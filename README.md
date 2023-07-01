@@ -1,1 +1,2 @@
-# pactus-faucet
+# Pactus Faucet Discord Robot
+
