@@ -8,3 +8,4 @@ dist/
 pactus-*
 cmd/data/wallet.json
 cmd/data/config.json
+cmd/data/validators.json

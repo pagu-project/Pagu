@@ -1,42 +1,52 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"pactus-faucet/config"
+	"pactus-faucet/discord"
 	"pactus-faucet/wallet"
-
-	"github.com/yudai/pp"
+	"syscall"
 )
 
 func main() {
 
+	//load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Printf("error loading configuration %v\n", err)
+		return
 	}
 
-	//load or create wallette
+	//load or create faucet wallet
 	w := wallet.Open(cfg)
 
-	if w != nil {
-		log.Println("wallet opened/created successfully")
+	if w == nil {
+		log.Println("faucet wallet could not be opened")
+		return
+	}
+// load list of validators already received faucet
+	ss, err := discord.LoadData(cfg)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 
-	validatorAddress := "tpc1prmusy99q9fhkaj6p9rfr9423qcg6epj9zdgglq"
+	//start discord bot
+	bot, err := discord.Start(cfg, w, ss)
+	if err != nil {
+		log.Printf("could not start discord bot: %v\n", err)
+		return
+	}
 
-	hash := wallet.Transfer(cfg, w, validatorAddress, 4.0)
+	// Wait here until CTRL-C or other term signal is received.
+	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sc
 
-	pp.Printf("bonding transaction hash: %v", hash)
-
-	// path := "./store/wallet.json"
-	// mnemonic := "mother hat quick unhappy swear nuclear reward glove regular napkin salad weapon"
-	// password := "123456"
-
-	// w := wallet.CreateWallet(path, mnemonic, password)
-
-	// address, _ := w.DeriveNewAddress("faucet")
-	// pp.Printf("address: %v", address)
-
-	// w.Save()
-
+	// Cleanly close down the Discord session.
+	bot.Stop()
 }

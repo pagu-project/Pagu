@@ -6,25 +6,33 @@ import (
 	"pactus-faucet/config"
 
 	"github.com/k0kubun/pp"
+	"github.com/pactus-project/pactus/crypto"
+	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/genesis"
 	"github.com/pactus-project/pactus/util"
-	w "github.com/pactus-project/pactus/wallet"
+	pwallet "github.com/pactus-project/pactus/wallet"
 )
 
 const entropy = 128
 const faucetAddressLabel = "faucet"
 
 type Balance struct {
-	Available int64
-	Staked    int64
+	Available float64
+	Staked    float64
 }
 
-func Create(cfg *config.Config, mnemonic string) *w.Wallet {
+type Wallet struct {
+	address  string
+	wallet   *pwallet.Wallet
+	password string
+}
+
+func Create(cfg *config.Config, mnemonic string) *Wallet {
 	network := genesis.Testnet
 	if mnemonic == "" {
-		mnemonic = w.GenerateMnemonic(entropy)
+		mnemonic = pwallet.GenerateMnemonic(entropy)
 	}
-	mywallet, err := w.Create(cfg.WalletPath, mnemonic, cfg.Password, network)
+	mywallet, err := pwallet.Create(cfg.WalletPath, mnemonic, cfg.WalletPassword, network)
 
 	if err != nil {
 		log.Printf("error creating wallet: %v", err)
@@ -49,12 +57,12 @@ func Create(cfg *config.Config, mnemonic string) *w.Wallet {
 	pp.Printf("Wallet created successfully at: %s\n", mywallet.Path())
 	pp.Printf("Seed: \"%v\"\n", mnemonic)
 	pp.Printf("Please keep your seed in a safe place;\nif you lose it, you will not be able to restore your wallet.\n")
-	return mywallet
+	return &Wallet{wallet: mywallet, address: cfg.FaucetAddress, password: cfg.WalletPassword}
 }
 
-func Open(cfg *config.Config) *w.Wallet {
+func Open(cfg *config.Config) *Wallet {
 	if doesWalletExist(cfg.WalletPath) {
-		wt, err := w.Open(cfg.WalletPath, true)
+		wt, err := pwallet.Open(cfg.WalletPath, true)
 		if err != nil {
 			log.Printf("error opening exising wallet: %v", err)
 			return nil
@@ -64,102 +72,74 @@ func Open(cfg *config.Config) *w.Wallet {
 			log.Printf("error establishing connection: %v", err)
 			return nil
 		}
-		return wt
+		return &Wallet{wallet: wt, address: cfg.FaucetAddress, password: cfg.WalletPassword}
 	}
 	//if the wallet does not exist, create one
 	return Create(cfg, "")
 }
 
-func Transfer(cfg *config.Config, wt *w.Wallet, toAddress string, amount float64) string {
-
-	opts := []w.TxOption{
-		w.OptionStamp(""),
-		w.OptionFee(util.CoinToChange(0)),
-		w.OptionSequence(int32(0)),
-		w.OptionMemo(""),
+func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) string {
+	opts := []pwallet.TxOption{
+		pwallet.OptionStamp(""),
+		pwallet.OptionFee(util.CoinToChange(0)),
+		pwallet.OptionSequence(int32(0)),
+		pwallet.OptionMemo(""),
 	}
-	tx, err := wt.MakeTransferTx(cfg.FaucetAddress, toAddress,
-		util.CoinToChange(amount), opts...)
-	if err != nil {
-		log.Printf("error creating transfer transaction: %v", err)
-		return ""
-	}
-	//sign transaction
-	err = wt.SignTransaction(cfg.Password, tx)
-	if err != nil {
-		log.Printf("error signing transfer transaction: %v", err)
-		return ""
-	}
-
-	//broadcast transaction
-	res, err := wt.BroadcastTransaction(tx)
-	if err != nil {
-		log.Printf("error broadcasting transfer transaction: %v", err)
-		return ""
-	}
-
-	err = wt.Save()
-	if err != nil {
-		log.Printf("error saving wallet transaction history: %v", err)
-	}
-	return res //return transaction hash
-}
-func BondTransaction(cfg *config.Config, wt *w.Wallet, toAddress string, amount float64) string {
-	info := wt.AddressInfo(toAddress)
-
-	pubKey := ""
-	if info != nil {
-		pubKey = info.Pub.String()
-	}
-
-	opts := []w.TxOption{
-		w.OptionStamp(""),
-		w.OptionFee(util.CoinToChange(0)),
-		w.OptionSequence(int32(0)),
-		w.OptionMemo(""),
-	}
-	tx, err := wt.MakeBondTx(cfg.FaucetAddress, toAddress, pubKey,
+	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
 		util.CoinToChange(amount), opts...)
 	if err != nil {
 		log.Printf("error creating bond transaction: %v", err)
 		return ""
 	}
 	//sign transaction
-	err = wt.SignTransaction(cfg.Password, tx)
+	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Printf("error signing bond transaction: %v", err)
 		return ""
 	}
 
 	//broadcast transaction
-	res, err := wt.BroadcastTransaction(tx)
+	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Printf("error broadcasting bond transaction: %v", err)
 		return ""
 	}
 
-	err = wt.Save()
+	err = w.wallet.Save()
 	if err != nil {
 		log.Printf("error saving wallet transaction history: %v", err)
 	}
 	return res //return transaction hash
 }
 
-func GetBalance(wt *w.Wallet, address string) *Balance {
+func (w *Wallet) GetBalance() *Balance {
 	balance := &Balance{Available: 0, Staked: 0}
-	b, err := wt.Balance(address)
+	b, err := w.wallet.Balance(w.address)
 	if err != nil {
 		log.Printf("error getting balance: %v", err)
-		return nil
+		return balance
 	}
-	balance.Available = b
-	stake, err := wt.Stake(address)
+	balance.Available = util.ChangeToCoin(b)
+	stake, err := w.wallet.Stake(w.address)
 	if err != nil {
 		log.Printf("error getting staking amount: %v", err)
-		return nil
+		return balance
 	}
-	balance.Staked = stake
+	balance.Staked = util.ChangeToCoin(stake)
 	return balance
+}
+
+func IsValidData(address, pubKey string) bool {
+	addr, err := crypto.AddressFromString(address)
+	if err != nil {
+		return false
+	}
+	pub, err := bls.PublicKeyFromString(pubKey)
+	if err != nil {
+		return false
+	}
+	err = pub.VerifyAddress(addr)
+	return err == nil
 }
 
 // function to check if file exists
