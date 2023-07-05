@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -34,7 +33,7 @@ func main() {
 		return
 	}
 
-	//start discord bot
+	///start discord bot
 	bot, err := discord.Start(cfg, w, ss)
 	if err != nil {
 		log.Printf("could not start discord bot: %v\n", err)
@@ -42,7 +41,10 @@ func main() {
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Pactus Universal Robot is now running.  Press CTRL-C to exit.")
+	log.Println("Pactus Universal Robot is now running...!")
+	log.Printf("The faucet address is: %v\n", cfg.FaucetAddress)
+	log.Printf("The maximu faucet amount is : %.4f\n", cfg.FaucetAmount)
+
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc

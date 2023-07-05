@@ -30,7 +30,7 @@ func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 	dg.AddHandler(bot.messageHandler)
 
 	// In this example, we only care about receiving message events.
-	dg.Identify.Intents = discordgo.IntentsGuildMessages
+	dg.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -49,9 +49,20 @@ func (b *Bot) Stop() error {
 // message is created on any channel that the authenticated bot has access to.
 func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	log.Printf(m.Content)
+
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
 		return
+	}
+
+	if m.Content == "help" {
+		msg := "You can request the faucet by sending your wallet address and its respective public key separated by '/' , e.g tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl/tpublic1p5th2dga9mfywwfdshxldkztzxlns3ax9gx7tcj0qzapactvex07e6gr5342fdwtu0eu9nyhfxw4tzrr7hauce03vupdaefxk6szslvz442yaa8r2acuyzppfmeh5k4yx80lc4at799v68js9wae7t0c7ng4e5whk"
+		s.ChannelMessageSend(m.ChannelID, msg)
+	}
+	if m.Content == "address" {
+		msg := fmt.Sprintf("Faucet address is: %v", b.cfg.FaucetAddress)
+		s.ChannelMessageSend(m.ChannelID, msg)
 	}
 	// If the message is "balance" reply with "available faucet balance"
 	if m.Content == "balance" {
@@ -70,14 +81,14 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// check if the validator has already been given the faucet
 		_, exists := b.store.GetData(m.Author.ID)
 		if exists {
-			s.ChannelMessageSendReply(m.ChannelID, "You received the faucet!", m.MessageReference)
+			s.ChannelMessageSend(m.ChannelID, "You received the faucet! You cannot request faucet multiple times.")
 			return
 		}
 
 		//check available balance
 		balance := b.faucetWallet.GetBalance()
 		if balance.Available < b.cfg.FaucetAmount {
-			s.ChannelMessageSend(m.ChannelID, "Insuffcient faucet balance. Try again later")
+			s.ChannelMessageSend(m.ChannelID, "Insuffcient faucet balance. Try again later.")
 			return
 		}
 
@@ -89,9 +100,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				log.Printf("error saving faucet information: %v\n", err)
 			}
 			msg := fmt.Sprintf("Faucet ( %.6f PAC) is transfered successfully!", b.cfg.FaucetAmount)
-			s.ChannelMessageSendReply(m.ChannelID, msg, m.MessageReference)
+			s.ChannelMessageSend(m.ChannelID, msg)
 		}
-
 	}
-
 }
