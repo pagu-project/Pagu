@@ -11,7 +11,6 @@ const configPath = "./data/config.json"
 
 type Config struct {
 	DiscordToken      string  `json:"discord_token"`
-	BotPrefix         string  `json:"bot_prefix"`
 	WalletPath        string  `json:"wallet_path"`
 	WalletPassword    string  `json:"wallet_password"`
 	Server            string  `json:"server"`

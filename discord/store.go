@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"pactus-faucet/config"
+	"pactus-bot/config"
 	"sync"
 )
 

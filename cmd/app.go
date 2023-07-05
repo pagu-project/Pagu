@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"pactus-faucet/config"
-	"pactus-faucet/discord"
-	"pactus-faucet/wallet"
+	"pactus-bot/config"
+	"pactus-bot/discord"
+	"pactus-bot/wallet"
 	"syscall"
 )
 
@@ -27,7 +27,7 @@ func main() {
 		log.Println("faucet wallet could not be opened")
 		return
 	}
-// load list of validators already received faucet
+	// load list of validators already received faucet
 	ss, err := discord.LoadData(cfg)
 	if err != nil {
 		log.Println(err)
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	fmt.Println("Pactus Universal Robot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc

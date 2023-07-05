@@ -3,7 +3,7 @@ package wallet
 import (
 	"log"
 	"os"
-	"pactus-faucet/config"
+	"pactus-bot/config"
 
 	"github.com/k0kubun/pp"
 	"github.com/pactus-project/pactus/crypto"

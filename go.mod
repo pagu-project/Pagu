@@ -1,4 +1,4 @@
-module pactus-faucet
+module pactus-bot
 
 go 1.20
 

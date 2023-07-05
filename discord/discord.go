@@ -3,8 +3,8 @@ package discord
 import (
 	"fmt"
 	"log"
-	"pactus-faucet/config"
-	"pactus-faucet/wallet"
+	"pactus-bot/config"
+	"pactus-bot/wallet"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
