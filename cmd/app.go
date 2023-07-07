@@ -26,8 +26,10 @@ func main() {
 		log.Println("faucet wallet could not be opened")
 		return
 	}
+
 	// load list of validators already received faucet
 	ss, err := discord.LoadData(cfg)
+
 	if err != nil {
 		log.Println(err)
 		return
@@ -35,6 +37,7 @@ func main() {
 
 	///start discord bot
 	bot, err := discord.Start(cfg, w, ss)
+
 	if err != nil {
 		log.Printf("could not start discord bot: %v\n", err)
 		return
@@ -51,4 +54,5 @@ func main() {
 
 	// Cleanly close down the Discord session.
 	bot.Stop()
+
 }

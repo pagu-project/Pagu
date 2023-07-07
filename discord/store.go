@@ -51,8 +51,8 @@ func LoadData(cfg *config.Config) (*SafeStore, error) {
 }
 
 // Set a given value to the data storage
-func (ss *SafeStore) SetData(address, discordName, discordID string, amount float64) error {
-	ss.syncMap.Store(discordID, &Validator{DiscordName: discordName, DiscordID: discordID, ValidatorAddress: address, FaucetAmount: amount})
+func (ss *SafeStore) SetData(peerID, address, discordName, discordID string, amount float64) error {
+	ss.syncMap.Store(peerID, &Validator{DiscordName: discordName, DiscordID: discordID, ValidatorAddress: address, FaucetAmount: amount})
 	//save record
 	data, err := marshalJSON(ss.syncMap)
 	if err != nil {
@@ -67,8 +67,8 @@ func (ss *SafeStore) SetData(address, discordName, discordID string, amount floa
 }
 
 // Get retrives the given key from the storage
-func (ss *SafeStore) GetData(discordID string) (*Validator, bool) {
-	entry, found := ss.syncMap.Load(discordID)
+func (ss *SafeStore) GetData(peerID string) (*Validator, bool) {
+	entry, found := ss.syncMap.Load(peerID)
 	if !found {
 		return nil, false
 	}
