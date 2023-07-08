@@ -76,6 +76,20 @@ func (ss *SafeStore) GetData(peerID string) (*Validator, bool) {
 	return validator, true
 }
 
+func (ss *SafeStore) FindDiscordID(discordID string) (*Validator, bool) {
+	validator := &Validator{}
+	exists := false
+	ss.syncMap.Range(func(key, value any) bool {
+		v := value.(*Validator)
+		if validator.DiscordID == discordID {
+			validator = v
+			exists = true
+		}
+		return true
+	})
+	return validator, exists
+}
+
 func marshalJSON(m *sync.Map) ([]byte, error) {
 	tmpMap := make(map[string]*Validator)
 	m.Range(func(k, v interface{}) bool {

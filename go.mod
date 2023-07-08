@@ -7,6 +7,7 @@ require (
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/libp2p/go-libp2p-core v0.20.1
 	github.com/pactus-project/pactus v0.13.0
+	github.com/yudai/pp v2.0.1+incompatible
 	google.golang.org/grpc v1.53.0
 )
 

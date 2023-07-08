@@ -54,7 +54,7 @@ func (b *Bot) Stop() error {
 // message is created on any channel that the authenticated bot has access to.
 func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	log.Printf(m.Content)
+	//log.Printf("received message: %v\n", m.Content)
 
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
@@ -62,71 +62,115 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if m.Content == "help" {
-		msg := "You can request the faucet by sending your wallet address, e.g tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl"
-		s.ChannelMessageSend(m.ChannelID, msg)
+		//msg := "You can request the faucet by sending your wallet address, e.g tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl"
+		//s.ChannelMessageSendReply(m.ChannelID, msg)
+		help(s, m)
 		return
 	}
 	if m.Content == "network" {
 		msg := b.networkInfo()
-		s.ChannelMessageSend(m.ChannelID, msg)
+		s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
 	if m.Content == "address" {
 		msg := fmt.Sprintf("Faucet address is: %v", b.cfg.FaucetAddress)
-		s.ChannelMessageSend(m.ChannelID, msg)
+		s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
 	// If the message is "balance" reply with "available faucet balance"
 	if m.Content == "balance" {
 		b := b.faucetWallet.GetBalance()
-		msg := fmt.Sprintf("Available faucet balance is %.6f PAC", b.Available)
-		s.ChannelMessageSend(m.ChannelID, msg)
+		msg := fmt.Sprintf("Available faucet balance is %.4f PACs", b.Available)
+		//s.ChannelMessageSendReply(m.ChannelID, msg)
+		s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
 
-	// faucet message must contain address/pubkey
-	trimmedAddress := strings.Trim(m.Content, " ")
-	peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress)
+	if strings.Contains(m.Content, "faucet") {
+		trimmedPrixix := strings.TrimPrefix(m.Content, "faucet")
+		// faucet message must contain address/pubkey
+		trimmedAddress := strings.Trim(trimmedPrixix, " ")
+		peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
 
-	if !isValid {
-		s.ChannelMessageSend(m.ChannelID, msg)
-		return
-	}
-
-	if pubKey != "" {
-
-		//check available balance
-		balance := b.faucetWallet.GetBalance()
-		if balance.Available < b.cfg.FaucetAmount {
-			s.ChannelMessageSend(m.ChannelID, "Insuffcient faucet balance. Try again later.")
+		if !isValid {
+			s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		//send faucet
-		txHash := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount)
-		if txHash != "" {
-			err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
-			if err != nil {
-				log.Printf("error saving faucet information: %v\n", err)
+		if pubKey != "" {
+
+			//check available balance
+			balance := b.faucetWallet.GetBalance()
+			if balance.Available < b.cfg.FaucetAmount {
+				s.ChannelMessageSendReply(m.ChannelID, "Insuffcient faucet balance. Try again later.", m.Reference())
+				return
 			}
-			msg := fmt.Sprintf("Faucet ( %.6f PAC) is staked on node successfully!", b.cfg.FaucetAmount)
-			s.ChannelMessageSend(m.ChannelID, msg)
+
+			//send faucet
+			txHash := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount)
+			if txHash != "" {
+				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
+				if err != nil {
+					log.Printf("error saving faucet information: %v\n", err)
+				}
+				msg := fmt.Sprintf("Faucet ( %.4f PACs) is staked on your node successfully!", b.cfg.FaucetAmount)
+				s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			}
 		}
 	}
+
 }
 
-func (b *Bot) validateInfo(address string) (string, string, bool, string) {
+// help sends a message detailing how to use the bot discord-client side
+func help(s *discordgo.Session, m *discordgo.MessageCreate) {
+	s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+		Title: "Pactus Universal Robot",
+		URL:   "https://pactus.org",
+		Author: &discordgo.MessageEmbedAuthor{
+			URL:     "https://pactus.org",
+			IconURL: s.State.User.AvatarURL(""),
+			Name:    s.State.User.Username,
+		},
+		Description: "Pactus Universal Robot is a robot that provides support and information about the Pactus Blockchain.\n" +
+			"To see the faucet account balance, simply type: `balance`\n" +
+			"To see the faucet address, simply type: `address`\n" +
+			"To get network information, simply type: `network`\n" +
+			"To request faucet for test network: simply post `faucet [validator address]`.",
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "Example of requesting `faucet` ",
+				Value: "faucet tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl",
+			},
+		},
+	})
+}
+
+func (b *Bot) validateInfo(address, discordID string) (string, string, bool, string) {
 	_, err := crypto.AddressFromString(address)
 	if err != nil {
 		log.Printf("invalid address")
 		return "", "", false, "Pactus Universal Robot is unable to handle your request. If you are requesting testing faucet, supply the valid address."
 	}
+
+	//check if the user is existing
+	v, exists := b.store.FindDiscordID(discordID)
+	if exists {
+		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
+	}
+
 	client, err := client.NewClient(b.cfg.Server)
 	if err != nil {
 		log.Printf("error establishing connection")
 		return "", "", false, "The bot cannot establish connection to the blochain network. Try again later."
 	}
 	defer client.Close()
+
+	//check if the address exists in the list of validators
+	isValidator := client.IsValidator(address)
+	if isValidator {
+		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet gain."
+	}
+
 	peerInfo, pub, err := client.GetPeerInfo(address)
 	if err != nil || pub == nil {
 		log.Printf("error getting peer info")
@@ -139,7 +183,7 @@ func (b *Bot) validateInfo(address string) (string, string, bool, string) {
 		log.Printf("error getting peer id")
 		return "", "", false, "Your node information could not obtained. Make sure your node is fully synced before requesting the faucet."
 	}
-	v, exists := b.store.GetData(peerID.String())
+	v, exists = b.store.GetData(peerID.String())
 	if exists || v != nil {
 		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
 	}
@@ -151,7 +195,7 @@ func (b *Bot) validateInfo(address string) (string, string, bool, string) {
 		return "", "", false, "The bot cannot establish connection to the blochain network. Try again later."
 	}
 	if (height - peerInfo.Height) > 1080 {
-		msg := fmt.Sprintf("Your node is not fully synchronised. It is is behind by %v blocks. Make sure that your node is fully synchronised before requesting faucet.", height-peerInfo.Height)
+		msg := fmt.Sprintf("Your node is not fully synchronised. It is is behind by %v blocks. Make sure that your node is fully synchronised before requesting faucet.", (height - peerInfo.Height))
 
 		log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
 		return "", "", false, msg
@@ -184,8 +228,8 @@ func (b *Bot) networkInfo() string {
 		return msg
 	}
 	msg += fmt.Sprintf("Block height: %v\n", blochainInfo.LastBlockHeight)
-	msg += fmt.Sprintf("Total power: %v PACs\n", util.ChangeToCoin(blochainInfo.TotalPower))
-	msg += fmt.Sprintf("Total committee power: %v PACs\n", util.ChangeToCoin(blochainInfo.CommitteePower))
+	msg += fmt.Sprintf("Total power: %.4f PACs\n", util.ChangeToCoin(blochainInfo.TotalPower))
+	msg += fmt.Sprintf("Total committee power: %.4f PACs\n", util.ChangeToCoin(blochainInfo.CommitteePower))
 	msg += fmt.Sprintf("Total validators: %v\n", blochainInfo.TotalValidators)
 	return msg
 }
