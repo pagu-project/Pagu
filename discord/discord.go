@@ -79,9 +79,10 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	// If the message is "balance" reply with "available faucet balance"
 	if m.Content == "balance" {
-		b := b.faucetWallet.GetBalance()
-		msg := fmt.Sprintf("Available faucet balance is %.4f PACs", b.Available)
-		//s.ChannelMessageSendReply(m.ChannelID, msg)
+		balance := b.faucetWallet.GetBalance()
+		v, d := b.store.GetDistribution()
+		msg := fmt.Sprintf("Available faucet balance is %.4f PACs\n", balance.Available)
+		msg += fmt.Sprintf("A total of %.4f PACs have been distributed to %d validators\n", d, v)
 		s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}

@@ -90,6 +90,20 @@ func (ss *SafeStore) FindDiscordID(discordID string) (*Validator, bool) {
 	return validator, exists
 }
 
+func (ss *SafeStore) GetDistribution() (uint, float64) {
+	totalDistribution := float64(0)
+	totalValidators := uint(0)
+	ss.syncMap.Range(func(key, value any) bool {
+		v := value.(*Validator)
+		if v != nil {
+			totalDistribution += v.FaucetAmount
+			totalValidators += 1
+		}
+		return true
+	})
+	return totalValidators, totalDistribution
+}
+
 func marshalJSON(m *sync.Map) ([]byte, error) {
 	tmpMap := make(map[string]*Validator)
 	m.Range(func(k, v interface{}) bool {
