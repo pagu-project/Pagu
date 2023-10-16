@@ -17,6 +17,18 @@ type Validator struct {
 	FaucetAmount     float64 `json:"faucet_amount"`
 }
 
+type ValidatorRoundOne struct{
+	
+        ID int `json:"id"`
+        Address string `json:"address"`
+        DiscordUsername string `json:"discordUsername"`
+        DiscordID string `json:"discord_id"`
+        Status string `json:"status"`
+        Twitter string `json:"Twitter"`
+        Total int `json:"Total"`
+    
+}
+
 // SafeCache is a thread-safe cache.
 type SafeStore struct {
 	syncMap *sync.Map

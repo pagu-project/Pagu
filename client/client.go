@@ -74,7 +74,7 @@ func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, 
 			for _, key := range p.ConsensusKeys {
 				pub, _ := bls.PublicKeyFromString(key)
 				if pub != nil {
-					if pub.Address().String() == address {
+					if pub.ValidatorAddress().String() == address {
 						return p, pub, nil
 					}
 				}

@@ -10,9 +10,11 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/util"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type Bot struct {
@@ -22,6 +24,7 @@ type Bot struct {
 	store          *SafeStore
 }
 
+// guildID: "795592769300987944"
 func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + cfg.DiscordToken)
@@ -29,7 +32,7 @@ func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 		log.Printf("error creating Discord session: %v", err)
 		return nil, err
 	}
-	bot := &Bot{cfg: cfg, discordSession: dg, faucetWallet: w, store: ss}
+	bot := &Bot{cfg: cfg, discordSession: dg, faucetWallet: w, store: ss} //TODO: remove this hard coded id
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(bot.messageHandler)
@@ -54,6 +57,7 @@ func (b *Bot) Stop() error {
 // message is created on any channel that the authenticated bot has access to.
 func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
+	p := message.NewPrinter(language.English)
 	//log.Printf("received message: %v\n", m.Content)
 
 	// Ignore all messages created by the bot itself
@@ -67,6 +71,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		help(s, m)
 		return
 	}
+
 	if m.Content == "network" {
 		msg := b.networkInfo()
 		s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
@@ -81,8 +86,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "balance" {
 		balance := b.faucetWallet.GetBalance()
 		v, d := b.store.GetDistribution()
-		msg := fmt.Sprintf("Available faucet balance is %.4f PACs\n", balance.Available)
-		msg += fmt.Sprintf("A total of %.4f PACs have been distributed to %d validators\n", d, v)
+		msg := p.Sprintf("Available faucet balance is %.4f PACs\n", balance.Available)
+		msg += p.Sprintf("A total of %.4f PACs has been distributed to %d validators\n", d, v)
 		s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -114,7 +119,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if err != nil {
 					log.Printf("error saving faucet information: %v\n", err)
 				}
-				msg := fmt.Sprintf("Faucet ( %.4f PACs) is staked on your node successfully!", b.cfg.FaucetAmount)
+				msg := p.Sprintf("Faucet ( %.4f PACs) is staked on your node successfully!", b.cfg.FaucetAmount)
 				s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			}
 		}

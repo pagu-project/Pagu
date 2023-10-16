@@ -30,7 +30,11 @@ type Wallet struct {
 func Create(cfg *config.Config, mnemonic string) *Wallet {
 	network := genesis.Testnet
 	if mnemonic == "" {
-		mnemonic = pwallet.GenerateMnemonic(entropy)
+		m, err := pwallet.GenerateMnemonic(entropy)
+		if err != nil {
+			return nil
+		}
+		mnemonic = m
 	}
 	mywallet, err := pwallet.Create(cfg.WalletPath, mnemonic, cfg.WalletPassword, network)
 
@@ -38,7 +42,7 @@ func Create(cfg *config.Config, mnemonic string) *Wallet {
 		log.Printf("error creating wallet: %v", err)
 		return nil
 	}
-	address, err := mywallet.DeriveNewAddress(faucetAddressLabel)
+	address, err := mywallet.NewBLSAccountAddress(faucetAddressLabel)
 	if err != nil {
 		log.Printf("error deriving wallet faucet address: %v", err)
 		return nil
@@ -80,10 +84,8 @@ func Open(cfg *config.Config) *Wallet {
 
 func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) string {
 	opts := []pwallet.TxOption{
-		pwallet.OptionStamp(""),
 		pwallet.OptionFee(util.CoinToChange(0)),
-		pwallet.OptionSequence(int32(0)),
-		pwallet.OptionMemo(""),
+		pwallet.OptionMemo("faucet from PactusBot"),
 	}
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
 		util.CoinToChange(amount), opts...)
