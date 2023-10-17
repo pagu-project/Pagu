@@ -108,7 +108,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			//check available balance
 			balance := b.faucetWallet.GetBalance()
 			if balance.Available < b.cfg.FaucetAmount {
-				s.ChannelMessageSendReply(m.ChannelID, "Insuffcient faucet balance. Try again later.", m.Reference())
+				s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
 				return
 			}
 
@@ -195,17 +195,17 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	}
 
 	//check block height
-	height, err := client.GetBlockchainHeight()
-	if err != nil {
-		log.Printf("error current block height")
-		return "", "", false, "The bot cannot establish connection to the blochain network. Try again later."
-	}
-	if (height - peerInfo.Height) > 1080 {
-		msg := fmt.Sprintf("Your node is not fully synchronised. It is is behind by %v blocks. Make sure that your node is fully synchronised before requesting faucet.", (height - peerInfo.Height))
+	// height, err := client.GetBlockchainHeight()
+	// if err != nil {
+	// 	log.Printf("error current block height")
+	// 	return "", "", false, "The bot cannot establish connection to the blochain network. Try again later."
+	// }
+	// if (height - peerInfo.Height) > 1080 {
+	// 	msg := fmt.Sprintf("Your node is not fully synchronised. It is is behind by %v blocks. Make sure that your node is fully synchronised before requesting faucet.", (height - peerInfo.Height))
 
-		log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
-		return "", "", false, msg
-	}
+	// 	log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
+	// 	return "", "", false, msg
+	// }
 	return peerID.String(), pub.String(), true, ""
 }
 

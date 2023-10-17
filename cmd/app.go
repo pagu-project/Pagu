@@ -46,7 +46,7 @@ func main() {
 	// Wait here until CTRL-C or other term signal is received.
 	log.Println("Pactus Universal Robot is now running...!")
 	log.Printf("The faucet address is: %v\n", cfg.FaucetAddress)
-	log.Printf("The maximu faucet amount is : %.4f\n", cfg.FaucetAmount)
+	log.Printf("The maximum faucet amount is : %.4f\n", cfg.FaucetAmount)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
