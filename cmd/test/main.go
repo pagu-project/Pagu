@@ -11,5 +11,4 @@ func main() {
 	c, _ := client.NewClient(ip)
 	res := c.IsValidator("tpc1pd9xmumgzsqd0mnmy3r5dvsku7d6xuxesmanwky")
 	pp.Println(res)
-
 }

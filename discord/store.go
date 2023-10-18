@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"pactus-bot/config"
 	"sync"
+
+	"pactus-bot/config"
 )
 
-// CacheEntry is a value stored in the cache.
+// Validator is a value stored in the cache.
 type Validator struct {
 	DiscordName      string  `json:"discord_name"`
 	DiscordID        string  `json:"discord_id"`
@@ -17,19 +18,17 @@ type Validator struct {
 	FaucetAmount     float64 `json:"faucet_amount"`
 }
 
-type ValidatorRoundOne struct{
-	
-        ID int `json:"id"`
-        Address string `json:"address"`
-        DiscordUsername string `json:"discordUsername"`
-        DiscordID string `json:"discord_id"`
-        Status string `json:"status"`
-        Twitter string `json:"Twitter"`
-        Total int `json:"Total"`
-    
+type ValidatorRoundOne struct {
+	ID              int    `json:"id"`
+	Address         string `json:"address"`
+	DiscordUsername string `json:"discordUsername"`
+	DiscordID       string `json:"discord_id"`
+	Status          string `json:"status"`
+	Twitter         string `json:"Twitter"`
+	Total           int    `json:"Total"`
 }
 
-// SafeCache is a thread-safe cache.
+// SafeStore is a thread-safe cache.
 type SafeStore struct {
 	syncMap *sync.Map
 	cfg     *config.Config
@@ -50,7 +49,6 @@ func LoadData(cfg *config.Config) (*SafeStore, error) {
 	}
 
 	data, err := unmarshalJSON(file)
-
 	if err != nil {
 		log.Printf("error unmarshalling validator data: %v", err)
 		return nil, fmt.Errorf("error unmarshalling validator data: %v", err)
@@ -62,23 +60,26 @@ func LoadData(cfg *config.Config) (*SafeStore, error) {
 	return ss, nil
 }
 
-// Set a given value to the data storage
+// SetData Set a given value to the data storage
 func (ss *SafeStore) SetData(peerID, address, discordName, discordID string, amount float64) error {
-	ss.syncMap.Store(peerID, &Validator{DiscordName: discordName, DiscordID: discordID, ValidatorAddress: address, FaucetAmount: amount})
-	//save record
+	ss.syncMap.Store(peerID, &Validator{
+		DiscordName: discordName, DiscordID: discordID,
+		ValidatorAddress: address, FaucetAmount: amount,
+	})
+	// save record
 	data, err := marshalJSON(ss.syncMap)
 	if err != nil {
 		log.Printf("error marshalling validator data file: %v", err)
 		return fmt.Errorf("error marshalling validator data file: %v", err)
 	}
-	if err := os.WriteFile(ss.cfg.ValidatorDataPath, data, 0600); err != nil {
+	if err := os.WriteFile(ss.cfg.ValidatorDataPath, data, 0o600); err != nil {
 		log.Printf("failed to write to %s: %v", ss.cfg.ValidatorDataPath, err)
 		return fmt.Errorf("failed to write to %s: %v", ss.cfg.ValidatorDataPath, err)
 	}
 	return nil
 }
 
-// Get retrives the given key from the storage
+// GetData retrieves the given key from the storage
 func (ss *SafeStore) GetData(peerID string) (*Validator, bool) {
 	entry, found := ss.syncMap.Load(peerID)
 	if !found {
@@ -109,7 +110,7 @@ func (ss *SafeStore) GetDistribution() (uint, float64) {
 		v := value.(*Validator)
 		if v != nil {
 			totalDistribution += v.FaucetAmount
-			totalValidators += 1
+			totalValidators++
 		}
 		return true
 	})
@@ -124,6 +125,7 @@ func marshalJSON(m *sync.Map) ([]byte, error) {
 	})
 	return json.MarshalIndent(tmpMap, "  ", "  ")
 }
+
 func unmarshalJSON(data []byte) (*sync.Map, error) {
 	var tmpMap map[string]*Validator
 	m := &sync.Map{}
