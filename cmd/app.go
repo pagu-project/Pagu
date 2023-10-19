@@ -4,22 +4,22 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
+
 	"pactus-bot/config"
 	"pactus-bot/discord"
 	"pactus-bot/wallet"
-	"syscall"
 )
 
 func main() {
-
-	//load configuration
+	// load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Printf("error loading configuration %v\n", err)
 		return
 	}
 
-	//load or create faucet wallet
+	// load or create faucet wallet
 	w := wallet.Open(cfg)
 
 	if w == nil {
@@ -29,7 +29,6 @@ func main() {
 
 	// load list of validators already received faucet
 	ss, err := discord.LoadData(cfg)
-
 	if err != nil {
 		log.Println(err)
 		return
@@ -37,13 +36,12 @@ func main() {
 
 	///start discord bot
 	bot, err := discord.Start(cfg, w, ss)
-
 	if err != nil {
 		log.Printf("could not start discord bot: %v\n", err)
 		return
 	}
 
-	// Wait here until CTRL-C or other term signal is received.
+	// Wait here until CTRL-C or other terms signal is received.
 	log.Println("Pactus Universal Robot is now running...!")
 	log.Printf("The faucet address is: %v\n", cfg.FaucetAddress)
 	log.Printf("The maximum faucet amount is : %.4f\n", cfg.FaucetAmount)
@@ -53,6 +51,5 @@ func main() {
 	<-sc
 
 	// Cleanly close down the Discord session.
-	bot.Stop()
-
+	_ = bot.Stop()
 }
