@@ -35,14 +35,14 @@ func Load() (*Config, error) {
 	}
 	return cfg, nil
 }
+
 func (cfg *Config) Save() error {
 	data, err := json.MarshalIndent(cfg, "  ", "  ")
 	if err != nil {
 		log.Printf("error marshalling configuration file: %v", err)
 		return fmt.Errorf("error marshalling configuration file: %v", err)
-
 	}
-	if err := os.WriteFile(configPath, data, 0600); err != nil {
+	if err := os.WriteFile(configPath, data, 0o600); err != nil {
 		log.Printf("failed to write to %s: %v", configPath, err)
 		return fmt.Errorf("failed to write to %s: %v", configPath, err)
 	}

@@ -35,7 +35,6 @@ func NewClient(endpoint string) (*Client, error) {
 		transactionClient: pactus.NewTransactionClient(conn),
 		conn:              conn,
 	}, nil
-
 }
 
 func (c *Client) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
@@ -46,6 +45,7 @@ func (c *Client) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) 
 	}
 	return blockchainInfo, nil
 }
+
 func (c *Client) GetBlockchainHeight() (uint32, error) {
 	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
@@ -85,7 +85,8 @@ func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, 
 }
 
 func (c *Client) IsValidator(address string) bool {
-	validators, err := c.blockchainClient.GetValidatorAddresses(context.Background(), &pactus.GetValidatorAddressesRequest{})
+	validators, err := c.blockchainClient.GetValidatorAddresses(context.Background(),
+		&pactus.GetValidatorAddressesRequest{})
 	if err != nil {
 		return false
 	}

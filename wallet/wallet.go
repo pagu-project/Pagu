@@ -3,6 +3,7 @@ package wallet
 import (
 	"log"
 	"os"
+
 	"pactus-bot/config"
 
 	"github.com/k0kubun/pp"
@@ -13,8 +14,10 @@ import (
 	pwallet "github.com/pactus-project/pactus/wallet"
 )
 
-const entropy = 128
-const faucetAddressLabel = "faucet"
+const (
+	entropy            = 128
+	faucetAddressLabel = "faucet"
+)
 
 type Balance struct {
 	Available float64
@@ -36,13 +39,12 @@ func Create(cfg *config.Config, mnemonic string) *Wallet {
 		}
 		mnemonic = m
 	}
-	mywallet, err := pwallet.Create(cfg.WalletPath, mnemonic, cfg.WalletPassword, network)
-
+	myWallet, err := pwallet.Create(cfg.WalletPath, mnemonic, cfg.WalletPassword, network)
 	if err != nil {
 		log.Printf("error creating wallet: %v", err)
 		return nil
 	}
-	address, err := mywallet.NewBLSAccountAddress(faucetAddressLabel)
+	address, err := myWallet.NewBLSAccountAddress(faucetAddressLabel)
 	if err != nil {
 		log.Printf("error deriving wallet faucet address: %v", err)
 		return nil
@@ -53,22 +55,22 @@ func Create(cfg *config.Config, mnemonic string) *Wallet {
 		log.Printf("error updating configuration faucet address: %v", err)
 		return nil
 	}
-	err = mywallet.Save()
+	err = myWallet.Save()
 	if err != nil {
 		log.Printf("error saving wallet: %v", err)
 		return nil
 	}
-	pp.Printf("Wallet created successfully at: %s\n", mywallet.Path())
+	pp.Printf("Wallet created successfully at: %s\n", myWallet.Path())
 	pp.Printf("Seed: \"%v\"\n", mnemonic)
 	pp.Printf("Please keep your seed in a safe place;\nif you lose it, you will not be able to restore your wallet.\n")
-	return &Wallet{wallet: mywallet, address: cfg.FaucetAddress, password: cfg.WalletPassword}
+	return &Wallet{wallet: myWallet, address: cfg.FaucetAddress, password: cfg.WalletPassword}
 }
 
 func Open(cfg *config.Config) *Wallet {
 	if doesWalletExist(cfg.WalletPath) {
 		wt, err := pwallet.Open(cfg.WalletPath, true)
 		if err != nil {
-			log.Printf("error opening exising wallet: %v", err)
+			log.Printf("error opening existing wallet: %v", err)
 			return nil
 		}
 		err = wt.Connect(cfg.Server)
@@ -78,7 +80,7 @@ func Open(cfg *config.Config) *Wallet {
 		}
 		return &Wallet{wallet: wt, address: cfg.FaucetAddress, password: cfg.WalletPassword}
 	}
-	//if the wallet does not exist, create one
+	// if the wallet does not exist, create one
 	return Create(cfg, "")
 }
 
@@ -93,14 +95,14 @@ func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) strin
 		log.Printf("error creating bond transaction: %v", err)
 		return ""
 	}
-	//sign transaction
+	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Printf("error signing bond transaction: %v", err)
 		return ""
 	}
 
-	//broadcast transaction
+	// broadcast transaction
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Printf("error broadcasting bond transaction: %v", err)
@@ -111,7 +113,7 @@ func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) strin
 	if err != nil {
 		log.Printf("error saving wallet transaction history: %v", err)
 	}
-	return res //return transaction hash
+	return res // return transaction hash
 }
 
 func (w *Wallet) GetBalance() *Balance {
@@ -146,10 +148,6 @@ func IsValidData(address, pubKey string) bool {
 
 // function to check if file exists
 func doesWalletExist(fileName string) bool {
-	_, error := os.Stat(fileName)
-	if os.IsNotExist(error) {
-		return false
-	} else {
-		return true
-	}
+	_, err := os.Stat(fileName)
+	return !os.IsNotExist(err)
 }
