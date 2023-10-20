@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-project:
-    runs-on: pactus-bot-runner
+    runs-on: self-hosted
 
     steps:
       - name: checkout changes
@@ -20,7 +20,7 @@ jobs:
 
   deploy-project:
     needs: 'build-project'
-    runs-on: pactus-bot-runner
+    runs-on: self-hosted
 
     steps:
       - name: Recreate Pactus Bot with new image
