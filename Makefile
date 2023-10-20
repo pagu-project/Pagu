@@ -4,7 +4,7 @@ unit_test:
 fmt:
 	gofumpt -l -w .
 
-devtools:
+install-tools:
 	@echo "Installing devtools"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
@@ -28,3 +28,7 @@ check:
         --enable=goimports \
         --enable=gocyclo \
         --enable=lll
+
+
+build-bot:
+	go build -mod vendor -o main cmd/app.go
