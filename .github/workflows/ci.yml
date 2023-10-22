@@ -24,6 +24,8 @@ jobs:
 
     steps:
       - name: Recreate Pactus Bot with new image
+        run: docker compose -f ${{ secrets.COMPOSE_PATH }} down
+        run: docker system prune -f
         run: docker compose -f ${{ secrets.COMPOSE_PATH }} up -d
 
       - name: Pactus Bot status
