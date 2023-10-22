@@ -61,8 +61,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
 	// log.Printf("received message: %v\n", m.Content)
 
-	log.Println("bot received message is: ",m.Message)
-	log.Println("bot received content is: ",m.Content)
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
 		return
