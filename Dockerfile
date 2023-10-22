@@ -10,6 +10,7 @@ COPY . /app
 # install tools
 RUN make install-tools
 
+ENV GOPROXY=direct
 # build
 RUN make build-bot
 
