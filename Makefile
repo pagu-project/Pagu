@@ -11,7 +11,7 @@ install-tools:
 	@echo "Installing devtools"
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install mvdan.cc/gofumpt@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1
 
 install-packages:
 	go mod tidy
