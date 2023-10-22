@@ -13,6 +13,9 @@ install-tools:
 	go install mvdan.cc/gofumpt@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
+install-packages:
+	go mod tidy
+
 check:
 	golangci-lint run \
         --build-tags "${BUILD_TAG}" \
@@ -36,4 +39,4 @@ check:
 
 
 build-bot:
-	go build -mod vendor -o main cmd/app.go
+	go build -o main cmd/app.go
