@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
-const configPath = "./data/config.json"
+const configPath = "/bot-data/config.json"
 
 type Config struct {
 	DiscordToken      string  `json:"discord_token"`
@@ -20,7 +21,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	file, err := os.ReadFile(configPath)
+	file, err := os.ReadFile(filepath.Join(configPath))
 	if err != nil {
 		log.Printf("error loading configuration file: %v", err)
 		return nil, fmt.Errorf("error loading configuration file: %v", err)

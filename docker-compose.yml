@@ -1,0 +1,8 @@
+services:
+  pactus-bot:
+    container_name: pactus-bot
+    image: pactus-bot:main
+    volumes:
+      - ./data/config.json:/data/config.json
+      - ./data/validators.json:/data/validators.json
+      - ./data/wallet.json:/data/wallet.json
