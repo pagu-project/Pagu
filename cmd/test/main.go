@@ -9,6 +9,6 @@ import (
 func main() {
 	ip := "172.104.46.145:9090"
 	c, _ := client.NewClient(ip)
-	res := c.IsValidator("tpc1pd9xmumgzsqd0mnmy3r5dvsku7d6xuxesmanwky")
+	res, _ := c.IsValidator("tpc1pd9xmumgzsqd0mnmy3r5dvsku7d6xuxesmanwky")
 	pp.Println(res)
 }
