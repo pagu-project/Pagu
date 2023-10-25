@@ -9,6 +9,7 @@ COPY . /app
 
 # install tools
 RUN make install-tools
+RUN make install-packages
 
 # build
 RUN make build-bot
