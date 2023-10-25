@@ -84,19 +84,19 @@ func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, 
 	return nil, nil, errors.New("peer does not exist")
 }
 
-func (c *Client) IsValidator(address string) bool {
+func (c *Client) IsValidator(address string) (bool, error) {
 	validators, err := c.blockchainClient.GetValidatorAddresses(context.Background(),
 		&pactus.GetValidatorAddressesRequest{})
 	if err != nil {
-		return false
+		return false, err
 	}
 	for _, a := range validators.Addresses {
 		pp.Println(a)
 		if a == address {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 func (c *Client) Close() error {

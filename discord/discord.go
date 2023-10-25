@@ -23,16 +23,28 @@ type Bot struct {
 	faucetWallet   *wallet.Wallet
 	cfg            *config.Config
 	store          *SafeStore
+
+	cm *client.ClientMgr
 }
 
 func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
+	cm := client.NewClientMgr()
+	for _, s := range cfg.Servers {
+		c, err := client.NewClient(s)
+		if err != nil {
+			log.Printf("unable to create client at: %s. err: %s", s, err)
+		} else {
+			log.Printf("adding client at: %s", s)
+			cm.AddClient(s, c)
+		}
+	}
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + cfg.DiscordToken)
 	if err != nil {
 		log.Printf("error creating Discord session: %v", err)
 		return nil, err
 	}
-	bot := &Bot{cfg: cfg, discordSession: dg, faucetWallet: w, store: ss} // TODO: remove this hard coded id
+	bot := &Bot{cfg: cfg, discordSession: dg, faucetWallet: w, store: ss, cm: cm}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(bot.messageHandler)
@@ -46,6 +58,7 @@ func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 		log.Printf("error opening connection: %v", err)
 		return nil, err
 	}
+
 	return bot, nil
 }
 
@@ -161,21 +174,20 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
 	}
 
-	cl, err := client.NewClient(b.cfg.Server)
-	if err != nil {
-		log.Printf("error establishing connection")
-		return "", "", false, "The bot cannot establish connection to the blochain network. Try again later."
-	}
-	defer cl.Close()
-
 	// check if the address exists in the list of validators
-	isValidator := cl.IsValidator(address)
+	isValidator, err := b.cm.IsValidator(address)
+	if err != nil {
+		return "", "", false, err.Error()
+	}
 	if isValidator {
-		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet gain."
+		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again."
 	}
 
-	peerInfo, pub, err := cl.GetPeerInfo(address)
-	if err != nil || pub == nil {
+	peerInfo, pub, err := b.cm.GetPeerInfo(address)
+	if err != nil {
+		return "", "", false, err.Error()
+	}
+	if pub == nil {
 		log.Printf("error getting peer info")
 		return "", "", false, "Your node information could not obtained." +
 			" Make sure your node is fully synced before requesting the faucet."
@@ -183,7 +195,10 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 
 	// check if the validator has already been given the faucet
 	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
-	if err != nil || peerID.String() == "" {
+	if err != nil {
+		return "", "", false, err.Error()
+	}
+	if peerID.String() == "" {
 		log.Printf("error getting peer id")
 		return "", "", false, "Your node information could not obtained." +
 			" Make sure your node is fully synced before requesting the faucet."
@@ -211,13 +226,7 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 
 func (b *Bot) networkInfo() string {
 	msg := "Pactus is truly decentralised proof of stake blockchain."
-	cl, err := client.NewClient(b.cfg.Server)
-	if err != nil {
-		log.Printf("error establishing connection")
-		return msg
-	}
-	defer cl.Close()
-	nodes, err := cl.GetNetworkInfo()
+	nodes, err := b.cm.GetNetworkInfo()
 	if err != nil {
 		log.Printf("error establishing connection")
 		return msg
@@ -228,14 +237,14 @@ func (b *Bot) networkInfo() string {
 	msg += fmt.Sprintf("Total received bytes : %v\n", nodes.TotalReceivedBytes)
 	msg += fmt.Sprintf("Number of peer nodes: %v\n", len(nodes.Peers))
 	// check block height
-	blochainInfo, err := cl.GetBlockchainInfo()
+	blockchainInfo, err := b.cm.GetBlockchainInfo()
 	if err != nil {
 		log.Printf("error current block height")
 		return msg
 	}
-	msg += fmt.Sprintf("Block height: %v\n", blochainInfo.LastBlockHeight)
-	msg += fmt.Sprintf("Total power: %.4f PACs\n", util.ChangeToCoin(blochainInfo.TotalPower))
-	msg += fmt.Sprintf("Total committee power: %.4f PACs\n", util.ChangeToCoin(blochainInfo.CommitteePower))
-	msg += fmt.Sprintf("Total validators: %v\n", blochainInfo.TotalValidators)
+	msg += fmt.Sprintf("Block height: %v\n", blockchainInfo.LastBlockHeight)
+	msg += fmt.Sprintf("Total power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.TotalPower))
+	msg += fmt.Sprintf("Total committee power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.CommitteePower))
+	msg += fmt.Sprintf("Total validators: %v\n", blockchainInfo.TotalValidators)
 	return msg
 }

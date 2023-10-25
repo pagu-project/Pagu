@@ -74,7 +74,7 @@ func Open(cfg *config.Config) *Wallet {
 			log.Printf("error opening existing wallet: %v", err)
 			return nil
 		}
-		err = wt.Connect(cfg.Server)
+		err = wt.Connect(cfg.Servers[0])
 		if err != nil {
 			log.Printf("error establishing connection: %v", err)
 			return nil

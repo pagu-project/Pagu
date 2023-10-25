@@ -11,13 +11,13 @@ import (
 const configPath = "/bot-data/config.json"
 
 type Config struct {
-	DiscordToken      string  `json:"discord_token"`
-	WalletPath        string  `json:"wallet_path"`
-	WalletPassword    string  `json:"wallet_password"`
-	Server            string  `json:"server"`
-	FaucetAddress     string  `json:"faucet_address"`
-	FaucetAmount      float64 `json:"faucet_amount"`
-	ValidatorDataPath string  `json:"validator_data_path"`
+	DiscordToken      string   `json:"discord_token"`
+	WalletPath        string   `json:"wallet_path"`
+	WalletPassword    string   `json:"wallet_password"`
+	Servers           []string `json:"servers"`
+	FaucetAddress     string   `json:"faucet_address"`
+	FaucetAmount      float64  `json:"faucet_amount"`
+	ValidatorDataPath string   `json:"validator_data_path"`
 }
 
 func Load() (*Config, error) {
