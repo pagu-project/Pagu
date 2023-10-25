@@ -25,8 +25,6 @@ type Bot struct {
 	store          *SafeStore
 }
 
-// guildID: "795592769300987944"
-
 func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + cfg.DiscordToken)
@@ -67,8 +65,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if m.Content == "help" {
-		// msg := "You can request the faucet by sending your wallet address, e.g tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl"
-		// s.ChannelMessageSendReply(m.ChannelID, msg)
 		help(s, m)
 		return
 	}
