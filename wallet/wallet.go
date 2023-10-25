@@ -11,6 +11,7 @@ import (
 	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/genesis"
 	"github.com/pactus-project/pactus/util"
+
 	pwallet "github.com/pactus-project/pactus/wallet"
 )
 

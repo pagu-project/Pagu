@@ -89,6 +89,8 @@ github.com/multiformats/go-varint v0.0.7 h1:sWSGR+f/eu5ABZA2ZpYKBILXTTs9JWpdEM/n
 github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOELpZAu9eioSos/OU=
 github.com/pactus-project/pactus v0.15.0 h1:gDMAZgGwuThyFwiHhiH++iPCcBEPbBhdvshkPCyzpu0=
 github.com/pactus-project/pactus v0.15.0/go.mod h1:FSBNMR9CokOsHK/6hVpRFJtaIZDy+cxSeV87QU3CZkc=
+github.com/pactus-project/pactus v0.15.2 h1:99rbRbgYrrE+SbpSCYQpPbBoRyau27q3H4XQju0/tWs=
+github.com/pactus-project/pactus v0.15.2/go.mod h1:FSBNMR9CokOsHK/6hVpRFJtaIZDy+cxSeV87QU3CZkc=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
