@@ -8,12 +8,12 @@ To compile the bot, on your terminal navigate to the project cmd folder and run 
 2. In the installation folder, create a nother folder that will hold the bot data e.g `mkdir data`
 3. In that data directory, add the three files namely `config.json`, `wallet.json`, and `validator.json`
 4. Make sure that `pbot` binary is executable e.g by running this command: `chmod +x pbot`
-5. Your folder structure should be like this:
-        [1;36m/opt/pbot[0m
-        ├── pbot
-        ├── [1;36mdata[0m
-           ├── config.json
-           ├── validator.json
-           └── wallet.json
+5. Your folder structure should be like the one shown below:
 6. You can either create a bpot service and start the service by running `service pbot start` or open a new screen and run your `pbot` in terminal e.g `./pbot` and then exit the screen and leave the pbot service running
 
+[1;36m/opt/pbot[0m
+├── pbot
+├── [1;36mdata[0m
+    ├── config.json
+    ├── validator.json
+    └── wallet.json
