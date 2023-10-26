@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-const configPath = "/bot-data/config.json"
+const configPath = "./data/config.json"
 
 type Config struct {
 	DiscordToken      string   `json:"discord_token"`
