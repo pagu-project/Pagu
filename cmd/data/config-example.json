@@ -1,9 +1,0 @@
-{
-  "discord_token": "put here your discord token",
-  "wallet_path": "./data/wallet.json",
-  "wallet_password": "put here your super secret password",
-  "server": "172.104.46.145:9090",
-  "faucet_address": "tpc1p57artpxnsqdrcdh0p4f8asxlyn7gw5ty6qnpy2",
-  "faucet_amount": 250.0,
-  "validator_data_path": "./data/validator.json"
-}

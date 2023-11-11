@@ -6,18 +6,10 @@ import (
 
 	"pactus-bot/config"
 
-	"github.com/k0kubun/pp"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
-	"github.com/pactus-project/pactus/genesis"
 	"github.com/pactus-project/pactus/util"
-
 	pwallet "github.com/pactus-project/pactus/wallet"
-)
-
-const (
-	entropy            = 128
-	faucetAddressLabel = "faucet"
 )
 
 type Balance struct {
@@ -29,42 +21,6 @@ type Wallet struct {
 	address  string
 	wallet   *pwallet.Wallet
 	password string
-}
-
-func Create(cfg *config.Config, mnemonic string) *Wallet {
-	network := genesis.Testnet
-	if mnemonic == "" {
-		m, err := pwallet.GenerateMnemonic(entropy)
-		if err != nil {
-			return nil
-		}
-		mnemonic = m
-	}
-	myWallet, err := pwallet.Create(cfg.WalletPath, mnemonic, cfg.WalletPassword, network)
-	if err != nil {
-		log.Printf("error creating wallet: %v", err)
-		return nil
-	}
-	address, err := myWallet.NewBLSAccountAddress(faucetAddressLabel)
-	if err != nil {
-		log.Printf("error deriving wallet faucet address: %v", err)
-		return nil
-	}
-	cfg.FaucetAddress = address
-	err = cfg.Save()
-	if err != nil {
-		log.Printf("error updating configuration faucet address: %v", err)
-		return nil
-	}
-	err = myWallet.Save()
-	if err != nil {
-		log.Printf("error saving wallet: %v", err)
-		return nil
-	}
-	pp.Printf("Wallet created successfully at: %s\n", myWallet.Path())
-	pp.Printf("Seed: \"%v\"\n", mnemonic)
-	pp.Printf("Please keep your seed in a safe place;\nif you lose it, you will not be able to restore your wallet.\n")
-	return &Wallet{wallet: myWallet, address: cfg.FaucetAddress, password: cfg.WalletPassword}
 }
 
 func Open(cfg *config.Config) *Wallet {
@@ -82,7 +38,7 @@ func Open(cfg *config.Config) *Wallet {
 		return &Wallet{wallet: wt, address: cfg.FaucetAddress, password: cfg.WalletPassword}
 	}
 	// if the wallet does not exist, create one
-	return Create(cfg, "")
+	return nil
 }
 
 func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) string {

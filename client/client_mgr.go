@@ -14,21 +14,21 @@ func init() {
 	crypto.PublicKeyHRP = "tpublic"
 }
 
-type ClientMgr struct {
+type Mgr struct {
 	clients map[string]*Client
 }
 
-func NewClientMgr() *ClientMgr {
-	return &ClientMgr{
+func NewClientMgr() *Mgr {
+	return &Mgr{
 		clients: make(map[string]*Client),
 	}
 }
 
-func (cm *ClientMgr) AddClient(addr string, c *Client) {
+func (cm *Mgr) AddClient(addr string, c *Client) {
 	cm.clients[addr] = c
 }
 
-func (cm *ClientMgr) GetRandomClient() *Client {
+func (cm *Mgr) GetRandomClient() *Client {
 	for _, c := range cm.clients {
 		return c
 	}
@@ -36,7 +36,7 @@ func (cm *ClientMgr) GetRandomClient() *Client {
 	return nil
 }
 
-func (cm *ClientMgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
+func (cm *Mgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
 	for _, c := range cm.clients {
 		info, err := c.GetBlockchainInfo()
 		if err != nil {
@@ -48,7 +48,7 @@ func (cm *ClientMgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, err
 	return nil, errors.New("unable to get blockchain info")
 }
 
-func (cm *ClientMgr) GetBlockchainHeight() (uint32, error) {
+func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
 	for _, c := range cm.clients {
 		height, err := c.GetBlockchainHeight()
 		if err != nil {
@@ -60,7 +60,7 @@ func (cm *ClientMgr) GetBlockchainHeight() (uint32, error) {
 	return 0, errors.New("unable to get blockchain height")
 }
 
-func (cm *ClientMgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
+func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	for _, c := range cm.clients {
 		info, err := c.GetNetworkInfo()
 		if err != nil {
@@ -72,7 +72,7 @@ func (cm *ClientMgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	return nil, errors.New("unable to get network info")
 }
 
-func (cm *ClientMgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, error) {
+func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, error) {
 	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
@@ -96,7 +96,7 @@ func (cm *ClientMgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicK
 	return nil, nil, errors.New("peer does not exist")
 }
 
-func (cm *ClientMgr) IsValidator(address string) (bool, error) {
+func (cm *Mgr) IsValidator(address string) (bool, error) {
 	for _, c := range cm.clients {
 		exists, err := c.IsValidator(address)
 		if err != nil {
@@ -106,10 +106,9 @@ func (cm *ClientMgr) IsValidator(address string) (bool, error) {
 	}
 
 	return false, errors.New("unable to get validator info")
-
 }
 
-func (cm *ClientMgr) Close() {
+func (cm *Mgr) Close() {
 	for addr, c := range cm.clients {
 		if err := c.Close(); err != nil {
 			fmt.Printf("error on closing client %s\n", addr)

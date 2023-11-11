@@ -14,6 +14,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/util"
+	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -24,8 +25,10 @@ type Bot struct {
 	cfg            *config.Config
 	store          *SafeStore
 
-	cm *client.ClientMgr
+	cm *client.Mgr
 }
+
+// guildID: "795592769300987944"
 
 func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 	cm := client.NewClientMgr()
@@ -77,23 +80,26 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Content == "help" {
+	if strings.ToLower(m.Content) == "help" {
+		// msg := "You can request the faucet by sending your wallet address, e.g tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl"
+		// s.ChannelMessageSendReply(m.ChannelID, msg)
 		help(s, m)
 		return
 	}
 
-	if m.Content == "network" {
+	if strings.ToLower(m.Content) == "network" {
 		msg := b.networkInfo()
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
-	if m.Content == "address" {
+	if strings.ToLower(m.Content) == "address" {
 		msg := fmt.Sprintf("Faucet address is: %v", b.cfg.FaucetAddress)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
+
 	// If the message is "balance" reply with "available faucet balance"
-	if m.Content == "balance" {
+	if strings.ToLower(m.Content) == "balance" {
 		balance := b.faucetWallet.GetBalance()
 		v, d := b.store.GetDistribution()
 		msg := p.Sprintf("Available faucet balance is %.4f PACs\n", balance.Available)
@@ -102,11 +108,32 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.Contains(m.Content, "faucet") {
-		trimmedPrixix := strings.TrimPrefix(m.Content, "faucet")
+	if strings.Contains(strings.ToLower(m.Content), "peerinfo") {
+		trimmedPrixix := strings.TrimPrefix(m.Content, "peerInfo")
+		// faucet message must contain address/pubkey
+		trimmedAddress := strings.Trim(trimmedPrixix, " ")
+		peerInfo, err := b.GetPeerInfo(trimmedAddress)
+		if err != nil {
+			msg := p.Sprintf("An error occurred %v\n", err)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+		msg := p.Sprintf("Peer info ,\n")
+		msg += p.Sprintf("Peer ID = %v\n", peerInfo.PeerId)
+		msg += p.Sprintf("Agent =  %v\n", peerInfo.Agent)
+		msg += p.Sprintf("Moniker = %v\n", peerInfo.Moniker)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+	}
+
+	if strings.Contains(strings.ToLower(m.Content), "faucet") {
+		trimmedPrixix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
 		// faucet message must contain address/pubkey
 		trimmedAddress := strings.Trim(trimmedPrixix, " ")
 		peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
+
+		msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
+			msg, m.Author.Username, trimmedAddress)
 
 		if !isValid {
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
@@ -128,7 +155,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if err != nil {
 					log.Printf("error saving faucet information: %v\n", err)
 				}
-				msg := p.Sprintf("Faucet ( %.4f PACs) is staked on your node successfully!", b.cfg.FaucetAmount)
+				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!",
+					m.Author.Username, b.cfg.FaucetAmount, trimmedAddress)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			}
 		}
@@ -150,6 +178,7 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"To see the faucet account balance, simply type: `balance`\n" +
 			"To see the faucet address, simply type: `address`\n" +
 			"To get network information, simply type: `network`\n" +
+			"To get peer information, simply type: `peerInfo [validator address]`\n" +
 			"To request faucet for test network: simply post `faucet [validator address]`.",
 		Fields: []*discordgo.MessageEmbedField{
 			{
@@ -247,4 +276,24 @@ func (b *Bot) networkInfo() string {
 	msg += fmt.Sprintf("Total committee power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.CommitteePower))
 	msg += fmt.Sprintf("Total validators: %v\n", blockchainInfo.TotalValidators)
 	return msg
+}
+
+func (b *Bot) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
+	_, err := crypto.AddressFromString(address)
+	if err != nil {
+		log.Printf("invalid address")
+
+		return nil, err
+	}
+
+	_, err = b.cm.IsValidator(address)
+	if err != nil {
+		return nil, err
+	}
+
+	peerInfo, _, err := b.cm.GetPeerInfo(address)
+	if err != nil {
+		return nil, err
+	}
+	return peerInfo, nil
 }

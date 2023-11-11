@@ -39,4 +39,4 @@ check:
 
 
 build-bot:
-	go build -o main cmd/app.go
+	go build -o build/main cmd/app.go
