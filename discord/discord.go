@@ -108,18 +108,27 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.Contains(strings.ToLower(m.Content), "peerinfo") {
-		trimmedPrixix := strings.TrimPrefix(m.Content, "peerInfo")
+	if strings.Contains(strings.ToLower(m.Content), "peer-info") {
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
 		// faucet message must contain address/pubkey
-		trimmedAddress := strings.Trim(trimmedPrixix, " ")
+		trimmedAddress := strings.Trim(trimmedPrefix, " ")
 		peerInfo, err := b.GetPeerInfo(trimmedAddress)
 		if err != nil {
 			msg := p.Sprintf("An error occurred %v\n", err)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
+
+		peerID, err := peer.IDFromBytes(peerInfo.PeerId)
+		if err != nil {
+			msg := p.Sprintf("An error occurred %v\n", err)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
 		msg := p.Sprintf("Peer info ,\n")
-		msg += p.Sprintf("Peer ID = %v\n", peerInfo.PeerId)
+		msg += p.Sprintf("Peer ID = %v\n", peerID)
+		msg += p.Sprintf("IP address = %v\n", peerInfo.Address)
 		msg += p.Sprintf("Agent =  %v\n", peerInfo.Agent)
 		msg += p.Sprintf("Moniker = %v\n", peerInfo.Moniker)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
@@ -174,11 +183,11 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 			IconURL: s.State.User.AvatarURL(""),
 			Name:    s.State.User.Username,
 		},
-		Description: "Pactus Universal Robot is a robot that provides support and information about the Pactus Blockchain.\n" +
+		Description: "RoboPac is a robot that provides support and information about the Pactus Blockchain.\n" +
 			"To see the faucet account balance, simply type: `balance`\n" +
 			"To see the faucet address, simply type: `address`\n" +
 			"To get network information, simply type: `network`\n" +
-			"To get peer information, simply type: `peerInfo [validator address]`\n" +
+			"To get peer information, simply type: `peer-info [validator address]`\n" +
 			"To request faucet for test network: simply post `faucet [validator address]`.",
 		Fields: []*discordgo.MessageEmbedField{
 			{
