@@ -99,6 +99,19 @@ func (c *Client) IsValidator(address string) (bool, error) {
 	return false, nil
 }
 
+func (c *Client) TransactionData(hash string) (*pactus.TransactionInfo, error) {
+	data, err := c.transactionClient.GetTransaction(context.Background(),
+		&pactus.GetTransactionRequest{
+			Id:        []byte(hash),
+			Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return data.GetTransaction(), nil
+}
+
 func (c *Client) Close() error {
 	return c.conn.Close()
 }
