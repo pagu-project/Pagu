@@ -110,8 +110,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.Contains(strings.ToLower(m.Content), "peer-info") {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
-		// faucet message must contain address/pubkey
 		trimmedAddress := strings.Trim(trimmedPrefix, " ")
+
 		peerInfo, err := b.GetPeerInfo(trimmedAddress)
 		if err != nil {
 			msg := p.Sprintf("An error occurred %v\n", err)
@@ -136,9 +136,9 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.Contains(strings.ToLower(m.Content), "faucet") {
-		trimmedPrixix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
 		// faucet message must contain address/pubkey
-		trimmedAddress := strings.Trim(trimmedPrixix, " ")
+		trimmedAddress := strings.Trim(trimmedPrefix, " ")
 		peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
 
 		msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
@@ -169,6 +169,23 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			}
 		}
+	}
+
+	if strings.Contains(strings.ToLower(m.Content), "tx-data") {
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
+		trimmedTXHash := strings.Trim(trimmedPrefix, " ")
+
+		data, err := b.cm.GetRandomClient().TransactionData(trimmedTXHash)
+		if err != nil {
+			msg := p.Sprintf("An error occurred %v\n", err)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		msg := p.Sprintf("your transaction data:\ndata:%v\nversion:%v\nlockTime:%v\nvalue:%v\nmemo:%v\npubkey:%v\n",
+			string(data.Data), data.Version, data.LockTime, data.Value, data.Memo, data.PublicKey)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
 	}
 }
 
