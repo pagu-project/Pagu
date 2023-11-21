@@ -4,8 +4,7 @@ import (
 	"log"
 	"os"
 
-	"pactus-bot/config"
-
+	"github.com/kehiy/RoboPac/config"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/util"
@@ -86,6 +85,7 @@ func (w *Wallet) GetBalance() *Balance {
 		log.Printf("error getting staking amount: %v", err)
 		return balance
 	}
+
 	balance.Staked = util.ChangeToCoin(stake)
 	return balance
 }
@@ -103,7 +103,7 @@ func IsValidData(address, pubKey string) bool {
 	return err == nil
 }
 
-// function to check if file exists
+// function to check if file exists.
 func doesWalletExist(fileName string) bool {
 	_, err := os.Stat(fileName)
 	return !os.IsNotExist(err)

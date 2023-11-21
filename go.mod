@@ -1,4 +1,4 @@
-module pactus-bot
+module github.com/kehiy/RoboPac
 
 go 1.21
 

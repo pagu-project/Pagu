@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"pactus-bot/config"
-	"pactus-bot/discord"
-	"pactus-bot/wallet"
+	"github.com/kehiy/RoboPac/config"
+	"github.com/kehiy/RoboPac/discord"
+	"github.com/kehiy/RoboPac/wallet"
 )
 
 func main() {
