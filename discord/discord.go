@@ -108,31 +108,18 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.ToLower(m.Content) == "health" {
-		var genesisTime int64 = 1697328000
 		currentTime := time.Now().Unix()
-		timeDifference := currentTime - genesisTime
-		blocks := (timeDifference / 10)
-		acceptableHeight := (blocks / 100) * 5 // 5% is acceptable number.
-		heights, err := b.cm.GetAllBlockchainHeight()
-		if err != nil {
-			msg := p.Sprintf("Network is unhealthy\nNon of nodes responding")
+		lastBlockTime := b.cm.GetLastBlockTime()
+
+		if (uint32(currentTime) - lastBlockTime)  > 15 {
+			msg := p.Sprintf("Network is unhealthy\nlast block time: %v\ncurrent time: %v\nDifference is more than 15 seconds.",
+			lastBlockTime, currentTime)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		heightsAddition := 0
-		for _, h := range heights {
-			heightsAddition += int(h)
-		}
-		averageHeight := heightsAddition / len(heights)
-
-		if (blocks - int64(averageHeight)) > acceptableHeight {
-			msg := p.Sprintf("Network is unhealthy\ncurrent height: %v\naverage of nodes height: %v\nDifference is more than 5%", blocks, averageHeight)
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
-
-		msg := p.Sprintf("Network is **healthy**\ncurrent height: %v\naverage of nodes height: %v\n", blocks, averageHeight)
+		msg := p.Sprintf("Network is **healthy**\nlast block time: %v\ncurrent time: %v\nDifference is less than 15 seconds.",
+		lastBlockTime, currentTime)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
