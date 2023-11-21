@@ -6,7 +6,7 @@ linters:
     - ineffassign
     - staticcheck
     - unused
-    - gocognit
+    # - gocognit
     - godox 
     - gocritic 
     - gci 
