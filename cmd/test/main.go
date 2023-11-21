@@ -1,8 +1,7 @@
 package main
 
 import (
-	"pactus-bot/client"
-
+	"github.com/kehiy/RoboPac/client"
 	"github.com/yudai/pp"
 )
 

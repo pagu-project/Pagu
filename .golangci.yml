@@ -1,0 +1,64 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gocognit
+    - godox 
+    - gocritic 
+    - gci 
+    - containedctx
+    - contextcheck
+    - exhaustive 
+    - wastedassign
+    - nonamedreturns
+    - ireturn 
+    - gofumpt
+    - tagalign
+    - errname
+    - errorlint
+
+
+linters-settings:
+  gosimple:
+    checks: ["all"]
+
+  govet:
+    enable-all: true
+    disable: fieldalignment
+    shadow:
+        strict: true
+
+  godox:
+    severity: warning
+
+  predeclared:
+    # Comma-separated list of predeclared identifiers to not report on.
+    # Default: ""
+    ignore: "len"
+    # Include method names and field names (i.e., qualified names) in checks.
+    # Default: false
+    q: true
+
+  tagliatelle:
+    # Check the struct tag name case.
+    case:
+      use-field-name: false
+      rules:
+        json: snake
+        yaml: snake
+
+issues:
+  exclude-rules:
+    # disable funlen for all _test.go files
+    - path: _test.go
+      linters:
+        - funlen
+
+    - linters:
+        - govet
+      text: "shadow: declaration of \"err\" shadows"
+      
