@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 type Config struct {
@@ -19,10 +18,10 @@ type Config struct {
 }
 
 func Load(path string) (*Config, error) {
-	file, err := os.ReadFile(filepath.Join(path))
+	file, err := os.ReadFile(path)
 	if err != nil {
 		log.Printf("error loading configuration file: %v", err)
-		return nil, fmt.Errorf("error loading configuration file: %v", err)
+		return nil, fmt.Errorf("error loading configuration file: %w", err)
 	}
 
 	cfg := &Config{}
@@ -30,7 +29,7 @@ func Load(path string) (*Config, error) {
 
 	if err != nil {
 		log.Printf("error unmarshalling configuration file: %v", err)
-		return nil, fmt.Errorf("error unmarshalling configuration file: %v", err)
+		return nil, fmt.Errorf("error unmarshalling configuration file: %w", err)
 	}
 	return cfg, nil
 }

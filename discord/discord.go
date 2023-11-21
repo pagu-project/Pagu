@@ -6,11 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"pactus-bot/client"
-	"pactus-bot/config"
-	"pactus-bot/wallet"
-
 	"github.com/bwmarrin/discordgo"
+	"github.com/kehiy/RoboPac/client"
+	"github.com/kehiy/RoboPac/config"
+	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/util"
@@ -32,6 +31,7 @@ type Bot struct {
 
 func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
 	cm := client.NewClientMgr()
+
 	for _, s := range cfg.Servers {
 		c, err := client.NewClient(s)
 		if err != nil {
@@ -92,6 +92,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
+
 	if strings.ToLower(m.Content) == "address" {
 		msg := fmt.Sprintf("Faucet address is: %v", b.cfg.FaucetAddress)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
@@ -190,7 +191,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // help sends a message detailing how to use the bot discord-client side
-// nolint
+// nolint.
 func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 	_, _ = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 		Title: "Pactus Universal Robot",
@@ -234,6 +235,7 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	if err != nil {
 		return "", "", false, err.Error()
 	}
+
 	if isValidator {
 		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again."
 	}
