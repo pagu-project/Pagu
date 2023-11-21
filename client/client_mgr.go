@@ -60,21 +60,19 @@ func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
 	return 0, errors.New("unable to get blockchain height")
 }
 
-func (cm *Mgr) GetAllBlockchainHeight() ([]uint32, error) {
-	result := []uint32{}
+func (cm *Mgr) GetLastBlockTime() (uint32) {
+	var lastBlockHeight  uint32  = 0
 	for _, c := range cm.clients {
-		height, err := c.GetBlockchainHeight()
+		info, err := c.GetBlockchainInfo()
 		if err != nil {
 			continue
 		}
-		result = append(result, height)
+		if info.LastBlockHeight > lastBlockHeight {
+			lastBlockHeight = info.LastBlockHeight
+		}
 	}
 
-	if len(result) != 0 {
-		return result, nil
-	}
-
-	return []uint32{}, errors.New("unable to get blockchain height")
+	return lastBlockHeight
 }
 
 func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
