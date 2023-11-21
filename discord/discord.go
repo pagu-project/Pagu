@@ -71,6 +71,7 @@ func (b *Bot) Stop() error {
 
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
+//nolint
 func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
 
@@ -102,6 +103,36 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		v, d := b.store.GetDistribution()
 		msg := p.Sprintf("Available faucet balance is %.4f test PACs\n", balance.Available)
 		msg += p.Sprintf("A total of %.4f test PACs has been distributed to %d validators\n", d, v)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+	}
+
+	if strings.ToLower(m.Content) == "health" {
+		var genesisTime int64 = 1697328000
+		currentTime := time.Now().Unix()
+		timeDifference := currentTime - genesisTime
+		blocks := (timeDifference / 10)
+		acceptableHeight := (blocks / 100) * 5 // 5% is acceptable number.
+		heights, err := b.cm.GetAllBlockchainHeight()
+		if err != nil {
+			msg := p.Sprintf("Network is unhealthy\nNon of nodes responding")
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		heightsAddition := 0
+		for _, h := range heights {
+			heightsAddition += int(h)
+		}
+		averageHeight := heightsAddition / len(heights)
+
+		if (blocks - int64(averageHeight)) > acceptableHeight {
+			msg := p.Sprintf("Network is unhealthy\ncurrent height: %v\naverage of nodes height: %v\nDifference is more than 5%", blocks, averageHeight)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		msg := p.Sprintf("Network is **healthy**\ncurrent height: %v\naverage of nodes height: %v\n", blocks, averageHeight)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
