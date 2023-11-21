@@ -60,8 +60,8 @@ func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
 	return 0, errors.New("unable to get blockchain height")
 }
 
-func (cm *Mgr) GetLastBlockTime() (uint32) {
-	var lastBlockHeight  uint32  = 0
+func (cm *Mgr) GetLastBlockTime() uint32 {
+	var lastBlockHeight uint32 = 0
 	for _, c := range cm.clients {
 		info, err := c.GetBlockchainInfo()
 		if err != nil {

@@ -71,7 +71,7 @@ func (b *Bot) Stop() error {
 
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
-//nolint
+// nolint
 func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
 
@@ -111,15 +111,15 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		currentTime := time.Now().Unix()
 		lastBlockTime := b.cm.GetLastBlockTime()
 
-		if (uint32(currentTime) - lastBlockTime)  > 15 {
+		if (uint32(currentTime) - lastBlockTime) > 15 {
 			msg := p.Sprintf("Network is unhealthy\nlast block time: %v\ncurrent time: %v\nDifference is more than 15 seconds.",
-			lastBlockTime, currentTime)
+				lastBlockTime, currentTime)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
 		msg := p.Sprintf("Network is **healthy**\nlast block time: %v\ncurrent time: %v\nDifference is less than 15 seconds.",
-		lastBlockTime, currentTime)
+			lastBlockTime, currentTime)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
