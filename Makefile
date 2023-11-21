@@ -1,3 +1,5 @@
+PACKAGES=$(shell go list ./... | grep -v 'tests')
+
 ### Testing
 unit_test:
 	go test $(PACKAGES)
