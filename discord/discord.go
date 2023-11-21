@@ -73,7 +73,6 @@ func (b *Bot) Stop() error {
 // message is created on any channel that the authenticated bot has access to.
 func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	p := message.NewPrinter(language.English)
-	// log.Printf("received message: %v\n", m.Content)
 
 	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
@@ -81,8 +80,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.ToLower(m.Content) == "help" {
-		// msg := "You can request the faucet by sending your wallet address, e.g tpc1pxl333elgnrdtk0kjpjdvky44yu62x0cwupnpjl"
-		// s.ChannelMessageSendReply(m.ChannelID, msg)
 		help(s, m)
 		return
 	}
@@ -94,7 +91,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.ToLower(m.Content) == "address" {
-		msg := fmt.Sprintf("Faucet address is: %v", b.cfg.FaucetAddress)
+		msg := fmt.Sprintf("Faucet address is %v", b.cfg.FaucetAddress)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -103,8 +100,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.ToLower(m.Content) == "balance" {
 		balance := b.faucetWallet.GetBalance()
 		v, d := b.store.GetDistribution()
-		msg := p.Sprintf("Available faucet balance is %.4f PACs\n", balance.Available)
-		msg += p.Sprintf("A total of %.4f PACs has been distributed to %d validators\n", d, v)
+		msg := p.Sprintf("Available faucet balance is %.4f test PACs\n", balance.Available)
+		msg += p.Sprintf("A total of %.4f test PACs has been distributed to %d validators\n", d, v)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -127,18 +124,18 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := p.Sprintf("Peer info ,\n")
-		msg += p.Sprintf("Peer ID = %v\n", peerID)
-		msg += p.Sprintf("IP address = %v\n", peerInfo.Address)
-		msg += p.Sprintf("Agent =  %v\n", peerInfo.Agent)
-		msg += p.Sprintf("Moniker = %v\n", peerInfo.Moniker)
+		msg := p.Sprintf("Peer info\n")
+		msg += p.Sprintf("Peer ID: %v\n", peerID)
+		msg += p.Sprintf("IP address: %v\n", peerInfo.Address)
+		msg += p.Sprintf("Agent: %v\n", peerInfo.Agent)
+		msg += p.Sprintf("Moniker: %v\n", peerInfo.Moniker)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
 
 	if strings.Contains(strings.ToLower(m.Content), "faucet") {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
-		// faucet message must contain address/pubkey
+		// faucet message must contain address/public-key
 		trimmedAddress := strings.Trim(trimmedPrefix, " ")
 		peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
 
@@ -183,7 +180,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := p.Sprintf("your transaction data:\ndata:%v\nversion:%v\nlockTime:%v\nvalue:%v\nmemo:%v\npubkey:%v\n",
+		msg := p.Sprintf("your transaction data:\ndata:%v\nversion:%v\nlockTime:%v\nvalue:%v\nmemo:%v\npublic-key:%v\n",
 			string(data.Data), data.Version, data.LockTime, data.Value, data.Memo, data.PublicKey)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
