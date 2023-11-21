@@ -112,6 +112,13 @@ func (c *Client) TransactionData(hash string) (*pactus.TransactionInfo, error) {
 	return data.GetTransaction(), nil
 }
 
+func (c *Client) LastBlockTime() (uint32, error) {
+	info, _ := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
+	lastBlockTime, err := c.blockchainClient.GetBlock(context.Background(), &pactus.GetBlockRequest{Height: info.LastBlockHeight})
+
+	return lastBlockTime.BlockTime, err
+}
+
 func (c *Client) Close() error {
 	return c.conn.Close()
 }
