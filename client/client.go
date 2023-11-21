@@ -117,8 +117,11 @@ func (c *Client) LastBlockTime() (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	
-	lastBlockTime, err := c.blockchainClient.GetBlock(context.Background(), &pactus.GetBlockRequest{Height: info.LastBlockHeight})
+
+	lastBlockTime, err := c.blockchainClient.GetBlock(context.Background(), &pactus.GetBlockRequest{
+		Height:    info.LastBlockHeight,
+		Verbosity: pactus.BlockVerbosity_BLOCK_INFO,
+	})
 
 	return lastBlockTime.BlockTime, err
 }
