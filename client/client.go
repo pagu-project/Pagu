@@ -126,6 +126,15 @@ func (c *Client) LastBlockTime() (uint32, error) {
 	return lastBlockTime.BlockTime, err
 }
 
+func (c *Client) GetNodeInfo() (*pactus.GetNodeInfoResponse, error) {
+	info, err := c.networkClient.GetNodeInfo(context.Background(), &pactus.GetNodeInfoRequest{})
+	if err != nil {
+		return &pactus.GetNodeInfoResponse{}, err
+	}
+
+	return info, err
+}
+
 func (c *Client) Close() error {
 	return c.conn.Close()
 }

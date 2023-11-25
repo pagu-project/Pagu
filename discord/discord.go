@@ -143,11 +143,30 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		notSyncedMsg := "this peer is not synced with network, gRPC is disabled or doesn't have public IP address."
+		syncedMsg := "**this peer is synced with network**"
+
+		isSynced := notSyncedMsg
+		c, err := client.NewClient(strings.Split(peerInfo.Address, "/")[2] + ":50051")
+		if err != nil {
+			isSynced = notSyncedMsg
+		}
+		lastBlockTime, err := c.LastBlockTime()
+		if err != nil {
+			isSynced = notSyncedMsg
+		}
+		currentTime := time.Now().Unix()
+
+		if (uint32(currentTime) - lastBlockTime) < 15 {
+			isSynced = syncedMsg
+		}
+
 		msg := p.Sprintf("Peer info\n")
 		msg += p.Sprintf("Peer ID: %v\n", peerID)
 		msg += p.Sprintf("IP address: %v\n", peerInfo.Address)
 		msg += p.Sprintf("Agent: %v\n", peerInfo.Agent)
 		msg += p.Sprintf("Moniker: %v\n", peerInfo.Moniker)
+		msg += p.Sprintf("IsSynced: %v\n", isSynced)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
