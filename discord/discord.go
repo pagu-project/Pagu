@@ -147,7 +147,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		syncedMsg := "**this peer is synced with network**"
 
 		isSynced := notSyncedMsg
-		c, err := client.NewClient(strings.Split(peerInfo.Address, "/")[2] + ":50051")
+		c, err := client.NewClient(strings.Split(peerInfo.Address, "/")[2] + ":50052")
 		if err != nil {
 			isSynced = notSyncedMsg
 		}
