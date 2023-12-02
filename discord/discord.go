@@ -325,8 +325,8 @@ func (b *Bot) networkInfo() string {
 	}
 	msg += "\nThe following are the currentl statistics:\n"
 	msg += fmt.Sprintf("Network started at : %v\n", time.UnixMilli(nodes.StartedAt*1000).Format("02/01/2006, 15:04:05"))
-	msg += fmt.Sprintf("Total bytes sent : %v\n", nodes.TotalSentBytes)
-	msg += fmt.Sprintf("Total received bytes : %v\n", nodes.TotalReceivedBytes)
+	msg += fmt.Sprintf("Total bytes sent : %v\n", uint32(nodes.TotalSentBytes))
+	msg += fmt.Sprintf("Total received bytes : %v\n", uint32(nodes.TotalReceivedBytes))
 	msg += fmt.Sprintf("Number of peer nodes: %v\n", len(nodes.Peers))
 	// check block height
 	blockchainInfo, err := b.cm.GetBlockchainInfo()
