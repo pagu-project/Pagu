@@ -23,13 +23,14 @@ type Bot struct {
 	faucetWallet   *wallet.Wallet
 	cfg            *config.Config
 	store          *SafeStore
+	referralStore  *ReferralStore
 
 	cm *client.Mgr
 }
 
 // guildID: "795592769300987944"
 
-func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
+func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore, rs *ReferralStore) (*Bot, error) {
 	cm := client.NewClientMgr()
 
 	for _, s := range cfg.Servers {
@@ -185,6 +186,20 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		haveReferral := false
+		referralAddr := ""
+		referralCount := 0
+
+		cmd := strings.Split(m.Content, " ")
+		if cmd[2] != "" {
+			data, found := b.referralStore.GetData(strings.ToLower(cmd[2]))
+			if found {
+				haveReferral = true
+				referralAddr = data.AccountAddress
+				referralCount = data.ReferralCounts
+			}
+		}
+
 		if pubKey != "" {
 			// check available balance
 			balance := b.faucetWallet.GetBalance()
@@ -193,15 +208,35 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 
+			amount := b.cfg.FaucetAmount
+			if haveReferral {
+				amount = b.cfg.ReferralerRewardAmount + b.cfg.FaucetAmount
+			}
+
 			// send faucet
-			txHash := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount)
-			if txHash != "" {
-				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
+			txHashReferral := ""
+			txHashFaucet := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, amount)
+			if haveReferral {
+				txHashReferral = b.faucetWallet.TransferTransaction(referralAddr, b.cfg.ReferralRewardAmount)
+				err := b.referralStore.SetData(referralAddr, referralCount+1)
+				if err != nil {
+					log.Printf("error saving referral information: %v\n", err)
+				}
+			}
+			if txHashFaucet != "" {
+				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, amount)
 				if err != nil {
 					log.Printf("error saving faucet information: %v\n", err)
 				}
-				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!",
-					m.Author.Username, b.cfg.FaucetAmount, trimmedAddress)
+
+				if haveReferral && txHashFaucet != "" {
+					msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\nReferral Data:\nTX ID:%v\nReferral Address:%v",
+						m.Author.Username, amount, trimmedAddress, txHashReferral, referralAddr)
+					_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+				}
+
+				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\n*No Referral!*",
+					m.Author.Username, amount, trimmedAddress)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			}
 		}

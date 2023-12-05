@@ -43,7 +43,7 @@ func Open(cfg *config.Config) *Wallet {
 func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) string {
 	opts := []pwallet.TxOption{
 		pwallet.OptionFee(util.CoinToChange(0)),
-		pwallet.OptionMemo("faucet from PactusBot"),
+		pwallet.OptionMemo("Faucet from PactusBot"),
 	}
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
 		util.CoinToChange(amount), opts...)
@@ -62,6 +62,37 @@ func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) strin
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Printf("error broadcasting bond transaction: %v", err)
+		return ""
+	}
+
+	err = w.wallet.Save()
+	if err != nil {
+		log.Printf("error saving wallet transaction history: %v", err)
+	}
+	return res // return transaction hash
+}
+
+func (w *Wallet) TransferTransaction(toAddress string, amount float64) string {
+	opts := []pwallet.TxOption{
+		pwallet.OptionFee(int64(1)),
+		pwallet.OptionMemo("Referral Reward from PactusBot"),
+	}
+	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, util.CoinToChange(amount), opts...)
+	if err != nil {
+		log.Printf("error creating transfer transaction: %v", err)
+		return ""
+	}
+	// sign transaction
+	err = w.wallet.SignTransaction(w.password, tx)
+	if err != nil {
+		log.Printf("error signing transfer transaction: %v", err)
+		return ""
+	}
+
+	// broadcast transaction
+	res, err := w.wallet.BroadcastTransaction(tx)
+	if err != nil {
+		log.Printf("error broadcasting transfer transaction: %v", err)
 		return ""
 	}
 

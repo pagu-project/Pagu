@@ -8,13 +8,16 @@ import (
 )
 
 type Config struct {
-	DiscordToken      string   `json:"discord_token"`
-	WalletPath        string   `json:"wallet_path"`
-	WalletPassword    string   `json:"wallet_password"`
-	Servers           []string `json:"servers"`
-	FaucetAddress     string   `json:"faucet_address"`
-	FaucetAmount      float64  `json:"faucet_amount"`
-	ValidatorDataPath string   `json:"validator_data_path"`
+	DiscordToken           string   `json:"discord_token"`
+	WalletPath             string   `json:"wallet_path"`
+	WalletPassword         string   `json:"wallet_password"`
+	Servers                []string `json:"servers"`
+	FaucetAddress          string   `json:"faucet_address"`
+	FaucetAmount           float64  `json:"faucet_amount"`
+	ReferralRewardAmount   float64  `json:"referral_reward_amount"`   // who is a referral
+	ReferralerRewardAmount float64  `json:"referraler_reward_amount"` // who get faucet
+	ValidatorDataPath      string   `json:"validator_data_path"`
+	ReferralDataPath       string   `json:"referral_data_path"`
 }
 
 func Load(path string) (*Config, error) {
