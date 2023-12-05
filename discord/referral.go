@@ -52,7 +52,7 @@ func LoadReferralData(cfg *config.Config) (*ReferralStore, error) {
 // SetData Set a given value to the data storage.
 func (rs *ReferralStore) SetData(address string, count int) error {
 	rs.syncMap.Store(address, &Referral{
-		ReferralCounts: count,
+		ReferralCounts: count, // TODO: is that remove previous data?
 	})
 	// save record
 	data, err := marshalJSON(rs.syncMap)
