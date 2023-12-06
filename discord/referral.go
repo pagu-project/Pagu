@@ -11,7 +11,7 @@ import (
 
 type Referral struct {
 	ReferralCode   string `json:"referral_code"`
-	AccountAddress string `json:"account_address"`
+	RewardAddress  string `json:"account_address"`
 	ReferralCounts int    `json:"referral_count"`
 	DiscordName    string `json:"discord_name"`
 	DiscordID      string `json:"discord_id"`
@@ -50,9 +50,13 @@ func LoadReferralData(cfg *config.Config) (*ReferralStore, error) {
 }
 
 // SetData Set a given value to the data storage.
-func (rs *ReferralStore) SetData(address string, count int) error {
-	rs.syncMap.Store(address, &Referral{
-		ReferralCounts: count, // TODO: is that remove previous data?
+func (rs *ReferralStore) NewReferral(address, discordId, discordName, referralCode string, count int) error {
+	rs.syncMap.Store(referralCode, &Referral{
+		ReferralCounts: count,
+		DiscordName:    discordName,
+		ReferralCode:   referralCode,
+		RewardAddress:  address,
+		DiscordID:      discordId,
 	})
 	// save record
 	data, err := marshalJSON(rs.syncMap)
@@ -68,8 +72,8 @@ func (rs *ReferralStore) SetData(address string, count int) error {
 }
 
 // GetData retrieves the given key from the storage.
-func (rs *ReferralStore) GetData(address string) (*Referral, bool) {
-	entry, found := rs.syncMap.Load(address)
+func (rs *ReferralStore) GetData(code string) (*Referral, bool) {
+	entry, found := rs.syncMap.Load(code)
 	if !found {
 		return nil, false
 	}

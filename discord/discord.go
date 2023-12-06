@@ -11,6 +11,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/util"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -172,6 +173,88 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if strings.Contains(strings.ToLower(m.Content), "my-referral") {
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
+		// referral message must contain address/public-key
+		trimmedAddress := strings.Trim(trimmedPrefix, " ")
+		data, found := b.referralStore.GetData(m.Author.ID)
+		if !found {
+			referralCode, err := gonanoid.New(10)
+			if err != nil {
+				msg := "can't generate referral code, please try again later."
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			}
+			err = b.referralStore.NewReferral(trimmedAddress, m.Author.ID, m.Author.Username, referralCode, 0)
+			if err != nil {
+				msg := "can't generate referral code, please try again later."
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			}
+
+			msg := fmt.Sprintf("your referral data:\nreferral code: ```%v```\nreward address:%v\n", referralCode, trimmedAddress)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		}
+
+		msg := fmt.Sprintf("your referral data:\nreferral code: ```%v```\nreward address:%v\n", data.ReferralCode, data.RewardAddress)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+	}
+
+	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") {
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
+		// faucet message must contain address/public-key
+		trimmedAddress := strings.Trim(trimmedPrefix, " ")
+		peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
+
+		msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
+			msg, m.Author.Username, trimmedAddress)
+
+		if !isValid {
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		referralAddr := ""
+		cmd := strings.Split(m.Content, " ")
+		referralCode := cmd[2]
+		if referralCode != "" {
+			data, found := b.referralStore.GetData(referralCode)
+			if !found {
+				msg := p.Sprintf("*Invalid* referral!")
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			}
+			referralAddr = data.RewardAddress
+		} else {
+			msg := p.Sprintf("*Invalid* referral!")
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		}
+
+		if pubKey != "" {
+			// check available balance
+			balance := b.faucetWallet.GetBalance()
+			if balance.Available < b.cfg.FaucetAmount {
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
+				return
+			}
+
+			amount := b.cfg.FaucetAmount + b.cfg.ReferralerRewardAmount
+			// send faucet
+
+			txHashFaucet := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, amount)
+			txHashReferral := b.faucetWallet.TransferTransaction(referralAddr, b.cfg.ReferralRewardAmount)
+
+			if txHashFaucet != "" && txHashReferral != "" {
+				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, amount)
+				if err != nil {
+					log.Printf("error saving faucet information: %v\n", err)
+				}
+
+				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\nReferral Data:\nTX ID:%v\nReferral Address:%v",
+					m.Author.Username, amount, trimmedAddress, txHashReferral, referralAddr)
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+
+			}
+		}
+	}
+
 	if strings.Contains(strings.ToLower(m.Content), "faucet") {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
 		// faucet message must contain address/public-key
@@ -186,20 +269,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		haveReferral := false
-		referralAddr := ""
-		referralCount := 0
-
-		cmd := strings.Split(m.Content, " ")
-		if cmd[2] != "" {
-			data, found := b.referralStore.GetData(strings.ToLower(cmd[2]))
-			if found {
-				haveReferral = true
-				referralAddr = data.AccountAddress
-				referralCount = data.ReferralCounts
-			}
-		}
-
 		if pubKey != "" {
 			// check available balance
 			balance := b.faucetWallet.GetBalance()
@@ -208,35 +277,15 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 
-			amount := b.cfg.FaucetAmount
-			if haveReferral {
-				amount = b.cfg.ReferralerRewardAmount + b.cfg.FaucetAmount
-			}
-
 			// send faucet
-			txHashReferral := ""
-			txHashFaucet := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, amount)
-			if haveReferral {
-				txHashReferral = b.faucetWallet.TransferTransaction(referralAddr, b.cfg.ReferralRewardAmount)
-				err := b.referralStore.SetData(referralAddr, referralCount+1)
-				if err != nil {
-					log.Printf("error saving referral information: %v\n", err)
-				}
-			}
-			if txHashFaucet != "" {
-				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, amount)
+			txHash := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount)
+			if txHash != "" {
+				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
 				if err != nil {
 					log.Printf("error saving faucet information: %v\n", err)
 				}
-
-				if haveReferral && txHashFaucet != "" {
-					msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\nReferral Data:\nTX ID:%v\nReferral Address:%v",
-						m.Author.Username, amount, trimmedAddress, txHashReferral, referralAddr)
-					_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-				}
-
-				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\n*No Referral!*",
-					m.Author.Username, amount, trimmedAddress)
+				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!",
+					m.Author.Username, b.cfg.FaucetAmount, trimmedAddress)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			}
 		}

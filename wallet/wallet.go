@@ -74,7 +74,8 @@ func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) strin
 
 func (w *Wallet) TransferTransaction(toAddress string, amount float64) string {
 	opts := []pwallet.TxOption{
-		pwallet.OptionFee(int64(1)), // TODO: ???
+		//nolint
+		pwallet.OptionFee(int64(1)), // TODO 
 		pwallet.OptionMemo("Referral Reward from PactusBot"),
 	}
 	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, util.CoinToChange(amount), opts...)
