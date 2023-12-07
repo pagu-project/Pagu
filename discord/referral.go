@@ -123,17 +123,17 @@ func (rs *ReferralStore) AddPoint(code string) bool {
 }
 
 func marshaReferralJSON(m *sync.Map) ([]byte, error) {
-	tmpMap := make(map[string]*Validator)
+	tmpMap := make(map[string]*Referral)
 
 	m.Range(func(k, v interface{}) bool {
-		tmpMap[k.(string)] = v.(*Validator)
+		tmpMap[k.(string)] = v.(*Referral)
 		return true
 	})
 	return json.MarshalIndent(tmpMap, "  ", "  ")
 }
 
 func unmarshalReferralJSON(data []byte) (*sync.Map, error) {
-	var tmpMap map[string]*Validator
+	var tmpMap map[string]*Referral
 	m := &sync.Map{}
 
 	if err := json.Unmarshal(data, &tmpMap); err != nil {
