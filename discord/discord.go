@@ -49,7 +49,7 @@ func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore, rs *ReferralStor
 		log.Printf("error creating Discord session: %v", err)
 		return nil, err
 	}
-	bot := &Bot{cfg: cfg, discordSession: dg, faucetWallet: w, store: ss, cm: cm}
+	bot := &Bot{cfg: cfg, discordSession: dg, faucetWallet: w, store: ss, cm: cm, referralStore: rs}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(bot.messageHandler)
