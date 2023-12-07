@@ -84,12 +84,12 @@ func (rs *ReferralStore) GetAllReferrals() []*Referral {
 	result := []*Referral{}
 
 	rs.syncMap.Range(func(key, value any) bool {
-		referral, ok := value.(*Referral)
-		if !ok {
+		referral, _ := value.(*Referral)
+		result = append(result, referral)
+		if value == nil {
 			return true
 		}
-		result = append(result, referral)
-		return true
+		return false
 	})
 
 	return result
