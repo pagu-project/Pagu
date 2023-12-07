@@ -226,13 +226,11 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// validate referral.
-		if referralCode != "" {
-			_, found := b.referralStore.GetData(referralCode)
-			if !found {
-				msg := p.Sprintf("*Invalid* referral!")
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-				return
-			}
+		_, found := b.referralStore.GetData(referralCode)
+		if !found {
+			msg := p.Sprintf("*Invalid* referral!")
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
 		}
 
 		if pubKey != "" {
