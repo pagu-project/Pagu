@@ -10,11 +10,10 @@ import (
 )
 
 type Referral struct {
-	ReferralCode   string `json:"referral_code"`
-	RewardAddress  string `json:"account_address"`
-	ReferralCounts int    `json:"referral_count"`
-	DiscordName    string `json:"discord_name"`
-	DiscordID      string `json:"discord_id"`
+	ReferralCode string `json:"referral_code"`
+	Points       int    `json:"points"`
+	DiscordName  string `json:"discord_name"`
+	DiscordID    string `json:"discord_id"`
 }
 
 // SafeStore is a thread-safe cache.
@@ -50,13 +49,12 @@ func LoadReferralData(cfg *config.Config) (*ReferralStore, error) {
 }
 
 // SetData Set a given value to the data storage.
-func (rs *ReferralStore) NewReferral(address, discordId, discordName, referralCode string, count int) error {
+func (rs *ReferralStore) NewReferral(discordId, discordName, referralCode string) error {
 	rs.syncMap.Store(referralCode, &Referral{
-		ReferralCounts: count,
-		DiscordName:    discordName,
-		ReferralCode:   referralCode,
-		RewardAddress:  address,
-		DiscordID:      discordId,
+		Points:       0,
+		DiscordName:  discordName,
+		ReferralCode: referralCode,
+		DiscordID:    discordId,
 	})
 	// save record
 	data, err := marshalJSON(rs.syncMap)
@@ -81,8 +79,24 @@ func (rs *ReferralStore) GetData(code string) (*Referral, bool) {
 	return referral, true
 }
 
-// AddReferraler add one new referraller.
-func (rs *ReferralStore) AddReferraler(code string) bool {
+// GetAllReferrals retrieves all referrals in store.
+func (rs *ReferralStore) GetAllReferrals() []*Referral {
+	result := []*Referral{}
+
+	rs.syncMap.Range(func(key, value any) bool {
+		referral, ok := value.(*Referral)
+		if !ok {
+			return true
+		}
+		result = append(result, referral)
+		return true
+	})
+
+	return result
+}
+
+// AddPoint add one point for a referral.
+func (rs *ReferralStore) AddPoint(code string) bool {
 	entry, found := rs.syncMap.Load(code)
 	if !found {
 		return false
@@ -90,9 +104,22 @@ func (rs *ReferralStore) AddReferraler(code string) bool {
 
 	if found {
 		referral := entry.(*Referral)
-		referral.ReferralCounts++
+		referral.Points++
 		rs.syncMap.Store(referral.ReferralCode, referral)
 		return true
 	}
+
+	// save record
+	data, err := marshalJSON(rs.syncMap)
+	if err != nil {
+		log.Printf("error marshalling validator data file: %v", err)
+		return false
+	}
+
+	if err := os.WriteFile(rs.cfg.ReferralDataPath, data, 0o600); err != nil {
+		log.Printf("failed to write to %s: %v", rs.cfg.ReferralDataPath, err)
+		return false
+	}
+
 	return false
 }
