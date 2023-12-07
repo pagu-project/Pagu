@@ -14,7 +14,6 @@ type Config struct {
 	Servers                []string `json:"servers"`
 	FaucetAddress          string   `json:"faucet_address"`
 	FaucetAmount           float64  `json:"faucet_amount"`
-	ReferralRewardAmount   float64  `json:"referral_reward_amount"`   // who is a referral
 	ReferralerRewardAmount float64  `json:"referraler_reward_amount"` // who get faucet
 	ValidatorDataPath      string   `json:"validator_data_path"`
 	ReferralDataPath       string   `json:"referral_data_path"`

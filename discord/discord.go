@@ -236,21 +236,24 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 
 			amount := b.cfg.FaucetAmount + b.cfg.ReferralerRewardAmount
+			ok := b.referralStore.AddReferraler(referralCode)
+			if !ok {
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Can't update referral data. please  try again later.", m.Reference())
+				return
+			}
+
 			// send faucet
-
 			txHashFaucet := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, amount)
-			txHashReferral := b.faucetWallet.TransferTransaction(referralAddr, b.cfg.ReferralRewardAmount)
 
-			if txHashFaucet != "" && txHashReferral != "" {
+			if txHashFaucet != "" {
 				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, amount)
 				if err != nil {
 					log.Printf("error saving faucet information: %v\n", err)
 				}
 
-				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\nReferral Data:\nTX ID:%v\nReferral Address:%v",
-					m.Author.Username, amount, trimmedAddress, txHashReferral, referralAddr)
+				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!\nReferral Data:\nReferral Address:%v",
+					m.Author.Username, amount, trimmedAddress, referralAddr)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-
 			}
 		}
 	}

@@ -80,3 +80,19 @@ func (rs *ReferralStore) GetData(code string) (*Referral, bool) {
 	referral := entry.(*Referral)
 	return referral, true
 }
+
+// AddReferraler add one new referraller.
+func (rs *ReferralStore) AddReferraler(code string) bool {
+	entry, found := rs.syncMap.Load(code)
+	if !found {
+		return false
+	}
+
+	if found {
+		referral := entry.(*Referral)
+		referral.ReferralCounts++
+		rs.syncMap.Store(referral.ReferralCode, referral)
+		return true
+	}
+	return false
+}

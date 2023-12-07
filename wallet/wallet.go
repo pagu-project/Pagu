@@ -72,38 +72,6 @@ func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) strin
 	return res // return transaction hash
 }
 
-func (w *Wallet) TransferTransaction(toAddress string, amount float64) string {
-	opts := []pwallet.TxOption{
-		//nolint
-		pwallet.OptionFee(int64(1)), // TODO 
-		pwallet.OptionMemo("Referral Reward from PactusBot"),
-	}
-	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, util.CoinToChange(amount), opts...)
-	if err != nil {
-		log.Printf("error creating transfer transaction: %v", err)
-		return ""
-	}
-	// sign transaction
-	err = w.wallet.SignTransaction(w.password, tx)
-	if err != nil {
-		log.Printf("error signing transfer transaction: %v", err)
-		return ""
-	}
-
-	// broadcast transaction
-	res, err := w.wallet.BroadcastTransaction(tx)
-	if err != nil {
-		log.Printf("error broadcasting transfer transaction: %v", err)
-		return ""
-	}
-
-	err = w.wallet.Save()
-	if err != nil {
-		log.Printf("error saving wallet transaction history: %v", err)
-	}
-	return res // return transaction hash
-}
-
 func (w *Wallet) GetBalance() *Balance {
 	balance := &Balance{Available: 0, Staked: 0}
 	b, err := w.wallet.Balance(w.address)
