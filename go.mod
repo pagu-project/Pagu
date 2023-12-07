@@ -8,6 +8,7 @@ require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/libp2p/go-libp2p v0.31.0
+	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/pactus-project/pactus v0.17.0
 	github.com/yudai/pp v2.0.1+incompatible
 	golang.org/x/text v0.13.0

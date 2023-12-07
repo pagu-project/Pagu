@@ -11,6 +11,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/util"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -23,13 +24,14 @@ type Bot struct {
 	faucetWallet   *wallet.Wallet
 	cfg            *config.Config
 	store          *SafeStore
+	referralStore  *ReferralStore
 
 	cm *client.Mgr
 }
 
 // guildID: "795592769300987944"
 
-func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore) (*Bot, error) {
+func Start(cfg *config.Config, w *wallet.Wallet, ss *SafeStore, rs *ReferralStore) (*Bot, error) {
 	cm := client.NewClientMgr()
 
 	for _, s := range cfg.Servers {
@@ -171,6 +173,97 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if strings.ToLower(m.Content) == "my-referral" {
+		referrals := b.referralStore.GetAllReferrals()
+		for _, r := range referrals {
+			if r.DiscordID == m.Author.ID {
+				msg := fmt.Sprintf("Your referral data:\nPoints: %v\nCode: ```%v```\n", r.Points, r.ReferralCode)
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+				return
+			}
+		}
+
+		referralCode, err := gonanoid.New(10)
+		if err != nil {
+			msg := "can't generate referral code, please try again later."
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		err = b.referralStore.NewReferral(m.Author.ID, m.Author.Username, referralCode)
+		if err != nil {
+			msg := "can't generate referral code, please try again later."
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		msg := fmt.Sprintf("Your referral data:\nPoints: %v\nCode: ```%v```\n", 0, referralCode)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+	}
+
+	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") {
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet-referral")
+
+		Params := strings.Split(trimmedPrefix, " ")
+		if len(Params) != 2 {
+			msg := p.Sprintf("*Invalid* parameters!")
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		address := strings.Trim(Params[0], " ")
+		referralCode := strings.Trim(Params[1], " ")
+
+		peerID, pubKey, isValid, msg := b.validateInfo(address, m.Author.ID)
+
+		msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
+			msg, m.Author.Username, address)
+
+		if !isValid {
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		// validate referral.
+		_, found := b.referralStore.GetData(referralCode)
+		if !found {
+			msg := p.Sprintf("*Invalid* referral!")
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		if pubKey != "" {
+			// check available balance
+			balance := b.faucetWallet.GetBalance()
+			if balance.Available < b.cfg.FaucetAmount {
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
+				return
+			}
+
+			amount := b.cfg.ReferralerStakeAmount
+			ok := b.referralStore.AddPoint(referralCode)
+			if !ok {
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Can't update referral data. please  try again later.", m.Reference())
+				return
+			}
+
+			// send faucet
+			txHashFaucet := b.faucetWallet.BondTransaction(pubKey, address, amount)
+
+			if txHashFaucet != "" {
+				err := b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, amount)
+				if err != nil {
+					log.Printf("error saving faucet information: %v\n", err)
+				}
+
+				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!",
+					m.Author.Username, amount, address)
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			}
+		}
+	}
+
 	if strings.Contains(strings.ToLower(m.Content), "faucet") {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
 		// faucet message must contain address/public-key
@@ -240,8 +333,11 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"To see the faucet account balance, simply type: `balance`\n" +
 			"To see the faucet address, simply type: `address`\n" +
 			"To get network information, simply type: `network`\n" +
+			"To get network health status, simply type: `health`\n" +
 			"To get peer information, simply type: `peer-info [validator address]`\n" +
-			"To request faucet for test network: simply post `faucet [validator address]`.",
+			"To get your referral information, simply type: `my-referral`\n" +
+			"To request faucet for test network *with referral code*: simply type `faucet-referral [validator address] [referral code]`\n" +
+			"To request faucet for test network: simply type `faucet [validator address]`.",
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:  "Example of requesting `faucet` ",

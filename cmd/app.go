@@ -35,8 +35,15 @@ func main() {
 		return
 	}
 
+	// load list of validators already received faucet
+	rs, err := discord.LoadReferralData(cfg)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	///start discord bot
-	bot, err := discord.Start(cfg, w, ss)
+	bot, err := discord.Start(cfg, w, ss, rs)
 	if err != nil {
 		log.Printf("could not start discord bot: %v\n", err)
 		return
