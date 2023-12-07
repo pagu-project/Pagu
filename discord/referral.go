@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -36,7 +37,7 @@ func LoadReferralData(cfg *config.Config) (*ReferralStore, error) {
 		return rs, nil
 	}
 
-	data, err := unmarshalJSON(file)
+	data, err := unmarshalReferralJSON(file)
 	if err != nil {
 		log.Printf("error unmarshalling validator data: %v", err)
 		return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
@@ -57,7 +58,7 @@ func (rs *ReferralStore) NewReferral(discordId, discordName, referralCode string
 		DiscordID:    discordId,
 	})
 	// save record
-	data, err := marshalJSON(rs.syncMap)
+	data, err := marshaReferralJSON(rs.syncMap)
 	if err != nil {
 		log.Printf("error marshalling validator data file: %v", err)
 		return fmt.Errorf("error marshalling validator data file: %w", err)
@@ -107,7 +108,7 @@ func (rs *ReferralStore) AddPoint(code string) bool {
 	}
 
 	// save record
-	data, err := marshalJSON(rs.syncMap)
+	data, err := marshaReferralJSON(rs.syncMap)
 	if err != nil {
 		log.Printf("error marshalling validator data file: %v", err)
 		return false
@@ -119,4 +120,28 @@ func (rs *ReferralStore) AddPoint(code string) bool {
 	}
 
 	return false
+}
+
+func marshaReferralJSON(m *sync.Map) ([]byte, error) {
+	tmpMap := make(map[string]*Validator)
+
+	m.Range(func(k, v interface{}) bool {
+		tmpMap[k.(string)] = v.(*Validator)
+		return true
+	})
+	return json.MarshalIndent(tmpMap, "  ", "  ")
+}
+
+func unmarshalReferralJSON(data []byte) (*sync.Map, error) {
+	var tmpMap map[string]*Validator
+	m := &sync.Map{}
+
+	if err := json.Unmarshal(data, &tmpMap); err != nil {
+		return m, err
+	}
+
+	for key, value := range tmpMap {
+		m.Store(key, value)
+	}
+	return m, nil
 }
