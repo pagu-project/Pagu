@@ -260,6 +260,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				msg := p.Sprintf("%v  %.4f test PACs is staked to %v successfully!",
 					m.Author.Username, amount, address)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+				return
 			}
 		}
 	}
