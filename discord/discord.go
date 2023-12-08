@@ -183,7 +183,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
-		referralCode, err := gonanoid.New(10)
+		referralCode, err := gonanoid.Generate("0123456789", 6)
 		if err != nil {
 			msg := "can't generate referral code, please try again later."
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
