@@ -203,7 +203,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") {
-		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet-referral")
+		trimmedPrefix := strings.TrimPrefix(m.Content, "faucet-referral ")
 
 		Params := strings.Split(trimmedPrefix, " ")
 		if len(Params) != 2 {
@@ -212,8 +212,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		address := strings.Trim(Params[0], " ")
-		referralCode := strings.Trim(Params[1], " ")
+		address := Params[0]
+		referralCode := Params[1]
 
 		peerID, pubKey, isValid, msg := b.validateInfo(address, m.Author.ID)
 
