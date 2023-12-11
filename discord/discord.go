@@ -177,7 +177,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		referrals := b.referralStore.GetAllReferrals()
 		for _, r := range referrals {
 			if r.DiscordID == m.Author.ID {
-				msg := fmt.Sprintf("Your referral data:\nPoints: %v\nCode: ```%v```\n", r.Points, r.ReferralCode)
+				msg := fmt.Sprintf("Your referral data:\nPoints: %v (%v tPACs)\nCode: ```%v```\n", r.Points, (r.Points * 10), r.ReferralCode)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 				return
 			}
@@ -197,7 +197,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := fmt.Sprintf("Your referral data:\nPoints: %v\nCode: ```%v```\n", 0, referralCode)
+		msg := fmt.Sprintf("Your referral data:\nPoints: %v (%v tPACs)\nCode: ```%v```\n", 0, 0, referralCode)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
