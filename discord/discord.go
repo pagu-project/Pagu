@@ -82,6 +82,11 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Ignore messages which is not from accepted channels
+	if m.GuildID != "795592769300987944" {
+		return
+	}
+
 	if strings.ToLower(m.Content) == "help" {
 		help(s, m)
 		return
