@@ -10,3 +10,4 @@ cmd/data/wallet.json
 cmd/data/config.json
 cmd/data/validators.json
 cmd/bin
+__pycache__
