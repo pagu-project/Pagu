@@ -96,10 +96,13 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, er
 
 		if networkInfo != nil {
 			for _, p := range networkInfo.Peers {
-				for _, key := range p.ConsensusKeys {
+				for i, key := range p.ConsensusKeys {
 					pub, _ := bls.PublicKeyFromString(key)
 					if pub != nil {
 						if pub.ValidatorAddress().String() == address {
+							if i != 0 {
+								return nil, nil, errors.New("please enter the first validator address")
+							}
 							return p, pub, nil
 						}
 					}
