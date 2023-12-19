@@ -120,14 +120,14 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
 
 		timeDiff := (uint32(currentTime.Unix()) - lastBlockTime)
-		if   timeDiff> 15 {
-			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v\nDifference is more than 15 seconds.",
+		if timeDiff > 15 {
+			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v seconds\nDifference is more than 15 seconds.",
 				lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v\nDifference is less than 15 seconds.",
+		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v seconds\nDifference is less than 15 seconds.",
 			lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
@@ -274,9 +274,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 
 		}
-	}
-
-	if strings.Contains(strings.ToLower(m.Content), "faucet") {
+	} else if strings.Contains(strings.ToLower(m.Content), "faucet") {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
 		// faucet message must contain address/public-key
 		trimmedAddress := strings.Trim(trimmedPrefix, " ")
