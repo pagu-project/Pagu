@@ -26,7 +26,7 @@ type ReferralStore struct {
 func LoadReferralData(cfg *config.Config) (*ReferralStore, error) {
 	file, err := os.ReadFile(cfg.ReferralDataPath)
 	if err != nil {
-		log.Printf("error loading validator data: %v", err)
+		log.Printf("error loading referral data: %v", err)
 		return nil, fmt.Errorf("error loading data file: %w", err)
 	}
 	if len(file) == 0 {
@@ -39,8 +39,8 @@ func LoadReferralData(cfg *config.Config) (*ReferralStore, error) {
 
 	data, err := unmarshalReferralJSON(file)
 	if err != nil {
-		log.Printf("error unmarshalling validator data: %v", err)
-		return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
+		log.Printf("error unmarshalling referral data: %v", err)
+		return nil, fmt.Errorf("error unmarshalling referral data: %w", err)
 	}
 	rs := &ReferralStore{
 		syncMap: data,
@@ -60,8 +60,8 @@ func (rs *ReferralStore) NewReferral(discordId, discordName, referralCode string
 	// save record
 	data, err := marshaReferralJSON(rs.syncMap)
 	if err != nil {
-		log.Printf("error marshalling validator data file: %v", err)
-		return fmt.Errorf("error marshalling validator data file: %w", err)
+		log.Printf("error marshalling referral data file: %v", err)
+		return fmt.Errorf("error marshalling referral data file: %w", err)
 	}
 	if err := os.WriteFile(rs.cfg.ReferralDataPath, data, 0o600); err != nil {
 		log.Printf("failed to write to %s: %v", rs.cfg.ReferralDataPath, err)
@@ -106,7 +106,7 @@ func (rs *ReferralStore) AddPoint(code string) bool {
     // save record
     data, err := marshaReferralJSON(rs.syncMap)
     if err != nil {
-        log.Printf("error marshalling validator data file: %v", err)
+        log.Printf("error marshalling referral data file: %v", err)
         return false
     }
 
