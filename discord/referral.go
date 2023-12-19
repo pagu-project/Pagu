@@ -99,11 +99,13 @@ func (rs *ReferralStore) AddPoint(code string) bool {
     if !found {
         return false
     }
+
+	// updating record
     referral := entry.(*Referral)
     referral.Points++
     rs.syncMap.Store(referral.ReferralCode, referral)
 
-    // save record
+    // saving record
     data, err := marshaReferralJSON(rs.syncMap)
     if err != nil {
         log.Printf("error marshalling referral data file: %v", err)
