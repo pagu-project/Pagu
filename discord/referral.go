@@ -95,29 +95,29 @@ func (rs *ReferralStore) GetAllReferrals() []*Referral {
 
 // AddPoint add one point for a referral.
 func (rs *ReferralStore) AddPoint(code string) bool {
-    entry, found := rs.syncMap.Load(code)
-    if !found {
-        return false
-    }
+	entry, found := rs.syncMap.Load(code)
+	if !found {
+		return false
+	}
 
 	// updating record
-    referral := entry.(*Referral)
-    referral.Points++
-    rs.syncMap.Store(referral.ReferralCode, referral)
+	referral := entry.(*Referral)
+	referral.Points++
+	rs.syncMap.Store(referral.ReferralCode, referral)
 
-    // saving record
-    data, err := marshaReferralJSON(rs.syncMap)
-    if err != nil {
-        log.Printf("error marshalling referral data file: %v", err)
-        return false
-    }
+	// saving record
+	data, err := marshaReferralJSON(rs.syncMap)
+	if err != nil {
+		log.Printf("error marshalling referral data file: %v", err)
+		return false
+	}
 
-    if err := os.WriteFile(rs.cfg.ReferralDataPath, data, 0o600); err != nil {
-        log.Printf("failed to write to %s: %v", rs.cfg.ReferralDataPath, err)
-        return false
-    }
+	if err := os.WriteFile(rs.cfg.ReferralDataPath, data, 0o600); err != nil {
+		log.Printf("failed to write to %s: %v", rs.cfg.ReferralDataPath, err)
+		return false
+	}
 
-    return true
+	return true
 }
 
 func marshaReferralJSON(m *sync.Map) ([]byte, error) {

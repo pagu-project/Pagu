@@ -108,8 +108,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.ToLower(m.Content) == "balance" {
 		balance := b.faucetWallet.GetBalance()
 		v, d := b.store.GetDistribution()
-		msg := p.Sprintf("Available faucet balance is %.4f test tPAC's🪙\n", balance.Available)
-		msg += p.Sprintf("A total of %.4f test tPAC's has been distributed to %d validators.\n", d, v)
+		msg := p.Sprintf("Available faucet balance is %.4f tPAC's🪙\n", balance.Available)
+		msg += p.Sprintf("A total of %.4f tPAC's has been distributed to %d validators.\n", d, v)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
