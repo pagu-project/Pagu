@@ -119,15 +119,16 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		lastBlockTime := b.cm.GetLastBlockTime()
 		lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
 
-		if (uint32(currentTime.Unix()) - lastBlockTime) > 15 {
-			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nDifference is more than 15 seconds.",
-				lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"))
+		timeDiff := (uint32(currentTime.Unix()) - lastBlockTime)
+		if   timeDiff> 15 {
+			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v\nDifference is more than 15 seconds.",
+				lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nDifference is less than 15 seconds.",
-			lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"))
+		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v\nDifference is less than 15 seconds.",
+			lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -182,7 +183,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		referrals := b.referralStore.GetAllReferrals()
 		for _, r := range referrals {
 			if r.DiscordID == m.Author.ID {
-				msg := fmt.Sprintf("Your referral information:\nPoints: %v (%v tPACs)\nCode: ```%v```\n", r.Points, (r.Points * 10), r.ReferralCode)
+				msg := fmt.Sprintf("Your referral information👥:\nPoints: %v (%v tPACs)\nCode: ```%v```\n", r.Points, (r.Points * 10), r.ReferralCode)
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 				return
 			}
@@ -242,7 +243,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// check available balance
 			balance := b.faucetWallet.GetBalance()
 			if balance.Available < b.cfg.FaucetAmount {
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
+				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later please😔.", m.Reference())
 				return
 			}
 
