@@ -40,7 +40,7 @@ func Open(cfg *config.Config) *Wallet {
 	return nil
 }
 
-func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64, memo string) string {
+func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64, memo string) (string, error) {
 	opts := []pwallet.TxOption{
 		pwallet.OptionFee(util.CoinToChange(0)),
 		pwallet.OptionMemo(memo),
@@ -49,27 +49,27 @@ func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64, memo 
 		util.CoinToChange(amount), opts...)
 	if err != nil {
 		log.Printf("error creating bond transaction: %v", err)
-		return ""
+		return "", err
 	}
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Printf("error signing bond transaction: %v", err)
-		return ""
+		return "", err
 	}
 
 	// broadcast transaction
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Printf("error broadcasting bond transaction: %v", err)
-		return ""
+		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		log.Printf("error saving wallet transaction history: %v", err)
 	}
-	return res // return transaction hash
+	return res, nil // return transaction hash
 }
 
 func (w *Wallet) GetBalance() *Balance {

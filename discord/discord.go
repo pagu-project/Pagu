@@ -108,7 +108,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if strings.ToLower(m.Content) == "balance" {
 		balance := b.faucetWallet.GetBalance()
 		v, d := b.store.GetDistribution()
-		msg := p.Sprintf("Available faucet balance is %.4f test tPAC's\n", balance.Available)
+		msg := p.Sprintf("Available faucet balance is %.4f test tPAC's🪙\n", balance.Available)
 		msg += p.Sprintf("A total of %.4f test tPAC's has been distributed to %d validators.\n", d, v)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
@@ -120,13 +120,13 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
 
 		if (uint32(currentTime.Unix()) - lastBlockTime) > 15 {
-			msg := p.Sprintf("Network is unhealthy\nLast block time: %v\nCurrent time: %v\nDifference is more than 15 seconds.",
+			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nDifference is more than 15 seconds.",
 				lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"))
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		msg := p.Sprintf("Network is **healthy**\nlast block time: %v\ncurrent time: %v\nDifference is less than 15 seconds.",
+		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nDifference is less than 15 seconds.",
 			lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"))
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
@@ -202,7 +202,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := fmt.Sprintf("Your referral information:\nPoints: %v (%v tPAC's)\nCode: ```%v```\n", 0, 0, referralCode)
+		msg := fmt.Sprintf("Your referral information👥:\nPoints: %v (%v tPAC's)\nCode: ```%v```\n", 0, 0, referralCode)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -255,19 +255,23 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			// send faucet
 			memo := fmt.Sprintf("pactus faucet ref:%v", referral.DiscordID)
-			txHashFaucet := b.faucetWallet.BondTransaction(pubKey, address, amount, memo)
-
-			if txHashFaucet != "" {
-				err := b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, amount)
-				if err != nil {
-					log.Printf("error saving faucet information: %v\n", err)
-				}
-
-				msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully!\n with %v as referral.",
-					m.Author.Username, amount, address, referral.DiscordName)
+			txHashFaucet, err := b.faucetWallet.BondTransaction(pubKey, address, amount, memo)
+			if err != nil {
+				msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 				return
 			}
+
+			err = b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, amount)
+			if err != nil {
+				log.Printf("error saving faucet information: %v\n", err)
+			}
+
+			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\n with %v as referral.\n your transaction hash:%v",
+				m.Author.Username, amount, address, referral.DiscordName, txHashFaucet)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+
 		}
 	}
 
@@ -295,31 +299,36 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			// send faucet
 			memo := "pactus faucet"
-			txHash := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount, memo)
-			if txHash != "" {
-				err := b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
-				if err != nil {
-					log.Printf("error saving faucet information: %v\n", err)
-				}
-				msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully!",
-					m.Author.Username, b.cfg.FaucetAmount, trimmedAddress)
+			txHash, err := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount, memo)
+			if err != nil {
+				msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
 				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+				return
 			}
+
+			err = b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
+			if err != nil {
+				log.Printf("error saving faucet information: %v\n", err)
+			}
+			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\nyour transaction hash:%v",
+				m.Author.Username, b.cfg.FaucetAmount, trimmedAddress, txHash)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+
 		}
 	}
 
 	if strings.Contains(strings.ToLower(m.Content), "tx-data") {
-		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "tx-data")
 		trimmedTXHash := strings.Trim(trimmedPrefix, " ")
 
 		data, err := b.cm.GetRandomClient().TransactionData(trimmedTXHash)
 		if err != nil {
-			msg := p.Sprintf("An error occurred %v\n", err)
+			msg := p.Sprintf("An error occurred %v❌\n", err)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		msg := p.Sprintf("your transaction data:\ndata:%v\nversion:%v\nlockTime:%v\nvalue:%v\nmemo:%v\npublic-key:%v\n",
+		msg := p.Sprintf("Your transaction data:\nData:%v\nVersion:%v\nLockTime:%v\nValue:%v\nMemo:%v\nPublic-key:%v\n",
 			string(data.Data), data.Version, data.LockTime, data.Value, data.Memo, data.PublicKey)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
@@ -344,7 +353,7 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"To get network health status, simply type: `health`\n" +
 			"To get peer information, simply type: `peer-info [validator address]`\n" +
 			"To get your referral information, simply type: `my-referral`\n" +
-			"To request faucet for test network *with referral code*: simply type `faucet-referral [validator address] [referral code]` referral faucet will get 100 tPAC's\n" +
+			"To request faucet for test network *with referral code*: simply type `faucet-referral [validator address] [referral code]`\nreferral faucet will get 100 tPAC's\n" +
 			"To request faucet for test network: simply type `faucet [validator address]`. normal faucet will get 60 tPAC's",
 		Fields: []*discordgo.MessageEmbedField{
 			{
@@ -359,7 +368,7 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	_, err := crypto.AddressFromString(address)
 	if err != nil {
 		log.Printf("invalid address")
-		return "", "", false, "Pactus Universal Robot is unable to handle your request." +
+		return "", "", false, "Pactus Universal Robot is unable to handle your request.❌" +
 			" If you are requesting testing faucet, supply the valid address."
 	}
 
@@ -376,7 +385,7 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	}
 
 	if isValidator {
-		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again."
+		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again.❌"
 	}
 
 	peerInfo, pub, err := b.cm.GetPeerInfo(address)
@@ -385,8 +394,8 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	}
 	if pub == nil {
 		log.Printf("error getting peer info")
-		return "", "", false, "Your node information could not obtained." +
-			" Make sure your node is fully synced before requesting the faucet."
+		return "", "", false, "Your node information could not obtained.❌" +
+			" Make sure your node is fully synced before requesting the faucet.🛜"
 	}
 
 	// check if the validator has already been given the faucet
@@ -396,8 +405,8 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	}
 	if peerID.String() == "" {
 		log.Printf("error getting peer id")
-		return "", "", false, "Your node information could not obtained." +
-			" Make sure your node is fully synced before requesting the faucet."
+		return "", "", false, "Your node information could not obtained.❌" +
+			" Make sure your node is fully synced before requesting the faucet.🛜"
 	}
 	v, exists = b.store.GetData(peerID.String())
 	if exists || v != nil {
@@ -408,11 +417,11 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 	// height, err := cl.GetBlockchainHeight()
 	// if err != nil {
 	// 	log.Printf("error current block height")
-	// 	return "", "", false, "The bot cannot establish connection to the blochain network. Try again later."
+	// 	return "", "", false, "The bot cannot establish connection to the blockchain network. Try again later."
 	// }
 	// if (height - peerInfo.Height) > 1080 {
-	//	msg := fmt.Sprintf("Your node is not fully synchronised. It is is behind by %v blocks." +
-	//		" Make sure that your node is fully synchronised before requesting faucet.", (height - peerInfo.Height))
+	//	msg := fmt.Sprintf("Your node is not fully synchronized. It is is behind by %v blocks." +
+	//		" Make sure that your node is fully synchronized before requesting faucet.", (height - peerInfo.Height))
 
 	// 	log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
 	// 	return "", "", false, msg
@@ -421,27 +430,27 @@ func (b *Bot) validateInfo(address, discordID string) (string, string, bool, str
 }
 
 func (b *Bot) networkInfo() string {
-	msg := "Pactus is truly decentralized Proof of Stake blockchain."
+	msg := "Pactus is truly decentralized Proof of Stake Blockchain.⛓️"
 	nodes, err := b.cm.GetNetworkInfo()
 	if err != nil {
 		log.Printf("error establishing connection")
 		return msg
 	}
-	msg += "\nThe current statistics are:\n"
-	msg += fmt.Sprintf("Network started at : %v\n", time.UnixMilli(nodes.StartedAt*1000).Format("02/01/2006, 15:04:05"))
-	msg += fmt.Sprintf("Total bytes sent : %v\n", uint32(nodes.TotalSentBytes))
-	msg += fmt.Sprintf("Total bytes received  : %v\n", uint32(nodes.TotalReceivedBytes))
-	msg += fmt.Sprintf("Number of peer nodes: %v\n", len(nodes.Peers))
+	msg += "\n📊 The current statistics are:\n"
+	msg += fmt.Sprintf("🕧Network started at: %v\n", time.UnixMilli(nodes.StartedAt*1000).Format("02/01/2006, 15:04:05"))
+	msg += fmt.Sprintf("⬆️Total bytes sent: %v\n", uint32(nodes.TotalSentBytes))
+	msg += fmt.Sprintf("⬇️Total bytes received: %v\n", uint32(nodes.TotalReceivedBytes))
+	msg += fmt.Sprintf("👾Number of peer nodes: %v\n", len(nodes.Peers))
 	// check block height
 	blockchainInfo, err := b.cm.GetBlockchainInfo()
 	if err != nil {
 		log.Printf("error current block height")
 		return msg
 	}
-	msg += fmt.Sprintf("Block height: %v\n", blockchainInfo.LastBlockHeight)
-	msg += fmt.Sprintf("Total power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.TotalPower))
-	msg += fmt.Sprintf("Total committee power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.CommitteePower))
-	msg += fmt.Sprintf("Total validators: %v\n", blockchainInfo.TotalValidators)
+	msg += fmt.Sprintf("⛓️Block height: %v\n", blockchainInfo.LastBlockHeight)
+	msg += fmt.Sprintf("🦾Total power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.TotalPower))
+	msg += fmt.Sprintf("🦾Total committee power: %.4f PACs\n", util.ChangeToCoin(blockchainInfo.CommitteePower))
+	msg += fmt.Sprintf("✔️Total validators: %v\n", blockchainInfo.TotalValidators)
 	return msg
 }
 
