@@ -40,10 +40,10 @@ func Open(cfg *config.Config) *Wallet {
 	return nil
 }
 
-func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64) string {
+func (w *Wallet) BondTransaction(pubKey, toAddress string, amount float64, memo string) string {
 	opts := []pwallet.TxOption{
 		pwallet.OptionFee(util.CoinToChange(0)),
-		pwallet.OptionMemo("Faucet from PactusBot"),
+		pwallet.OptionMemo(memo),
 	}
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
 		util.CoinToChange(amount), opts...)
