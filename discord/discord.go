@@ -263,7 +263,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 
-			err = b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, amount)
+			err = b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, referral.DiscordID, amount)
 			if err != nil {
 				log.Printf("error saving faucet information: %v\n", err)
 			}
@@ -305,7 +305,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 
-			err = b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, b.cfg.FaucetAmount)
+			err = b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, "", b.cfg.FaucetAmount)
 			if err != nil {
 				log.Printf("error saving faucet information: %v\n", err)
 			}

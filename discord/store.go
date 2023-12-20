@@ -12,10 +12,11 @@ import (
 
 // Validator is a value stored in the cache.
 type Validator struct {
-	DiscordName      string  `json:"discord_name"`
-	DiscordID        string  `json:"discord_id"`
-	ValidatorAddress string  `json:"validator_address"`
-	FaucetAmount     float64 `json:"faucet_amount"`
+	DiscordName       string  `json:"discord_name"`
+	DiscordID         string  `json:"discord_id"`
+	ValidatorAddress  string  `json:"validator_address"`
+	ReferrerDiscordID string  `json:"referrer_discord_id"`
+	FaucetAmount      float64 `json:"faucet_amount"`
 }
 
 type ValidatorRoundOne struct {
@@ -61,10 +62,11 @@ func LoadData(cfg *config.Config) (*SafeStore, error) {
 }
 
 // SetData Set a given value to the data storage.
-func (ss *SafeStore) SetData(peerID, address, discordName, discordID string, amount float64) error {
+func (ss *SafeStore) SetData(peerID, address, discordName, discordID, referrerDiscordID string, amount float64) error {
 	ss.syncMap.Store(peerID, &Validator{
 		DiscordName: discordName, DiscordID: discordID,
 		ValidatorAddress: address, FaucetAmount: amount,
+		ReferrerDiscordID: referrerDiscordID,
 	})
 	// save record
 	data, err := marshalJSON(ss.syncMap)
