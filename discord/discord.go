@@ -268,7 +268,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				log.Printf("error saving faucet information: %v\n", err)
 			}
 
-			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\n with %v as referral.\nYour transaction hash: ```%v```",
+			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\n with %v as referral.\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
 				m.Author.Username, amount, address, referral.DiscordName, txHashFaucet)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
@@ -309,7 +309,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if err != nil {
 				log.Printf("error saving faucet information: %v\n", err)
 			}
-			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\nYour transaction hash: ```%v```",
+			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
 				m.Author.Username, b.cfg.FaucetAmount, trimmedAddress, txHash)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 
