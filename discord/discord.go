@@ -239,6 +239,11 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		if referral.DiscordID == m.Author.ID {
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Sorry, You can't be your own referral😔", m.Reference())
+			return
+		}
+
 		if pubKey != "" {
 			// check available balance
 			balance := b.faucetWallet.GetBalance()
