@@ -441,7 +441,7 @@ func (b *Bot) networkInfo() string {
 		return msg
 	}
 	msg += "\n📊 The current statistics are:\n"
-	msg += fmt.Sprintf("Node started at: %v\n", time.UnixMilli(nodes.StartedAt*1000).Format("02/01/2006, 15:04:05"))
+	msg += fmt.Sprintf("🕧Node started at: %v\n", time.UnixMilli(nodes.StartedAt*1000).Format("02/01/2006, 15:04:05"))
 	msg += fmt.Sprintf("⬆️Total bytes sent: %v\n", uint32(nodes.TotalSentBytes))
 	msg += fmt.Sprintf("⬇️Total bytes received: %v\n", uint32(nodes.TotalReceivedBytes))
 	msg += fmt.Sprintf("👾Number of connected peers: %v\n", len(nodes.Peers))
