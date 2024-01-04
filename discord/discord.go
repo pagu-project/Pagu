@@ -116,19 +116,19 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.ToLower(m.Content) == "health" {
 		currentTime := time.Now()
-		lastBlockTime := b.cm.GetLastBlockTime()
+		lastBlockTime, LastBlockHeight := b.cm.GetLastBlockTime()
 		lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
 
-		timeDiff := (uint32(currentTime.Unix()) - lastBlockTime)
+		timeDiff := (currentTime.Unix() - int64(lastBlockTime))
 		if timeDiff > 15 {
-			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v seconds\nDifference is more than 15 seconds.",
-				lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff)
+			msg := p.Sprintf("Network is **unhealthy❌**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v seconds\nLast block height⛓️: %v\nDifference is more than 15 seconds.",
+				lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff, LastBlockHeight)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 			return
 		}
 
-		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v seconds\nDifference is less than 15 seconds.",
-			lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff)
+		msg := p.Sprintf("Network is **healthy✅**\nLast block time⛓️: %v\nCurrent time🕧: %v\nTime Difference: %v seconds\nLast block height⛓️: %v\nDifference is less than 15 seconds.",
+			lastBlockTimeFormatted.Format("02/01/2006, 15:04:05"), currentTime.Format("02/01/2006, 15:04:05"), timeDiff, LastBlockHeight)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -159,7 +159,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			isSynced = notSyncedMsg
 		}
-		lastBlockTime, err := c.LastBlockTime()
+		lastBlockTime, _, err := c.LastBlockTime()
 		if err != nil {
 			isSynced = notSyncedMsg
 		}
