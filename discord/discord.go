@@ -228,7 +228,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") || strings.Contains(strings.ToLower(m.Content), "faucet") {
-		msg := "Hi, faucet and referral campanig for testnet2 is closes now!\nCheck this post:\nhttps://ptb.discord.com/channels/795592769300987944/811878389304655892/1192018704855220234"
+		msg := "Hi, faucet and referral campaign for testnet-2 is closed now!\nCheck this post:\nhttps://ptb.discord.com/channels/795592769300987944/811878389304655892/1192018704855220234"
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 		// 	trimmedPrefix := strings.TrimPrefix(m.Content, "faucet-referral ")
@@ -342,23 +342,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// 	}
 	}
-
-	if strings.Contains(strings.ToLower(m.Content), "tx-data") {
-		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "tx-data")
-		trimmedTXHash := strings.Trim(trimmedPrefix, " ")
-
-		data, err := b.cm.GetRandomClient().TransactionData(trimmedTXHash)
-		if err != nil {
-			msg := p.Sprintf("An error occurred %v❌\n", err)
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
-
-		msg := p.Sprintf("Your transaction data:\nData:%v\nVersion:%v\nLockTime:%v\nValue:%v\nMemo:%v\nPublic-key:%v\n",
-			string(data.Data), data.Version, data.LockTime, data.Value, data.Memo, data.PublicKey)
-		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		return
-	}
 }
 
 // help sends a message detailing how to use the bot discord-client side
@@ -463,10 +446,10 @@ func (b *Bot) networkInfo() string {
 		return msg
 	}
 	msg += "\n📊 The current statistics are:\n"
-	msg += fmt.Sprintf("🕧Node started at: %v\n", time.UnixMilli(nodes.StartedAt*1000).Format("02/01/2006, 15:04:05"))
+	// msg += fmt.Sprintf("🕧Node started at: %v\n", time.UnixMilli(nodes.sta*1000).Format("02/01/2006, 15:04:05"))
 	msg += fmt.Sprintf("⬆️Total bytes sent: %v\n", uint32(nodes.TotalSentBytes))
 	msg += fmt.Sprintf("⬇️Total bytes received: %v\n", uint32(nodes.TotalReceivedBytes))
-	msg += fmt.Sprintf("👾Number of connected peers: %v\n", len(nodes.Peers))
+	msg += fmt.Sprintf("👾Number of connected peers: %v\n", nodes.ConnectedPeersCount)
 	// check block height
 	blockchainInfo, err := b.cm.GetBlockchainInfo()
 	if err != nil {

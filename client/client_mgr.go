@@ -97,7 +97,7 @@ func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, *bls.Publi
 		}
 
 		if networkInfo != nil {
-			for _, p := range networkInfo.Peers {
+			for _, p := range networkInfo.ConnectedPeers {
 				for i, key := range p.ConsensusKeys {
 					pub, _ := bls.PublicKeyFromString(key)
 					if pub != nil {
@@ -124,7 +124,7 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, er
 		}
 
 		if networkInfo != nil {
-			for _, p := range networkInfo.Peers {
+			for _, p := range networkInfo.ConnectedPeers {
 				for _, key := range p.ConsensusKeys {
 					pub, _ := bls.PublicKeyFromString(key)
 					if pub != nil {

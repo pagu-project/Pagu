@@ -70,7 +70,7 @@ func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, 
 	networkInfo, _ := c.GetNetworkInfo()
 	crypto.PublicKeyHRP = "tpublic"
 	if networkInfo != nil {
-		for _, p := range networkInfo.Peers {
+		for _, p := range networkInfo.ConnectedPeers {
 			for _, key := range p.ConsensusKeys {
 				pub, _ := bls.PublicKeyFromString(key)
 				if pub != nil {
