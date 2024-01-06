@@ -1,9 +1,11 @@
 package discord
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 )
 
 type GeoIP struct {
@@ -23,16 +25,25 @@ type GeoIP struct {
 
 func getGeoIP(ip string) *GeoIP {
 	geo := &GeoIP{}
-	response, err := http.Get("https://freegeoip.net/json/" + ip)
+	req, err := http.NewRequest("GET", "http://www.yahoo.co.jp", nil)
 	if err != nil {
 		return geo
 	}
-	defer response.Body.Close()
 
+	ctx, cancel := context.WithTimeout(req.Context(), 1*time.Millisecond)
+	defer cancel()
+
+	req = req.WithContext(ctx)
+
+	client := http.DefaultClient
+	res, err := client.Do(req)
+	if err != nil {
+		return geo
+	}
 	// response.Body() is a reader type. We have
 	// to use ioutil.ReadAll() to read the data
 	// in to a byte slice(string)
-	body, err := io.ReadAll(response.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return geo
 	}
