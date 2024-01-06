@@ -137,7 +137,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
 		trimmedAddress := strings.Trim(trimmedPrefix, " ")
 
-		peerInfo, err := b.GetPeerInfo(trimmedAddress)
+		peerInfo, _, err := b.cm.GetPeerInfo(trimmedAddress)
 		if err != nil {
 			msg := p.Sprintf("An error occurred %v\n", err)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
