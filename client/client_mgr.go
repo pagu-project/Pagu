@@ -128,6 +128,7 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, er
 				for _, key := range p.ConsensusKeys {
 					pub, _ := bls.PublicKeyFromString(key)
 					if pub != nil {
+						fmt.Println(pub.ValidatorAddress().String())
 						if pub.ValidatorAddress().String() == address {
 							return p, pub, nil
 						}
