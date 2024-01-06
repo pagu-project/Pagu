@@ -151,6 +151,10 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		parts := strings.Split(strings.Split(peerInfo.Address, "/")[2], "/")
+		ip := parts[0]
+		geoData := getGeoIP(ip)
+
 		notSyncedMsg := "this peer is not synced with network, gRPC is disabled or doesn't have public IP address."
 		syncedMsg := "**this peer is synced with network**"
 
@@ -169,12 +173,27 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			isSynced = syncedMsg
 		}
 
+		val, err := c.GetValidatorInfo(trimmedAddress)
+		if err != nil {
+			msg := p.Sprintf("An error occurred %v\n", err)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
 		msg := p.Sprintf("Peer info\n")
 		msg += p.Sprintf("Peer ID: %v\n", peerID)
 		msg += p.Sprintf("IP address: %v\n", peerInfo.Address)
 		msg += p.Sprintf("Agent: %v\n", peerInfo.Agent)
 		msg += p.Sprintf("Moniker: %v\n", peerInfo.Moniker)
 		msg += p.Sprintf("IsSynced: %v\n", isSynced)
+		msg += p.Sprintf("Country: %v\n", geoData.CountryName)
+		msg += p.Sprintf("City: %v\n", geoData.City)
+		msg += p.Sprintf("Region Name: %v\n", geoData.RegionName)
+		msg += p.Sprintf("--------------------Validator Info----------------\n")
+		msg += p.Sprintf("Number: %v", val.Validator.Number)
+		msg += p.Sprintf("Last bonding height: %v", val.Validator.LastBondingHeight)
+		msg += p.Sprintf("Last sortition height: %v", val.Validator.LastSortitionHeight)
+		msg += p.Sprintf("Stake amount: %v", val.Validator.Stake)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}

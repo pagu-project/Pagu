@@ -99,6 +99,16 @@ func (c *Client) IsValidator(address string) (bool, error) {
 	return false, nil
 }
 
+func (c *Client) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
+	validator, err := c.blockchainClient.GetValidator(context.Background(),
+		&pactus.GetValidatorRequest{Address: address})
+	if err != nil {
+		return nil, err
+	}
+
+	return validator, nil
+}
+
 func (c *Client) TransactionData(hash string) (*pactus.TransactionInfo, error) {
 	data, err := c.transactionClient.GetTransaction(context.Background(),
 		&pactus.GetTransactionRequest{
