@@ -9,23 +9,16 @@ import (
 )
 
 type GeoIP struct {
-	// The right side is the name of the JSON variable
-	Ip          string  `json:"ip"`
-	CountryCode string  `json:"country_code"`
-	CountryName string  `json:"country_name"`
-	RegionCode  string  `json:"region_code"`
-	RegionName  string  `json:"region_name"`
-	City        string  `json:"city"`
-	Zipcode     string  `json:"zipcode"`
-	Lat         float32 `json:"latitude"`
-	Lon         float32 `json:"longitude"`
-	MetroCode   int     `json:"metro_code"`
-	AreaCode    int     `json:"area_code"`
+	CountryName string `json:"country"`
+	RegionName  string `json:"regionName"`
+	City        string `json:"city"`
+	TimeZone    string `json:"timezone"`
+	ISP         string `json:"isp"`
 }
 
 func getGeoIP(ip string) *GeoIP {
 	geo := &GeoIP{}
-	req, err := http.NewRequest("GET", "http://www.yahoo.co.jp", nil)
+	req, err := http.NewRequest("GET", "http://ip-api.com/json/"+ip, nil)
 	if err != nil {
 		return geo
 	}

@@ -189,11 +189,13 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		msg += p.Sprintf("Country: %v\n", geoData.CountryName)
 		msg += p.Sprintf("City: %v\n", geoData.City)
 		msg += p.Sprintf("Region Name: %v\n", geoData.RegionName)
+		msg += p.Sprintf("TimeZone: %v\n", geoData.TimeZone)
+		msg += p.Sprintf("ISP: %v\n", geoData.ISP)
 		msg += p.Sprintf("--------------------Validator Info----------------\n")
-		msg += p.Sprintf("Number: %v", val.Validator.Number)
-		msg += p.Sprintf("Last bonding height: %v", val.Validator.LastBondingHeight)
-		msg += p.Sprintf("Last sortition height: %v", val.Validator.LastSortitionHeight)
-		msg += p.Sprintf("Stake amount: %v", val.Validator.Stake)
+		msg += p.Sprintf("Number: %v\n", val.Validator.Number)
+		msg += p.Sprintf("Last bonding height: %v\n", val.Validator.LastBondingHeight)
+		msg += p.Sprintf("Last sortition height: %v\n", val.Validator.LastSortitionHeight)
+		msg += p.Sprintf("Stake amount: %v\n", val.Validator.Stake)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -231,116 +233,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		msg := "Hi, faucet and referral campaign for testnet-2 is closed now!\nCheck this post:\nhttps://ptb.discord.com/channels/795592769300987944/811878389304655892/1192018704855220234"
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
-		// 	trimmedPrefix := strings.TrimPrefix(m.Content, "faucet-referral ")
-
-		// 	Params := strings.Split(trimmedPrefix, " ")
-		// 	if len(Params) != 2 {
-		// 		msg := p.Sprintf("Invalid parameters, referral code is missed!")
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 		return
-		// 	}
-
-		// 	address := Params[0]
-		// 	referralCode := Params[1]
-
-		// 	peerID, pubKey, isValid, msg := b.validateInfo(address, m.Author.ID)
-
-		// 	msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
-		// 		msg, m.Author.Username, address)
-
-		// 	if !isValid {
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 		return
-		// 	}
-
-		// 	// validate referral.
-		// 	referral, found := b.referralStore.GetData(referralCode)
-		// 	if !found {
-		// 		msg := p.Sprintf("*Invalid* referral!")
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 		return
-		// 	}
-
-		// 	if referral.DiscordID == m.Author.ID {
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, "Sorry, You can't be your own referral😔", m.Reference())
-		// 		return
-		// 	}
-
-		// 	if pubKey != "" {
-		// 		// check available balance
-		// 		balance := b.faucetWallet.GetBalance()
-		// 		if balance.Available < b.cfg.FaucetAmount {
-		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later please😔.", m.Reference())
-		// 			return
-		// 		}
-
-		// 		amount := b.cfg.ReferralerStakeAmount
-		// 		ok := b.referralStore.AddPoint(referralCode)
-		// 		if !ok {
-		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Can't update referral data. please  try again later.", m.Reference())
-		// 			return
-		// 		}
-
-		// 		// send faucet
-		// 		memo := fmt.Sprintf("pactus faucet ref:%v", referral.DiscordID)
-		// 		txHashFaucet, err := b.faucetWallet.BondTransaction(pubKey, address, amount, memo)
-		// 		if err != nil {
-		// 			msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
-		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 			return
-		// 		}
-
-		// 		err = b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, referral.DiscordID, amount)
-		// 		if err != nil {
-		// 			log.Printf("error saving faucet information: %v\n", err)
-		// 		}
-
-		// 		msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\n with %v as referral.\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
-		// 			m.Author.Username, amount, address, referral.DiscordName, txHashFaucet)
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 		return
-
-		// 	}
-		// } else if strings.Contains(strings.ToLower(m.Content), "faucet") {
-		// 	trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
-		// 	// faucet message must contain address/public-key
-		// 	trimmedAddress := strings.Trim(trimmedPrefix, " ")
-		// 	peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
-
-		// 	msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
-		// 		msg, m.Author.Username, trimmedAddress)
-
-		// 	if !isValid {
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 		return
-		// 	}
-
-		// 	if pubKey != "" {
-		// 		// check available balance
-		// 		balance := b.faucetWallet.GetBalance()
-		// 		if balance.Available < b.cfg.FaucetAmount {
-		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
-		// 			return
-		// 		}
-
-		// 		// send faucet
-		// 		memo := "pactus faucet"
-		// 		txHash, err := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount, memo)
-		// 		if err != nil {
-		// 			msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
-		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		// 			return
-		// 		}
-
-		// 		err = b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, "", b.cfg.FaucetAmount)
-		// 		if err != nil {
-		// 			log.Printf("error saving faucet information: %v\n", err)
-		// 		}
-		// 		msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
-		// 			m.Author.Username, b.cfg.FaucetAmount, trimmedAddress, txHash)
-		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-
-		// 	}
 	}
 }
 
@@ -372,71 +264,6 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 		},
 	})
 }
-
-// func (b *Bot) validateInfo(address, discordID string) (string, string, bool, string) {
-// 	_, err := crypto.AddressFromString(address)
-// 	if err != nil {
-// 		log.Printf("invalid address")
-// 		return "", "", false, "Pactus Universal Robot is unable to handle your request.❌" +
-// 			" If you are requesting testing faucet, supply the valid address."
-// 	}
-
-// 	// check if the user is existing
-// 	v, exists := b.store.FindDiscordID(discordID)
-// 	if exists {
-// 		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
-// 	}
-
-// 	// check if the address exists in the list of validators
-// 	isValidator, err := b.cm.IsValidator(address)
-// 	if err != nil {
-// 		return "", "", false, err.Error()
-// 	}
-
-// 	if isValidator {
-// 		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again.❌"
-// 	}
-
-// 	peerInfo, pub, err := b.cm.GetPeerInfoFirstVal(address)
-// 	if err != nil {
-// 		return "", "", false, err.Error()
-// 	}
-// 	if pub == nil {
-// 		log.Printf("error getting peer info")
-// 		return "", "", false, "Your node information could not obtained.❌" +
-// 			" Make sure your node is fully synced before requesting the faucet.🛜"
-// 	}
-
-// 	// check if the validator has already been given the faucet
-// 	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
-// 	if err != nil {
-// 		return "", "", false, err.Error()
-// 	}
-// 	if peerID.String() == "" {
-// 		log.Printf("error getting peer id")
-// 		return "", "", false, "Your node information could not obtained.❌" +
-// 			" Make sure your node is fully synced before requesting the faucet.🛜"
-// 	}
-// 	v, exists = b.store.GetData(peerID.String())
-// 	if exists || v != nil {
-// 		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
-// 	}
-
-// 	// check block height
-// 	// height, err := cl.GetBlockchainHeight()
-// 	// if err != nil {
-// 	// 	log.Printf("error current block height")
-// 	// 	return "", "", false, "The bot cannot establish connection to the blockchain network. Try again later."
-// 	// }
-// 	// if (height - peerInfo.Height) > 1080 {
-// 	//	msg := fmt.Sprintf("Your node is not fully synchronized. It is is behind by %v blocks." +
-// 	//		" Make sure that your node is fully synchronized before requesting faucet.", (height - peerInfo.Height))
-
-// 	// 	log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
-// 	// 	return "", "", false, msg
-// 	// }
-// 	return peerID.String(), pub.String(), true, ""
-// }
 
 func (b *Bot) networkInfo() string {
 	msg := "Pactus is truly decentralized Proof of Stake Blockchain.⛓️"
