@@ -153,6 +153,18 @@ func (cm *Mgr) IsValidator(address string) (bool, error) {
 	return false, errors.New("unable to get validator info")
 }
 
+func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
+	for _, c := range cm.clients {
+		val, err := c.GetValidatorInfo(address)
+		if err != nil {
+			continue
+		}
+		return val, nil
+	}
+
+	return nil, errors.New("unable to get validator info")
+}
+
 func (cm *Mgr) Close() {
 	for addr, c := range cm.clients {
 		if err := c.Close(); err != nil {

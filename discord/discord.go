@@ -153,27 +153,10 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		parts := strings.Split(strings.Split(peerInfo.Address, "/")[2], "/")
 		ip := parts[0]
+		fmt.Println(ip)
 		geoData := getGeoIP(ip)
 
-		notSyncedMsg := "this peer is not synced with network, gRPC is disabled or doesn't have public IP address."
-		syncedMsg := "**this peer is synced with network**"
-
-		isSynced := notSyncedMsg
-		c, err := client.NewClient(strings.Split(peerInfo.Address, "/")[2] + ":50052")
-		if err != nil {
-			isSynced = notSyncedMsg
-		}
-		lastBlockTime, _, err := c.LastBlockTime()
-		if err != nil {
-			isSynced = notSyncedMsg
-		}
-		currentTime := time.Now().Unix()
-
-		if (uint32(currentTime) - lastBlockTime) < 15 {
-			isSynced = syncedMsg
-		}
-
-		val, err := c.GetValidatorInfo(trimmedAddress)
+		val, err := b.cm.GetValidatorInfo(trimmedAddress)
 		if err != nil {
 			msg := p.Sprintf("An error occurred %v\n", err)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
@@ -185,7 +168,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		msg += p.Sprintf("IP address: %v\n", peerInfo.Address)
 		msg += p.Sprintf("Agent: %v\n", peerInfo.Agent)
 		msg += p.Sprintf("Moniker: %v\n", peerInfo.Moniker)
-		msg += p.Sprintf("IsSynced: %v\n", isSynced)
 		msg += p.Sprintf("Country: %v\n", geoData.CountryName)
 		msg += p.Sprintf("City: %v\n", geoData.City)
 		msg += p.Sprintf("Region Name: %v\n", geoData.RegionName)
@@ -196,6 +178,38 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		msg += p.Sprintf("Last bonding height: %v\n", val.Validator.LastBondingHeight)
 		msg += p.Sprintf("Last sortition height: %v\n", val.Validator.LastSortitionHeight)
 		msg += p.Sprintf("Stake amount: %v\n", val.Validator.Stake)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+	}
+	if strings.Contains(strings.ToLower(m.Content), "synced") {
+		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
+		trimmedAddress := strings.Trim(trimmedPrefix, " ")
+
+		peerInfo, _, err := b.cm.GetPeerInfo(trimmedAddress)
+		if err != nil {
+			msg := p.Sprintf("An error occurred %v\n", err)
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		notSyncedMsg := "this peer is not synced with network, gRPC is disabled or doesn't have public IP address."
+		syncedMsg := "**this peer is synced with network**"
+
+		msg := notSyncedMsg
+		c, err := client.NewClient(strings.Split(peerInfo.Address, "/")[2] + ":50052")
+		if err != nil {
+			msg = notSyncedMsg
+		}
+		lastBlockTime, _, err := c.LastBlockTime()
+		if err != nil {
+			msg = notSyncedMsg
+		}
+		currentTime := time.Now().Unix()
+
+		if (uint32(currentTime) - lastBlockTime) < 15 {
+			msg = syncedMsg
+		}
+
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
@@ -252,6 +266,7 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"To see the faucet address, simply type: `address`\n" +
 			"To get network information, simply type: `network`\n" +
 			"To get network health status, simply type: `health`\n" +
+			"To get your node syncing status, simply type: `synced [validator address]`\n" +
 			"To get peer information, simply type: `peer-info [validator address]`\n" +
 			"To get your referral information, simply type: `my-referral`\n" +
 			"To request faucet for test network *with referral code*: simply type `faucet-referral [validator address] [referral code]`\nreferral faucet will get 100 tPAC's\n" +
