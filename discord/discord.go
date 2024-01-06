@@ -137,7 +137,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "peer-info")
 		trimmedAddress := strings.Trim(trimmedPrefix, " ")
 
-		peerInfo, err := b.GetPeerInfo(trimmedAddress)
+		peerInfo, _, err := b.cm.GetPeerInfo(trimmedAddress)
 		if err != nil {
 			msg := p.Sprintf("An error occurred %v\n", err)
 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
@@ -227,117 +227,120 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") {
-		trimmedPrefix := strings.TrimPrefix(m.Content, "faucet-referral ")
+	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") || strings.Contains(strings.ToLower(m.Content), "faucet") {
+		msg := "Hi, faucet and referral campanig for testnet2 is closes now!\nCheck this post:\nhttps://ptb.discord.com/channels/795592769300987944/811878389304655892/1192018704855220234"
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+		// 	trimmedPrefix := strings.TrimPrefix(m.Content, "faucet-referral ")
 
-		Params := strings.Split(trimmedPrefix, " ")
-		if len(Params) != 2 {
-			msg := p.Sprintf("Invalid parameters, referral code is missed!")
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+		// 	Params := strings.Split(trimmedPrefix, " ")
+		// 	if len(Params) != 2 {
+		// 		msg := p.Sprintf("Invalid parameters, referral code is missed!")
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 		return
+		// 	}
 
-		address := Params[0]
-		referralCode := Params[1]
+		// 	address := Params[0]
+		// 	referralCode := Params[1]
 
-		peerID, pubKey, isValid, msg := b.validateInfo(address, m.Author.ID)
+		// 	peerID, pubKey, isValid, msg := b.validateInfo(address, m.Author.ID)
 
-		msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
-			msg, m.Author.Username, address)
+		// 	msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
+		// 		msg, m.Author.Username, address)
 
-		if !isValid {
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+		// 	if !isValid {
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 		return
+		// 	}
 
-		// validate referral.
-		referral, found := b.referralStore.GetData(referralCode)
-		if !found {
-			msg := p.Sprintf("*Invalid* referral!")
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+		// 	// validate referral.
+		// 	referral, found := b.referralStore.GetData(referralCode)
+		// 	if !found {
+		// 		msg := p.Sprintf("*Invalid* referral!")
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 		return
+		// 	}
 
-		if referral.DiscordID == m.Author.ID {
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Sorry, You can't be your own referral😔", m.Reference())
-			return
-		}
+		// 	if referral.DiscordID == m.Author.ID {
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, "Sorry, You can't be your own referral😔", m.Reference())
+		// 		return
+		// 	}
 
-		if pubKey != "" {
-			// check available balance
-			balance := b.faucetWallet.GetBalance()
-			if balance.Available < b.cfg.FaucetAmount {
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later please😔.", m.Reference())
-				return
-			}
+		// 	if pubKey != "" {
+		// 		// check available balance
+		// 		balance := b.faucetWallet.GetBalance()
+		// 		if balance.Available < b.cfg.FaucetAmount {
+		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later please😔.", m.Reference())
+		// 			return
+		// 		}
 
-			amount := b.cfg.ReferralerStakeAmount
-			ok := b.referralStore.AddPoint(referralCode)
-			if !ok {
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Can't update referral data. please  try again later.", m.Reference())
-				return
-			}
+		// 		amount := b.cfg.ReferralerStakeAmount
+		// 		ok := b.referralStore.AddPoint(referralCode)
+		// 		if !ok {
+		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Can't update referral data. please  try again later.", m.Reference())
+		// 			return
+		// 		}
 
-			// send faucet
-			memo := fmt.Sprintf("pactus faucet ref:%v", referral.DiscordID)
-			txHashFaucet, err := b.faucetWallet.BondTransaction(pubKey, address, amount, memo)
-			if err != nil {
-				msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-				return
-			}
+		// 		// send faucet
+		// 		memo := fmt.Sprintf("pactus faucet ref:%v", referral.DiscordID)
+		// 		txHashFaucet, err := b.faucetWallet.BondTransaction(pubKey, address, amount, memo)
+		// 		if err != nil {
+		// 			msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
+		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 			return
+		// 		}
 
-			err = b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, referral.DiscordID, amount)
-			if err != nil {
-				log.Printf("error saving faucet information: %v\n", err)
-			}
+		// 		err = b.store.SetData(peerID, address, m.Author.Username, m.Author.ID, referral.DiscordID, amount)
+		// 		if err != nil {
+		// 			log.Printf("error saving faucet information: %v\n", err)
+		// 		}
 
-			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\n with %v as referral.\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
-				m.Author.Username, amount, address, referral.DiscordName, txHashFaucet)
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
+		// 		msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\n with %v as referral.\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
+		// 			m.Author.Username, amount, address, referral.DiscordName, txHashFaucet)
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 		return
 
-		}
-	} else if strings.Contains(strings.ToLower(m.Content), "faucet") {
-		trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
-		// faucet message must contain address/public-key
-		trimmedAddress := strings.Trim(trimmedPrefix, " ")
-		peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
+		// 	}
+		// } else if strings.Contains(strings.ToLower(m.Content), "faucet") {
+		// 	trimmedPrefix := strings.TrimPrefix(strings.ToLower(m.Content), "faucet")
+		// 	// faucet message must contain address/public-key
+		// 	trimmedAddress := strings.Trim(trimmedPrefix, " ")
+		// 	peerID, pubKey, isValid, msg := b.validateInfo(trimmedAddress, m.Author.ID)
 
-		msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
-			msg, m.Author.Username, trimmedAddress)
+		// 	msg = fmt.Sprintf("%v\ndiscord: %v\naddress: %v",
+		// 		msg, m.Author.Username, trimmedAddress)
 
-		if !isValid {
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+		// 	if !isValid {
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 		return
+		// 	}
 
-		if pubKey != "" {
-			// check available balance
-			balance := b.faucetWallet.GetBalance()
-			if balance.Available < b.cfg.FaucetAmount {
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
-				return
-			}
+		// 	if pubKey != "" {
+		// 		// check available balance
+		// 		balance := b.faucetWallet.GetBalance()
+		// 		if balance.Available < b.cfg.FaucetAmount {
+		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, "Insufficient faucet balance. Try again later.", m.Reference())
+		// 			return
+		// 		}
 
-			// send faucet
-			memo := "pactus faucet"
-			txHash, err := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount, memo)
-			if err != nil {
-				msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
-				_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-				return
-			}
+		// 		// send faucet
+		// 		memo := "pactus faucet"
+		// 		txHash, err := b.faucetWallet.BondTransaction(pubKey, trimmedAddress, b.cfg.FaucetAmount, memo)
+		// 		if err != nil {
+		// 			msg := p.Sprintf("error while sending bond transaction: %w", err.Error())
+		// 			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 			return
+		// 		}
 
-			err = b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, "", b.cfg.FaucetAmount)
-			if err != nil {
-				log.Printf("error saving faucet information: %v\n", err)
-			}
-			msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
-				m.Author.Username, b.cfg.FaucetAmount, trimmedAddress, txHash)
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		// 		err = b.store.SetData(peerID, trimmedAddress, m.Author.Username, m.Author.ID, "", b.cfg.FaucetAmount)
+		// 		if err != nil {
+		// 			log.Printf("error saving faucet information: %v\n", err)
+		// 		}
+		// 		msg := p.Sprintf("%v  %.4f tPAC's is staked to %v successfully🪙!\nYour transaction:\nhttps://pacscan.org/transactions/%v/",
+		// 			m.Author.Username, b.cfg.FaucetAmount, trimmedAddress, txHash)
+		// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 
-		}
+		// 	}
 	}
 
 	if strings.Contains(strings.ToLower(m.Content), "tx-data") {
@@ -387,70 +390,70 @@ func help(s *discordgo.Session, m *discordgo.MessageCreate) {
 	})
 }
 
-func (b *Bot) validateInfo(address, discordID string) (string, string, bool, string) {
-	_, err := crypto.AddressFromString(address)
-	if err != nil {
-		log.Printf("invalid address")
-		return "", "", false, "Pactus Universal Robot is unable to handle your request.❌" +
-			" If you are requesting testing faucet, supply the valid address."
-	}
+// func (b *Bot) validateInfo(address, discordID string) (string, string, bool, string) {
+// 	_, err := crypto.AddressFromString(address)
+// 	if err != nil {
+// 		log.Printf("invalid address")
+// 		return "", "", false, "Pactus Universal Robot is unable to handle your request.❌" +
+// 			" If you are requesting testing faucet, supply the valid address."
+// 	}
 
-	// check if the user is existing
-	v, exists := b.store.FindDiscordID(discordID)
-	if exists {
-		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
-	}
+// 	// check if the user is existing
+// 	v, exists := b.store.FindDiscordID(discordID)
+// 	if exists {
+// 		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
+// 	}
 
-	// check if the address exists in the list of validators
-	isValidator, err := b.cm.IsValidator(address)
-	if err != nil {
-		return "", "", false, err.Error()
-	}
+// 	// check if the address exists in the list of validators
+// 	isValidator, err := b.cm.IsValidator(address)
+// 	if err != nil {
+// 		return "", "", false, err.Error()
+// 	}
 
-	if isValidator {
-		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again.❌"
-	}
+// 	if isValidator {
+// 		return "", "", false, "Sorry. Your address is in the list of active validators. You do not need faucet again.❌"
+// 	}
 
-	peerInfo, pub, err := b.cm.GetPeerInfo(address)
-	if err != nil {
-		return "", "", false, err.Error()
-	}
-	if pub == nil {
-		log.Printf("error getting peer info")
-		return "", "", false, "Your node information could not obtained.❌" +
-			" Make sure your node is fully synced before requesting the faucet.🛜"
-	}
+// 	peerInfo, pub, err := b.cm.GetPeerInfoFirstVal(address)
+// 	if err != nil {
+// 		return "", "", false, err.Error()
+// 	}
+// 	if pub == nil {
+// 		log.Printf("error getting peer info")
+// 		return "", "", false, "Your node information could not obtained.❌" +
+// 			" Make sure your node is fully synced before requesting the faucet.🛜"
+// 	}
 
-	// check if the validator has already been given the faucet
-	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
-	if err != nil {
-		return "", "", false, err.Error()
-	}
-	if peerID.String() == "" {
-		log.Printf("error getting peer id")
-		return "", "", false, "Your node information could not obtained.❌" +
-			" Make sure your node is fully synced before requesting the faucet.🛜"
-	}
-	v, exists = b.store.GetData(peerID.String())
-	if exists || v != nil {
-		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
-	}
+// 	// check if the validator has already been given the faucet
+// 	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
+// 	if err != nil {
+// 		return "", "", false, err.Error()
+// 	}
+// 	if peerID.String() == "" {
+// 		log.Printf("error getting peer id")
+// 		return "", "", false, "Your node information could not obtained.❌" +
+// 			" Make sure your node is fully synced before requesting the faucet.🛜"
+// 	}
+// 	v, exists = b.store.GetData(peerID.String())
+// 	if exists || v != nil {
+// 		return "", "", false, "Sorry. You already received faucet using this address: " + v.ValidatorAddress
+// 	}
 
-	// check block height
-	// height, err := cl.GetBlockchainHeight()
-	// if err != nil {
-	// 	log.Printf("error current block height")
-	// 	return "", "", false, "The bot cannot establish connection to the blockchain network. Try again later."
-	// }
-	// if (height - peerInfo.Height) > 1080 {
-	//	msg := fmt.Sprintf("Your node is not fully synchronized. It is is behind by %v blocks." +
-	//		" Make sure that your node is fully synchronized before requesting faucet.", (height - peerInfo.Height))
+// 	// check block height
+// 	// height, err := cl.GetBlockchainHeight()
+// 	// if err != nil {
+// 	// 	log.Printf("error current block height")
+// 	// 	return "", "", false, "The bot cannot establish connection to the blockchain network. Try again later."
+// 	// }
+// 	// if (height - peerInfo.Height) > 1080 {
+// 	//	msg := fmt.Sprintf("Your node is not fully synchronized. It is is behind by %v blocks." +
+// 	//		" Make sure that your node is fully synchronized before requesting faucet.", (height - peerInfo.Height))
 
-	// 	log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
-	// 	return "", "", false, msg
-	// }
-	return peerID.String(), pub.String(), true, ""
-}
+// 	// 	log.Printf("peer %s with address %v is not well synced: ", peerInfo.PeerId, address)
+// 	// 	return "", "", false, msg
+// 	// }
+// 	return peerID.String(), pub.String(), true, ""
+// }
 
 func (b *Bot) networkInfo() string {
 	msg := "Pactus is truly decentralized Proof of Stake Blockchain.⛓️"
@@ -490,7 +493,7 @@ func (b *Bot) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 		return nil, err
 	}
 
-	peerInfo, _, err := b.cm.GetPeerInfo(address)
+	peerInfo, _, err := b.cm.GetPeerInfoFirstVal(address)
 	if err != nil {
 		return nil, err
 	}
