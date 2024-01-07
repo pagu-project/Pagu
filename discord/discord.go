@@ -172,7 +172,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			score = fmt.Sprintf("%v🟢✅", val.Validator.AvailabilityScore)
 		}
 
-		msg := p.Sprintf("Peer info\n")
+		msg := p.Sprintf("--------------------Peer Info--------------------\n")
 		msg += p.Sprintf("Peer ID: %v\n", peerID)
 		msg += p.Sprintf("IP address: %v\n", peerInfo.Address)
 		msg += p.Sprintf("Agent: %v\n", peerInfo.Agent)
@@ -185,7 +185,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		msg += p.Sprintf("--------------------Validator Info----------------\n")
 		msg += p.Sprintf("Number: %v\n", val.Validator.Number)
 		msg += p.Sprintf("**Availability score: %v\n**", score)
-		msg += p.Sprintf("**Stake amount: %v tPAC's\n**", util.ChangeToCoin(val.Validator.Stake))
+		msg += p.Sprintf("Stake amount: %v tPAC's\n", util.ChangeToCoin(val.Validator.Stake))
 		msg += p.Sprintf("Last bonding height: %v\n", val.Validator.LastBondingHeight)
 		msg += p.Sprintf("Last sortition height: %v\n", val.Validator.LastSortitionHeight)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
