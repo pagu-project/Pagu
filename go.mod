@@ -7,7 +7,7 @@ require (
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/libp2p/go-libp2p v0.32.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
-	github.com/pactus-project/pactus v0.19.0
+	github.com/pactus-project/pactus v0.19.1-0.20240107131502-acb2217f2508
 	github.com/yudai/pp v2.0.1+incompatible
 	golang.org/x/text v0.14.0
 	google.golang.org/grpc v1.58.3
@@ -45,6 +45,6 @@ require (
 	golang.org/x/sys v0.15.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230911183012-2d3300fd4832 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230911183012-2d3300fd4832 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 )
