@@ -168,7 +168,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			score = fmt.Sprintf("%v⚠️⚠️", val.Validator.AvailabilityScore)
 		}
 
-		if val.Validator.AvailabilityScore > 0.8 {
+		if val.Validator.AvailabilityScore >= 0.8 {
 			score = fmt.Sprintf("%v🟢✅", val.Validator.AvailabilityScore)
 		}
 
