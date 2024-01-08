@@ -115,9 +115,9 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.ToLower(m.Content) == "health" {
-		currentTime := time.Now()
 		lastBlockTime, LastBlockHeight := b.cm.GetLastBlockTime()
 		lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
+		currentTime := time.Now()
 
 		timeDiff := (currentTime.Unix() - int64(lastBlockTime))
 		if timeDiff > 15 {
