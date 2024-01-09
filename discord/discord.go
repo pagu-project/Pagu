@@ -269,7 +269,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		results := []Result{}
 
-
 		info, err := b.cm.GetNetworkInfo()
 		if err != nil {
 			msg := "error getting network info"
@@ -278,6 +277,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		for _, p := range info.ConnectedPeers {
+			fmt.Println("new peer")
 			r := Result{}
 			r.Agent = p.Agent
 			r.RemoteAddress = p.Address
@@ -286,6 +286,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				r.IsActive = false
 			}
 			for _, v := range p.ConsensusKeys {
+				fmt.Println("new validator")
 				val, err := b.cm.GetValidatorInfo(v)
 				if err != nil {
 					continue
