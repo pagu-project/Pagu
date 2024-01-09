@@ -1,8 +1,10 @@
 package discord
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -255,6 +257,47 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") || strings.Contains(strings.ToLower(m.Content), "faucet") {
 		msg := "Hi, faucet and referral campaign for testnet-2 is closed now!\nCheck this post:\nhttps://ptb.discord.com/channels/795592769300987944/811878389304655892/1192018704855220234"
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+	}
+
+	if m.Content == "pip19-report" {
+		t := time.Now()
+
+		total := float64(0)
+		scoresSum := float64(0)
+
+		results := []Result{}
+
+		for i := 0; i < 2030; i++ {
+			val, err := b.cm.GetValidatorInfoByNumber(int32(i))
+			if err != nil {
+				continue
+			}
+			result := Result{
+				ValidatorAddress: val.Validator.Address,
+				PIP19Score:       val.Validator.AvailabilityScore,
+			}
+
+			results = append(results, result)
+			total += 1
+			scoresSum += val.Validator.AvailabilityScore
+		}
+
+		data, err := json.Marshal(results)
+		if err != nil {
+			msg := "error saving report"
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		if err = os.WriteFile("pip19Report.json", data, 0o600); err != nil {
+			msg := "error saving report"
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		msg := fmt.Sprintf("time:%v\n avg:%.10f", t.Unix(), scoresSum/total)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
