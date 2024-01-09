@@ -1,10 +1,8 @@
 package discord
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"time"
 
@@ -257,61 +255,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.Contains(strings.ToLower(m.Content), "faucet-referral") || strings.Contains(strings.ToLower(m.Content), "faucet") {
 		msg := "Hi, faucet and referral campaign for testnet-2 is closed now!\nCheck this post:\nhttps://ptb.discord.com/channels/795592769300987944/811878389304655892/1192018704855220234"
-		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		return
-	}
-
-	if m.Content == "pip19-report" {
-		t := time.Now()
-
-		total := float64(0)
-		scoresSum := float64(0)
-
-		results := []Result{}
-
-		info, err := b.cm.GetNetworkInfo()
-		if err != nil {
-			msg := "error getting network info"
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
-
-		for _, p := range info.ConnectedPeers {
-			fmt.Println("new peer")
-			r := Result{}
-			r.Agent = p.Agent
-			r.RemoteAddress = p.Address
-			r.IsActive = true
-			if p.Height < 673_000 {
-				r.IsActive = false
-			}
-			for _, v := range p.ConsensusKeys {
-				fmt.Println("new validator")
-				val, err := b.cm.GetValidatorInfo(v)
-				if err != nil {
-					continue
-				}
-				r.PIP19Score = val.Validator.AvailabilityScore
-				r.ValidatorAddress = v
-
-				results = append(results, r)
-			}
-		}
-
-		data, err := json.Marshal(results)
-		if err != nil {
-			msg := "error saving report"
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
-
-		if err = os.WriteFile("pip19Report.json", data, 0o600); err != nil {
-			msg := "error saving report"
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
-
-		msg := fmt.Sprintf("time:%v\n avg:%.10f", t.Unix(), scoresSum/total)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
