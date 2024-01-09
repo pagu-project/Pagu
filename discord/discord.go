@@ -287,8 +287,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if p.Height < 673_000 {
 				r.IsActive = false
 			}
-			for _, v := range p.ConsensusKeys {
-				fmt.Printf("new validator %v\n", i)
+			for iv, v := range p.ConsensusKeys {
+				fmt.Printf("new validator %v\n", iv)
 				val, err := b.cm.GetValidatorInfo(v)
 				if err != nil {
 					continue
