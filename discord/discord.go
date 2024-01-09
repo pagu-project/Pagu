@@ -1,11 +1,8 @@
 package discord
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"math/big"
-	"os"
 	"strings"
 	"time"
 
@@ -262,64 +259,64 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Content == "pip19-report" {
-		t := time.Now()
+	// if m.Content == "pip19-report" {
+	// 	t := time.Now()
 
-		total := big.NewFloat(0)
-		scoresSum := big.NewFloat(0)
+	// 	total := big.NewFloat(0)
+	// 	scoresSum := big.NewFloat(0)
 
-		results := make([]Result, 2000)
+	// 	results := make([]Result, 2000)
 
-		info, err := b.cm.GetNetworkInfo()
-		if err != nil {
-			msg := "error getting network info"
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+	// 	info, err := b.cm.GetNetworkInfo()
+	// 	if err != nil {
+	// 		msg := "error getting network info"
+	// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+	// 		return
+	// 	}
 
-		fmt.Printf("total peers: %v\n", info.ConnectedPeersCount)
+	// 	fmt.Printf("total peers: %v\n", info.ConnectedPeersCount)
 
-		for i, p := range info.ConnectedPeers {
-			fmt.Printf("new peer %v\n", i)
-			r := Result{}
-			r.Agent = p.Agent
-			r.RemoteAddress = p.Address
-			r.IsActive = true
-			if p.Height < 673_000 {
-				r.IsActive = false
-			}
-			for iv, v := range p.ConsensusKeys {
-				fmt.Printf("new validator %v\n", iv)
-				val, err := b.cm.GetValidatorInfo(v)
-				if err != nil {
-					continue
-				}
-				r.PIP19Score = val.Validator.AvailabilityScore
-				r.ValidatorAddress = v
+	// 	for i, p := range info.ConnectedPeers {
+	// 		fmt.Printf("new peer %v\n", i)
+	// 		r := Result{}
+	// 		r.Agent = p.Agent
+	// 		r.RemoteAddress = p.Address
+	// 		r.IsActive = true
+	// 		if p.Height < 673_000 {
+	// 			r.IsActive = false
+	// 		}
+	// 		for iv, v := range p.ConsensusKeys {
+	// 			fmt.Printf("new validator %v\n", iv)
+	// 			val, err := b.cm.GetValidatorInfo(v)
+	// 			if err != nil {
+	// 				continue
+	// 			}
+	// 			r.PIP19Score = val.Validator.AvailabilityScore
+	// 			r.ValidatorAddress = v
 
-				results = append(results, r)
-				total = total.Abs(big.NewFloat(1))
-				scoresSum = scoresSum.Abs(big.NewFloat(val.Validator.AvailabilityScore))
-			}
-		}
+	// 			results = append(results, r)
+	// 			total = total.Abs(big.NewFloat(1))
+	// 			scoresSum = scoresSum.Abs(big.NewFloat(val.Validator.AvailabilityScore))
+	// 		}
+	// 	}
 
-		data, err := json.Marshal(results)
-		if err != nil {
-			msg := "error saving report"
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+	// 	data, err := json.Marshal(results)
+	// 	if err != nil {
+	// 		msg := "error saving report"
+	// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+	// 		return
+	// 	}
 
-		if err = os.WriteFile("pip19Report.json", data, 0o600); err != nil {
-			msg := "error saving report"
-			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-			return
-		}
+	// 	if err = os.WriteFile("pip19Report.json", data, 0o600); err != nil {
+	// 		msg := "error saving report"
+	// 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+	// 		return
+	// 	}
 
-		msg := fmt.Sprintf("time:%v\n avg:%v", t.Format("15:04:05"), new(big.Float).Quo(scoresSum, total))
-		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
-		return
-	}
+	// 	msg := fmt.Sprintf("time:%v\n avg:%v", t.Format("15:04:05"), new(big.Float).Quo(scoresSum, total))
+	// 	_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+	// 	return
+	// }
 }
 
 // help sends a message detailing how to use the bot discord-client side
