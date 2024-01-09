@@ -259,6 +259,24 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if m.Content == "pip19-score-average" {
+		totalValidators := float64(0)
+		sumScores := float64(0)
+
+		for i := 0; i < 3_000; i++ {
+			val, err := b.cm.GetValidatorInfoByNumber(int32(i))
+			if err != nil {
+				continue
+			}
+			totalValidators += 1
+			sumScores += val.Validator.AvailabilityScore
+		}
+
+		msg := fmt.Sprintf("average of %v validators pip19 score is %f", totalValidators, sumScores/totalValidators)
+		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+		return
+	}
+
 	// if m.Content == "pip19-report" {
 	// 	t := time.Now()
 
