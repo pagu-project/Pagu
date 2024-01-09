@@ -269,19 +269,32 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		results := []Result{}
 
-		for i := 0; i < 2030; i++ {
-			val, err := b.cm.GetValidatorInfoByNumber(int32(i))
-			if err != nil {
-				continue
-			}
-			result := Result{
-				ValidatorAddress: val.Validator.Address,
-				PIP19Score:       val.Validator.AvailabilityScore,
-			}
 
-			results = append(results, result)
-			total += 1
-			scoresSum += val.Validator.AvailabilityScore
+		info, err := b.cm.GetNetworkInfo()
+		if err != nil {
+			msg := "error getting network info"
+			_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
+			return
+		}
+
+		for _, p := range info.ConnectedPeers {
+			r := Result{}
+			r.Agent = p.Agent
+			r.RemoteAddress = p.Address
+			r.IsActive = true
+			if p.Height < 673_000 {
+				r.IsActive = false
+			}
+			for _, v := range p.ConsensusKeys {
+				val, err := b.cm.GetValidatorInfo(v)
+				if err != nil {
+					continue
+				}
+				r.PIP19Score = val.Validator.AvailabilityScore
+				r.ValidatorAddress = v
+
+				results = append(results, r)
+			}
 		}
 
 		data, err := json.Marshal(results)
