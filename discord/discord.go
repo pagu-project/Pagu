@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
 	"os"
 	"strings"
 	"time"
@@ -264,10 +265,10 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "pip19-report" {
 		t := time.Now()
 
-		total := float64(0)
-		scoresSum := float64(0)
+		total := big.NewFloat(0)
+		scoresSum := big.NewFloat(0)
 
-		results := []Result{}
+		results := make([]Result, 2000)
 
 		info, err := b.cm.GetNetworkInfo()
 		if err != nil {
@@ -297,8 +298,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				r.ValidatorAddress = v
 
 				results = append(results, r)
-				total += 1
-				scoresSum += val.Validator.AvailabilityScore
+				total = total.Abs(big.NewFloat(1))
+				scoresSum = scoresSum.Abs(big.NewFloat(val.Validator.AvailabilityScore))
 			}
 		}
 
@@ -315,7 +316,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := fmt.Sprintf("time:%v\n avg:%v", t.Format("02/01/2006, 15:04:05"), scoresSum/total)
+		msg := fmt.Sprintf("time:%v\n avg:%v", t.Format("15:04:05"), new(big.Float).Quo(scoresSum, total))
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
