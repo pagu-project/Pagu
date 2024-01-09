@@ -263,13 +263,14 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		totalValidators := float64(0)
 		sumScores := float64(0)
 
-		for i := 0; i < 3_000; i++ {
+		for i := 0; i < 2065; i++ {
 			val, err := b.cm.GetValidatorInfoByNumber(int32(i))
 			if err != nil {
 				continue
 			}
 			totalValidators += 1
 			sumScores += val.Validator.AvailabilityScore
+			fmt.Print(i)
 		}
 
 		msg := fmt.Sprintf("average of %v validators pip19 score is %f", totalValidators, sumScores/totalValidators)
