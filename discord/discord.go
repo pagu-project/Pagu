@@ -283,11 +283,11 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "pip19-report" {
 		t := time.Now()
 
-		total := float64(0)
+		totalActiveValidators := 0
 		scoresSum := float64(0)
-		totalDeactive := 0
+		notActiveNodes := 0
 
-		results := make([]Result, 0)
+		results := []Result{}
 
 		info, err := b.cm.GetNetworkInfo()
 		if err != nil {
@@ -305,7 +305,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			r.RemoteAddress = p.Address
 			if p.Height < 682_000 {
 				fmt.Printf("new peer %v is not active\n", i)
-				totalDeactive += 1
+				notActiveNodes += 1
 				continue
 			}
 			for iv, v := range p.ConsensusKeys {
@@ -318,7 +318,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				r.ValidatorAddress = v
 
 				results = append(results, r)
-				total += 1
+				totalActiveValidators += 1
 				scoresSum += val.Validator.AvailabilityScore
 			}
 		}
@@ -336,8 +336,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := fmt.Sprintf("Time:%v\n Average Score:%v\nNot Active Nodes: %v\nActive Nodes:%v\nTotal Nodes:%v\n",
-			t.Format("15:04:05"), scoresSum/total, totalDeactive, total, info.ConnectedPeersCount)
+		msg := fmt.Sprintf("Time: %v\nSum Scores: %v\nNot Active Nodes: %v\nActive Validators: %v\nTotal Nodes: %v\n",
+			t.Format("04:05"), scoresSum, notActiveNodes, totalActiveValidators, info.ConnectedPeersCount)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
