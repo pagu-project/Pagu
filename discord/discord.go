@@ -299,7 +299,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Printf("total peers: %v\n", info.ConnectedPeersCount)
 
 		for i, p := range info.ConnectedPeers {
-			if i > 300 {
+			if i > 100 {
 				continue
 			}
 			fmt.Printf("new peer %v\n", i)
