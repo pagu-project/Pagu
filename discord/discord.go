@@ -312,6 +312,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				fmt.Printf("new validator %v\n", iv)
 				val, err := b.cm.GetValidatorInfo(v)
 				if err != nil {
+					fmt.Println(err)
 					continue
 				}
 				r.PIP19Score = val.Validator.AvailabilityScore
