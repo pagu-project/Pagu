@@ -15,6 +15,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/pactus-project/pactus/crypto"
+	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/util"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"golang.org/x/text/language"
@@ -287,7 +288,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		scoresSum := float64(0)
 		notActiveNodes := 0
 
-		results := *new([]Result)
+		results := []Result{}
 
 		info, err := b.cm.GetNetworkInfo()
 		if err != nil {
@@ -308,22 +309,26 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				notActiveNodes += 1
 				continue
 			}
-			for iv, v := range p.ConsensusKeys {
-				fmt.Printf("new validator %v\n", iv)
-				val, err := b.cm.GetValidatorInfo(v)
-				if err != nil {
-					fmt.Println(err)
+			for iv, key := range p.ConsensusKeys {
+				pub, _ := bls.PublicKeyFromString(key)
+				if pub != nil {
+					fmt.Printf("new validator %v\n", iv)
+					val, err := b.cm.GetValidatorInfo(pub.ValidatorAddress().String())
+					if err != nil {
+						fmt.Println(err)
+						continue
+					}
+					r.PIP19Score = val.Validator.AvailabilityScore
+					r.ValidatorAddress = key
+
+					results = append(results, r)
+					totalActiveValidators++
+					scoresSum += val.Validator.AvailabilityScore
+					fmt.Println(scoresSum)
+					fmt.Println(totalActiveValidators)
+				} else {
 					continue
 				}
-				r.PIP19Score = val.Validator.AvailabilityScore
-				r.ValidatorAddress = v
-
-				results = append(results, r)
-				fmt.Println(results)
-				totalActiveValidators = totalActiveValidators + 1
-				scoresSum = scoresSum + val.Validator.AvailabilityScore
-				fmt.Println(scoresSum)
-				fmt.Println(totalActiveValidators)
 			}
 		}
 
