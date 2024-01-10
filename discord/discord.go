@@ -286,7 +286,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		totalActiveValidators := 0
 		scoresSum := float64(0)
-		notActiveNodes := 0
+		notActiveValidators := 0
 
 		results := []Result{}
 
@@ -304,11 +304,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			r := Result{}
 			r.Agent = p.Agent
 			r.RemoteAddress = p.Address
-			if p.Height < 682_000 {
-				fmt.Printf("new peer %v is not active\n", i)
-				notActiveNodes += 1
-				continue
-			}
 			for iv, key := range p.ConsensusKeys {
 				pub, _ := bls.PublicKeyFromString(key)
 				if pub != nil {
@@ -318,14 +313,23 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 						fmt.Println(err)
 						continue
 					}
+
+					if val.Validator.LastSortitionHeight <= (684_400 - 60480) {
+						fmt.Printf("validator %v is not active", iv)
+						r.IsActive = false
+						r.ValidatorAddress = key
+						notActiveValidators++
+						results = append(results, r)
+						continue
+					}
+
 					r.PIP19Score = val.Validator.AvailabilityScore
 					r.ValidatorAddress = key
 
+					r.IsActive = true
 					results = append(results, r)
 					totalActiveValidators++
 					scoresSum += val.Validator.AvailabilityScore
-					fmt.Println(scoresSum)
-					fmt.Println(totalActiveValidators)
 				} else {
 					continue
 				}
@@ -345,8 +349,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := fmt.Sprintf("Time: %v\nSum Scores: %v\nNot Active Nodes: %v\nActive Validators: %v\nTotal Nodes: %v\nAverage of Scores: %v\n",
-			t.Format("04:05"), scoresSum, notActiveNodes, totalActiveValidators, info.ConnectedPeersCount, scoresSum/float64(totalActiveValidators))
+		msg := fmt.Sprintf("Time: %v\nSum Scores: %v\nNot Active Validators: %v\nActive Validators: %v\nTotal Nodes: %v\nAverage of Scores: %v\n",
+			t.Format("04:05"), scoresSum, notActiveValidators, totalActiveValidators, info.ConnectedPeersCount, scoresSum/float64(totalActiveValidators))
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
