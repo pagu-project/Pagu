@@ -287,7 +287,7 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		scoresSum := float64(0)
 		notActiveNodes := 0
 
-		results := []Result{}
+		results := *new([]Result)
 
 		info, err := b.cm.GetNetworkInfo()
 		if err != nil {
@@ -321,6 +321,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				fmt.Println(results)
 				totalActiveValidators = totalActiveValidators + 1
 				scoresSum = scoresSum + val.Validator.AvailabilityScore
+				fmt.Println(scoresSum)
+				fmt.Println(totalActiveValidators)
 			}
 		}
 
