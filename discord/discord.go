@@ -340,8 +340,8 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		msg := fmt.Sprintf("Time: %v\nSum Scores: %v\nNot Active Nodes: %v\nActive Validators: %v\nTotal Nodes: %v\n",
-			t.Format("04:05"), scoresSum, notActiveNodes, totalActiveValidators, info.ConnectedPeersCount)
+		msg := fmt.Sprintf("Time: %v\nSum Scores: %v\nNot Active Nodes: %v\nActive Validators: %v\nTotal Nodes: %v\nAverage of Scores: %v\n",
+			t.Format("04:05"), scoresSum, notActiveNodes, totalActiveValidators, info.ConnectedPeersCount, scoresSum/float64(totalActiveValidators))
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, msg, m.Reference())
 		return
 	}
