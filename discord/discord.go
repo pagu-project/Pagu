@@ -299,9 +299,6 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Printf("total peers: %v\n", info.ConnectedPeersCount)
 
 		for i, p := range info.ConnectedPeers {
-			if i > 100 {
-				continue
-			}
 			fmt.Printf("new peer %v\n", i)
 			r := Result{}
 			r.Agent = p.Agent
@@ -321,8 +318,9 @@ func (b *Bot) messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				r.ValidatorAddress = v
 
 				results = append(results, r)
-				totalActiveValidators += 1
-				scoresSum += val.Validator.AvailabilityScore
+				fmt.Println(results)
+				totalActiveValidators = totalActiveValidators + 1
+				scoresSum = scoresSum + val.Validator.AvailabilityScore
 			}
 		}
 
