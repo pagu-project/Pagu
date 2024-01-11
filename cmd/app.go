@@ -1,13 +1,13 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/kehiy/RoboPac/config"
-	"github.com/kehiy/RoboPac/discord"
+	"github.com/kehiy/RoboPac/engine"
+	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/wallet"
 )
 
@@ -16,7 +16,7 @@ func main() {
 	// load configuration
 	cfg, err := config.Load(configPath)
 	if err != nil {
-		log.Printf("error loading configuration %v\n", err)
+		log.Panic("error loading configuration %v\n", err)
 		return
 	}
 
@@ -24,40 +24,23 @@ func main() {
 	w := wallet.Open(cfg)
 
 	if w == nil {
-		log.Println("faucet wallet could not be opened")
+		log.Panic("faucet wallet could not be opened")
 		return
 	}
 
-	// load list of validators already received faucet
-	ss, err := discord.LoadData(cfg)
+	sl := log.NewSubLogger("engine")
+
+	// start be engine
+	be, err := discord.Start(sl, cfg, w)
 	if err != nil {
-		log.Println(err)
+		log.Panic("could not start discord bot: %v\n", err)
 		return
 	}
-
-	// load list of validators already received faucet
-	rs, err := discord.LoadReferralData(cfg)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	///start discord bot
-	bot, err := discord.Start(cfg, w, ss, rs)
-	if err != nil {
-		log.Printf("could not start discord bot: %v\n", err)
-		return
-	}
-
-	// Wait here until CTRL-C or other terms signal is received.
-	log.Println("Pactus Universal Robot is now running...!")
-	log.Printf("The faucet address is: %v\n", cfg.FaucetAddress)
-	log.Printf("The maximum faucet amount is : %.4f\n", cfg.FaucetAmount)
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
 	// Cleanly close down the Discord session.
-	_ = bot.Stop()
+	be.Stop()
 }

@@ -31,6 +31,6 @@ check:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
 
 ### building
-discord-bot:
+build:
 	go build -o build/main cmd/app.go
         
