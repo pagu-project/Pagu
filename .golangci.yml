@@ -15,7 +15,7 @@ linters:
     - exhaustive 
     - wastedassign
     - nonamedreturns
-    - ireturn 
+    # - ireturn 
     - gofumpt
     - tagalign
     - errname

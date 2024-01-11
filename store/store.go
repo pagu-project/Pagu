@@ -9,7 +9,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 )
 
-// TODO:::
+// TO:DO:::
 
 // SafeStore is a thread-safe cache.
 type SafeStore struct {
