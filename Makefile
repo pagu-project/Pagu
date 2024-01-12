@@ -33,4 +33,3 @@ check:
 ### building
 build:
 	go build -o build/main cmd/app.go
-        
