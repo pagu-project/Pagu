@@ -11,20 +11,20 @@ import (
 
 // TO:DO:::
 
-// SafeStore is a thread-safe cache.
-type SafeStore struct {
+// Store is a thread-safe cache.
+type Store struct {
 	syncMap *sync.Map
 	cfg     *config.Config
 }
 
-func LoadStore(cfg *config.Config) (Store, error) {
+func LoadStore(cfg *config.Config) (IStore, error) {
 	file, err := os.ReadFile(cfg.StorePath)
 	if err != nil {
 		log.Printf("error loading validator data: %v", err)
 		return nil, fmt.Errorf("error loading data file: %w", err)
 	}
 	if len(file) == 0 {
-		ss := &SafeStore{
+		ss := &Store{
 			syncMap: &sync.Map{},
 			cfg:     cfg,
 		}
@@ -37,18 +37,18 @@ func LoadStore(cfg *config.Config) (Store, error) {
 	// 	return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
 	// }
 
-	ss := &SafeStore{
+	ss := &Store{
 		// syncMap: data,
 		cfg: cfg,
 	}
 	return ss, nil
 }
 
-func (s SafeStore) Set() bool {
+func (s *Store) Set() bool {
 	return true
 }
 
-func (s SafeStore) Get() {}
+func (s *Store) Get() {}
 
 // func marshalJSON(m *sync.Map) ([]byte, error) {
 // 	tmpMap := make(map[string]*Validator)

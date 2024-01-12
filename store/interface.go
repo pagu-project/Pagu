@@ -1,6 +1,6 @@
 package store
 
-type Store interface {
+type IStore interface {
 	Set() bool
-	Get()
+	Get() // how input and out put should be?
 }
