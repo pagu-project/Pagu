@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	DiscordToken   string   `json:"discord_token"`
+	DiscordGuildID string   `json:"discord_guild_id"`
 	WalletPath     string   `json:"wallet_path"`
 	WalletPassword string   `json:"wallet_password"`
 	RPCNodes       []string `json:"rpc_nodes"`
