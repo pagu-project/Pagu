@@ -1,4 +1,4 @@
-package discord
+package utils
 
 import (
 	"encoding/json"

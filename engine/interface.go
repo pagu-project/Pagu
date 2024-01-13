@@ -1,11 +1,11 @@
 package engine
 
 type Engine interface {
-	NetworkHealth([]string) (string, error)
-	NetworkData([]string) (string, error)
+	NetworkHealth([]string) (*NetHealthResponse, error)
+	NetworkStatus([]string) (*NetStatus, error)
+	NodeInfo([]string) (*NodeInfo, error)
 	MyInfo([]string) (string, error)
 	Withdraw([]string) (string, error)
-	NodeInfo([]string) (string, error)
 
 	Stop()
 }
