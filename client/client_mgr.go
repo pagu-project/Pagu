@@ -10,8 +10,8 @@ import (
 )
 
 func init() {
-	crypto.AddressHRP = "tpc"
-	crypto.PublicKeyHRP = "tpublic"
+	crypto.AddressHRP = "pc"
+	crypto.PublicKeyHRP = "public"
 }
 
 type Mgr struct {

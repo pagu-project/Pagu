@@ -1,63 +1,53 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/kehiy/RoboPac/config"
-	"github.com/kehiy/RoboPac/discord"
+	"github.com/kehiy/RoboPac/engine"
+	"github.com/kehiy/RoboPac/log"
+	"github.com/kehiy/RoboPac/store"
 	"github.com/kehiy/RoboPac/wallet"
 )
 
 func main() {
 	configPath := os.Args[1]
-	// load configuration
-	cfg, err := config.Load(configPath)
+
+	// load configuration.
+	config, err := config.Load(configPath)
 	if err != nil {
-		log.Printf("error loading configuration %v\n", err)
-		return
+		log.Panic("error loading configuration %v\n", err)
 	}
 
-	// load or create faucet wallet
-	w := wallet.Open(cfg)
-
-	if w == nil {
-		log.Println("faucet wallet could not be opened")
-		return
+	// load or create wallet.
+	wallet := wallet.Open(config)
+	if wallet == nil {
+		log.Panic("wallet could not be opened, wallet is nil", "path", config.WalletPath)
 	}
 
-	// load list of validators already received faucet
-	ss, err := discord.LoadData(cfg)
+	log.Info("wallet opened successfully", "address", wallet.Address())
+
+	// new subLogger for engine.
+	sl := log.NewSubLogger("engine")
+
+	// load store
+	store, err := store.LoadStore(config)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Panic("could not load store", "err", err, "path", config.StorePath)
 	}
 
-	// load list of validators already received faucet
-	rs, err := discord.LoadReferralData(cfg)
+	// start botEngine engine.
+	botEngine, err := engine.Start(sl, config, wallet, store)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Panic("could not start discord bot", "err", err)
 	}
 
-	///start discord bot
-	bot, err := discord.Start(cfg, w, ss, rs)
-	if err != nil {
-		log.Printf("could not start discord bot: %v\n", err)
-		return
-	}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sigChan
 
-	// Wait here until CTRL-C or other terms signal is received.
-	log.Println("Pactus Universal Robot is now running...!")
-	log.Printf("The faucet address is: %v\n", cfg.FaucetAddress)
-	log.Printf("The maximum faucet amount is : %.4f\n", cfg.FaucetAmount)
-
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sc
-
-	// Cleanly close down the Discord session.
-	_ = bot.Stop()
+	// gracefully shutdown the bot.
+	botEngine.Stop()
 }

@@ -3,10 +3,10 @@ linters:
     - errcheck
     - gosimple
     - govet
+    - godot
     - ineffassign
     - staticcheck
     - unused
-    # - gocognit
     - godox 
     - gocritic 
     - gci 
@@ -15,7 +15,6 @@ linters:
     - exhaustive 
     - wastedassign
     - nonamedreturns
-    - ireturn 
     - gofumpt
     - tagalign
     - errname

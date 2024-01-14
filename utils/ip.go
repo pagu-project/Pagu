@@ -1,4 +1,4 @@
-package discord
+package utils
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ type GeoIP struct {
 	ISP         string `json:"isp"`
 }
 
-func getGeoIP(ip string) *GeoIP {
+func GetGeoIP(ip string) *GeoIP {
 	geo := &GeoIP{}
 	res, err := http.Get("http://ip-api.com/json/" + ip)
 	if err != nil {

@@ -1,11 +1,10 @@
-<img alt="RoboPac" src="./media/images/robopac.png" width="150" />
+<p align="center">
+    <img alt="RoboPac" src="./media/robopac.png" width="150" height="150" />
+</p>
 
+# Pactus Bot Engine (RoboPac)
 
-# Pactus Discord Bot (RoboPac)
-
-Pactus Universal Robot is a universal robot that provides support and information about the Pactus Blockchain.
-
-These are the available commands: (a) help, (b) balance,  (c) address, (d) network, (e) faucet
+Pactus Bor Engine is a Robot that provides support and information about the Pactus Blockchain.
 
 
 ## Contributing
