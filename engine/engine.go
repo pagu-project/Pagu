@@ -76,14 +76,14 @@ func (be *BotEngine) NetworkStatus(_ []string) (*NetStatus, error) {
 	}, nil
 }
 
-func (be *BotEngine) MyInfo([]string) (string, error) {
+func (be *BotEngine) ClaimerInfo([]string) (string, error) {
 	be.RLock()
 	defer be.RUnlock()
 
 	return "not implemented", nil
 }
 
-func (be *BotEngine) Withdraw([]string) (string, error) {
+func (be *BotEngine) Claim([]string) (string, error) {
 	be.Lock()
 	defer be.Unlock()
 
