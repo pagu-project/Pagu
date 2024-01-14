@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
@@ -29,6 +30,19 @@ func main() {
 
 	log.Info("wallet opened successfully", "address", wallet.Address())
 
+	// starting client manager for RPC.
+	cm := client.NewClientMgr()
+
+	for _, rn := range config.RPCNodes {
+		c, err := client.NewClient(rn)
+		if err != nil {
+			log.Error("can't make new client.", "RPC Node address", rn)
+			continue
+		}
+		log.Info("connecting to RPC Node", "addr", rn)
+		cm.AddClient(rn, c)
+	}
+
 	// new subLogger for engine.
 	sl := log.NewSubLogger("engine")
 
@@ -39,7 +53,7 @@ func main() {
 	}
 
 	// start botEngine engine.
-	botEngine, err := engine.Start(sl, config, wallet, store)
+	botEngine, err := engine.NewBotEngine(sl, cm, wallet, store)
 	if err != nil {
 		log.Panic("could not start discord bot", "err", err)
 	}
@@ -50,4 +64,5 @@ func main() {
 
 	// gracefully shutdown the bot.
 	botEngine.Stop()
+	cm.Close()
 }

@@ -5,11 +5,10 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/kehiy/RoboPac/config"
 )
-
-// TO:DO:::
 
 // Store is a thread-safe cache.
 type Store struct {
@@ -44,11 +43,13 @@ func LoadStore(cfg *config.Config) (IStore, error) {
 	return ss, nil
 }
 
-func (s *Store) Set() bool {
-	return true
+func (s *Store) ClaimerInfo(discordID string) *Claimer {
+	return nil
 }
 
-func (s *Store) Get() {}
+func (s *Store) AddClaimTransaction(TxID string, Amount int64, Time time.Time, Data string) error {
+	return nil
+}
 
 // func marshalJSON(m *sync.Map) ([]byte, error) {
 // 	tmpMap := make(map[string]*Validator)

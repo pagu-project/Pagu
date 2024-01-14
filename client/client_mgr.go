@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -15,20 +16,20 @@ func init() {
 }
 
 type Mgr struct {
-	clients map[string]*Client
+	clients map[string]IClient
 }
 
 func NewClientMgr() *Mgr {
 	return &Mgr{
-		clients: make(map[string]*Client),
+		clients: make(map[string]IClient),
 	}
 }
 
-func (cm *Mgr) AddClient(addr string, c *Client) {
+func (cm *Mgr) AddClient(addr string, c IClient) {
 	cm.clients[addr] = c
 }
 
-func (cm *Mgr) GetRandomClient() *Client {
+func (cm *Mgr) GetRandomClient() IClient {
 	for _, c := range cm.clients {
 		return c
 	}
@@ -180,7 +181,7 @@ func (cm *Mgr) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorResponse
 func (cm *Mgr) Close() {
 	for addr, c := range cm.clients {
 		if err := c.Close(); err != nil {
-			fmt.Printf("error on closing client %s\n", addr)
+			log.Error("could not close connection to RPC node", "err", err, "RPCAddr", addr)
 		}
 	}
 }
