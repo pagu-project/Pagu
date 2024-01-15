@@ -16,10 +16,14 @@ devtools:
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install mvdan.cc/gofumpt@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1
+	go install go.uber.org/mock/mockgen@latest
 
-packages:
-	go mod tidy
+### mock
 
+mock:
+	mockgen -source=./client/interface.go -destination=./client/mock.go  -package=client
+	mockgen -source=./wallet/interface.go -destination=./wallet/mock.go  -package=wallet
+	mockgen -source=./store/interface.go  -destination=./store/mock.go   -package=store    
 
 ### Formatting, linting, and vetting
 fmt:

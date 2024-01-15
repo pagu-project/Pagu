@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type GeoIP struct {
@@ -12,6 +13,11 @@ type GeoIP struct {
 	City        string `json:"city"`
 	TimeZone    string `json:"timezone"`
 	ISP         string `json:"isp"`
+}
+
+func ExtractIPFromMultiAddr(multiAddr string) string {
+	parts := strings.Split(strings.Split(multiAddr, "/")[2], "/")
+	return parts[0]
 }
 
 func GetGeoIP(ip string) *GeoIP {

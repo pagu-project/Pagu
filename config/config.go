@@ -8,13 +8,17 @@ import (
 )
 
 type Config struct {
-	DiscordToken   string   `json:"discord_token"`
-	DiscordGuildID string   `json:"discord_guild_id"`
-	WalletPath     string   `json:"wallet_path"`
-	WalletPassword string   `json:"wallet_password"`
-	RPCNodes       []string `json:"rpc_nodes"`
-	FaucetAddress  string   `json:"faucet_address"`
-	StorePath      string   `json:"store_path"`
+	WalletAddress  string           `json:"wallet_address"`
+	WalletPath     string           `json:"wallet_path"`
+	WalletPassword string           `json:"wallet_password"`
+	RPCNodes       []string         `json:"rpc_nodes"`
+	StorePath      string           `json:"store_path"`
+	DiscordBotCfg  DiscordBotConfig `json:"discord_bot_config"`
+}
+
+type DiscordBotConfig struct {
+	DiscordToken   string `json:"discord_token"`
+	DiscordGuildID string `json:"discord_guild_id"`
 }
 
 func Load(path string) (*Config, error) {

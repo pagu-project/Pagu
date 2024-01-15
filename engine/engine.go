@@ -2,12 +2,10 @@ package engine
 
 import (
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/kehiy/RoboPac/client"
-	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
 	"github.com/kehiy/RoboPac/utils"
@@ -19,29 +17,15 @@ type BotEngine struct {
 	Wallet wallet.IWallet
 	Store  store.IStore
 	Cm     *client.Mgr
-	Cfg    *config.Config
 	logger *log.SubLogger
 
 	sync.RWMutex
 }
 
-func Start(logger *log.SubLogger, cfg *config.Config, w wallet.IWallet, s store.IStore) (Engine, error) {
-	cm := client.NewClientMgr()
-
-	for _, rn := range cfg.RPCNodes {
-		c, err := client.NewClient(rn)
-		if err != nil {
-			logger.Error("can't make new client.", "RPC Node address", rn)
-			continue
-		}
-		logger.Info("connecting to RPC Node", "addr", rn)
-		cm.AddClient(rn, c)
-	}
-
+func NewBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore) (Engine, error) {
 	return &BotEngine{
 		logger: logger,
 		Wallet: w,
-		Cfg:    cfg,
 		Cm:     cm,
 		Store:  s,
 	}, nil
@@ -91,20 +75,6 @@ func (be *BotEngine) NetworkStatus(_ []string) (*NetStatus, error) {
 	}, nil
 }
 
-func (be *BotEngine) MyInfo([]string) (string, error) {
-	be.RLock()
-	defer be.RUnlock()
-
-	return "not implemented", nil
-}
-
-func (be *BotEngine) Withdraw([]string) (string, error) {
-	be.Lock()
-	defer be.Unlock()
-
-	return "not implemented", nil
-}
-
 func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 	if len(tokens) != 1 {
 		return nil, errors.New("missing argument: validator address")
@@ -122,8 +92,7 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 		return nil, err
 	}
 
-	parts := strings.Split(strings.Split(peerInfo.Address, "/")[2], "/")
-	ip := parts[0]
+	ip := utils.ExtractIPFromMultiAddr(peerInfo.Address)
 	geoData := utils.GetGeoIP(ip)
 
 	val, err := be.Cm.GetValidatorInfo(valAddress)
@@ -149,8 +118,24 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 	}, nil
 }
 
+func (be *BotEngine) ClaimerInfo([]string) (string, error) {
+	be.RLock()
+	defer be.RUnlock()
+
+	return "not implemented", nil
+}
+
+func (be *BotEngine) Claim([]string) (string, error) {
+	be.Lock()
+	defer be.Unlock()
+
+	return "not implemented", nil
+}
+
 func (be *BotEngine) Stop() {
 	be.logger.Info("shutting bot engine down...")
+}
 
-	be.Cm.Close()
+func (be *BotEngine) Start() {
+	be.logger.Info("starting the bot engine...")
 }

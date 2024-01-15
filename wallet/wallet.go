@@ -38,7 +38,7 @@ func Open(cfg *config.Config) IWallet {
 
 		return &Wallet{
 			wallet:   wt,
-			address:  cfg.FaucetAddress,
+			address:  cfg.WalletAddress,
 			password: cfg.WalletPassword,
 		}
 	}
