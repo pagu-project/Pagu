@@ -2,7 +2,6 @@ package client
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
@@ -13,6 +12,9 @@ import (
 func init() {
 	crypto.AddressHRP = "pc"
 	crypto.PublicKeyHRP = "public"
+	crypto.PrivateKeyHRP = "secret"
+	crypto.XPublicKeyHRP = "xpublic"
+	crypto.XPrivateKeyHRP = "xsecret"
 }
 
 type Mgr struct {
@@ -129,7 +131,6 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, er
 				for _, key := range p.ConsensusKeys {
 					pub, _ := bls.PublicKeyFromString(key)
 					if pub != nil {
-						fmt.Println(pub.ValidatorAddress().String())
 						if pub.ValidatorAddress().String() == address {
 							return p, pub, nil
 						}

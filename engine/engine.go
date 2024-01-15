@@ -2,7 +2,6 @@ package engine
 
 import (
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
@@ -93,8 +92,7 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 		return nil, err
 	}
 
-	parts := strings.Split(strings.Split(peerInfo.Address, "/")[2], "/")
-	ip := parts[0]
+	ip := utils.ExtractIPFromMultiAddr(peerInfo.Address)
 	geoData := utils.GetGeoIP(ip)
 
 	val, err := be.Cm.GetValidatorInfo(valAddress)

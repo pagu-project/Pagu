@@ -3,9 +3,8 @@ package client
 import (
 	"context"
 	"errors"
-	"log"
 
-	"github.com/k0kubun/pp"
+	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -27,7 +26,7 @@ func NewClient(endpoint string) (*Client, error) {
 		return nil, err
 	}
 
-	pp.Println("connection established...")
+	log.Info("establishing new connection", "addr", endpoint)
 
 	return &Client{
 		blockchainClient:  pactus.NewBlockchainClient(conn),
@@ -40,7 +39,6 @@ func NewClient(endpoint string) (*Client, error) {
 func (c *Client) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
 	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
-		log.Printf("error obtaining block height: %v", err)
 		return nil, err
 	}
 	return blockchainInfo, nil
@@ -49,7 +47,6 @@ func (c *Client) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) 
 func (c *Client) GetBlockchainHeight() (uint32, error) {
 	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
-		log.Printf("error obtaining block height: %v", err)
 		return 0, err
 	}
 	return blockchainInfo.LastBlockHeight, nil
@@ -58,8 +55,6 @@ func (c *Client) GetBlockchainHeight() (uint32, error) {
 func (c *Client) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	networkInfo, err := c.networkClient.GetNetworkInfo(context.Background(), &pactus.GetNetworkInfoRequest{})
 	if err != nil {
-		log.Printf("error obtaining network information: %v", err)
-
 		return nil, err
 	}
 
@@ -91,7 +86,6 @@ func (c *Client) IsValidator(address string) (bool, error) {
 		return false, err
 	}
 	for _, a := range validators.Addresses {
-		pp.Println(a)
 		if a == address {
 			return true, nil
 		}
