@@ -47,7 +47,7 @@ func (s *Store) ClaimerInfo(discordID string) *Claimer {
 	return nil
 }
 
-func (s *Store) AddClaimTransaction(TxID string, Amount int64, Time time.Time, Data string) error {
+func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, data string) error {
 	return nil
 }
 

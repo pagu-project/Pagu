@@ -57,6 +57,7 @@ func main() {
 	if err != nil {
 		log.Panic("could not start discord bot", "err", err)
 	}
+	botEngine.Start()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

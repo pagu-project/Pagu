@@ -8,4 +8,5 @@ type Engine interface {
 	Claim([]string) (string, error)
 
 	Stop()
+	Start()
 }

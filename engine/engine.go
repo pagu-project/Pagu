@@ -76,20 +76,6 @@ func (be *BotEngine) NetworkStatus(_ []string) (*NetStatus, error) {
 	}, nil
 }
 
-func (be *BotEngine) ClaimerInfo([]string) (string, error) {
-	be.RLock()
-	defer be.RUnlock()
-
-	return "not implemented", nil
-}
-
-func (be *BotEngine) Claim([]string) (string, error) {
-	be.Lock()
-	defer be.Unlock()
-
-	return "not implemented", nil
-}
-
 func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 	if len(tokens) != 1 {
 		return nil, errors.New("missing argument: validator address")
@@ -132,6 +118,20 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 		LastBondingHeight:   val.Validator.LastBondingHeight,
 		LastSortitionHeight: val.Validator.LastSortitionHeight,
 	}, nil
+}
+
+func (be *BotEngine) ClaimerInfo([]string) (string, error) {
+	be.RLock()
+	defer be.RUnlock()
+
+	return "not implemented", nil
+}
+
+func (be *BotEngine) Claim([]string) (string, error) {
+	be.Lock()
+	defer be.Unlock()
+
+	return "not implemented", nil
 }
 
 func (be *BotEngine) Stop() {
