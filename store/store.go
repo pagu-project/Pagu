@@ -3,7 +3,6 @@ package store
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 	"time"
@@ -20,7 +19,6 @@ type Store struct {
 func LoadStore(cfg *config.Config) (IStore, error) {
 	file, err := os.ReadFile(cfg.StorePath)
 	if err != nil {
-		log.Printf("error loading validator data: %v", err)
 		return nil, fmt.Errorf("error loading data file: %w", err)
 	}
 	if len(file) == 0 {
@@ -33,7 +31,6 @@ func LoadStore(cfg *config.Config) (IStore, error) {
 
 	data, err := unmarshalJSON(file)
 	if err != nil {
-		log.Printf("error unmarshalling validator data: %v", err)
 		return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
 	}
 
