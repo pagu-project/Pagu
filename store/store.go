@@ -1,6 +1,7 @@
 package store
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -30,15 +31,15 @@ func LoadStore(cfg *config.Config) (IStore, error) {
 		return ss, nil
 	}
 
-	// data, err := unmarshalJSON(file)
-	// if err != nil {
-	// 	log.Printf("error unmarshalling validator data: %v", err)
-	// 	return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
-	// }
+	data, err := unmarshalJSON(file)
+	if err != nil {
+		log.Printf("error unmarshalling validator data: %v", err)
+		return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
+	}
 
 	ss := &Store{
-		// syncMap: data,
-		cfg: cfg,
+		syncMap: data,
+		cfg:     cfg,
 	}
 	return ss, nil
 }
@@ -51,26 +52,26 @@ func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, d
 	return nil
 }
 
-// func marshalJSON(m *sync.Map) ([]byte, error) {
-// 	tmpMap := make(map[string]*Validator)
+func marshalJSON(m *sync.Map) ([]byte, error) {
+	tmpMap := make(map[string]*Claimer)
 
-// 	m.Range(func(k, v interface{}) bool {
-// 		tmpMap[k.(string)] = v.(*Validator)
-// 		return true
-// 	})
-// 	return json.MarshalIndent(tmpMap, "  ", "  ")
-// }
+	m.Range(func(k, v interface{}) bool {
+		tmpMap[k.(string)] = v.(*Claimer)
+		return true
+	})
+	return json.MarshalIndent(tmpMap, "  ", "  ")
+}
 
-// func unmarshalJSON(data []byte) (*sync.Map, error) {
-// 	var tmpMap map[string]*Validator
-// 	m := &sync.Map{}
+func unmarshalJSON(data []byte) (*sync.Map, error) {
+	var tmpMap map[string]*Claimer
+	m := &sync.Map{}
 
-// 	if err := json.Unmarshal(data, &tmpMap); err != nil {
-// 		return m, err
-// 	}
+	if err := json.Unmarshal(data, &tmpMap); err != nil {
+		return m, err
+	}
 
-// 	for key, value := range tmpMap {
-// 		m.Store(key, value)
-// 	}
-// 	return m, nil
-// }
+	for key, value := range tmpMap {
+		m.Store(key, value)
+	}
+	return m, nil
+}

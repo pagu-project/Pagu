@@ -10,7 +10,7 @@ type ClaimedTransaction struct {
 }
 
 type Claimer struct {
-	DiscordID          string // 123456789
+	DiscordID          string // user ID
 	TotalReward        int64
 	ClaimedTransaction *ClaimedTransaction
 }
