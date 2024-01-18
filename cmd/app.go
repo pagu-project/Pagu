@@ -44,16 +44,19 @@ func main() {
 	}
 
 	// new subLogger for engine.
-	sl := log.NewSubLogger("engine")
+	eSl := log.NewSubLogger("engine")
+
+	// new subLogger for store.
+	sSl := log.NewSubLogger("engine")
 
 	// load store.
-	store, err := store.LoadStore(config)
+	store, err := store.LoadStore(config, sSl)
 	if err != nil {
 		log.Panic("could not load store", "err", err, "path", config.StorePath)
 	}
 
 	// starting botEngine.
-	botEngine, err := engine.NewBotEngine(sl, cm, wallet, store)
+	botEngine, err := engine.NewBotEngine(eSl, cm, wallet, store)
 	if err != nil {
 		log.Panic("could not start discord bot", "err", err)
 	}

@@ -21,5 +21,5 @@ func (c *Claimer) IsClaimed() bool {
 
 type IStore interface {
 	ClaimerInfo(discordID string) *Claimer
-	AddClaimTransaction(TxID string, Amount int64, Time time.Time, Data string) error
+	AddClaimTransaction(TxID string, Amount int64, Time time.Time, Data string, discordID string) error
 }
