@@ -33,12 +33,13 @@ func LoadStore(cfg *config.Config, logger *log.SubLogger) (IStore, error) {
 
 	data, err := unmarshalJSON(file)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
+		return nil, fmt.Errorf("error un-marshalling validator data: %w", err)
 	}
 
 	ss := &Store{
 		syncMap: data,
 		cfg:     cfg,
+		logger:  logger,
 	}
 	return ss, nil
 }
@@ -54,12 +55,12 @@ func (s *Store) ClaimerInfo(discordID string) *Claimer {
 }
 
 func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, txData string, discordID string) error {
-	s.syncMap.Store(discordID, Claimer{
+	s.syncMap.Store(discordID, &Claimer{
 		DiscordID: discordID,
-		ClaimedTransaction: &ClaimedTransaction{
+		ClaimTransaction: &ClaimTransaction{
 			TxID:   txID,
 			Amount: amount,
-			Time:   time,
+			Time:   time.Unix(),
 			Data:   txData,
 		},
 	})

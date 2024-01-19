@@ -35,6 +35,9 @@ func main() {
 		cm.AddClient(rn, c)
 	}
 
+	// initializing logger global instance.
+	log.InitGlobalLogger()
+
 	// new subLogger for engine.
 	eSl := log.NewSubLogger("engine")
 
