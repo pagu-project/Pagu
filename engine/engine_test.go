@@ -207,5 +207,81 @@ func TestClaim(t *testing.T) {
 		claimTx, err := eng.Claim([]string{valAddress, discordID})
 		assert.NoError(t, err)
 		assert.NotNil(t, claimTx)
+
+		assert.Equal(t, amount, claimTx.Amount)
+		assert.Equal(t, txID, claimTx.TxID)
+		assert.Equal(t, time, claimTx.Time)
+
+		//! can't claim twice.
+		claimTx, err = eng.Claim([]string{valAddress, discordID})
+		assert.EqualError(t, err, "this claimer have already claimed rewards")
+		assert.Nil(t, claimTx)
+	})
+
+	t.Run("missing arguments", func(t *testing.T) {
+		claimTx, err := eng.Claim([]string{})
+		assert.EqualError(t, err, "missing argument: validator address")
+		assert.Nil(t, claimTx)
+	})
+
+	t.Run("claimer not found", func(t *testing.T) {
+		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		discordID := "987654321"
+
+		store.EXPECT().ClaimerInfo(discordID).Return(
+			nil,
+		)
+
+		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		assert.EqualError(t, err, "claimer not found")
+		assert.Nil(t, claimTx)
+	})
+
+	t.Run("not validator address", func(t *testing.T) {
+		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		discordID := "1234567890"
+		amount := 74.68
+
+		store.EXPECT().ClaimerInfo(discordID).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				TotalReward: amount,
+			},
+		)
+
+		client.EXPECT().IsValidator(valAddress).Return(
+			false, nil,
+		)
+
+		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		assert.EqualError(t, err, "invalid argument: validator address")
+		assert.Nil(t, claimTx)
+	})
+
+	t.Run("empty transaction ID", func(t *testing.T) {
+		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		discordID := "1234567890"
+		amount := 74.68
+
+		client.EXPECT().IsValidator(valAddress).Return(
+			true, nil,
+		)
+
+		store.EXPECT().ClaimerInfo(discordID).Return(
+			&rpstore.Claimer{
+				DiscordID:        discordID,
+				TotalReward:      amount,
+				ClaimTransaction: nil,
+			},
+		)
+
+		memo := fmt.Sprintf("RP to: %v", discordID)
+		wallet.EXPECT().BondTransaction("", valAddress, memo, amount).Return(
+			"", nil,
+		)
+
+		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		assert.EqualError(t, err, "can't send bond transaction")
+		assert.Nil(t, claimTx)
 	})
 }
