@@ -1,39 +1,82 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	WalletAddress  string           `json:"wallet_address"`
-	WalletPath     string           `json:"wallet_path"`
-	WalletPassword string           `json:"wallet_password"`
-	RPCNodes       []string         `json:"rpc_nodes"`
-	StorePath      string           `json:"store_path"`
-	DiscordBotCfg  DiscordBotConfig `json:"discord_bot_config"`
+	WalletAddress  string
+	WalletPath     string
+	WalletPassword string
+	RPCNodes       []string
+	StorePath      string
+	DiscordBotCfg  DiscordBotConfig
 }
 
 type DiscordBotConfig struct {
-	DiscordToken   string `json:"discord_token"`
-	DiscordGuildID string `json:"discord_guild_id"`
+	DiscordToken   string
+	DiscordGuildID string
 }
 
-func Load(path string) (*Config, error) {
-	file, err := os.ReadFile(path)
+func Load() (*Config, error) {
+
+	// Load .env file
+	err := godotenv.Load()
 	if err != nil {
-		log.Printf("error loading configuration file: %v", err)
-		return nil, fmt.Errorf("error loading configuration file: %w", err)
+		log.Printf("Error loading .env file: %v", err)
+		return nil, err
 	}
 
-	cfg := &Config{}
-	err = json.Unmarshal(file, cfg)
-
-	if err != nil {
-		log.Printf("error unmarshalling configuration file: %v", err)
-		return nil, fmt.Errorf("error unmarshalling configuration file: %w", err)
+	// Fetch config values from environment variables
+	cfg := &Config{
+		WalletAddress:  os.Getenv("WALLET_ADDRESS"),                //create a .env file and make a variable named WALLET_ADDRESS,put your wallet address there
+		WalletPath:     os.Getenv("WALLET_PATH"),                   //in .env file , make WALLET_PATH varaible and put your wallet path there
+		WalletPassword: os.Getenv("WALLET_PASSWORD"),               //in .env file, create WALLET PASSWORD variable and put your wallet password
+		RPCNodes:       strings.Split(os.Getenv("RPC_NODES"), ","), //in .env file, make RPC_NODES variable and put your RPC_NODES key there
+		StorePath:      os.Getenv("STORE_PATH"),                    //in .env file, make STORE_PATH variable and put your store_path there
+		DiscordBotCfg: DiscordBotConfig{
+			DiscordToken:   os.Getenv("DISCORD_TOKEN"),    //in .env file, make Discord_TOKEN variable and put your Discord_TOKEN
+			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"), //in .env file, make Discord_Guild_ID variable and put your Discord_GUILD_ID
+		},
 	}
+
+	// Check if the required configurations are set
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+
 	return cfg, nil
+
+}
+
+// Validate checks for the presence of required environment variables
+func (cfg *Config) Validate() error {
+	if cfg.WalletAddress == "" {
+		return fmt.Errorf("WALLET_ADDRESS is not set")
+	}
+	if cfg.WalletPath == "" {
+		return fmt.Errorf("WALLET_PATH is not set")
+	}
+	if cfg.WalletPassword == "" {
+		return fmt.Errorf("WALLET_PASSWORD is not set or incorrect")
+	}
+	if len(cfg.RPCNodes) == 0 {
+		return fmt.Errorf("RPCNODES is not set or incorrect")
+	}
+	if cfg.StorePath == "" {
+		return fmt.Errorf("STORE_PATH is not set or incorrect")
+	}
+	if cfg.DiscordBotCfg.DiscordToken == "" {
+		return fmt.Errorf("DISCORD_TOKEN is not set or incorrect")
+	}
+	if cfg.DiscordBotCfg.DiscordGuildID == "" {
+		return fmt.Errorf("DISCORD_GUILD_ID is not set or incorrect")
+	}
+
+	return nil
 }
