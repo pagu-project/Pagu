@@ -27,15 +27,11 @@ func GetGeoIP(ip string) *GeoIP {
 		return geo
 	}
 
-	// response.Body() is a reader type. We have
-	// to use ioutil.ReadAll() to read the data
-	// in to a byte slice(string)
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return geo
 	}
 
-	// Unmarshal the JSON byte slice to a GeoIP struct
 	err = json.Unmarshal(body, &geo)
 	if err != nil {
 		return geo
