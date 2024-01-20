@@ -22,14 +22,6 @@ func main() {
 		log.Panic("error loading configuration %v\n", err)
 	}
 
-	// load or create wallet.
-	wallet := wallet.Open(config)
-	if wallet == nil {
-		log.Panic("wallet could not be opened, wallet is nil", "path", config.WalletPath)
-	}
-
-	log.Info("wallet opened successfully", "address", wallet.Address())
-
 	// starting client manager for RPC.
 	cm := client.NewClientMgr()
 
@@ -43,17 +35,36 @@ func main() {
 		cm.AddClient(rn, c)
 	}
 
+	// initializing logger global instance.
+	log.InitGlobalLogger()
+
 	// new subLogger for engine.
-	sl := log.NewSubLogger("engine")
+	eSl := log.NewSubLogger("engine")
+
+	// new subLogger for store.
+	sSl := log.NewSubLogger("store")
+
+	// new subLogger for store.
+	wSl := log.NewSubLogger("wallet")
+
+	// load or create wallet.
+	wallet := wallet.Open(config, wSl)
+	if wallet == nil {
+		log.Panic("wallet could not be opened, wallet is nil", "path", config.WalletPath)
+	}
+
+	log.Info("wallet opened successfully", "address", wallet.Address())
 
 	// load store.
-	store, err := store.LoadStore(config)
+	store, err := store.LoadStore(config, sSl)
 	if err != nil {
 		log.Panic("could not load store", "err", err, "path", config.StorePath)
 	}
 
+	log.Info("store loaded successfully", "path", config.StorePath)
+
 	// starting botEngine.
-	botEngine, err := engine.NewBotEngine(sl, cm, wallet, store)
+	botEngine, err := engine.NewBotEngine(eSl, cm, wallet, store)
 	if err != nil {
 		log.Panic("could not start discord bot", "err", err)
 	}

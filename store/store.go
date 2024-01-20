@@ -1,25 +1,26 @@
 package store
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/kehiy/RoboPac/config"
+	"github.com/kehiy/RoboPac/log"
 )
 
 // Store is a thread-safe cache.
 type Store struct {
 	syncMap *sync.Map
 	cfg     *config.Config
+	logger  *log.SubLogger
 }
 
-func LoadStore(cfg *config.Config) (IStore, error) {
+func LoadStore(cfg *config.Config, logger *log.SubLogger) (IStore, error) {
 	file, err := os.ReadFile(cfg.StorePath)
 	if err != nil {
-		log.Printf("error loading validator data: %v", err)
 		return nil, fmt.Errorf("error loading data file: %w", err)
 	}
 	if len(file) == 0 {
@@ -30,47 +31,82 @@ func LoadStore(cfg *config.Config) (IStore, error) {
 		return ss, nil
 	}
 
-	// data, err := unmarshalJSON(file)
-	// if err != nil {
-	// 	log.Printf("error unmarshalling validator data: %v", err)
-	// 	return nil, fmt.Errorf("error unmarshalling validator data: %w", err)
-	// }
+	data, err := unmarshalJSON(file)
+	if err != nil {
+		return nil, fmt.Errorf("error un-marshalling validator data: %w", err)
+	}
 
 	ss := &Store{
-		// syncMap: data,
-		cfg: cfg,
+		syncMap: data,
+		cfg:     cfg,
+		logger:  logger,
 	}
 	return ss, nil
 }
 
 func (s *Store) ClaimerInfo(discordID string) *Claimer {
+	entry, found := s.syncMap.Load(discordID)
+	if !found {
+		return nil
+	}
+
+	claimerInfo := entry.(*Claimer)
+	return claimerInfo
+}
+
+func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, txData string, discordID string) error {
+	s.syncMap.Store(discordID, &Claimer{
+		DiscordID: discordID,
+		ClaimTransaction: &ClaimTransaction{
+			TxID:   txID,
+			Amount: amount,
+			Time:   time.Unix(),
+			Data:   txData,
+		},
+	})
+
+	s.logger.Info("new claim transaction added", "discordID", discordID, "amount",
+		amount, "data", txData, "time", time.Unix(), "txID", txID)
+
+	// save record.
+	data, err := marshalJSON(s.syncMap)
+	if err != nil {
+		s.logger.Panic("can't marshal json new claim transaction", "discordID", discordID, "amount",
+			amount, "data", txData, "time", time.Unix(), "txID", txID, "err", err)
+
+		return fmt.Errorf("error marshalling validator data file: %w", err)
+	}
+
+	if err := os.WriteFile(s.cfg.StorePath, data, 0o600); err != nil {
+		s.logger.Panic("can't write new claim transaction", "discordID", discordID, "amount",
+			amount, "data", txData, "time", time.Unix(), "txID", txID, "err", err)
+
+		return fmt.Errorf("failed to write to %s: %w", s.cfg.StorePath, err)
+	}
+
 	return nil
 }
 
-func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, data string) error {
-	return nil
+func marshalJSON(m *sync.Map) ([]byte, error) {
+	tmpMap := make(map[string]*Claimer)
+
+	m.Range(func(k, v interface{}) bool {
+		tmpMap[k.(string)] = v.(*Claimer)
+		return true
+	})
+	return json.MarshalIndent(tmpMap, "  ", "  ")
 }
 
-// func marshalJSON(m *sync.Map) ([]byte, error) {
-// 	tmpMap := make(map[string]*Validator)
+func unmarshalJSON(data []byte) (*sync.Map, error) {
+	var tmpMap map[string]*Claimer
+	m := &sync.Map{}
 
-// 	m.Range(func(k, v interface{}) bool {
-// 		tmpMap[k.(string)] = v.(*Validator)
-// 		return true
-// 	})
-// 	return json.MarshalIndent(tmpMap, "  ", "  ")
-// }
+	if err := json.Unmarshal(data, &tmpMap); err != nil {
+		return m, err
+	}
 
-// func unmarshalJSON(data []byte) (*sync.Map, error) {
-// 	var tmpMap map[string]*Validator
-// 	m := &sync.Map{}
-
-// 	if err := json.Unmarshal(data, &tmpMap); err != nil {
-// 		return m, err
-// 	}
-
-// 	for key, value := range tmpMap {
-// 		m.Store(key, value)
-// 	}
-// 	return m, nil
-// }
+	for key, value := range tmpMap {
+		m.Store(key, value)
+	}
+	return m, nil
+}

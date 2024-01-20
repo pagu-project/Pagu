@@ -19,17 +19,17 @@ func setup(t *testing.T) (engine.Engine, client.MockIClient, error) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
-	// mocking client manager
+	// mocking client manager.
 	sl := log.NewSubLogger("test")
 	mockClient := client.NewMockIClient(ctrl)
 
 	cm := client.NewClientMgr()
 	cm.AddClient("addr-1", mockClient)
 
-	// mocking wallet
+	// mocking wallet.
 	wallet := wallet.NewMockIWallet(ctrl)
 
-	// mocking wallet
+	// mocking store.
 	store := store.NewMockIStore(ctrl)
 
 	eng, err := engine.NewBotEngine(sl, cm, wallet, store)

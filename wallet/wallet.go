@@ -19,27 +19,29 @@ type Balance struct {
 
 type Wallet struct {
 	address  string
-	wallet   *pwallet.Wallet
 	password string
+	wallet   *pwallet.Wallet
+	logger   *log.SubLogger
 }
 
-func Open(cfg *config.Config) IWallet {
+func Open(cfg *config.Config, logger *log.SubLogger) IWallet {
 	if doesWalletExist(cfg.WalletPath) {
 
 		wt, err := pwallet.Open(cfg.WalletPath, true)
 		if err != nil {
-			log.Fatal("error opening existing wallet", "err", err)
+			logger.Fatal("error opening existing wallet", "err", err)
 		}
 
 		err = wt.Connect(cfg.RPCNodes[0])
 		if err != nil {
-			log.Fatal("error establishing connection", "err", err)
+			logger.Fatal("error establishing connection", "err", err)
 		}
 
 		return &Wallet{
 			wallet:   wt,
 			address:  cfg.WalletAddress,
 			password: cfg.WalletPassword,
+			logger:   logger,
 		}
 	}
 
@@ -55,26 +57,26 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount float64)
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
 		util.CoinToChange(amount), opts...)
 	if err != nil {
-		log.Error("error creating bond transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error creating bond transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
 	}
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
-		log.Error("error signing bond transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error signing bond transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
 	}
 
 	// broadcast transaction
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
-		log.Error("error broadcasting bond transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error broadcasting bond transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
-		log.Error("error saving wallet transaction history", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error saving wallet transaction history", "err", err, "address", toAddress, "amount", amount)
 	}
 	return res, nil // return transaction hash
 }
@@ -92,27 +94,27 @@ func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount floa
 
 	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, int64(amount), opts...)
 	if err != nil {
-		log.Error("error creating transfer transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error creating transfer transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
 	}
 
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
-		log.Error("error signing transfer transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error signing transfer transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
 	}
 
 	// broadcast transaction
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
-		log.Error("error broadcasting transfer transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error broadcasting transfer transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
-		log.Error("error saving wallet transaction history", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error saving wallet transaction history", "err", err, "address", toAddress, "amount", amount)
 	}
 	return res, nil // return transaction hash
 }
