@@ -152,7 +152,7 @@ func (cm *Mgr) IsValidator(address string) (bool, error) {
 		return exists, nil
 	}
 
-	return false, errors.New("unable to get validator info")
+	return false, errors.New("validator not found")
 }
 
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {

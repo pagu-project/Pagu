@@ -54,7 +54,7 @@ func (s *Store) ClaimerInfo(discordID string) *Claimer {
 	return claimerInfo
 }
 
-func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, txData string, discordID string) error {
+func (s *Store) AddClaimTransaction(txID string, amount float64, time time.Time, txData string, discordID string) error {
 	s.syncMap.Store(discordID, &Claimer{
 		DiscordID: discordID,
 		ClaimTransaction: &ClaimTransaction{

@@ -40,7 +40,7 @@ func (m *MockIStore) EXPECT() *MockIStoreMockRecorder {
 }
 
 // AddClaimTransaction mocks base method.
-func (m *MockIStore) AddClaimTransaction(TxID string, Amount int64, Time time.Time, Data, discordID string) error {
+func (m *MockIStore) AddClaimTransaction(TxID string, Amount float64, Time time.Time, Data, discordID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddClaimTransaction", TxID, Amount, Time, Data, discordID)
 	ret0, _ := ret[0].(error)
