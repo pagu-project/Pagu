@@ -11,7 +11,6 @@ package store
 
 import (
 	reflect "reflect"
-	time "time"
 
 	gomock "go.uber.org/mock/gomock"
 )
@@ -40,17 +39,17 @@ func (m *MockIStore) EXPECT() *MockIStoreMockRecorder {
 }
 
 // AddClaimTransaction mocks base method.
-func (m *MockIStore) AddClaimTransaction(TxID string, Amount float64, Time time.Time, Data, discordID string) error {
+func (m *MockIStore) AddClaimTransaction(TxID string, Amount float64, Time int64, discordID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddClaimTransaction", TxID, Amount, Time, Data, discordID)
+	ret := m.ctrl.Call(m, "AddClaimTransaction", TxID, Amount, Time, discordID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddClaimTransaction indicates an expected call of AddClaimTransaction.
-func (mr *MockIStoreMockRecorder) AddClaimTransaction(TxID, Amount, Time, Data, discordID any) *gomock.Call {
+func (mr *MockIStoreMockRecorder) AddClaimTransaction(TxID, Amount, Time, discordID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), TxID, Amount, Time, Data, discordID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), TxID, Amount, Time, discordID)
 }
 
 // ClaimerInfo mocks base method.

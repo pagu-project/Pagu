@@ -12,6 +12,7 @@ import (
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/pactus-project/pactus/util"
 )
 
 type BotEngine struct {
@@ -179,7 +180,12 @@ func (be *BotEngine) Claim(tokens []string) (*store.ClaimTransaction, error) {
 		return nil, errors.New("can't send bond transaction")
 	}
 
-	err = be.Store.AddClaimTransaction(txID, claimer.TotalReward, time.Now(), "", discordID)
+	txData, err := be.Cm.GetTransactionData(txID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = be.Store.AddClaimTransaction(txID, util.ChangeToCoin(txData.Transaction.Value), int64(txData.BlockTime), discordID)
 	if err != nil {
 		return nil, err
 	}

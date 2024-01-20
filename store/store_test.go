@@ -43,7 +43,6 @@ func TestStore(t *testing.T) {
 	t.Run("test add claim transaction", func(t *testing.T) {
 		txID := "0x123456789"
 		time := time.Now()
-		data := "data"
 		discordID := "123456789"
 
 		claimer := store.ClaimerInfo(discordID)
@@ -51,11 +50,10 @@ func TestStore(t *testing.T) {
 		isClaimed := claimer.IsClaimed()
 		assert.False(t, isClaimed)
 
-		err := store.AddClaimTransaction(txID, claimer.TotalReward, time, data, discordID)
+		err := store.AddClaimTransaction(txID, claimer.TotalReward, time.Unix(), discordID)
 		assert.NoError(t, err)
 
 		claimedInfo := store.ClaimerInfo(discordID)
-		assert.Equal(t, data, claimedInfo.ClaimTransaction.Data)
 		assert.Equal(t, discordID, claimedInfo.DiscordID)
 		assert.Equal(t, float64(100), claimedInfo.ClaimTransaction.Amount)
 		assert.Equal(t, txID, claimedInfo.ClaimTransaction.TxID)

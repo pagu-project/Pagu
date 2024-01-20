@@ -1,10 +1,7 @@
 package store
 
-import "time"
-
 type ClaimTransaction struct {
 	TxID   string  `json:"transaction_id"`
-	Data   string  `json:"data"`
 	Amount float64 `json:"amount"`
 	Time   int64   `json:"time"`
 }
@@ -21,5 +18,5 @@ func (c *Claimer) IsClaimed() bool {
 
 type IStore interface {
 	ClaimerInfo(discordID string) *Claimer
-	AddClaimTransaction(TxID string, Amount float64, Time time.Time, Data string, discordID string) error
+	AddClaimTransaction(TxID string, Amount float64, Time int64, discordID string) error
 }

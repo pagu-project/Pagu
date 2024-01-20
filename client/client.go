@@ -149,6 +149,13 @@ func (c *Client) GetNodeInfo() (*pactus.GetNodeInfoResponse, error) {
 	return info, err
 }
 
+func (c *Client) GetTransactionData(txID string) (*pactus.GetTransactionResponse, error) {
+	return c.transactionClient.GetTransaction(context.Background(), &pactus.GetTransactionRequest{
+		Id:        []byte(txID),
+		Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
+	})
+}
+
 func (c *Client) Close() error {
 	return c.conn.Close()
 }
