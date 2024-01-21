@@ -14,10 +14,8 @@ import (
 )
 
 func main() {
-	configPath := os.Args[1]
-
 	// load configuration.
-	config, err := config.Load(configPath)
+	config, err := config.Load()
 	if err != nil {
 		log.Panic("error loading configuration %v\n", err)
 	}
