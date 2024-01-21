@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//go:embed store_example.json
+//go:embed test/store_example.json
 var exampleStore []byte
 
 func setup(t *testing.T) (store.IStore, string) {
-	cfg, err := config.Load("../.env")
+	cfg, err := config.Load("test/.env.test")
 	assert.NoError(t, err)
 
 	err = os.WriteFile(cfg.StorePath, exampleStore, 0o600)

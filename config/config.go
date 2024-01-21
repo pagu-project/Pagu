@@ -23,34 +23,22 @@ type DiscordBotConfig struct {
 	DiscordGuildID string
 }
 
-func Load(envFile ...string) (*Config, error) {
-	// Load .env file
-	// err := godotenv.Load("store/store_path.json")
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// If a .env file path is provided, load it; otherwise, load the default .env file
-	var err error
-	if len(envFile) > 0 {
-		err = godotenv.Load(envFile[0])
-	} else {
-		err = godotenv.Load() // This will load the .env file from the current working directory
-	}
+func Load(filePaths ...string) (*Config, error) {
+	err := godotenv.Load(filePaths...)
 	if err != nil {
 		return nil, err
 	}
 
 	// Fetch config values from environment variables.
 	cfg := &Config{
-		WalletAddress:  os.Getenv("WALLET_ADDRESS"),                // create a .env file and make a variable named WALLET_ADDRESS,put your wallet address there.
-		WalletPath:     os.Getenv("WALLET_PATH"),                   // in .env file , make WALLET_PATH varaible and put your wallet path there.
-		WalletPassword: os.Getenv("WALLET_PASSWORD"),               // in .env file, create WALLET PASSWORD variable and put your wallet password.
-		RPCNodes:       strings.Split(os.Getenv("RPC_NODES"), ","), // in .env file, make RPC_NODES variable and put your RPC_NODES key there.
-		StorePath:      os.Getenv("STORE_PATH"),                    // in .env file, make STORE_PATH variable and put your store_path there.
+		WalletAddress:  os.Getenv("WALLET_ADDRESS"),
+		WalletPath:     os.Getenv("WALLET_PATH"),
+		WalletPassword: os.Getenv("WALLET_PASSWORD"),
+		RPCNodes:       strings.Split(os.Getenv("RPC_NODES"), ","),
+		StorePath:      os.Getenv("STORE_PATH"),
 		DiscordBotCfg: DiscordBotConfig{
-			DiscordToken:   os.Getenv("DISCORD_TOKEN"),    // in .env file, make Discord_TOKEN variable and put your Discord_TOKEN.
-			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"), // in .env file, make Discord_Guild_ID variable and put your Discord_GUILD_ID.
+			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
+			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),
 		},
 	}
 
