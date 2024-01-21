@@ -23,9 +23,20 @@ type DiscordBotConfig struct {
 	DiscordGuildID string
 }
 
-func Load() (*Config, error) {
+func Load(envFile ...string) (*Config, error) {
 	// Load .env file
-	err := godotenv.Load()
+	// err := godotenv.Load("store/store_path.json")
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// If a .env file path is provided, load it; otherwise, load the default .env file
+	var err error
+	if len(envFile) > 0 {
+		err = godotenv.Load(envFile[0])
+	} else {
+		err = godotenv.Load() // This will load the .env file from the current working directory
+	}
 	if err != nil {
 		return nil, err
 	}
