@@ -1,5 +1,7 @@
 import unittest
 import public_key
+import tempfile
+from main import *
 
 class TestPublicKey(unittest.TestCase):
     def test_from_string(self):
@@ -10,6 +12,7 @@ class TestPublicKey(unittest.TestCase):
         pub = public_key.PublicKey.from_string(pubStr)
         self.assertEqual(pub.account_address().string(), addrAccStr)
         self.assertEqual(pub.validator_address().string(), addrValStr)
+
 
 if __name__ == '__main__':
     unittest.main()

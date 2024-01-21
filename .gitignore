@@ -6,7 +6,7 @@ todo
 dist/
 .releaser.yml
 pactus-*
-cmd/data/wallet.json
+cmd/data/*
 cmd/data/config.json
 cmd/data/validators.json
 cmd/bin
@@ -16,3 +16,5 @@ __pycache__
 
 #.env file
 .env
+/scripts/go/top10.json
+output/*
