@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="RoboPac" src="./media/robopac.png" width="150" height="150" />
+    <img alt="RoboPac" src="./assets/robopac.png" width="150" height="150" />
 </p>
 
 # Pactus Bot Engine (RoboPac)
