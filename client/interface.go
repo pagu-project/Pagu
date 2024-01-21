@@ -12,5 +12,6 @@ type IClient interface {
 	IsValidator(string) (bool, error)
 	GetValidatorInfo(string) (*pactus.GetValidatorResponse, error)
 	GetValidatorInfoByNumber(int32) (*pactus.GetValidatorResponse, error)
+	GetTransactionData(string) (*pactus.GetTransactionResponse, error)
 	Close() error
 }

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/pactus-project/pactus/util"
 )
 
 type BotEngine struct {
@@ -118,18 +120,84 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 	}, nil
 }
 
-func (be *BotEngine) ClaimerInfo([]string) (string, error) {
+func (be *BotEngine) ClaimerInfo(tokens []string) (*store.Claimer, error) {
 	be.RLock()
 	defer be.RUnlock()
 
-	return "not implemented", nil
+	if len(tokens) != 1 {
+		return nil, errors.New("missing argument: Discord ID")
+	}
+
+	claimer := be.Store.ClaimerInfo(tokens[0])
+	if claimer == nil {
+		return nil, errors.New("not found")
+	}
+
+	return claimer, nil
 }
 
-func (be *BotEngine) Claim([]string) (string, error) {
+func (be *BotEngine) Claim(tokens []string) (*store.ClaimTransaction, error) {
 	be.Lock()
 	defer be.Unlock()
 
-	return "not implemented", nil
+	if len(tokens) != 2 {
+		return nil, errors.New("missing argument: validator address")
+	}
+
+	valAddr := tokens[0]
+	discordID := tokens[1]
+
+	be.logger.Info("new claim request", "valAddr", valAddr, "discordID", discordID)
+
+	claimer := be.Store.ClaimerInfo(discordID)
+	if claimer == nil {
+		return nil, errors.New("claimer not found")
+	}
+
+	if claimer.IsClaimed() {
+		return nil, errors.New("this claimer have already claimed rewards")
+	}
+
+	isValidator, err := be.Cm.IsValidator(valAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isValidator {
+		return nil, errors.New("invalid argument: validator address")
+	}
+
+	memo := fmt.Sprintf("RP to: %v", discordID)
+
+	txID, err := be.Wallet.BondTransaction("", valAddr, memo, claimer.TotalReward)
+	if err != nil {
+		return nil, err
+	}
+
+	be.logger.Info("new bond transaction sent", "txID", txID, "memo", memo)
+
+	if txID == "" {
+		return nil, errors.New("can't send bond transaction")
+	}
+
+	txData, err := be.Cm.GetTransactionData(txID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = be.Store.AddClaimTransaction(txID, util.ChangeToCoin(txData.Transaction.Value), int64(txData.BlockTime), discordID)
+	if err != nil {
+		return nil, err
+	}
+
+	claimer = be.Store.ClaimerInfo(discordID)
+	if claimer == nil {
+		return nil, errors.New("can't save claim info")
+	}
+
+	be.logger.Info("new claimer added", "valAddr", valAddr, "discordID", discordID)
+
+	return claimer.ClaimTransaction, nil
 }
 
 func (be *BotEngine) Stop() {

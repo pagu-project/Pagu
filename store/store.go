@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
@@ -54,32 +53,31 @@ func (s *Store) ClaimerInfo(discordID string) *Claimer {
 	return claimerInfo
 }
 
-func (s *Store) AddClaimTransaction(txID string, amount int64, time time.Time, txData string, discordID string) error {
+func (s *Store) AddClaimTransaction(txID string, amount float64, time int64, discordID string) error {
 	s.syncMap.Store(discordID, &Claimer{
 		DiscordID: discordID,
 		ClaimTransaction: &ClaimTransaction{
 			TxID:   txID,
 			Amount: amount,
-			Time:   time.Unix(),
-			Data:   txData,
+			Time:   time,
 		},
 	})
 
 	s.logger.Info("new claim transaction added", "discordID", discordID, "amount",
-		amount, "data", txData, "time", time.Unix(), "txID", txID)
+		amount, "time", time, "txID", txID)
 
 	// save record.
 	data, err := marshalJSON(s.syncMap)
 	if err != nil {
 		s.logger.Panic("can't marshal json new claim transaction", "discordID", discordID, "amount",
-			amount, "data", txData, "time", time.Unix(), "txID", txID, "err", err)
+			amount, "time", time, "txID", txID, "err", err)
 
 		return fmt.Errorf("error marshalling validator data file: %w", err)
 	}
 
 	if err := os.WriteFile(s.cfg.StorePath, data, 0o600); err != nil {
 		s.logger.Panic("can't write new claim transaction", "discordID", discordID, "amount",
-			amount, "data", txData, "time", time.Unix(), "txID", txID, "err", err)
+			amount, "time", time, "txID", txID, "err", err)
 
 		return fmt.Errorf("failed to write to %s: %w", s.cfg.StorePath, err)
 	}

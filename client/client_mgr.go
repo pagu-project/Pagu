@@ -152,7 +152,7 @@ func (cm *Mgr) IsValidator(address string) (bool, error) {
 		return exists, nil
 	}
 
-	return false, errors.New("unable to get validator info")
+	return false, errors.New("validator not found")
 }
 
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
@@ -177,6 +177,18 @@ func (cm *Mgr) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorResponse
 	}
 
 	return nil, errors.New("unable to get validator info")
+}
+
+func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, error) {
+	for _, c := range cm.clients {
+		txData, err := c.GetTransactionData(txID)
+		if err != nil {
+			continue
+		}
+		return txData, nil
+	}
+
+	return nil, errors.New("unable to get transaction data")
 }
 
 func (cm *Mgr) Close() {

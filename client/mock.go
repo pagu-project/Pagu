@@ -98,6 +98,21 @@ func (mr *MockIClientMockRecorder) GetNetworkInfo() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworkInfo", reflect.TypeOf((*MockIClient)(nil).GetNetworkInfo))
 }
 
+// GetTransactionData mocks base method.
+func (m *MockIClient) GetTransactionData(arg0 string) (*pactus.GetTransactionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransactionData", arg0)
+	ret0, _ := ret[0].(*pactus.GetTransactionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransactionData indicates an expected call of GetTransactionData.
+func (mr *MockIClientMockRecorder) GetTransactionData(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionData", reflect.TypeOf((*MockIClient)(nil).GetTransactionData), arg0)
+}
+
 // GetValidatorInfo mocks base method.
 func (m *MockIClient) GetValidatorInfo(arg0 string) (*pactus.GetValidatorResponse, error) {
 	m.ctrl.T.Helper()

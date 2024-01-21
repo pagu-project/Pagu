@@ -4,7 +4,7 @@
 
 # Pactus Bot Engine (RoboPac)
 
-Pactus Bor Engine is a Robot that provides support and information about the Pactus Blockchain.
+The Pactus Bot Engine is a Robot that provides support and information about the Pactus Blockchain.
 
 
 ## Contributing
