@@ -17,7 +17,7 @@ func main() {
 	// load configuration.
 	config, err := config.Load()
 	if err != nil {
-		log.Panic("error loading configuration %v\n", err)
+		log.Panic("error loading configuration", "err", err)
 	}
 
 	// starting client manager for RPC.
