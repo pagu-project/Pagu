@@ -2,12 +2,15 @@ package config
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TestBasicCheck tests the BasicCheck method of the Config struct.
 func TestBasicCheck(t *testing.T) {
-	// Setup - Create a temporary directory for WalletPath
-	tempDir := t.TempDir()
+	// Create a temporary directory for the WalletPath
+	tempWalletPath := t.TempDir()
+	tempStorePath := t.TempDir()
 
 	// Define test cases
 	tests := []struct {
@@ -19,10 +22,10 @@ func TestBasicCheck(t *testing.T) {
 			name: "Valid config",
 			cfg: Config{
 				WalletAddress:  "test_wallet_address",
-				WalletPath:     tempDir, // Use the temporary directory
+				WalletPath:     tempWalletPath, // Use the temporary directory
 				WalletPassword: "test_password",
 				RPCNodes:       []string{"http://127.0.0.1:8545"},
-				StorePath:      tempDir, // Use the temporary directory for StorePath as well
+				StorePath:      tempStorePath, // Use the temporary directory
 				DiscordBotCfg: DiscordBotConfig{
 					DiscordToken:   "MTEabc123",
 					DiscordGuildID: "123456789",
@@ -53,9 +56,11 @@ func TestBasicCheck(t *testing.T) {
 			// Perform the check
 			err := tt.cfg.BasicCheck()
 
-			// Assert the error
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Config.BasicCheck() error = %v, wantErr %v", err, tt.wantErr)
+			// Assert the error based on wantErr
+			if tt.wantErr {
+				assert.Error(t, err, "Config.BasicCheck() should return an error")
+			} else {
+				assert.NoError(t, err, "Config.BasicCheck() should not return an error")
 			}
 		})
 	}

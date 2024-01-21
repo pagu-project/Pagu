@@ -57,10 +57,6 @@ func (cfg *Config) BasicCheck() error {
 		return fmt.Errorf("WALLET_ADDRESS is not set")
 	}
 
-	if cfg.WalletPath == "" {
-		return fmt.Errorf("WALLET_PATH is not set")
-	}
-
 	// Check if the WalletPath exists.
 	if !util.PathExists(cfg.WalletPath) {
 		return fmt.Errorf("WALLET_PATH does not exist")
