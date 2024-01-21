@@ -10,9 +10,9 @@ cmd/data/wallet.json
 cmd/data/config.json
 cmd/data/validators.json
 cmd/bin
+
 __pycache__
 /scripts/go/referral.json
-/scripts/go/top10.json
 
 #.env file
 .env
