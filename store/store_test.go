@@ -16,7 +16,7 @@ import (
 var exampleStore []byte
 
 func setup(t *testing.T) (store.IStore, string) {
-	cfg, err := config.Load()
+	cfg, err := config.Load("../config/config.json")
 	assert.NoError(t, err)
 
 	err = os.WriteFile(cfg.StorePath, exampleStore, 0o600)
