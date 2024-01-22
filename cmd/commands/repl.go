@@ -8,6 +8,7 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
+	"github.com/kehiy/RoboPac/engine/commands"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
 	"github.com/kehiy/RoboPac/wallet"
@@ -87,11 +88,18 @@ func REPLCommand(parentCmd *cobra.Command) {
 			input = strings.TrimSuffix(input, "\n")
 
 			if strings.ToLower(input) == "exit" {
-				cmd.Println("exiting from repl.")
+				cmd.Println("exiting from repl")
 
 				return
 			}
 
+			q := commands.ParseQuery(input)
+			response, err := commands.Execute(q, botEngine)
+			if err != nil {
+				cmd.PrintErr(err)
+			}
+
+			cmd.Print(response)
 		}
 	}
 }

@@ -12,4 +12,5 @@ cmd/data/validators.json
 cmd/bin
 __pycache__
 /scripts/go/referral.json
-
+dev_wallet
+/build
