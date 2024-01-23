@@ -64,8 +64,8 @@ github.com/multiformats/go-multihash v0.2.3 h1:7Lyc8XfX/IY2jWb/gI7JP+o7JEq9hOa7B
 github.com/multiformats/go-multihash v0.2.3/go.mod h1:dXgKXCXjBzdscBLk9JkjINiEsCKRVch90MdaGiKsvSM=
 github.com/multiformats/go-varint v0.0.7 h1:sWSGR+f/eu5ABZA2ZpYKBILXTTs9JWpdEM/nEGOHFS8=
 github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOELpZAu9eioSos/OU=
-github.com/pactus-project/pactus v0.20.1 h1:PsmT4ybJdfyc8KmHkdQFBOwCJrwolpwH5Obq9hTVuJg=
-github.com/pactus-project/pactus v0.20.1/go.mod h1:+pOQiwujnaKELLypC7Cw3VR72B4iIaisEIWKR4ru0tk=
+github.com/pactus-project/pactus v0.20.1-0.20240123172127-c5fe20fc3942 h1:ggHMeHuE6Ta7TDbzAzhKbq7/e56jWgcPcI2uub0x6NI=
+github.com/pactus-project/pactus v0.20.1-0.20240123172127-c5fe20fc3942/go.mod h1:+pOQiwujnaKELLypC7Cw3VR72B4iIaisEIWKR4ru0tk=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

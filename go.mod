@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/pactus-project/pactus v0.20.1
+	github.com/pactus-project/pactus v0.20.1-0.20240123172127-c5fe20fc3942
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.58.3

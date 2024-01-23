@@ -4,18 +4,8 @@ import (
 	"errors"
 
 	"github.com/kehiy/RoboPac/log"
-	"github.com/pactus-project/pactus/crypto"
-	"github.com/pactus-project/pactus/crypto/bls"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
-
-func init() {
-	crypto.AddressHRP = "pc"
-	crypto.PublicKeyHRP = "public"
-	crypto.PrivateKeyHRP = "secret"
-	crypto.XPublicKeyHRP = "xpublic"
-	crypto.XPrivateKeyHRP = "xsecret"
-}
 
 type Mgr struct {
 	clients map[string]IClient
@@ -92,7 +82,7 @@ func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	return nil, errors.New("unable to get network info")
 }
 
-func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, *bls.PublicKey, error) {
+func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
 	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
@@ -101,25 +91,22 @@ func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, *bls.Publi
 
 		if networkInfo != nil {
 			for _, p := range networkInfo.ConnectedPeers {
-				for i, key := range p.ConsensusKeys {
-					pub, _ := bls.PublicKeyFromString(key)
-					if pub != nil {
-						if pub.ValidatorAddress().String() == address {
-							if i != 0 {
-								return nil, nil, errors.New("please enter the first validator address")
-							}
-							return p, pub, nil
+				for i, addr := range p.ConsensusKeys {
+					if addr == address {
+						if i != 0 {
+							return nil, errors.New("please enter the first validator address")
 						}
+						return p, nil
 					}
 				}
 			}
 		}
 	}
 
-	return nil, nil, errors.New("peer does not exist")
+	return nil, errors.New("peer does not exist")
 }
 
-func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, error) {
+func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
@@ -128,19 +115,16 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, er
 
 		if networkInfo != nil {
 			for _, p := range networkInfo.ConnectedPeers {
-				for _, key := range p.ConsensusKeys {
-					pub, _ := bls.PublicKeyFromString(key)
-					if pub != nil {
-						if pub.ValidatorAddress().String() == address {
-							return p, pub, nil
-						}
+				for _, addr := range p.ConsensusAddress {
+					if addr == address {
+						return p, nil
 					}
 				}
 			}
 		}
 	}
 
-	return nil, nil, errors.New("peer does not exist")
+	return nil, errors.New("peer does not exist")
 }
 
 func (cm *Mgr) IsValidator(address string) (bool, error) {

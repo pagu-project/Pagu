@@ -84,7 +84,7 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 
 	valAddress := tokens[0]
 
-	peerInfo, _, err := be.Cm.GetPeerInfo(valAddress)
+	peerInfo, err := be.Cm.GetPeerInfo(valAddress)
 	if err != nil {
 		return nil, err
 	}
