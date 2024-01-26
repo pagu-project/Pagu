@@ -116,11 +116,12 @@ func TestNodeInfo(t *testing.T) {
 			&pactus.GetNetworkInfoResponse{
 				ConnectedPeers: []*pactus.PeerInfo{
 					{
-						ConsensusKeys: []string{pubKey},
-						Height:        100,
-						PeerId:        []byte(peerID),
-						Agent:         "node=pactus-gui.exe/node-version=v0.20.0/protocol-version=1/os=windows/arch=amd64",
-						Address:       "/ip4/000.000.000.000/tcp/21777",
+						ConsensusKeys:    []string{pubKey},
+						ConsensusAddress: []string{valAddress},
+						Height:           100,
+						PeerId:           []byte(peerID),
+						Agent:            "node=pactus-gui.exe/node-version=v0.20.0/protocol-version=1/os=windows/arch=amd64",
+						Address:          "/ip4/000.000.000.000/tcp/21777",
 					},
 					{
 						ConsensusKeys: []string{"publicInvalid"},
