@@ -43,8 +43,8 @@ func LoadStore(cfg *config.Config, logger *log.SubLogger) (IStore, error) {
 	return ss, nil
 }
 
-func (s *Store) ClaimerInfo(discordID string) *Claimer {
-	entry, found := s.syncMap.Load(discordID)
+func (s *Store) ClaimerInfo(testNetValAddr string) *Claimer {
+	entry, found := s.syncMap.Load(testNetValAddr)
 	if !found {
 		return nil
 	}
@@ -53,8 +53,8 @@ func (s *Store) ClaimerInfo(discordID string) *Claimer {
 	return claimerInfo
 }
 
-func (s *Store) AddClaimTransaction(txID string, amount float64, time int64, discordID string) error {
-	s.syncMap.Store(discordID, &Claimer{
+func (s *Store) AddClaimTransaction(amount float64, time int64, txID, discordID, testNetValAddr string) error {
+	s.syncMap.Store(testNetValAddr, &Claimer{
 		DiscordID: discordID,
 		ClaimTransaction: &ClaimTransaction{
 			TxID:   txID,

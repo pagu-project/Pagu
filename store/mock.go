@@ -39,29 +39,29 @@ func (m *MockIStore) EXPECT() *MockIStoreMockRecorder {
 }
 
 // AddClaimTransaction mocks base method.
-func (m *MockIStore) AddClaimTransaction(TxID string, Amount float64, Time int64, discordID string) error {
+func (m *MockIStore) AddClaimTransaction(amount float64, time int64, txID, discordID, testNetValAddr string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddClaimTransaction", TxID, Amount, Time, discordID)
+	ret := m.ctrl.Call(m, "AddClaimTransaction", amount, time, txID, discordID, testNetValAddr)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddClaimTransaction indicates an expected call of AddClaimTransaction.
-func (mr *MockIStoreMockRecorder) AddClaimTransaction(TxID, Amount, Time, discordID any) *gomock.Call {
+func (mr *MockIStoreMockRecorder) AddClaimTransaction(amount, time, txID, discordID, testNetValAddr any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), TxID, Amount, Time, discordID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), amount, time, txID, discordID, testNetValAddr)
 }
 
 // ClaimerInfo mocks base method.
-func (m *MockIStore) ClaimerInfo(discordID string) *Claimer {
+func (m *MockIStore) ClaimerInfo(testNetValAddr string) *Claimer {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ClaimerInfo", discordID)
+	ret := m.ctrl.Call(m, "ClaimerInfo", testNetValAddr)
 	ret0, _ := ret[0].(*Claimer)
 	return ret0
 }
 
 // ClaimerInfo indicates an expected call of ClaimerInfo.
-func (mr *MockIStoreMockRecorder) ClaimerInfo(discordID any) *gomock.Call {
+func (mr *MockIStoreMockRecorder) ClaimerInfo(testNetValAddr any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClaimerInfo", reflect.TypeOf((*MockIStore)(nil).ClaimerInfo), discordID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClaimerInfo", reflect.TypeOf((*MockIStore)(nil).ClaimerInfo), testNetValAddr)
 }

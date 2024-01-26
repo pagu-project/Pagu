@@ -156,16 +156,17 @@ func TestClaim(t *testing.T) {
 
 	t.Run("everything normal and good", func(t *testing.T) {
 		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		testNetValAddr := "tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf"
 		discordID := "123456789"
 		txID := "0x123456789"
-		amount := 74.68
+		amount := float64(74)
 		time := time.Now().Unix()
 
 		client.EXPECT().IsValidator(valAddress).Return(
 			true, nil,
 		)
 
-		store.EXPECT().ClaimerInfo(discordID).Return(
+		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:        discordID,
 				TotalReward:      amount,
@@ -189,11 +190,11 @@ func TestClaim(t *testing.T) {
 			}, nil,
 		)
 
-		store.EXPECT().AddClaimTransaction(txID, amount, time, discordID).Return(
+		store.EXPECT().AddClaimTransaction(amount, time, txID, discordID, testNetValAddr).Return(
 			nil,
 		)
 
-		store.EXPECT().ClaimerInfo(discordID).Return(
+		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
 				TotalReward: amount,
@@ -205,7 +206,7 @@ func TestClaim(t *testing.T) {
 			},
 		).AnyTimes()
 
-		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
 		assert.NoError(t, err)
 		assert.NotNil(t, claimTx)
 
@@ -214,7 +215,7 @@ func TestClaim(t *testing.T) {
 		assert.Equal(t, time, claimTx.Time)
 
 		//! can't claim twice.
-		claimTx, err = eng.Claim([]string{valAddress, discordID})
+		claimTx, err = eng.Claim([]string{valAddress, testNetValAddr, discordID})
 		assert.EqualError(t, err, "this claimer have already claimed rewards")
 		assert.Nil(t, claimTx)
 	})
@@ -227,23 +228,25 @@ func TestClaim(t *testing.T) {
 
 	t.Run("claimer not found", func(t *testing.T) {
 		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		testNetValAddr := "tpc1peaeyzmwjqu6nz93c27hr8ad2l265tx4s9v6zhw"
 		discordID := "987654321"
 
-		store.EXPECT().ClaimerInfo(discordID).Return(
+		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
 			nil,
 		)
 
-		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
 		assert.EqualError(t, err, "claimer not found")
 		assert.Nil(t, claimTx)
 	})
 
 	t.Run("not validator address", func(t *testing.T) {
 		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		testNetValAddr := "tpc1p2vx5t8sglhvncmp3en0qhgtxyc59w0gfgnaqe7"
 		discordID := "1234567890"
 		amount := 74.68
 
-		store.EXPECT().ClaimerInfo(discordID).Return(
+		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
 				TotalReward: amount,
@@ -254,13 +257,14 @@ func TestClaim(t *testing.T) {
 			false, nil,
 		)
 
-		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
 		assert.EqualError(t, err, "invalid argument: validator address")
 		assert.Nil(t, claimTx)
 	})
 
 	t.Run("empty transaction ID", func(t *testing.T) {
 		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+		testNetValAddr := "tpc1pvmundkkp83u5cfz04sem5r7688dc0lef5u0mmv"
 		discordID := "1234567890"
 		amount := 74.68
 
@@ -268,7 +272,7 @@ func TestClaim(t *testing.T) {
 			true, nil,
 		)
 
-		store.EXPECT().ClaimerInfo(discordID).Return(
+		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:        discordID,
 				TotalReward:      amount,
@@ -281,7 +285,7 @@ func TestClaim(t *testing.T) {
 			"", nil,
 		)
 
-		claimTx, err := eng.Claim([]string{valAddress, discordID})
+		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
 		assert.EqualError(t, err, "can't send bond transaction")
 		assert.Nil(t, claimTx)
 	})

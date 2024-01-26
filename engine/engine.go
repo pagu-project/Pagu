@@ -140,16 +140,17 @@ func (be *BotEngine) Claim(tokens []string) (*store.ClaimTransaction, error) {
 	be.Lock()
 	defer be.Unlock()
 
-	if len(tokens) != 2 {
+	if len(tokens) != 3 {
 		return nil, errors.New("missing argument: validator address")
 	}
 
 	valAddr := tokens[0]
-	discordID := tokens[1]
+	testNetValAddr := tokens[1]
+	discordID := tokens[2]
 
-	be.logger.Info("new claim request", "valAddr", valAddr, "discordID", discordID)
+	be.logger.Info("new claim request", "valAddr", valAddr, "testNetValAddr", testNetValAddr, "discordID", discordID)
 
-	claimer := be.Store.ClaimerInfo(discordID)
+	claimer := be.Store.ClaimerInfo(testNetValAddr)
 	if claimer == nil {
 		return nil, errors.New("claimer not found")
 	}
@@ -185,12 +186,13 @@ func (be *BotEngine) Claim(tokens []string) (*store.ClaimTransaction, error) {
 		return nil, err
 	}
 
-	err = be.Store.AddClaimTransaction(txID, util.ChangeToCoin(txData.Transaction.Value), int64(txData.BlockTime), discordID)
+	err = be.Store.AddClaimTransaction(util.ChangeToCoin(txData.Transaction.Value),
+		int64(txData.BlockTime), txID, discordID, testNetValAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	claimer = be.Store.ClaimerInfo(discordID)
+	claimer = be.Store.ClaimerInfo(testNetValAddr)
 	if claimer == nil {
 		return nil, errors.New("can't save claim info")
 	}

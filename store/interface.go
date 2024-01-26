@@ -7,8 +7,9 @@ type ClaimTransaction struct {
 }
 
 type Claimer struct {
-	DiscordID        string            `json:"discord_id"`
-	TotalReward      float64           `json:"total_reward"`
+	DiscordID string `json:"did"`
+	// ValAddr          string            `json:"main_net_validator_address"`
+	TotalReward      float64           `json:"r"`
 	ClaimTransaction *ClaimTransaction `json:"claim_transaction"`
 }
 
@@ -17,6 +18,6 @@ func (c *Claimer) IsClaimed() bool {
 }
 
 type IStore interface {
-	ClaimerInfo(discordID string) *Claimer
-	AddClaimTransaction(TxID string, Amount float64, Time int64, discordID string) error
+	ClaimerInfo(testNetValAddr string) *Claimer
+	AddClaimTransaction(amount float64, time int64, txID, discordID, testNetValAddr string) error
 }

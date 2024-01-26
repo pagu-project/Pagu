@@ -35,7 +35,7 @@ func TestStore(t *testing.T) {
 	store, path := setup(t)
 
 	t.Run("get claimer", func(t *testing.T) {
-		claimer := store.ClaimerInfo("123456789")
+		claimer := store.ClaimerInfo("tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf")
 		assert.Equal(t, float64(100), claimer.TotalReward)
 		assert.Equal(t, "123456789", claimer.DiscordID)
 	})
@@ -44,16 +44,17 @@ func TestStore(t *testing.T) {
 		txID := "0x123456789"
 		time := time.Now()
 		discordID := "123456789"
+		testNetValAddr := "tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf"
 
-		claimer := store.ClaimerInfo(discordID)
+		claimer := store.ClaimerInfo(testNetValAddr)
 
 		isClaimed := claimer.IsClaimed()
 		assert.False(t, isClaimed)
 
-		err := store.AddClaimTransaction(txID, claimer.TotalReward, time.Unix(), discordID)
+		err := store.AddClaimTransaction(claimer.TotalReward, time.Unix(), txID, discordID, testNetValAddr)
 		assert.NoError(t, err)
 
-		claimedInfo := store.ClaimerInfo(discordID)
+		claimedInfo := store.ClaimerInfo(testNetValAddr)
 		assert.Equal(t, discordID, claimedInfo.DiscordID)
 		assert.Equal(t, float64(100), claimedInfo.ClaimTransaction.Amount)
 		assert.Equal(t, txID, claimedInfo.ClaimTransaction.TxID)
@@ -63,6 +64,13 @@ func TestStore(t *testing.T) {
 
 		isClaimed = claimedInfo.IsClaimed()
 		assert.True(t, isClaimed)
+	})
+
+	t.Run("is claimed test", func(t *testing.T) {
+		claimer := store.ClaimerInfo("tpc1pesz6kuv7jts6al6la3794fyj5xaj7wm93k7z6y")
+		assert.Equal(t, float64(12), claimer.TotalReward)
+		assert.Equal(t, "964550933793103912", claimer.DiscordID)
+		assert.True(t, claimer.IsClaimed())
 	})
 
 	err := os.Remove(path)
