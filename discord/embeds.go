@@ -5,7 +5,7 @@ import "github.com/bwmarrin/discordgo"
 func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title: "RoboPac Help",
-		URL: "https://pactus.org",
+		URL:   "https://pactus.org",
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://pactus.org",
 			IconURL: s.State.User.AvatarURL(""),
