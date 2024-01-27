@@ -175,7 +175,7 @@ func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, 
 	return nil, errors.New("unable to get transaction data")
 }
 
-func (cm *Mgr) Close() {
+func (cm *Mgr) Stop() {
 	for addr, c := range cm.clients {
 		if err := c.Close(); err != nil {
 			log.Error("could not close connection to RPC node", "err", err, "RPCAddr", addr)

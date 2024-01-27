@@ -10,7 +10,10 @@ require (
 	google.golang.org/grpc v1.58.3
 )
 
+require github.com/gorilla/websocket v1.5.1 // indirect
+
 require (
+	github.com/bwmarrin/discordgo v0.27.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.5.0 // indirect

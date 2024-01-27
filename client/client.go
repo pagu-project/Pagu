@@ -5,8 +5,6 @@ import (
 	"errors"
 
 	"github.com/kehiy/RoboPac/log"
-	"github.com/pactus-project/pactus/crypto"
-	"github.com/pactus-project/pactus/crypto/bls"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -61,22 +59,20 @@ func (c *Client) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	return networkInfo, nil
 }
 
-func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, *bls.PublicKey, error) {
+func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 	networkInfo, _ := c.GetNetworkInfo()
-	crypto.PublicKeyHRP = "tpublic"
 	if networkInfo != nil {
 		for _, p := range networkInfo.ConnectedPeers {
-			for _, key := range p.ConsensusKeys {
-				pub, _ := bls.PublicKeyFromString(key)
-				if pub != nil {
-					if pub.ValidatorAddress().String() == address {
-						return p, pub, nil
+			for _, addr := range p.ConsensusAddress {
+				if addr != "" {
+					if addr == address {
+						return p, nil
 					}
 				}
 			}
 		}
 	}
-	return nil, nil, errors.New("peer does not exist")
+	return nil, errors.New("peer does not exist")
 }
 
 func (c *Client) IsValidator(address string) (bool, error) {
