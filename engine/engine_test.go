@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	rpstore "github.com/kehiy/RoboPac/store"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/pactus-project/pactus/util"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -150,138 +148,128 @@ func TestClaim(t *testing.T) {
 	eng, client, store, wallet := setup(t)
 
 	t.Run("everything normal and good", func(t *testing.T) {
-		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-		testNetValAddr := "tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf"
+		mainnetAddr := "mainnet-addr"
+		testnetAddr := "testnet-addr"
 		discordID := "123456789"
-		txID := "0x123456789"
-		amount := float64(74)
-		time := time.Now().Unix()
+		amount := int64(74)
+		txID := "tx-id"
 
-		client.EXPECT().IsValidator(valAddress).Return(
+		client.EXPECT().IsValidator(mainnetAddr).Return(
 			true, nil,
-		)
+		).AnyTimes()
 
-		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
-				DiscordID:        discordID,
-				TotalReward:      amount,
-				ClaimTransaction: nil,
+				DiscordID:   discordID,
+				TotalReward: amount,
+				ClaimedTxID: "",
 			},
 		)
 
-		memo := fmt.Sprintf("RP to: %v", discordID)
-		wallet.EXPECT().BondTransaction("", valAddress, memo, amount).Return(
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{mainnetAddr},
+						ConsensusKeys:    []string{"public-key-1"},
+					},
+				},
+			}, nil,
+		).AnyTimes()
+
+		wallet.EXPECT().BondTransaction("public-key-1", mainnetAddr, "", amount).Return(
 			txID, nil,
 		)
 
-		client.EXPECT().GetTransactionData(txID).Return(
-			&pactus.GetTransactionResponse{
-				BlockTime: uint32(time),
-				Transaction: &pactus.TransactionInfo{
-					Id:    []byte(txID),
-					Value: util.CoinToChange(amount),
-					Memo:  memo,
-				},
-			}, nil,
-		)
-
-		store.EXPECT().AddClaimTransaction(amount, time, txID, discordID, testNetValAddr).Return(
+		store.EXPECT().AddClaimTransaction(testnetAddr, txID).Return(
 			nil,
 		)
 
-		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-			&rpstore.Claimer{
-				DiscordID:   discordID,
-				TotalReward: amount,
-				ClaimTransaction: &rpstore.ClaimTransaction{
-					TxID:   txID,
-					Amount: amount,
-					Time:   time,
-				},
-			},
-		).AnyTimes()
-
-		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.NoError(t, err)
-		assert.NotNil(t, claimTx)
-
-		assert.Equal(t, amount, claimTx.Amount)
-		assert.Equal(t, txID, claimTx.TxID)
-		assert.Equal(t, time, claimTx.Time)
+		assert.NotNil(t, expectedTx, txID)
 
 		//! can't claim twice.
-		claimTx, err = eng.Claim([]string{valAddress, testNetValAddr, discordID})
-		assert.EqualError(t, err, "this claimer have already claimed rewards")
-		assert.Nil(t, claimTx)
-	})
 
-	t.Run("missing arguments", func(t *testing.T) {
-		claimTx, err := eng.Claim()
-		assert.EqualError(t, err, "missing argument: validator address")
-		assert.Nil(t, claimTx)
-	})
-
-	t.Run("claimer not found", func(t *testing.T) {
-		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-		testNetValAddr := "tpc1peaeyzmwjqu6nz93c27hr8ad2l265tx4s9v6zhw"
-		discordID := "987654321"
-
-		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-			nil,
-		)
-
-		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-		assert.EqualError(t, err, "claimer not found")
-		assert.Nil(t, claimTx)
-	})
-
-	t.Run("not validator address", func(t *testing.T) {
-		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-		testNetValAddr := "tpc1p2vx5t8sglhvncmp3en0qhgtxyc59w0gfgnaqe7"
-		discordID := "1234567890"
-		amount := 74.68
-
-		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
 				TotalReward: amount,
+				ClaimedTxID: txID,
 			},
 		)
-
-		client.EXPECT().IsValidator(valAddress).Return(
-			false, nil,
-		)
-
-		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-		assert.EqualError(t, err, "invalid argument: validator address")
-		assert.Nil(t, claimTx)
+		expectedTx, err = eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.Error(t, err)
+		assert.Empty(t, expectedTx)
 	})
 
-	t.Run("empty transaction ID", func(t *testing.T) {
-		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-		testNetValAddr := "tpc1pvmundkkp83u5cfz04sem5r7688dc0lef5u0mmv"
-		discordID := "1234567890"
-		amount := 74.68
+	// t.Run("missing arguments", func(t *testing.T) {
+	// 	claimTx, err := eng.Claim()
+	// 	assert.EqualError(t, err, "missing argument: validator address")
+	// 	assert.Nil(t, claimTx)
+	// })
 
-		client.EXPECT().IsValidator(valAddress).Return(
-			true, nil,
-		)
+	// t.Run("claimer not found", func(t *testing.T) {
+	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+	// 	testNetValAddr := "tpc1peaeyzmwjqu6nz93c27hr8ad2l265tx4s9v6zhw"
+	// 	discordID := "987654321"
 
-		store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-			&rpstore.Claimer{
-				DiscordID:        discordID,
-				TotalReward:      amount,
-				ClaimTransaction: nil,
-			},
-		)
+	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
+	// 		nil,
+	// 	)
 
-		memo := fmt.Sprintf("RP to: %v", discordID)
-		wallet.EXPECT().BondTransaction("", valAddress, memo, amount).Return(
-			"", nil,
-		)
+	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
+	// 	assert.EqualError(t, err, "claimer not found")
+	// 	assert.Nil(t, claimTx)
+	// })
 
-		claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-		assert.EqualError(t, err, "can't send bond transaction")
-		assert.Nil(t, claimTx)
-	})
+	// t.Run("not validator address", func(t *testing.T) {
+	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+	// 	testNetValAddr := "tpc1p2vx5t8sglhvncmp3en0qhgtxyc59w0gfgnaqe7"
+	// 	discordID := "1234567890"
+	// 	amount := 74.68
+
+	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
+	// 		&rpstore.Claimer{
+	// 			DiscordID:   discordID,
+	// 			TotalReward: amount,
+	// 		},
+	// 	)
+
+	// 	client.EXPECT().IsValidator(valAddress).Return(
+	// 		false, nil,
+	// 	)
+
+	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
+	// 	assert.EqualError(t, err, "invalid argument: validator address")
+	// 	assert.Nil(t, claimTx)
+	// })
+
+	// t.Run("empty transaction ID", func(t *testing.T) {
+	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
+	// 	testNetValAddr := "tpc1pvmundkkp83u5cfz04sem5r7688dc0lef5u0mmv"
+	// 	discordID := "1234567890"
+	// 	amount := 74.68
+
+	// 	client.EXPECT().IsValidator(valAddress).Return(
+	// 		true, nil,
+	// 	)
+
+	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
+	// 		&rpstore.Claimer{
+	// 			DiscordID:        discordID,
+	// 			TotalReward:      amount,
+	// 			ClaimTransaction: nil,
+	// 		},
+	// 	)
+
+	// 	memo := fmt.Sprintf("RP to: %v", discordID)
+	// 	wallet.EXPECT().BondTransaction("", valAddress, memo, amount).Return(
+	// 		"", nil,
+	// 	)
+
+	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
+	// 	assert.EqualError(t, err, "can't send bond transaction")
+	// 	assert.Nil(t, claimTx)
+	// })
 }

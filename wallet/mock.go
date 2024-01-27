@@ -53,7 +53,7 @@ func (mr *MockIWalletMockRecorder) Address() *gomock.Call {
 }
 
 // BondTransaction mocks base method.
-func (m *MockIWallet) BondTransaction(arg0, arg1, arg2 string, arg3 float64) (string, error) {
+func (m *MockIWallet) BondTransaction(arg0, arg1, arg2 string, arg3 int64) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BondTransaction", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(string)
@@ -68,7 +68,7 @@ func (mr *MockIWalletMockRecorder) BondTransaction(arg0, arg1, arg2, arg3 any) *
 }
 
 // TransferTransaction mocks base method.
-func (m *MockIWallet) TransferTransaction(arg0, arg1, arg2 string, arg3 float64) (string, error) {
+func (m *MockIWallet) TransferTransaction(arg0, arg1, arg2 string, arg3 int64) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "TransferTransaction", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(string)
