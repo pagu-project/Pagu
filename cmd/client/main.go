@@ -3,18 +3,16 @@ package main
 import (
 	"os"
 
-	"github.com/kehiy/RoboPac/cmd/commands"
 	"github.com/spf13/cobra"
 )
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac",
+		Use:     "robopac-server",
 		Version: "0.0.1",
 	}
 
-	commands.RunCommand(rootCmd)
-	commands.REPLCommand(rootCmd)
+	REPLCommand(rootCmd)
 
 	err := rootCmd.Execute()
 	if err != nil {

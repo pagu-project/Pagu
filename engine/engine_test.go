@@ -154,10 +154,6 @@ func TestClaim(t *testing.T) {
 		amount := int64(74)
 		txID := "tx-id"
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			true, nil,
-		).AnyTimes()
-
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,

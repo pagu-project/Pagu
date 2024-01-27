@@ -93,7 +93,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
 		}
 
-		_, err := be.Claim(args[0], args[1], args[3])
+		_, err := be.Claim(args[0], args[1], args[2])
 		if err != nil {
 			return "", err
 		}
@@ -222,21 +222,21 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 
 	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
 
+	// TODO:
+	// Check if has less balance of 500, return error
+
 	claimer := be.Store.ClaimerInfo(testnetAddr)
 	if claimer == nil {
 		return "", errors.New("claimer not found")
 	}
 
-	if claimer.IsClaimed() {
-		return "", errors.New("this claimer have already claimed rewards")
+	if claimer.DiscordID != discordID {
+		be.logger.Warn("try to claim other's reward", "claimer", claimer.DiscordID, "discordID", discordID)
+		return "", errors.New("invalid claimer")
 	}
 
-	isValidator, err := be.Cm.IsValidator(mainnetAddr)
-	if err != nil {
-		return "", err
-	}
-	if !isValidator {
-		return "", errors.New("invalid argument: validator address")
+	if claimer.IsClaimed() {
+		return "", errors.New("this claimer have already claimed rewards")
 	}
 
 	peerInfo, err := be.Cm.GetPeerInfoFirstVal(mainnetAddr)

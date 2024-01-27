@@ -14,3 +14,5 @@ __pycache__
 /scripts/go/referral.json
 dev_wallet
 /build
+.env
+*.log
