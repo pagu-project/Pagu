@@ -13,7 +13,8 @@ type Config struct {
 	WalletAddress  string
 	WalletPath     string
 	WalletPassword string
-	RPCNodes       []string
+	NetworkNodes   []string
+	LocalNode      string
 	StorePath      string
 	DiscordBotCfg  DiscordBotConfig
 }
@@ -34,7 +35,8 @@ func Load(filePaths ...string) (*Config, error) {
 		WalletAddress:  os.Getenv("WALLET_ADDRESS"),
 		WalletPath:     os.Getenv("WALLET_PATH"),
 		WalletPassword: os.Getenv("WALLET_PASSWORD"),
-		RPCNodes:       strings.Split(os.Getenv("RPC_NODES"), ","),
+		LocalNode:      os.Getenv("LOCAL_NODE"),
+		NetworkNodes:   strings.Split(os.Getenv("NETWORK_NODES"), ","),
 		StorePath:      os.Getenv("STORE_PATH"),
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
@@ -61,7 +63,7 @@ func (cfg *Config) BasicCheck() error {
 		return fmt.Errorf("WALLET_PATH does not exist")
 	}
 
-	if len(cfg.RPCNodes) == 0 {
+	if len(cfg.NetworkNodes) == 0 {
 		return fmt.Errorf("RPCNODES is not set or incorrect")
 	}
 

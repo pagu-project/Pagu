@@ -1,13 +1,13 @@
 package engine
 
-import "github.com/kehiy/RoboPac/store"
+type IEngine interface {
+	// NetworkHealth() (*NetHealthResponse, error)
+	// NetworkStatus([]string) (*NetStatus, error)
+	// NodeInfo(addr string) (*NodeInfo, error)
+	// ClaimerInfo([]string) (*store.Claimer, error)
+	// Claim(discordID string, testnetAddr string, mainnetAddr string) (*store.ClaimTransaction, error)
 
-type Engine interface {
-	NetworkHealth([]string) (*NetHealthResponse, error)
-	NetworkStatus([]string) (*NetStatus, error)
-	NodeInfo([]string) (*NodeInfo, error)
-	ClaimerInfo([]string) (*store.Claimer, error)
-	Claim([]string) (*store.ClaimTransaction, error)
+	Run(input string) (string, error)
 
 	Stop()
 	Start()

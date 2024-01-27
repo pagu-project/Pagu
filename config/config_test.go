@@ -24,7 +24,7 @@ func TestBasicCheck(t *testing.T) {
 				WalletAddress:  "test_wallet_address",
 				WalletPath:     tempWalletPath, // Use the temporary directory
 				WalletPassword: "test_password",
-				RPCNodes:       []string{"http://127.0.0.1:8545"},
+				NetworkNodes:   []string{"http://127.0.0.1:8545"},
 				StorePath:      tempStorePath, // Use the temporary directory
 				DiscordBotCfg: DiscordBotConfig{
 					DiscordToken:   "MTEabc123",
@@ -39,7 +39,7 @@ func TestBasicCheck(t *testing.T) {
 				WalletAddress:  "test_wallet_address",
 				WalletPath:     "/valid/path",
 				WalletPassword: "test_password",
-				RPCNodes:       []string{},
+				NetworkNodes:   []string{},
 				StorePath:      "/valid/storepath",
 				DiscordBotCfg: DiscordBotConfig{
 					DiscordToken:   "MTEabc123",

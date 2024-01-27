@@ -3,16 +3,22 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/kehiy/RoboPac/client"
+	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/util"
+)
+
+const (
+	botCmdClaim = "claim"
 )
 
 type BotEngine struct {
@@ -24,13 +30,88 @@ type BotEngine struct {
 	sync.RWMutex
 }
 
-func NewBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore) (Engine, error) {
+func NewBotEngine(config *config.Config) (IEngine, error) {
+	cm := client.NewClientMgr()
+	c, err := client.NewClient(config.LocalNode)
+	if err != nil {
+		log.Error("can't make a new local-net client", "err", err, "addr", config.LocalNode)
+		return nil, err
+	}
+
+	cm.AddClient("local-net", c)
+
+	// initializing logger global instance.
+	log.InitGlobalLogger()
+
+	// new subLogger for engine.
+	eSl := log.NewSubLogger("engine")
+
+	// new subLogger for store.
+	sSl := log.NewSubLogger("store")
+
+	// new subLogger for store.
+	wSl := log.NewSubLogger("wallet")
+
+	// load or create wallet.
+	wallet := wallet.Open(config, wSl)
+	if wallet == nil {
+		log.Panic("wallet could not be opened, wallet is nil", "path", config.WalletPath)
+	}
+
+	log.Info("wallet opened successfully", "address", wallet.Address())
+
+	// load store.
+	store, err := store.LoadStore(config, sSl)
+	if err != nil {
+		log.Panic("could not load store", "err", err, "path", config.StorePath)
+	}
+
+	log.Info("store loaded successfully", "path", config.StorePath)
+
+	return newBotEngine(eSl, cm, wallet, store), nil
+}
+
+func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore) *BotEngine {
 	return &BotEngine{
 		logger: logger,
 		Wallet: w,
 		Cm:     cm,
 		Store:  s,
-	}, nil
+	}
+}
+
+// The input is always string.
+//
+//	The input format is like: [Command] <Arguments ...>
+//
+// The output is always string, but format might be JSON. ???
+func (be *BotEngine) Run(input string) (string, error) {
+	cmd, args := be.parseQuery(input)
+
+	switch cmd {
+	case botCmdClaim:
+		if len(args) != 3 {
+			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
+		}
+
+		_, err := be.Claim(args[0], args[1], args[3])
+		if err != nil {
+			return "", err
+		}
+		return "", nil
+
+	default:
+		return "", fmt.Errorf("unknown command: %s", cmd)
+	}
+}
+
+func (be *BotEngine) parseQuery(query string) (string, []string) {
+	subs := strings.Split(query, " ")
+	if len(subs) == 0 {
+		return "", nil
+	}
+
+	return subs[0], subs[1:]
 }
 
 func (be *BotEngine) NetworkHealth(_ []string) (*NetHealthResponse, error) {
@@ -136,17 +217,9 @@ func (be *BotEngine) ClaimerInfo(tokens []string) (*store.Claimer, error) {
 	return claimer, nil
 }
 
-func (be *BotEngine) Claim(tokens []string) (*store.ClaimTransaction, error) {
+func (be *BotEngine) Claim(discordID string, testNetValAddr string, valAddr string) (*store.ClaimTransaction, error) {
 	be.Lock()
 	defer be.Unlock()
-
-	if len(tokens) != 3 {
-		return nil, errors.New("missing argument: validator address")
-	}
-
-	valAddr := tokens[0]
-	testNetValAddr := tokens[1]
-	discordID := tokens[2]
 
 	be.logger.Info("new claim request", "valAddr", valAddr, "testNetValAddr", testNetValAddr, "discordID", discordID)
 
@@ -204,6 +277,8 @@ func (be *BotEngine) Claim(tokens []string) (*store.ClaimTransaction, error) {
 
 func (be *BotEngine) Stop() {
 	be.logger.Info("shutting bot engine down...")
+
+	be.Cm.Stop()
 }
 
 func (be *BotEngine) Start() {

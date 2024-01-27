@@ -1,4 +1,4 @@
-package engine_test
+package engine
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kehiy/RoboPac/client"
-	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
 	rpstore "github.com/kehiy/RoboPac/store"
 	"github.com/kehiy/RoboPac/wallet"
@@ -17,7 +16,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setup(t *testing.T) (engine.Engine, client.MockIClient, rpstore.MockIStore, wallet.MockIWallet, error) {
+func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
@@ -28,19 +27,18 @@ func setup(t *testing.T) (engine.Engine, client.MockIClient, rpstore.MockIStore,
 	cm := client.NewClientMgr()
 	cm.AddClient("addr-1", mockClient)
 
-	// mocking wallet.
-	wallet := wallet.NewMockIWallet(ctrl)
+	// mocking mockWallet.
+	mockWallet := wallet.NewMockIWallet(ctrl)
 
-	// mocking store.
-	store := rpstore.NewMockIStore(ctrl)
+	// mocking mockStore.
+	mockStore := rpstore.NewMockIStore(ctrl)
 
-	eng, err := engine.NewBotEngine(sl, cm, wallet, store)
-	return eng, *mockClient, *store, *wallet, err
+	eng := newBotEngine(sl, cm, mockWallet, mockStore)
+	return eng, mockClient, mockStore, mockWallet
 }
 
 func TestNetworkStatus(t *testing.T) {
-	eng, client, _, _, err := setup(t)
-	assert.NoError(t, err)
+	eng, client, _, _ := setup(t)
 
 	client.EXPECT().GetNetworkInfo().Return(
 		&pactus.GetNetworkInfoResponse{
@@ -64,8 +62,7 @@ func TestNetworkStatus(t *testing.T) {
 }
 
 func TestNetworkHealth(t *testing.T) {
-	eng, client, _, _, err := setup(t)
-	assert.NoError(t, err)
+	eng, client, _, _ := setup(t)
 
 	t.Run("should be healthy", func(t *testing.T) {
 		currentTime := time.Now().Unix()
@@ -95,8 +92,7 @@ func TestNetworkHealth(t *testing.T) {
 }
 
 func TestNodeInfo(t *testing.T) {
-	eng, client, _, _, err := setup(t)
-	assert.NoError(t, err)
+	eng, client, _, _ := setup(t)
 
 	t.Run("should return error, invalid input", func(t *testing.T) {
 		info, err := eng.NodeInfo([]string{})
@@ -151,8 +147,7 @@ func TestNodeInfo(t *testing.T) {
 }
 
 func TestClaim(t *testing.T) {
-	eng, client, store, wallet, err := setup(t)
-	assert.NoError(t, err)
+	eng, client, store, wallet := setup(t)
 
 	t.Run("everything normal and good", func(t *testing.T) {
 		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
@@ -221,7 +216,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("missing arguments", func(t *testing.T) {
-		claimTx, err := eng.Claim([]string{})
+		claimTx, err := eng.Claim()
 		assert.EqualError(t, err, "missing argument: validator address")
 		assert.Nil(t, claimTx)
 	})
