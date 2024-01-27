@@ -7,6 +7,7 @@ import (
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
+	"github.com/kehiy/RoboPac/discord"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
@@ -21,7 +22,7 @@ func RunCommand(parentCmd *cobra.Command) {
 	}
 	parentCmd.AddCommand(run)
 
-	run.Run = func(cmd *cobra.Command, args []string) {
+	run.Run = func(_ *cobra.Command, _ []string) {
 		// load configuration.
 		config, err := config.Load()
 		if err != nil {
@@ -72,16 +73,24 @@ func RunCommand(parentCmd *cobra.Command) {
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(eSl, cm, wallet, store)
 		if err != nil {
-			log.Panic("could not start discord bot", "err", err)
+			log.Panic("could not start bot engine", "err", err)
 		}
 		botEngine.Start()
+
+		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,
+			config.DiscordBotCfg.DiscordGuildID)
+		if err != nil {
+			log.Panic("could not start discord bot", "err", err)
+		}
+		discordBot.Start()
 
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 		<-sigChan
 
 		// gracefully shutdown the bot.
+		discordBot.Stop()
+		cm.Stop()
 		botEngine.Stop()
-		cm.Close()
 	}
 }
