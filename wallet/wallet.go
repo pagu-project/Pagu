@@ -32,7 +32,7 @@ func Open(cfg *config.Config, logger *log.SubLogger) IWallet {
 			logger.Fatal("error opening existing wallet", "err", err)
 		}
 
-		err = wt.Connect(cfg.RPCNodes[0])
+		err = wt.Connect(cfg.NetworkNodes[0])
 		if err != nil {
 			logger.Fatal("error establishing connection", "err", err)
 		}

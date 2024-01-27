@@ -8,11 +8,11 @@ import (
 
 type DiscordBot struct {
 	Session   *discordgo.Session
-	BotEngine engine.Engine
+	BotEngine engine.IEngine
 	GuildID   string
 }
 
-func NewDiscordBot(botEngine engine.Engine, token, guildID string) (*DiscordBot, error) {
+func NewDiscordBot(botEngine engine.IEngine, token, guildID string) (*DiscordBot, error) {
 	s, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err

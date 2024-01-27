@@ -5,13 +5,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/discord"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
-	"github.com/kehiy/RoboPac/store"
-	"github.com/kehiy/RoboPac/wallet"
 	"github.com/spf13/cobra"
 )
 
@@ -23,58 +20,21 @@ func RunCommand(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(run)
 
 	run.Run = func(_ *cobra.Command, _ []string) {
+		// initializing logger global instance.
+		log.InitGlobalLogger()
+
 		// load configuration.
 		config, err := config.Load()
 		if err != nil {
 			log.Panic("error loading configuration", "err", err)
 		}
 
-		// starting client manager for RPC.
-		cm := client.NewClientMgr()
-
-		for _, rn := range config.RPCNodes {
-			c, err := client.NewClient(rn)
-			if err != nil {
-				log.Error("can't make new client", "RPC Node address", rn)
-				continue
-			}
-			log.Info("connecting to RPC Node", "addr", rn)
-			cm.AddClient(rn, c)
-		}
-
-		// initializing logger global instance.
-		log.InitGlobalLogger()
-
-		// new subLogger for engine.
-		eSl := log.NewSubLogger("engine")
-
-		// new subLogger for store.
-		sSl := log.NewSubLogger("store")
-
-		// new subLogger for store.
-		wSl := log.NewSubLogger("wallet")
-
-		// load or create wallet.
-		wallet := wallet.Open(config, wSl)
-		if wallet == nil {
-			log.Panic("wallet could not be opened, wallet is nil", "path", config.WalletPath)
-		}
-
-		log.Info("wallet opened successfully", "address", wallet.Address())
-
-		// load store.
-		store, err := store.LoadStore(config, sSl)
-		if err != nil {
-			log.Panic("could not load store", "err", err, "path", config.StorePath)
-		}
-
-		log.Info("store loaded successfully", "path", config.StorePath)
-
 		// starting botEngine.
-		botEngine, err := engine.NewBotEngine(eSl, cm, wallet, store)
+		botEngine, err := engine.NewBotEngine(config)
 		if err != nil {
-			log.Panic("could not start bot engine", "err", err)
+			log.Panic("could not start discord bot", "err", err)
 		}
+
 		botEngine.Start()
 
 		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,
@@ -90,7 +50,6 @@ func RunCommand(parentCmd *cobra.Command) {
 
 		// gracefully shutdown the bot.
 		discordBot.Stop()
-		cm.Stop()
 		botEngine.Stop()
 	}
 }
