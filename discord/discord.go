@@ -19,9 +19,9 @@ func NewDiscordBot(botEngine engine.Engine, token, guildID string) (*DiscordBot,
 	}
 
 	return &DiscordBot{
-		Session: s,
+		Session:   s,
 		BotEngine: botEngine,
-		GuildID: guildID,
+		GuildID:   guildID,
 	}, nil
 }
 
