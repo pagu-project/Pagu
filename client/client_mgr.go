@@ -91,7 +91,7 @@ func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
 
 		if networkInfo != nil {
 			for _, p := range networkInfo.ConnectedPeers {
-				for i, addr := range p.ConsensusKeys {
+				for i, addr := range p.ConsensusAddress {
 					if addr == address {
 						if i != 0 {
 							return nil, errors.New("please enter the first validator address")

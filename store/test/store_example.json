@@ -10,10 +10,6 @@
   "tpc1pesz6kuv7jts6al6la3794fyj5xaj7wm93k7z6y": {
     "did": "964550933793103912",
     "r": 12,
-    "claim_transaction": {
-      "transaction_id": "",
-      "amount": 0,
-      "time": 0
-    }
+    "tx_id": "c03652ef5c0d343f92901d659be0eafbbfc35d7829a33032540b7a4ef03660b1"
   }
 }

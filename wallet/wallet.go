@@ -49,13 +49,12 @@ func Open(cfg *config.Config, logger *log.SubLogger) IWallet {
 	return nil
 }
 
-func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount float64) (string, error) {
+func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
 	opts := []pwallet.TxOption{
-		pwallet.OptionFee(util.CoinToChange(0)),
 		pwallet.OptionMemo(memo),
 	}
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
-		util.CoinToChange(amount), opts...)
+		amount, opts...)
 	if err != nil {
 		w.logger.Error("error creating bond transaction", "err", err, "address", toAddress, "amount", amount)
 		return "", err
@@ -81,7 +80,7 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount float64)
 	return res, nil // return transaction hash
 }
 
-func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount float64) (string, error) {
+func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
 	fee, err := w.wallet.CalculateFee(int64(amount), payload.TypeTransfer)
 	if err != nil {
 		return "", err

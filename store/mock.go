@@ -39,17 +39,17 @@ func (m *MockIStore) EXPECT() *MockIStoreMockRecorder {
 }
 
 // AddClaimTransaction mocks base method.
-func (m *MockIStore) AddClaimTransaction(amount float64, time int64, txID, discordID, testNetValAddr string) error {
+func (m *MockIStore) AddClaimTransaction(testNetValAddr, txID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddClaimTransaction", amount, time, txID, discordID, testNetValAddr)
+	ret := m.ctrl.Call(m, "AddClaimTransaction", testNetValAddr, txID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddClaimTransaction indicates an expected call of AddClaimTransaction.
-func (mr *MockIStoreMockRecorder) AddClaimTransaction(amount, time, txID, discordID, testNetValAddr any) *gomock.Call {
+func (mr *MockIStoreMockRecorder) AddClaimTransaction(testNetValAddr, txID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), amount, time, txID, discordID, testNetValAddr)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), testNetValAddr, txID)
 }
 
 // ClaimerInfo mocks base method.

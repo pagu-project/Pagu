@@ -14,7 +14,6 @@ import (
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/pactus-project/pactus/util"
 )
 
 const (
@@ -30,11 +29,11 @@ type BotEngine struct {
 	sync.RWMutex
 }
 
-func NewBotEngine(config *config.Config) (IEngine, error) {
+func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	cm := client.NewClientMgr()
-	c, err := client.NewClient(config.LocalNode)
+	c, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
-		log.Error("can't make a new local-net client", "err", err, "addr", config.LocalNode)
+		log.Error("can't make a new local-net client", "err", err, "addr", cfg.LocalNode)
 		return nil, err
 	}
 
@@ -53,20 +52,20 @@ func NewBotEngine(config *config.Config) (IEngine, error) {
 	wSl := log.NewSubLogger("wallet")
 
 	// load or create wallet.
-	wallet := wallet.Open(config, wSl)
+	wallet := wallet.Open(cfg, wSl)
 	if wallet == nil {
-		log.Panic("wallet could not be opened, wallet is nil", "path", config.WalletPath)
+		log.Panic("wallet could not be opened, wallet is nil", "path", cfg.WalletPath)
 	}
 
 	log.Info("wallet opened successfully", "address", wallet.Address())
 
 	// load store.
-	store, err := store.LoadStore(config, sSl)
+	store, err := store.NewStore(cfg, sSl)
 	if err != nil {
-		log.Panic("could not load store", "err", err, "path", config.StorePath)
+		log.Panic("could not load store", "err", err, "path", cfg.StorePath)
 	}
 
-	log.Info("store loaded successfully", "path", config.StorePath)
+	log.Info("store loaded successfully", "path", cfg.StorePath)
 
 	return newBotEngine(eSl, cm, wallet, store), nil
 }
@@ -217,62 +216,55 @@ func (be *BotEngine) ClaimerInfo(tokens []string) (*store.Claimer, error) {
 	return claimer, nil
 }
 
-func (be *BotEngine) Claim(discordID string, testNetValAddr string, valAddr string) (*store.ClaimTransaction, error) {
+func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr string) (string, error) {
 	be.Lock()
 	defer be.Unlock()
 
-	be.logger.Info("new claim request", "valAddr", valAddr, "testNetValAddr", testNetValAddr, "discordID", discordID)
+	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
 
-	claimer := be.Store.ClaimerInfo(testNetValAddr)
+	claimer := be.Store.ClaimerInfo(testnetAddr)
 	if claimer == nil {
-		return nil, errors.New("claimer not found")
+		return "", errors.New("claimer not found")
 	}
 
 	if claimer.IsClaimed() {
-		return nil, errors.New("this claimer have already claimed rewards")
+		return "", errors.New("this claimer have already claimed rewards")
 	}
 
-	isValidator, err := be.Cm.IsValidator(valAddr)
+	isValidator, err := be.Cm.IsValidator(mainnetAddr)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
 	if !isValidator {
-		return nil, errors.New("invalid argument: validator address")
+		return "", errors.New("invalid argument: validator address")
 	}
 
-	memo := fmt.Sprintf("RP to: %v", discordID)
-
-	txID, err := be.Wallet.BondTransaction("", valAddr, memo, claimer.TotalReward)
+	peerInfo, err := be.Cm.GetPeerInfoFirstVal(mainnetAddr)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	be.logger.Info("new bond transaction sent", "txID", txID, "memo", memo)
-
+	txID, err := be.Wallet.BondTransaction(peerInfo.ConsensusKeys[0], mainnetAddr, "", claimer.TotalReward)
+	if err != nil {
+		return "", err
+	}
 	if txID == "" {
-		return nil, errors.New("can't send bond transaction")
+		return "", errors.New("can't send bond transaction")
 	}
+	be.logger.Info("new bond transaction sent", "txID", txID)
 
-	txData, err := be.Cm.GetTransactionData(txID)
+	err = be.Store.AddClaimTransaction(testnetAddr, txID)
 	if err != nil {
-		return nil, err
+		be.logger.Panic("unable to add the claim transaction",
+			"error", err,
+			"discordID", discordID,
+			"testnetAddr", testnetAddr,
+			"txID", txID)
+
+		return "", err
 	}
 
-	err = be.Store.AddClaimTransaction(util.ChangeToCoin(txData.Transaction.Value),
-		int64(txData.BlockTime), txID, discordID, testNetValAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	claimer = be.Store.ClaimerInfo(testNetValAddr)
-	if claimer == nil {
-		return nil, errors.New("can't save claim info")
-	}
-
-	be.logger.Info("new claimer added", "valAddr", valAddr, "discordID", discordID)
-
-	return claimer.ClaimTransaction, nil
+	return txID, nil
 }
 
 func (be *BotEngine) Stop() {
