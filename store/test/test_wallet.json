@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "uuid": "b89fea2a-f8db-4243-8149-fa4f697c7207",
+  "created_at": "2024-01-27T19:21:03Z",
+  "network": 1,
+  "crc": 131930749,
+  "vault": {
+    "type": 1,
+    "coin_type": 21777,
+    "addresses": {
+      "tpc1z74zyvvdfx90mz6qfduqdfmfmjhzgh6u4mj3jvw": {
+        "address": "tpc1z74zyvvdfx90mz6qfduqdfmfmjhzgh6u4mj3jvw",
+        "public_key": "",
+        "label": "",
+        "path": "m/12381'/21777'/2'/1"
+      },
+      "tpc1zh75z7r7p3seswfpq0rs7rgxnmv6dg4drrmm2ds": {
+        "address": "tpc1zh75z7r7p3seswfpq0rs7rgxnmv6dg4drrmm2ds",
+        "public_key": "",
+        "label": "",
+        "path": "m/12381'/21777'/2'/0"
+      }
+    },
+    "encrypter": {
+      "method": "ARGON2ID-AES_256_CTR-MACV1",
+      "params": {
+        "iterations": "3",
+        "memory": "65536",
+        "parallelism": "4"
+      }
+    },
+    "key_store": "6h3TjkRvrCo53ynviJAQRkk+NhyCUUSDmjgA0VDu3jYhyj91kV9s9f4IThRpLTc20UD7rDTFWLalyt7hpXmoYH0uiOty/PvGqo2L1X/X792bZQdloWAjq+NcpUJ+qp1T2GXGs16CmWPkN0uAsAIAme/ehu30hj3xGdcO0+DM4w5YSWR4nyU7a40=",
+    "purposes": {
+      "purpose_bls": {
+        "xpub_account": "txpublic1pqdwnqqyqz92spqqpqqqgqgx2pja3rxxdg2q5frhycxlktf7mw6xlk4236pfceqa9d5lpyh7z3gqxpzse6achm9jy6axsecj60ghz7n36s8p0ljvyf2rw5lxgmkv7z4w5k0drdu52h5wrn3lxwphl54t9evq7s8fmf3rdppysjy5aysn52r2454496gzn6jgzf2ngex6ggfqltgunsy024j2vlhr5hx7gad52fpgn3r997",
+        "xpub_validator": "txpublic1pqdwnqqyqz92spqqzqqqgqgqkq7nut5h4lpavnf426xf2qxjcpu5ce9gcskcgtqay2v790n6l25qxpp0c6dcs2qdegsrrcqahz52fk7smz08394ls5ckynhgjmprr5g62ylth0qvythfq6lvfykt8ltlj5q26r8whx8l5x4pdkqu42gkw9gxff7lkqr943gsv4fl339z2e93zc56nxlavjshwj8lc7de2qdn5pucsv5rj3",
+        "next_account_index": 2,
+        "next_validator_index": 0
+      }
+    }
+  },
+  "history": {
+    "transactions": null,
+    "activities": null,
+    "pendings": null
+  }
+}

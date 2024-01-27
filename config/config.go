@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	Network        string
 	WalletAddress  string
 	WalletPath     string
 	WalletPassword string
@@ -32,6 +33,7 @@ func Load(filePaths ...string) (*Config, error) {
 
 	// Fetch config values from environment variables.
 	cfg := &Config{
+		Network:        os.Getenv("NETWORK"),
 		WalletAddress:  os.Getenv("WALLET_ADDRESS"),
 		WalletPath:     os.Getenv("WALLET_PATH"),
 		WalletPassword: os.Getenv("WALLET_PASSWORD"),
@@ -71,18 +73,18 @@ func (cfg *Config) BasicCheck() error {
 		return fmt.Errorf("STORE_PATH is not set or incorrect")
 	}
 
-	if cfg.DiscordBotCfg.DiscordToken == "" {
-		return fmt.Errorf("DISCORD_TOKEN is not set or incorrect")
-	}
+	// if cfg.DiscordBotCfg.DiscordToken == "" {
+	// 	return fmt.Errorf("DISCORD_TOKEN is not set or incorrect")
+	// }
 
-	// Check if the DiscordToken starts with 'MTE' which is discord's token prefix.
-	if !strings.HasPrefix(cfg.DiscordBotCfg.DiscordToken, "MTE") {
-		return fmt.Errorf("DISCORD_TOKEN does not start with the correct prefix or invalid")
-	}
+	// // Check if the DiscordToken starts with 'MTE' which is discord's token prefix.
+	// if !strings.HasPrefix(cfg.DiscordBotCfg.DiscordToken, "MTE") {
+	// 	return fmt.Errorf("DISCORD_TOKEN does not start with the correct prefix or invalid")
+	// }
 
-	if cfg.DiscordBotCfg.DiscordGuildID == "" {
-		return fmt.Errorf("DISCORD_GUILD_ID is not set or incorrect")
-	}
+	// if cfg.DiscordBotCfg.DiscordGuildID == "" {
+	// 	return fmt.Errorf("DISCORD_GUILD_ID is not set or incorrect")
+	// }
 
 	return nil
 }

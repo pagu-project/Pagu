@@ -1,4 +1,4 @@
-package commands
+package main
 
 import (
 	"bufio"
@@ -8,6 +8,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
+	"github.com/pactus-project/pactus/crypto"
 	cobra "github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ func REPLCommand(parentCmd *cobra.Command) {
 	}
 	parentCmd.AddCommand(connect)
 
-	envOpt := connect.Flags().StringP("env", "e", ".env.local", "your local/test env file for config")
+	envOpt := connect.Flags().StringP("env", "e", ".env", "the env file path")
 
 	connect.Run = func(cmd *cobra.Command, args []string) {
 		// initializing logger global instance.
@@ -31,6 +32,10 @@ func REPLCommand(parentCmd *cobra.Command) {
 		config, err := config.Load(*envOpt)
 		if err != nil {
 			log.Panic("can't load config env", "err", err, "path", *envOpt)
+		}
+
+		if config.Network == "Localnet" {
+			crypto.AddressHRP = "tpc"
 		}
 
 		// starting botEngine.

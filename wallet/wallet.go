@@ -56,26 +56,26 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
 		amount, opts...)
 	if err != nil {
-		w.logger.Error("error creating bond transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error creating bond transaction", "err", err, "to", toAddress, "amount", amount)
 		return "", err
 	}
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
-		w.logger.Error("error signing bond transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error signing bond transaction", "err", err, "to", toAddress, "amount", amount)
 		return "", err
 	}
 
 	// broadcast transaction
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
-		w.logger.Error("error broadcasting bond transaction", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error broadcasting bond transaction", "err", err, "to", toAddress, "amount", amount)
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
-		w.logger.Error("error saving wallet transaction history", "err", err, "address", toAddress, "amount", amount)
+		w.logger.Error("error saving wallet transaction history", "err", err, "to", toAddress, "amount", amount)
 	}
 	return res, nil // return transaction hash
 }

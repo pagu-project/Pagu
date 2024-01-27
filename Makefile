@@ -23,7 +23,7 @@ devtools:
 mock:
 	mockgen -source=./client/interface.go -destination=./client/mock.go  -package=client
 	mockgen -source=./wallet/interface.go -destination=./wallet/mock.go  -package=wallet
-	mockgen -source=./store/interface.go  -destination=./store/mock.go   -package=store    
+	mockgen -source=./store/interface.go  -destination=./store/mock.go   -package=store
 
 ### Formatting, linting, and vetting
 fmt:
@@ -36,4 +36,8 @@ check:
 
 ### building
 build:
-	go build -o build/main cmd/main.go
+	go build -o build/robopac-server ./cmd/server
+	go build -o build/robopac-client ./cmd/client
+
+
+.PHONY: build
