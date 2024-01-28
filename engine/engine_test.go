@@ -1,12 +1,14 @@
 package engine
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/log"
 	rpstore "github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -143,14 +145,15 @@ func TestClaim(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
+		pubKey := "public-key"
 		discordID := "123456789"
 		amount := int64(30)
 		memo := "TestNet reward claim from RoboPac"
 		txID := "tx-id"
 
 		wallet.EXPECT().Balance().Return(
-			int64(501 * 1e9),
-		).AnyTimes()
+			utils.CoinToAtomic(501),
+		).MaxTimes(2)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
@@ -165,15 +168,15 @@ func TestClaim(t *testing.T) {
 				ConnectedPeers: []*pactus.PeerInfo{
 					{
 						ConsensusAddress: []string{mainnetAddr},
-						ConsensusKeys:    []string{"public-key-1"},
+						ConsensusKeys:    []string{pubKey},
 					},
 				},
 			}, nil,
 		)
 
-		wallet.EXPECT().BondTransaction("public-key-1", mainnetAddr, memo, amount).Return(
+		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
 			txID, nil,
-		)
+		).MaxTimes(1)
 
 		store.EXPECT().AddClaimTransaction(testnetAddr, txID).Return(
 			nil,
@@ -195,5 +198,204 @@ func TestClaim(t *testing.T) {
 		expectedTx, err = eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.Error(t, err)
 		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, low balance", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-balance"
+		testnetAddr := "testnet-addr-fail-balance"
+		discordID := "123456789-fail-balance"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(499),
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "insufficient wallet balance")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, claimer not found", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-notfound"
+		testnetAddr := "testnet-addr-fail-notfound"
+		discordID := "123456789-fail-notfound"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "claimer not found")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, different Discord ID", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-different-id"
+		testnetAddr := "testnet-addr-fail-different-id"
+		discordID := "123456789-fail-different-id"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID: "invalid-discord-id",
+			},
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "invalid claimer")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, not first validator address", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-not-first-validator"
+		testnetAddr := "testnet-addr-fail-not-first-validator"
+		discordID := "123456789-fail-not-first-validator"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{"invalid-address", mainnetAddr},
+					},
+				},
+			}, nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "please enter the first validator address")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, validator not found", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-validator-not-found"
+		testnetAddr := "testnet-addr-fail-validator-not-found"
+		discordID := "123456789-fail-validator-not-found"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{"invalid-address", "invalid-address-2"},
+					},
+				},
+			}, nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "peer does not exist")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, empty transaction hash", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
+		testnetAddr := "testnet-addr-fail-empty-tx-hash"
+		pubKey := "public-key-fail-empty-tx-hash"
+		discordID := "123456789-fail-empty-tx-hash"
+		amount := int64(30)
+		memo := "TestNet reward claim from RoboPac"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				TotalReward: amount,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{mainnetAddr},
+						ConsensusKeys:    []string{pubKey},
+					},
+				},
+			}, nil,
+		)
+
+		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
+			"", nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "can't send bond transaction")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should panic, add claimer failed", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
+		testnetAddr := "testnet-addr-panic-add-claimer-failed"
+		pubKey := "public-key-panic-add-claimer-failed"
+		discordID := "123456789-panic-add-claimer-failed"
+		amount := int64(30)
+		memo := "TestNet reward claim from RoboPac"
+		txID := "tx-id-panic-add-claimer-failed"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				TotalReward: amount,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{mainnetAddr},
+						ConsensusKeys:    []string{pubKey},
+					},
+				},
+			}, nil,
+		)
+
+		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
+			txID, nil,
+		)
+
+		store.EXPECT().AddClaimTransaction(testnetAddr, txID).Return(
+			errors.New(""),
+		)
+
+		assert.Panics(t, func() {
+			_, _ = eng.Claim(discordID, testnetAddr, mainnetAddr)
+		})
 	})
 }
