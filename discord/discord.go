@@ -30,7 +30,7 @@ func (db *DiscordBot) Start() {
 
 	db.Session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
+			h(db, s, i) // support db *DiscordBot
 		}
 	})
 
