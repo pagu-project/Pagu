@@ -196,13 +196,16 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 		return "", err
 	}
 
-	txID, err := be.Wallet.BondTransaction(peerInfo.ConsensusKeys[0], mainnetAddr, "", claimer.TotalReward)
+	memo := "TestNet reward claim from RoboPac"
+	txID, err := be.Wallet.BondTransaction(peerInfo.ConsensusKeys[0], mainnetAddr, memo, claimer.TotalReward)
 	if err != nil {
 		return "", err
 	}
+
 	if txID == "" {
 		return "", errors.New("can't send bond transaction")
 	}
+
 	be.logger.Info("new bond transaction sent", "txID", txID)
 
 	err = be.Store.AddClaimTransaction(testnetAddr, txID)

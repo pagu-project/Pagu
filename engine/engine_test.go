@@ -152,6 +152,7 @@ func TestClaim(t *testing.T) {
 		testnetAddr := "testnet-addr"
 		discordID := "123456789"
 		amount := int64(74)
+		memo := "TestNet reward claim from RoboPac"
 		txID := "tx-id"
 
 		wallet.EXPECT().Balance().Return(
@@ -177,7 +178,7 @@ func TestClaim(t *testing.T) {
 			}, nil,
 		)
 
-		wallet.EXPECT().BondTransaction("public-key-1", mainnetAddr, "", amount).Return(
+		wallet.EXPECT().BondTransaction("public-key-1", mainnetAddr, memo, amount).Return(
 			txID, nil,
 		)
 
