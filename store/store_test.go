@@ -15,7 +15,7 @@ import (
 var exampleStore []byte
 
 func setup(t *testing.T) (store.IStore, string) {
-	cfg, err := config.Load("test/.env.test")
+	cfg, err := config.Load("./test/.env.test")
 	assert.NoError(t, err)
 
 	err = os.WriteFile(cfg.StorePath, exampleStore, 0o600)
@@ -41,7 +41,7 @@ func TestStore(t *testing.T) {
 	t.Run("get claimer", func(t *testing.T) {
 		claimer := store.ClaimerInfo("tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf")
 		assert.False(t, claimer.IsClaimed())
-		assert.Equal(t, int64(100), claimer.TotalReward)
+		assert.Equal(t, int64(100*1e9), claimer.TotalReward)
 		assert.Equal(t, "123456789", claimer.DiscordID)
 	})
 
@@ -60,7 +60,7 @@ func TestStore(t *testing.T) {
 
 		claimedInfo := store.ClaimerInfo(testNetValAddr)
 		assert.Equal(t, discordID, claimedInfo.DiscordID)
-		assert.Equal(t, int64(100), claimedInfo.TotalReward)
+		assert.Equal(t, int64(100*1e9), claimedInfo.TotalReward)
 		assert.Equal(t, txID, claimedInfo.ClaimedTxID)
 
 		isClaimed = claimedInfo.IsClaimed()
@@ -69,7 +69,7 @@ func TestStore(t *testing.T) {
 
 	t.Run("is claimed test", func(t *testing.T) {
 		claimer := store.ClaimerInfo("tpc1pesz6kuv7jts6al6la3794fyj5xaj7wm93k7z6y")
-		assert.Equal(t, int64(12), claimer.TotalReward)
+		assert.Equal(t, int64(12*1e9), claimer.TotalReward)
 		assert.Equal(t, "964550933793103912", claimer.DiscordID)
 		assert.True(t, claimer.IsClaimed())
 	})

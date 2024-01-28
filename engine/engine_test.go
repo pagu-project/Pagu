@@ -51,7 +51,7 @@ func TestNetworkStatus(t *testing.T) {
 		}, nil,
 	)
 
-	status, err := eng.NetworkStatus([]string{})
+	status, err := eng.NetworkStatus()
 	assert.NoError(t, err)
 
 	assert.Equal(t, uint32(5), status.ConnectedPeersCount)
@@ -68,7 +68,7 @@ func TestNetworkHealth(t *testing.T) {
 
 		time.Sleep(2 * time.Second)
 
-		healthy, err := eng.NetworkHealth([]string{})
+		healthy, err := eng.NetworkHealth()
 		assert.NoError(t, err)
 
 		assert.Equal(t, true, healthy.HealthStatus)
@@ -82,7 +82,7 @@ func TestNetworkHealth(t *testing.T) {
 		currentTime := time.Now().Unix() - 16 // time difference is more than 15 seconds.
 		client.EXPECT().LastBlockTime().Return(uint32(currentTime), uint32(100), nil)
 
-		healthy, err := eng.NetworkHealth([]string{})
+		healthy, err := eng.NetworkHealth()
 		assert.NoError(t, err)
 
 		assert.Equal(t, false, healthy.HealthStatus)
@@ -93,7 +93,7 @@ func TestNodeInfo(t *testing.T) {
 	eng, client, _, _ := setup(t)
 
 	t.Run("should return error, invalid input", func(t *testing.T) {
-		info, err := eng.NodeInfo([]string{})
+		info, err := eng.NodeInfo("pc1Invalid")
 
 		assert.Nil(t, info)
 		assert.Error(t, err)
@@ -136,7 +136,7 @@ func TestNodeInfo(t *testing.T) {
 			}, nil,
 		).AnyTimes()
 
-		info, err := eng.NodeInfo([]string{valAddress})
+		info, err := eng.NodeInfo(valAddress)
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(1_000), info.StakeAmount)
@@ -153,6 +153,10 @@ func TestClaim(t *testing.T) {
 		discordID := "123456789"
 		amount := int64(74)
 		txID := "tx-id"
+
+		wallet.EXPECT().Balance().Return(
+			int64(501 * 1e9),
+		).AnyTimes()
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
@@ -171,7 +175,7 @@ func TestClaim(t *testing.T) {
 					},
 				},
 			}, nil,
-		).AnyTimes()
+		)
 
 		wallet.EXPECT().BondTransaction("public-key-1", mainnetAddr, "", amount).Return(
 			txID, nil,
@@ -185,8 +189,7 @@ func TestClaim(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, expectedTx, txID)
 
-		//! can't claim twice.
-
+		//! can't claim twice:
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
@@ -194,78 +197,9 @@ func TestClaim(t *testing.T) {
 				ClaimedTxID: txID,
 			},
 		)
+
 		expectedTx, err = eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.Error(t, err)
 		assert.Empty(t, expectedTx)
 	})
-
-	// t.Run("missing arguments", func(t *testing.T) {
-	// 	claimTx, err := eng.Claim()
-	// 	assert.EqualError(t, err, "missing argument: validator address")
-	// 	assert.Nil(t, claimTx)
-	// })
-
-	// t.Run("claimer not found", func(t *testing.T) {
-	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-	// 	testNetValAddr := "tpc1peaeyzmwjqu6nz93c27hr8ad2l265tx4s9v6zhw"
-	// 	discordID := "987654321"
-
-	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-	// 		nil,
-	// 	)
-
-	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-	// 	assert.EqualError(t, err, "claimer not found")
-	// 	assert.Nil(t, claimTx)
-	// })
-
-	// t.Run("not validator address", func(t *testing.T) {
-	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-	// 	testNetValAddr := "tpc1p2vx5t8sglhvncmp3en0qhgtxyc59w0gfgnaqe7"
-	// 	discordID := "1234567890"
-	// 	amount := 74.68
-
-	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-	// 		&rpstore.Claimer{
-	// 			DiscordID:   discordID,
-	// 			TotalReward: amount,
-	// 		},
-	// 	)
-
-	// 	client.EXPECT().IsValidator(valAddress).Return(
-	// 		false, nil,
-	// 	)
-
-	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-	// 	assert.EqualError(t, err, "invalid argument: validator address")
-	// 	assert.Nil(t, claimTx)
-	// })
-
-	// t.Run("empty transaction ID", func(t *testing.T) {
-	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-	// 	testNetValAddr := "tpc1pvmundkkp83u5cfz04sem5r7688dc0lef5u0mmv"
-	// 	discordID := "1234567890"
-	// 	amount := 74.68
-
-	// 	client.EXPECT().IsValidator(valAddress).Return(
-	// 		true, nil,
-	// 	)
-
-	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-	// 		&rpstore.Claimer{
-	// 			DiscordID:        discordID,
-	// 			TotalReward:      amount,
-	// 			ClaimTransaction: nil,
-	// 		},
-	// 	)
-
-	// 	memo := fmt.Sprintf("RP to: %v", discordID)
-	// 	wallet.EXPECT().BondTransaction("", valAddress, memo, amount).Return(
-	// 		"", nil,
-	// 	)
-
-	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-	// 	assert.EqualError(t, err, "can't send bond transaction")
-	// 	assert.Nil(t, claimTx)
-	// })
 }

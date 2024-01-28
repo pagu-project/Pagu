@@ -52,6 +52,20 @@ func (mr *MockIWalletMockRecorder) Address() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Address", reflect.TypeOf((*MockIWallet)(nil).Address))
 }
 
+// Balance mocks base method.
+func (m *MockIWallet) Balance() int64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Balance")
+	ret0, _ := ret[0].(int64)
+	return ret0
+}
+
+// Balance indicates an expected call of Balance.
+func (mr *MockIWalletMockRecorder) Balance() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Balance", reflect.TypeOf((*MockIWallet)(nil).Balance))
+}
+
 // BondTransaction mocks base method.
 func (m *MockIWallet) BondTransaction(arg0, arg1, arg2 string, arg3 int64) (string, error) {
 	m.ctrl.T.Helper()
