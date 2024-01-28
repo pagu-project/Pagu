@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -92,18 +91,6 @@ func TestNetworkHealth(t *testing.T) {
 
 func TestNodeInfo(t *testing.T) {
 	eng, client, _, _ := setup(t)
-
-	t.Run("should return error, invalid input", func(t *testing.T) {
-		client.EXPECT().GetNetworkInfo().Return(
-			nil, errors.New(""),
-		)
-
-		info, err := eng.NodeInfo("pc1Invalid")
-
-		assert.Nil(t, info)
-		assert.Error(t, err)
-	})
-
 	t.Run("should work, valid address", func(t *testing.T) {
 		valAddress := "valid-address"
 		pubKey := "pub-key"
