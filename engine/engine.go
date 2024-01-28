@@ -2,8 +2,6 @@ package engine
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -14,10 +12,6 @@ import (
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
-)
-
-const (
-	botCmdClaim = "claim"
 )
 
 type BotEngine struct {
@@ -79,41 +73,7 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 	}
 }
 
-// The input is always string.
-//
-//	The input format is like: [Command] <Arguments ...>
-//
-// The output is always string, but format might be JSON. ???
-func (be *BotEngine) Run(input string) (string, error) {
-	cmd, args := be.parseQuery(input)
-
-	switch cmd {
-	case botCmdClaim:
-		if len(args) != 3 {
-			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
-		}
-
-		_, err := be.Claim(args[0], args[1], args[2])
-		if err != nil {
-			return "", err
-		}
-		return "", nil
-
-	default:
-		return "", fmt.Errorf("unknown command: %s", cmd)
-	}
-}
-
-func (be *BotEngine) parseQuery(query string) (string, []string) {
-	subs := strings.Split(query, " ")
-	if len(subs) == 0 {
-		return "", nil
-	}
-
-	return subs[0], subs[1:]
-}
-
-func (be *BotEngine) NetworkHealth(_ []string) (*NetHealthResponse, error) {
+func (be *BotEngine) NetworkHealth() (*NetHealthResponse, error) {
 	lastBlockTime, lastBlockHeight := be.Cm.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
 	currentTime := time.Now()
@@ -134,7 +94,7 @@ func (be *BotEngine) NetworkHealth(_ []string) (*NetHealthResponse, error) {
 	}, nil
 }
 
-func (be *BotEngine) NetworkStatus(_ []string) (*NetStatus, error) {
+func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 	netInfo, err := be.Cm.GetNetworkInfo()
 	if err != nil {
 		return nil, err
@@ -157,13 +117,7 @@ func (be *BotEngine) NetworkStatus(_ []string) (*NetStatus, error) {
 	}, nil
 }
 
-func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
-	if len(tokens) != 1 {
-		return nil, errors.New("missing argument: validator address")
-	}
-
-	valAddress := tokens[0]
-
+func (be *BotEngine) NodeInfo(valAddress string) (*NodeInfo, error) {
 	peerInfo, err := be.Cm.GetPeerInfo(valAddress)
 	if err != nil {
 		return nil, err
@@ -200,15 +154,11 @@ func (be *BotEngine) NodeInfo(tokens []string) (*NodeInfo, error) {
 	}, nil
 }
 
-func (be *BotEngine) ClaimerInfo(tokens []string) (*store.Claimer, error) {
+func (be *BotEngine) ClaimerInfo(testNetValAddr string) (*store.Claimer, error) {
 	be.RLock()
 	defer be.RUnlock()
 
-	if len(tokens) != 1 {
-		return nil, errors.New("missing argument: Discord ID")
-	}
-
-	claimer := be.Store.ClaimerInfo(tokens[0])
+	claimer := be.Store.ClaimerInfo(testNetValAddr)
 	if claimer == nil {
 		return nil, errors.New("not found")
 	}
@@ -222,8 +172,10 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 
 	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
 
-	// TODO:
-	// Check if has less balance of 500, return error
+	if utils.AtomicToCoin(be.Wallet.Balance()) <= 500 {
+		be.logger.Warn("bot wallet hasn't enough balance")
+		return "", errors.New("insufficient wallet balance")
+	}
 
 	claimer := be.Store.ClaimerInfo(testnetAddr)
 	if claimer == nil {
@@ -244,13 +196,16 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 		return "", err
 	}
 
-	txID, err := be.Wallet.BondTransaction(peerInfo.ConsensusKeys[0], mainnetAddr, "", claimer.TotalReward)
+	memo := "TestNet reward claim from RoboPac"
+	txID, err := be.Wallet.BondTransaction(peerInfo.ConsensusKeys[0], mainnetAddr, memo, claimer.TotalReward)
 	if err != nil {
 		return "", err
 	}
+
 	if txID == "" {
 		return "", errors.New("can't send bond transaction")
 	}
+
 	be.logger.Info("new bond transaction sent", "txID", txID)
 
 	err = be.Store.AddClaimTransaction(testnetAddr, txID)
@@ -259,7 +214,8 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 			"error", err,
 			"discordID", discordID,
 			"testnetAddr", testnetAddr,
-			"txID", txID)
+			"txID", txID,
+		)
 
 		return "", err
 	}

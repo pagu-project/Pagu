@@ -1,12 +1,14 @@
 package engine
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/log"
 	rpstore "github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -51,7 +53,7 @@ func TestNetworkStatus(t *testing.T) {
 		}, nil,
 	)
 
-	status, err := eng.NetworkStatus([]string{})
+	status, err := eng.NetworkStatus()
 	assert.NoError(t, err)
 
 	assert.Equal(t, uint32(5), status.ConnectedPeersCount)
@@ -68,7 +70,7 @@ func TestNetworkHealth(t *testing.T) {
 
 		time.Sleep(2 * time.Second)
 
-		healthy, err := eng.NetworkHealth([]string{})
+		healthy, err := eng.NetworkHealth()
 		assert.NoError(t, err)
 
 		assert.Equal(t, true, healthy.HealthStatus)
@@ -82,7 +84,7 @@ func TestNetworkHealth(t *testing.T) {
 		currentTime := time.Now().Unix() - 16 // time difference is more than 15 seconds.
 		client.EXPECT().LastBlockTime().Return(uint32(currentTime), uint32(100), nil)
 
-		healthy, err := eng.NetworkHealth([]string{})
+		healthy, err := eng.NetworkHealth()
 		assert.NoError(t, err)
 
 		assert.Equal(t, false, healthy.HealthStatus)
@@ -91,17 +93,9 @@ func TestNetworkHealth(t *testing.T) {
 
 func TestNodeInfo(t *testing.T) {
 	eng, client, _, _ := setup(t)
-
-	t.Run("should return error, invalid input", func(t *testing.T) {
-		info, err := eng.NodeInfo([]string{})
-
-		assert.Nil(t, info)
-		assert.Error(t, err)
-	})
-
 	t.Run("should work, valid address", func(t *testing.T) {
-		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-		pubKey := "public1pk85lz4hkymm7ke3539p7fssqz8hqkvlwlcx0jvxn3s6has834l2skdr3649fznt6xdvkvz6rum0gxq4nunr9ta0vapz0wt92kdr2dj6qxt5qnm92j2mv8u8e8rj3nylyr7q9pn88myp49kht85eqxkqdsu5t39gx"
+		valAddress := "valid-address"
+		pubKey := "pub-key"
 
 		peerID, err := peer.Decode("12D3KooWNwudyHVEwtyRTkTx9JoWgHo65hkPUxU12pKviAreVJYg")
 		assert.NoError(t, err)
@@ -118,7 +112,8 @@ func TestNodeInfo(t *testing.T) {
 						Address:          "/ip4/000.000.000.000/tcp/21777",
 					},
 					{
-						ConsensusKeys: []string{"publicInvalid"},
+						ConsensusKeys:    []string{pubKey},
+						ConsensusAddress: []string{valAddress},
 					},
 				},
 			}, nil,
@@ -136,7 +131,7 @@ func TestNodeInfo(t *testing.T) {
 			}, nil,
 		).AnyTimes()
 
-		info, err := eng.NodeInfo([]string{valAddress})
+		info, err := eng.NodeInfo(valAddress)
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(1_000), info.StakeAmount)
@@ -150,9 +145,15 @@ func TestClaim(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
+		pubKey := "public-key"
 		discordID := "123456789"
-		amount := int64(74)
+		amount := int64(30)
+		memo := "TestNet reward claim from RoboPac"
 		txID := "tx-id"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		).MaxTimes(2)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
@@ -167,15 +168,15 @@ func TestClaim(t *testing.T) {
 				ConnectedPeers: []*pactus.PeerInfo{
 					{
 						ConsensusAddress: []string{mainnetAddr},
-						ConsensusKeys:    []string{"public-key-1"},
+						ConsensusKeys:    []string{pubKey},
 					},
 				},
 			}, nil,
-		).AnyTimes()
-
-		wallet.EXPECT().BondTransaction("public-key-1", mainnetAddr, "", amount).Return(
-			txID, nil,
 		)
+
+		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
+			txID, nil,
+		).MaxTimes(1)
 
 		store.EXPECT().AddClaimTransaction(testnetAddr, txID).Return(
 			nil,
@@ -185,8 +186,7 @@ func TestClaim(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, expectedTx, txID)
 
-		//! can't claim twice.
-
+		//! can't claim twice:
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
@@ -194,78 +194,208 @@ func TestClaim(t *testing.T) {
 				ClaimedTxID: txID,
 			},
 		)
+
 		expectedTx, err = eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.Error(t, err)
 		assert.Empty(t, expectedTx)
 	})
 
-	// t.Run("missing arguments", func(t *testing.T) {
-	// 	claimTx, err := eng.Claim()
-	// 	assert.EqualError(t, err, "missing argument: validator address")
-	// 	assert.Nil(t, claimTx)
-	// })
+	t.Run("should fail, low balance", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-balance"
+		testnetAddr := "testnet-addr-fail-balance"
+		discordID := "123456789-fail-balance"
 
-	// t.Run("claimer not found", func(t *testing.T) {
-	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-	// 	testNetValAddr := "tpc1peaeyzmwjqu6nz93c27hr8ad2l265tx4s9v6zhw"
-	// 	discordID := "987654321"
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(499),
+		)
 
-	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-	// 		nil,
-	// 	)
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "insufficient wallet balance")
+		assert.Empty(t, expectedTx)
+	})
 
-	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-	// 	assert.EqualError(t, err, "claimer not found")
-	// 	assert.Nil(t, claimTx)
-	// })
+	t.Run("should fail, claimer not found", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-notfound"
+		testnetAddr := "testnet-addr-fail-notfound"
+		discordID := "123456789-fail-notfound"
 
-	// t.Run("not validator address", func(t *testing.T) {
-	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-	// 	testNetValAddr := "tpc1p2vx5t8sglhvncmp3en0qhgtxyc59w0gfgnaqe7"
-	// 	discordID := "1234567890"
-	// 	amount := 74.68
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
 
-	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-	// 		&rpstore.Claimer{
-	// 			DiscordID:   discordID,
-	// 			TotalReward: amount,
-	// 		},
-	// 	)
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			nil,
+		)
 
-	// 	client.EXPECT().IsValidator(valAddress).Return(
-	// 		false, nil,
-	// 	)
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "claimer not found")
+		assert.Empty(t, expectedTx)
+	})
 
-	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-	// 	assert.EqualError(t, err, "invalid argument: validator address")
-	// 	assert.Nil(t, claimTx)
-	// })
+	t.Run("should fail, different Discord ID", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-different-id"
+		testnetAddr := "testnet-addr-fail-different-id"
+		discordID := "123456789-fail-different-id"
 
-	// t.Run("empty transaction ID", func(t *testing.T) {
-	// 	valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-	// 	testNetValAddr := "tpc1pvmundkkp83u5cfz04sem5r7688dc0lef5u0mmv"
-	// 	discordID := "1234567890"
-	// 	amount := 74.68
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
 
-	// 	client.EXPECT().IsValidator(valAddress).Return(
-	// 		true, nil,
-	// 	)
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID: "invalid-discord-id",
+			},
+		)
 
-	// 	store.EXPECT().ClaimerInfo(testNetValAddr).Return(
-	// 		&rpstore.Claimer{
-	// 			DiscordID:        discordID,
-	// 			TotalReward:      amount,
-	// 			ClaimTransaction: nil,
-	// 		},
-	// 	)
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "invalid claimer")
+		assert.Empty(t, expectedTx)
+	})
 
-	// 	memo := fmt.Sprintf("RP to: %v", discordID)
-	// 	wallet.EXPECT().BondTransaction("", valAddress, memo, amount).Return(
-	// 		"", nil,
-	// 	)
+	t.Run("should fail, not first validator address", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-not-first-validator"
+		testnetAddr := "testnet-addr-fail-not-first-validator"
+		discordID := "123456789-fail-not-first-validator"
 
-	// 	claimTx, err := eng.Claim([]string{valAddress, testNetValAddr, discordID})
-	// 	assert.EqualError(t, err, "can't send bond transaction")
-	// 	assert.Nil(t, claimTx)
-	// })
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{"invalid-address", mainnetAddr},
+					},
+				},
+			}, nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "please enter the first validator address")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, validator not found", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-validator-not-found"
+		testnetAddr := "testnet-addr-fail-validator-not-found"
+		discordID := "123456789-fail-validator-not-found"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{"invalid-address", "invalid-address-2"},
+					},
+				},
+			}, nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "peer does not exist")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should fail, empty transaction hash", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
+		testnetAddr := "testnet-addr-fail-empty-tx-hash"
+		pubKey := "public-key-fail-empty-tx-hash"
+		discordID := "123456789-fail-empty-tx-hash"
+		amount := int64(30)
+		memo := "TestNet reward claim from RoboPac"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				TotalReward: amount,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{mainnetAddr},
+						ConsensusKeys:    []string{pubKey},
+					},
+				},
+			}, nil,
+		)
+
+		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
+			"", nil,
+		)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "can't send bond transaction")
+		assert.Empty(t, expectedTx)
+	})
+
+	t.Run("should panic, add claimer failed", func(t *testing.T) {
+		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
+		testnetAddr := "testnet-addr-panic-add-claimer-failed"
+		pubKey := "public-key-panic-add-claimer-failed"
+		discordID := "123456789-panic-add-claimer-failed"
+		amount := int64(30)
+		memo := "TestNet reward claim from RoboPac"
+		txID := "tx-id-panic-add-claimer-failed"
+
+		wallet.EXPECT().Balance().Return(
+			utils.CoinToAtomic(501),
+		)
+
+		store.EXPECT().ClaimerInfo(testnetAddr).Return(
+			&rpstore.Claimer{
+				DiscordID:   discordID,
+				TotalReward: amount,
+				ClaimedTxID: "",
+			},
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{mainnetAddr},
+						ConsensusKeys:    []string{pubKey},
+					},
+				},
+			}, nil,
+		)
+
+		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
+			txID, nil,
+		)
+
+		store.EXPECT().AddClaimTransaction(testnetAddr, txID).Return(
+			errors.New(""),
+		)
+
+		assert.Panics(t, func() {
+			_, _ = eng.Claim(discordID, testnetAddr, mainnetAddr)
+		})
+	})
 }
