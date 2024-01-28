@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -93,6 +94,10 @@ func TestNodeInfo(t *testing.T) {
 	eng, client, _, _ := setup(t)
 
 	t.Run("should return error, invalid input", func(t *testing.T) {
+		client.EXPECT().GetNetworkInfo().Return(
+			nil, errors.New(""),
+		)
+
 		info, err := eng.NodeInfo("pc1Invalid")
 
 		assert.Nil(t, info)
@@ -100,8 +105,8 @@ func TestNodeInfo(t *testing.T) {
 	})
 
 	t.Run("should work, valid address", func(t *testing.T) {
-		valAddress := "pc1p74scge5dyzjktv9q70xtr0pjmyqcqk7nuh8nzp"
-		pubKey := "public1pk85lz4hkymm7ke3539p7fssqz8hqkvlwlcx0jvxn3s6has834l2skdr3649fznt6xdvkvz6rum0gxq4nunr9ta0vapz0wt92kdr2dj6qxt5qnm92j2mv8u8e8rj3nylyr7q9pn88myp49kht85eqxkqdsu5t39gx"
+		valAddress := "valid-address"
+		pubKey := "pub-key"
 
 		peerID, err := peer.Decode("12D3KooWNwudyHVEwtyRTkTx9JoWgHo65hkPUxU12pKviAreVJYg")
 		assert.NoError(t, err)
@@ -118,7 +123,8 @@ func TestNodeInfo(t *testing.T) {
 						Address:          "/ip4/000.000.000.000/tcp/21777",
 					},
 					{
-						ConsensusKeys: []string{"publicInvalid"},
+						ConsensusKeys:    []string{pubKey},
+						ConsensusAddress: []string{valAddress},
 					},
 				},
 			}, nil,
@@ -151,7 +157,7 @@ func TestClaim(t *testing.T) {
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
 		discordID := "123456789"
-		amount := int64(74)
+		amount := int64(30)
 		memo := "TestNet reward claim from RoboPac"
 		txID := "tx-id"
 
