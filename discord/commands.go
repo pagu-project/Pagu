@@ -7,8 +7,69 @@ var commands = []*discordgo.ApplicationCommand{
 		Name:        "help",
 		Description: "Help command for RoboPac",
 	},
+	{
+		Name:        "claim",
+		Description: "Command to claim Pactus coins",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "discordID",
+				Description: "Discord User ID",
+				Required:    true,
+			},
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "testnetAddr",
+				Description: "Testnet validator address (tpc1p...)",
+				Required:    true,
+			},
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "mainnetAddr",
+				Description: "Mainnet validator address (pc1p...)",
+				Required:    true,
+			},
+		},
+	},
+	{
+		Name:        "claimer-info",
+		Description: "Get claimer info",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "testnetAddr",
+				Description: "Testnet address",
+				Required:    true,
+			},
+		},
+	},
+	{
+		Name:        "node-info",
+		Description: "Get node info",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "valAddress",
+				Description: "Validator address",
+				Required:    true,
+			},
+		},
+	},
+	{
+		Name:        "network-health",
+		Description: "information on network health",
+	},
+	{
+		Name:        "network-status",
+		Description: "status of pactus network",
+	},
 }
 
-var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-	"help": helpCommandHandler,
+var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
+	"help":           helpCommandHandler,
+	"claim":          claimCommandHandler,
+	"claimer-info":   claimerInfoCommandHandler,
+	"node-info":      nodeInfoCommandHandler,
+	"network-health": networkHealthCommandHandler,
+	"network-status": networkStatusCommandHandler,
 }
