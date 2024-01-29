@@ -14,19 +14,19 @@ var commands = []*discordgo.ApplicationCommand{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "discordID",
-				Description: "Discord username",
+				Description: "Discord User ID",
 				Required:    true,
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "testnetAddr",
-				Description: "Testnet address",
+				Description: "Testnet validator address (tpc1p...)",
 				Required:    true,
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "mainnetAddr",
-				Description: "Mainnet address",
+				Description: "Mainnet validator address (pc1p...)",
 				Required:    true,
 			},
 		},
