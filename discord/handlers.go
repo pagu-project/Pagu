@@ -11,7 +11,7 @@ func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inter
 		return
 	}
 
-	_, _ = s.ChannelMessageSendEmbedReply(i.ChannelID, helpEmbed(s), i.Message.Reference())
+	_, _ = s.ChannelMessageSendEmbedReply(i.ChannelID, helpEmbed(s), i.Message.MessageReference)
 }
 
 func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -33,7 +33,7 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 		return
 	}
 
-	_, _ = s.ChannelMessageSendEmbedReply(i.ChannelID, claimEmbed(s, i, result), i.Message.Reference())
+	_, _ = s.ChannelMessageSendEmbedReply(i.ChannelID, claimEmbed(s, i, result), i.Message.MessageReference)
 }
 
 func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -52,7 +52,7 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 		return
 	}
 
-	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{claimerInfoEmbed(s, i, result)}, i.Message.Reference())
+	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{claimerInfoEmbed(s, i, result)}, i.Message.MessageReference)
 }
 
 func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -71,7 +71,7 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 		return
 	}
 
-	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{nodeInfoEmbed(s, i, result)}, i.Message.Reference())
+	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{nodeInfoEmbed(s, i, result)}, i.Message.MessageReference)
 }
 
 func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -89,7 +89,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		return
 	}
 
-	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{networkHealthEmbed(s, i, result)}, i.Message.Reference())
+	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{networkHealthEmbed(s, i, result)}, i.Message.MessageReference)
 }
 
 func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -107,5 +107,5 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		return
 	}
 
-	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{networkStatusEmbed(s, i, result)}, i.Message.Reference())
+	_, _ = s.ChannelMessageSendEmbedsReply(i.ChannelID, []*discordgo.MessageEmbed{networkStatusEmbed(s, i, result)}, i.Message.MessageReference)
 }
