@@ -46,6 +46,7 @@ func (db *DiscordBot) Start() {
 			log.Panic("can not register discord command", "name", v.Name, "err", err)
 		}
 		registeredCommands[i] = cmd
+		log.Info("discord command registered", "name", v.Name)
 	}
 }
 
