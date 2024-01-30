@@ -7,7 +7,7 @@ import (
 )
 
 func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Message.Author.ID) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
@@ -15,11 +15,11 @@ func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inter
 }
 
 func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Message.Author.ID) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
-	discordID := i.Message.Author.ID
+	discordID := i.Member.User.ID
 	testnetAddr := i.ApplicationCommandData().Options[0].StringValue()
 	mainnetAddr := i.ApplicationCommandData().Options[1].StringValue()
 
@@ -37,7 +37,7 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 }
 
 func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Message.Author.ID) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
@@ -56,7 +56,7 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 }
 
 func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Message.Author.ID) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
@@ -75,7 +75,7 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 }
 
 func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Message.Author.ID) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
@@ -93,7 +93,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 }
 
 func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Message.Author.ID) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
