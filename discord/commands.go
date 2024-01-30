@@ -13,19 +13,19 @@ var commands = []*discordgo.ApplicationCommand{
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "discordID",
+				Name:        "discord-id",
 				Description: "Discord User ID",
 				Required:    true,
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "testnetAddr",
+				Name:        "testnet-addr",
 				Description: "Testnet validator address (tpc1p...)",
 				Required:    true,
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "mainnetAddr",
+				Name:        "mainnet-addr",
 				Description: "Mainnet validator address (pc1p...)",
 				Required:    true,
 			},
@@ -37,7 +37,7 @@ var commands = []*discordgo.ApplicationCommand{
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "testnetAddr",
+				Name:        "testnet-addr",
 				Description: "Testnet address",
 				Required:    true,
 			},
@@ -49,7 +49,7 @@ var commands = []*discordgo.ApplicationCommand{
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "valAddress",
+				Name:        "validator-address",
 				Description: "Validator address",
 				Required:    true,
 			},
