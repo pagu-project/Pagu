@@ -19,10 +19,10 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 			"Here is a list of commands supported by RoboPac:\n" +
 			"```/claim``` Will help you to claim your test-net rewards on main-net.\n" +
 			"```/claimer-info``` Shows you status of your claim reward.\n" +
-			"```/node-info``` Shows a node and validator info in network and blockchain\n" +
-			"```/network-status``` Shows a brief info about network\n" +
-			"```/network-health``` Check and shows network health status\n" +
-			"```/bot-wallet``` Shows RoboPac wallet address and balance\n",
+			"```/node-info``` Shows a node and validator info in network and blockchain.\n" +
+			"```/network-status``` Shows a brief info about network.\n" +
+			"```/network-health``` Check and shows network health status.\n" +
+			"```/bot-wallet``` Shows RoboPac wallet address and balance.\n",
 	}
 }
 
