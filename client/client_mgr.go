@@ -139,16 +139,16 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 	return nil, errors.New("peer does not exist")
 }
 
-func (cm *Mgr) IsValidator(address string) (bool, error) {
+func (cm *Mgr) IsStakedValidator(address string) bool {
 	for _, c := range cm.clients {
-		exists, err := c.IsValidator(address)
+		val, err := c.GetValidatorInfo(address)
 		if err != nil {
-			continue
+			return false
 		}
-		return exists, nil
+		return val.Validator.Stake > 0
 	}
 
-	return false, errors.New("validator not found")
+	return false
 }
 
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {

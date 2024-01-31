@@ -155,8 +155,12 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		).MaxTimes(2)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		).AnyTimes()
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -213,10 +217,13 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(499),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
-
 		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.EqualError(t, err, "insufficient wallet balance")
 		assert.Empty(t, expectedTx)
@@ -231,8 +238,12 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -253,8 +264,12 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -277,8 +292,12 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -312,8 +331,12 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -350,8 +373,12 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -395,10 +422,13 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
-		client.EXPECT().IsValidator(mainnetAddr).Return(
-			false, nil,
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 0,
+				},
+			}, nil,
 		)
-
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,

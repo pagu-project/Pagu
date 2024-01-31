@@ -181,11 +181,7 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 
 	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
 
-	isValidator, err := be.Cm.IsValidator(mainnetAddr)
-	if err != nil {
-		return "", err
-	}
-
+	isValidator := be.Cm.IsStakedValidator(mainnetAddr)
 	if isValidator {
 		return "", errors.New("this address is already a staked validator")
 	}
