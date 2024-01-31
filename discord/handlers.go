@@ -165,3 +165,21 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	_ = s.InteractionRespond(i.Interaction, response)
 }
+
+func botWalletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	result, _ := db.BotEngine.Run("bot-wallet")
+
+	embed := botWalletEmbed(s, i, result)
+	response := &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	}
+
+	_ = s.InteractionRespond(i.Interaction, response)
+}

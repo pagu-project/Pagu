@@ -13,6 +13,7 @@ const (
 	CmdNodeInfo      = "node-info"      //!
 	CmdNetworkStatus = "network"        //!
 	CmdNetworkHealth = "network-health" //!
+	CmdBotWallet     = "bot-wallet"     //!
 )
 
 // The input is always string.
@@ -98,6 +99,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 			"Validators Count: %v\nCurrent Block Height: %v\nTotal Power: %v\nTotal Committee Power: %v\n"+
 			"> Note📝: This info is from one random network node. so, non-blockchain data maybe won't be same every time.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.CurrentBlockHeight, net.TotalNetworkPower, net.TotalCommitteePower), nil
+
+	case CmdBotWallet:
+		addr, blnc := be.BotWallet()
+		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v\n", addr, blnc), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

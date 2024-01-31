@@ -4,7 +4,7 @@ import "github.com/bwmarrin/discordgo"
 
 func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title: "RoboPac Help",
+		Title: "RoboPac Help💸",
 		URL:   "https://pactus.org",
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://pactus.org",
@@ -17,35 +17,42 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 
 func claimEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "claim",
+		Title:       "Claim Result💸",
 		Description: result,
 	}
 }
 
 func claimerInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "claimer infoℹ️",
+		Title:       "Claimer Infoℹ️",
 		Description: result,
 	}
 }
 
 func nodeInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "node info🛟",
+		Title:       "Node Info🛟",
 		Description: result,
 	}
 }
 
 func networkHealthEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "network health🧑‍⚕️",
+		Title:       "Network Health🧑‍⚕️",
 		Description: result,
 	}
 }
 
 func networkStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "network status🕸️",
+		Title:       "Network Status🕸️",
+		Description: result,
+	}
+}
+
+func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed{
+		Title:       "Bot Wallet🪙",
 		Description: result,
 	}
 }

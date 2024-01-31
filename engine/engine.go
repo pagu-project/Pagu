@@ -223,6 +223,10 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 	return txID, nil
 }
 
+func (be *BotEngine) BotWallet() (string, int64) {
+	return be.Wallet.Address(), be.Wallet.Balance()
+}
+
 func (be *BotEngine) Stop() {
 	be.logger.Info("shutting bot engine down...")
 
