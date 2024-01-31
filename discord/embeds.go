@@ -17,7 +17,7 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 
 func claimEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "claim Pactus Coins",
+		Title:       "claim",
 		Description: result,
 	}
 }

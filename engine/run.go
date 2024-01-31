@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	CmdClaim         = "claim"        //!
-	CmdClaimerInfo   = "claimer-info" //!
-	CmdNodeInfo      = "node-info"    //!
-	CmdNetworkStatus = "network"      //!
-	CmdNetworkHealth = "health"       //!
+	CmdClaim         = "claim"          //!
+	CmdClaimerInfo   = "claimer-info"   //!
+	CmdNodeInfo      = "node-info"      //!
+	CmdNetworkStatus = "network"        //!
+	CmdNetworkHealth = "network-health" //!
 )
 
 // The input is always string.
