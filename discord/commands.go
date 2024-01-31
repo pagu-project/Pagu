@@ -13,12 +13,6 @@ var commands = []*discordgo.ApplicationCommand{
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "discord-id",
-				Description: "Discord User ID",
-				Required:    true,
-			},
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "testnet-addr",
 				Description: "Testnet validator address (tpc1p...)",
 				Required:    true,
@@ -61,7 +55,11 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "network-status",
-		Description: "status of pactus network",
+		Description: "status of Pactus network",
+	},
+	{
+		Name:        "bot-wallet",
+		Description: "RoboPac wallet address and balance",
 	},
 }
 
@@ -72,4 +70,5 @@ var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordg
 	"node-info":      nodeInfoCommandHandler,
 	"network-health": networkHealthCommandHandler,
 	"network-status": networkStatusCommandHandler,
+	"bot-wallet":     botWalletCommandHandler,
 }

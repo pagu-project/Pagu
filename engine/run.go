@@ -3,6 +3,8 @@ package engine
 import (
 	"fmt"
 	"strings"
+
+	"github.com/kehiy/RoboPac/utils"
 )
 
 const (
@@ -11,6 +13,7 @@ const (
 	CmdNodeInfo      = "node-info"      //!
 	CmdNetworkStatus = "network"        //!
 	CmdNetworkHealth = "network-health" //!
+	CmdBotWallet     = "bot-wallet"     //!
 )
 
 // The input is always string.
@@ -43,8 +46,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("Claimer Infoℹ️\nTestNet Address: %s\namount: %v\nIsClaimed: %v\n txHash: %s",
-			args[0], claimer.TotalReward, claimer.IsClaimed(), claimer.ClaimedTxID), nil
+		return fmt.Sprintf("TestNet Address: %s\namount: %v PACs\nIsClaimed: %v\n txHash: %s",
+			args[0], utils.AtomicToCoin(claimer.TotalReward), claimer.IsClaimed(), claimer.ClaimedTxID), nil
 
 	case CmdNetworkHealth:
 		health, err := be.NetworkHealth()
@@ -59,7 +62,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 			status = "UnHealthy❌"
 		}
 
-		return fmt.Sprintf("NetWork health status🧑‍⚕️\nNetwork Is: %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
+		return fmt.Sprintf("Network Is: %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
 			status, health.CurrentTime.Format("02/01/2006, 15:04:05"), health.LastBlockTime.Format("02/01/2006, 15:04:05"), health.TimeDifference, health.LastBlockHeight), nil
 
 	case CmdNodeInfo:
@@ -79,7 +82,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 			pip19Score = fmt.Sprintf("%v⚠️", nodeInfo.AvailabilityScore)
 		}
 
-		return fmt.Sprintf("NodeInfo🛟\nPeerID: %s\nIP Address: %s\nAgent: %s\n"+
+		return fmt.Sprintf("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
 			"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
 			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP19-Score: %s\nStake: %v\n",
 			nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
@@ -92,10 +95,14 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("Network Status🕸️\nNetWork Name: %s\nConnected Peers: %v\n"+
+		return fmt.Sprintf("NetWork Name: %s\nConnected Peers: %v\n"+
 			"Validators Count: %v\nCurrent Block Height: %v\nTotal Power: %v\nTotal Committee Power: %v\n"+
 			"> Note📝: This info is from one random network node. so, non-blockchain data maybe won't be same every time.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.CurrentBlockHeight, net.TotalNetworkPower, net.TotalCommitteePower), nil
+
+	case CmdBotWallet:
+		addr, blnc := be.BotWallet()
+		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v\n", addr, blnc), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

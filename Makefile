@@ -36,8 +36,8 @@ check:
 
 ### building
 build:
-	go build -o build/robopac-server ./cmd/server
-	go build -o build/robopac-client ./cmd/client
+	go build -o build/robopac-discord ./cmd/discord
+	go build -o build/robopac-cmd     ./cmd/cmd
 
 
 .PHONY: build

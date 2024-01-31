@@ -25,13 +25,22 @@ type BotEngine struct {
 
 func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	cm := client.NewClientMgr()
+
 	c, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
-		log.Error("can't make a new local-net client", "err", err, "addr", cfg.LocalNode)
+		log.Error("can't make a new local client", "err", err, "addr", cfg.LocalNode)
 		return nil, err
 	}
 
-	cm.AddClient("local-net", c)
+	cm.AddClient("local-node", c)
+
+	for _, nn := range cfg.NetworkNodes {
+		c, err := client.NewClient(nn)
+		if err != nil {
+			log.Error("can't add new network node client", "err", err, "addr", nn)
+		}
+		cm.AddClient("client", c)
+	}
 
 	// initializing logger global instance.
 	log.InitGlobalLogger()
@@ -221,6 +230,10 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 	}
 
 	return txID, nil
+}
+
+func (be *BotEngine) BotWallet() (string, int64) {
+	return be.Wallet.Address(), be.Wallet.Balance()
 }
 
 func (be *BotEngine) Stop() {

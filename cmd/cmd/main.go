@@ -8,11 +8,11 @@ import (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac",
+		Use:     "robopac-cmd",
 		Version: "0.0.1",
 	}
 
-	RunCommand(rootCmd)
+	REPLCommand(rootCmd)
 
 	err := rootCmd.Execute()
 	if err != nil {

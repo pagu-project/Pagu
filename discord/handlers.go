@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kehiy/RoboPac/log"
 )
 
 func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -20,88 +21,45 @@ func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inter
 		},
 	}
 
-	err := s.InteractionRespond(i.Interaction, response)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = s.InteractionRespond(i.Interaction, response)
 }
 
 func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	// Check if db, s, or i is nil
-	if db == nil || s == nil || i == nil {
-		fmt.Println("One or more arguments are nil")
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
 	// Get the application command data
 	data := i.ApplicationCommandData()
-	if data.Options == nil {
-		msg := "Command options are missing or invalid."
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
-		return
-	}
-
-	// Check if the required number of options are present
-	if data.Options == nil || len(data.Options) < 3 {
-		msg := "Not enough options provided for the claim command."
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
-		return
-	}
 
 	// Extract the options
-	var discordId, testnetAddr, mainnetAddr string
-	if data.Options[0] != nil {
-		discordId = data.Options[0].StringValue()
-	}
-	if data.Options[1] != nil {
-		testnetAddr = data.Options[1].StringValue()
-	}
-	if data.Options[2] != nil {
-		mainnetAddr = data.Options[2].StringValue()
-	}
+	testnetAddr := data.Options[0].StringValue()
+	mainnetAddr := data.Options[1].StringValue()
 
-	// Remove the "discord-id:" prefix from the discordId
-	discordId = strings.TrimPrefix(discordId, "discord-id:")
+	log.Info("new claim request", "discordID", i.Member.User.ID, "mainNetAddr", mainnetAddr, "testNetAddr", testnetAddr)
 
-	// Remove the "testnet-addr:" and "mainnet-addr:" prefixes from the addresses
 	testnetAddr = strings.TrimPrefix(testnetAddr, "testnet-addr:")
 	mainnetAddr = strings.TrimPrefix(mainnetAddr, "mainnet-addr:")
 
-	if testnetAddr != "" && mainnetAddr != "" {
-		command := fmt.Sprintf("claim %s %s %s", discordId, testnetAddr, mainnetAddr)
+	command := fmt.Sprintf("claim %s %s %s", i.Member.User.ID, testnetAddr, mainnetAddr)
 
-		// Check if db or db.BotEngine is nil
-		// if db == nil || db.BotEngine == nil {
-		// 	msg := "db or bot engine is nil."
-		// 	_, _ = s.ChannelMessageSend(i.ChannelID, msg)
-		// 	return
-		// }
-		if db.BotEngine == nil {
-			msg := "bot engine is nil."
-			_, _ = s.ChannelMessageSend(i.ChannelID, msg)
-			return
-		}
+	result, err := db.BotEngine.Run(command)
+	if err != nil {
+		msg := fmt.Sprintf("an error occurred while claiming: %v", err)
+		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 
-		result, err := db.BotEngine.Run(command)
-		if err != nil {
-			msg := fmt.Sprintf("an error occurred while claiming: %v", err)
-			_, _ = s.ChannelMessageSend(i.ChannelID, msg)
-			return
-		}
-
-		embed := claimEmbed(s, i, result)
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{embed},
-			},
-		}
-
-		err = s.InteractionRespond(i.Interaction, response)
-		if err != nil {
-			fmt.Println(err)
-		}
+		return
 	}
+
+	embed := claimEmbed(s, i, result)
+	response := &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	}
+
+	_ = s.InteractionRespond(i.Interaction, response)
 }
 
 func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -114,7 +72,7 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("Wallet address not found, please try again, %v", err)
+		msg := fmt.Sprintf("an error occurred : %v", err)
 		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 
 		return
@@ -128,10 +86,7 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 		},
 	}
 
-	err = s.InteractionRespond(i.Interaction, response)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = s.InteractionRespond(i.Interaction, response)
 }
 
 func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -144,7 +99,7 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("an error occcured : %v", err)
+		msg := fmt.Sprintf("an error occurred : %v", err)
 		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 
 		return
@@ -158,10 +113,7 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 		},
 	}
 
-	err = s.InteractionRespond(i.Interaction, response)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = s.InteractionRespond(i.Interaction, response)
 }
 
 func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -173,7 +125,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("an error occured while checking network health: %v", err)
+		msg := fmt.Sprintf("an error occurred : %v", err)
 		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 
 		return
@@ -187,10 +139,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		},
 	}
 
-	err = s.InteractionRespond(i.Interaction, response)
-	if err != nil {
-		fmt.Println(err)
-	}
+	_ = s.InteractionRespond(i.Interaction, response)
 }
 
 func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -198,11 +147,9 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		return
 	}
 
-	command := "network"
-
-	result, err := db.BotEngine.Run(command)
+	result, err := db.BotEngine.Run("network")
 	if err != nil {
-		msg := fmt.Sprintf("an error occured while checking network status: %v", err)
+		msg := fmt.Sprintf("an error occurred : %v", err)
 		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 
 		return
@@ -216,8 +163,23 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		},
 	}
 
-	err = s.InteractionRespond(i.Interaction, response)
-	if err != nil {
-		fmt.Println(err)
+	_ = s.InteractionRespond(i.Interaction, response)
+}
+
+func botWalletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
 	}
+
+	result, _ := db.BotEngine.Run("bot-wallet")
+
+	embed := botWalletEmbed(s, i, result)
+	response := &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	}
+
+	_ = s.InteractionRespond(i.Interaction, response)
 }
