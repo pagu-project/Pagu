@@ -21,7 +21,7 @@ func (cm *Mgr) AddClient(c IClient) {
 	cm.clients = append(cm.clients, c)
 }
 
-// NOTE: local client is always the first client
+// NOTE: local client is always the first client.
 func (cm *Mgr) getLocalClient() IClient {
 	return cm.clients[0]
 }
@@ -41,7 +41,6 @@ func (cm *Mgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
 		return nil, err
 	}
 	return info, nil
-
 }
 
 func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
