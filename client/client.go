@@ -75,20 +75,6 @@ func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 	return nil, errors.New("peer does not exist")
 }
 
-func (c *Client) IsValidator(address string) (bool, error) {
-	validators, err := c.blockchainClient.GetValidatorAddresses(context.Background(),
-		&pactus.GetValidatorAddressesRequest{})
-	if err != nil {
-		return false, err
-	}
-	for _, a := range validators.Addresses {
-		if a == address {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
 func (c *Client) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
 	validator, err := c.blockchainClient.GetValidator(context.Background(),
 		&pactus.GetValidatorRequest{Address: address})

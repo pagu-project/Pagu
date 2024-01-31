@@ -25,7 +25,7 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	mockClient := client.NewMockIClient(ctrl)
 
 	cm := client.NewClientMgr()
-	cm.AddClient("addr-1", mockClient)
+	cm.AddClient("local-node", mockClient)
 
 	// mocking mockWallet.
 	mockWallet := wallet.NewMockIWallet(ctrl)
