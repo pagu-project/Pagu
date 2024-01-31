@@ -71,7 +71,11 @@ func (cm *Mgr) GetLastBlockTime() (uint32, uint32) {
 }
 
 func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
-	for _, c := range cm.clients {
+	for name, c := range cm.clients {
+		if name == "local-node" {
+			continue
+		}
+
 		info, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
@@ -83,7 +87,11 @@ func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 }
 
 func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
-	for _, c := range cm.clients {
+	for name, c := range cm.clients {
+		if name == "local-node" {
+			continue
+		}
+
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
@@ -107,7 +115,11 @@ func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
 }
 
 func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
-	for _, c := range cm.clients {
+	for name, c := range cm.clients {
+		if name == "local-node" {
+			continue
+		}
+
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
