@@ -181,6 +181,15 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 
 	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
 
+	isValidator, err := be.Cm.IsValidator(mainnetAddr)
+	if err != nil {
+		return "", err
+	}
+
+	if isValidator {
+		return "", errors.New("this address is already a validator")
+	}
+
 	if utils.AtomicToCoin(be.Wallet.Balance()) <= 500 {
 		be.logger.Warn("bot wallet hasn't enough balance")
 		return "", errors.New("insufficient wallet balance")

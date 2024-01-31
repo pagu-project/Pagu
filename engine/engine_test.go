@@ -155,6 +155,10 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		).MaxTimes(2)
 
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
+		).AnyTimes()
+
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
@@ -209,6 +213,10 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(499),
 		)
 
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
+		)
+
 		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.EqualError(t, err, "insufficient wallet balance")
 		assert.Empty(t, expectedTx)
@@ -221,6 +229,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -241,6 +253,10 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(501),
 		)
 
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
+		)
+
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID: "invalid-discord-id",
@@ -259,6 +275,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -290,6 +310,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -324,6 +348,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -365,6 +393,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().IsValidator(mainnetAddr).Return(
+			false, nil,
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
