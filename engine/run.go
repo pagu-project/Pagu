@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kehiy/RoboPac/utils"
+	"github.com/pactus-project/pactus/util"
 )
 
 const (
@@ -47,7 +47,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 		}
 
 		return fmt.Sprintf("TestNet Address: %s\namount: %v PACs\nIsClaimed: %v\n txHash: %s",
-			args[0], utils.AtomicToCoin(claimer.TotalReward), claimer.IsClaimed(), claimer.ClaimedTxID), nil
+			args[0], util.ChangeToString(claimer.TotalReward), claimer.IsClaimed(), claimer.ClaimedTxID), nil
 
 	case CmdNetworkHealth:
 		health, err := be.NetworkHealth()
