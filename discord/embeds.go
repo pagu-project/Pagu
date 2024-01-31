@@ -71,7 +71,7 @@ func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result
 func errorEmbedMessage(reason string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Error",
-		Description: fmt.Sprintf("An error occurred, please try again! : %s", reason),
+		Description: fmt.Sprintf("An error occurred: %s", reason),
 		Color:       0xFF0000, // Red color
 	}
 }
