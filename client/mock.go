@@ -143,21 +143,6 @@ func (mr *MockIClientMockRecorder) GetValidatorInfoByNumber(arg0 any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidatorInfoByNumber", reflect.TypeOf((*MockIClient)(nil).GetValidatorInfoByNumber), arg0)
 }
 
-// IsValidator mocks base method.
-func (m *MockIClient) IsValidator(arg0 string) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsValidator", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsValidator indicates an expected call of IsValidator.
-func (mr *MockIClientMockRecorder) IsValidator(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsValidator", reflect.TypeOf((*MockIClient)(nil).IsValidator), arg0)
-}
-
 // LastBlockTime mocks base method.
 func (m *MockIClient) LastBlockTime() (uint32, uint32, error) {
 	m.ctrl.T.Helper()

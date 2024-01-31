@@ -115,11 +115,7 @@ func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
 }
 
 func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
-	for name, c := range cm.clients {
-		if name == "local-node" {
-			continue
-		}
-
+	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
@@ -140,17 +136,15 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 }
 
 func (cm *Mgr) IsStakedValidator(address string) bool {
-	for _, c := range cm.clients {
+	c, ok := cm.clients["local-node"]
+	if ok {
 		val, err := c.GetValidatorInfo(address)
 		if err != nil {
-			log.Info("error", "err", err)
 			return false
 		}
-		log.Info("passed", "bool", val.Validator.Stake > 0)
 		return val.Validator.Stake > 0
 	}
 
-	log.Info("passed")
 	return false
 }
 

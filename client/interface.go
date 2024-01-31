@@ -9,7 +9,6 @@ type IClient interface {
 	GetBlockchainHeight() (uint32, error)
 	LastBlockTime() (uint32, uint32, error)
 	GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error)
-	IsValidator(string) (bool, error)
 	GetValidatorInfo(string) (*pactus.GetValidatorResponse, error)
 	GetValidatorInfoByNumber(int32) (*pactus.GetValidatorResponse, error)
 	GetTransactionData(string) (*pactus.GetTransactionResponse, error)

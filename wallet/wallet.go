@@ -27,12 +27,12 @@ type Wallet struct {
 func Open(cfg *config.Config, logger *log.SubLogger) IWallet {
 	if doesWalletExist(cfg.WalletPath) {
 
-		wt, err := pwallet.Open(cfg.WalletPath, true)
+		wt, err := pwallet.Open(cfg.WalletPath, false)
 		if err != nil {
 			logger.Fatal("error opening existing wallet", "err", err)
 		}
 
-		err = wt.Connect(cfg.NetworkNodes[0])
+		err = wt.Connect(cfg.LocalNode)
 		if err != nil {
 			logger.Fatal("error establishing connection", "err", err)
 		}
