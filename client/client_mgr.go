@@ -143,11 +143,14 @@ func (cm *Mgr) IsStakedValidator(address string) bool {
 	for _, c := range cm.clients {
 		val, err := c.GetValidatorInfo(address)
 		if err != nil {
+			log.Info("error", "err", err)
 			return false
 		}
+		log.Info("passed", "bool", val.Validator.Stake > 0)
 		return val.Validator.Stake > 0
 	}
 
+	log.Info("passed")
 	return false
 }
 
