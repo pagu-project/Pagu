@@ -27,7 +27,7 @@ type Wallet struct {
 func Open(cfg *config.Config, logger *log.SubLogger) IWallet {
 	if doesWalletExist(cfg.WalletPath) {
 
-		wt, err := pwallet.Open(cfg.WalletPath, false)
+		wt, err := pwallet.Open(cfg.WalletPath, true)
 		if err != nil {
 			logger.Fatal("error opening existing wallet", "err", err)
 		}
