@@ -24,28 +24,28 @@ func claimEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result str
 
 func claimerInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "claimer info",
+		Title:       "claimer infoℹ️",
 		Description: result,
 	}
 }
 
 func nodeInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "node info",
+		Title:       "node info🛟",
 		Description: result,
 	}
 }
 
 func networkHealthEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "network health",
+		Title:       "network health🧑‍⚕️",
 		Description: result,
 	}
 }
 
 func networkStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "network status",
+		Title:       "network status🕸️",
 		Description: result,
 	}
 }
