@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/log"
@@ -37,12 +38,23 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 
 	log.Info("new claim request", "discordID", i.Member.User.ID, "mainNetAddr", mainnetAddr, "testNetAddr", testnetAddr)
 
+	testnetAddr = strings.TrimPrefix(testnetAddr, "testnet-addr:")
+	mainnetAddr = strings.TrimPrefix(mainnetAddr, "mainnet-addr:")
+
 	command := fmt.Sprintf("claim %s %s %s", i.Member.User.ID, testnetAddr, mainnetAddr)
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("an error occurred while claiming: %v", err)
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
 
 		return
 	}
@@ -68,8 +80,16 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("an error occurred : %v", err)
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
 
 		return
 	}
@@ -95,8 +115,16 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("an error occurred : %v", err)
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
 
 		return
 	}
@@ -121,8 +149,16 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		msg := fmt.Sprintf("an error occurred : %v", err)
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
 
 		return
 	}
@@ -145,8 +181,16 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	result, err := db.BotEngine.Run("network")
 	if err != nil {
-		msg := fmt.Sprintf("an error occurred : %v", err)
-		_, _ = s.ChannelMessageSend(i.ChannelID, msg)
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
 
 		return
 	}
