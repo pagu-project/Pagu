@@ -13,12 +13,6 @@ var commands = []*discordgo.ApplicationCommand{
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "discord-id",
-				Description: "Discord User ID",
-				Required:    true,
-			},
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "testnet-addr",
 				Description: "Testnet validator address (tpc1p...)",
 				Required:    true,
