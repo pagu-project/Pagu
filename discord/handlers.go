@@ -71,8 +71,13 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 		command := fmt.Sprintf("claim %s %s %s", discordId, testnetAddr, mainnetAddr)
 
 		// Check if db or db.BotEngine is nil
-		if db == nil || db.BotEngine == nil {
-			msg := "db or bot engine is nil."
+		// if db == nil || db.BotEngine == nil {
+		// 	msg := "db or bot engine is nil."
+		// 	_, _ = s.ChannelMessageSend(i.ChannelID, msg)
+		// 	return
+		// }
+		if db.BotEngine == nil {
+			msg := "bot engine is nil."
 			_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 			return
 		}
@@ -127,7 +132,6 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 	if err != nil {
 		fmt.Println(err)
 	}
-
 }
 
 func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
