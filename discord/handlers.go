@@ -2,7 +2,6 @@ package discord
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/log"
@@ -38,8 +37,9 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 
 	log.Info("new claim request", "discordID", i.Member.User.ID, "mainNetAddr", mainnetAddr, "testNetAddr", testnetAddr)
 
-	testnetAddr = strings.TrimPrefix(testnetAddr, "testnet-addr:")
-	mainnetAddr = strings.TrimPrefix(mainnetAddr, "mainnet-addr:")
+	//! Do we need these two?
+	// testnetAddr = strings.TrimPrefix(testnetAddr, "testnet-addr:")
+	// mainnetAddr = strings.TrimPrefix(mainnetAddr, "mainnet-addr:")
 
 	command := fmt.Sprintf("claim %s %s %s", i.Member.User.ID, testnetAddr, mainnetAddr)
 

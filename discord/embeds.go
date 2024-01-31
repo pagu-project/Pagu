@@ -8,14 +8,21 @@ import (
 
 func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title: "RoboPac Help💸",
+		Title: "RoboPac Help🆘",
 		URL:   "https://pactus.org",
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://pactus.org",
 			IconURL: s.State.User.AvatarURL(""),
 			Name:    s.State.User.Username,
 		},
-		Description: "RoboPac is a robot that provides support and information about the Pactus Blockchain.",
+		Description: "RoboPac is a robot that provides support and information about the Pactus Blockchain.\n" +
+			"Here is a list of commands supported by RoboPac:\n" +
+			"```/claim``` Will help you to claim your test-net rewards on main-net.\n" +
+			"```/claimer-info``` Shows you status of your claim reward.\n" +
+			"```/node-info``` Shows a node and validator info in network and blockchain\n" +
+			"```/network-status``` Shows a brief info about network\n" +
+			"```/network-health``` Check and shows network health status\n" +
+			"```/bot-wallet``` Shows RoboPac wallet address and balance\n",
 	}
 }
 
