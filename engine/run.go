@@ -62,7 +62,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 			status = "UnHealthy❌"
 		}
 
-		return fmt.Sprintf("Network Is: %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
+		return fmt.Sprintf("Network is %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
 			status, health.CurrentTime.Format("02/01/2006, 15:04:05"), health.LastBlockTime.Format("02/01/2006, 15:04:05"), health.TimeDifference, health.LastBlockHeight), nil
 
 	case CmdNodeInfo:
@@ -95,9 +95,9 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("NetWork Name: %s\nConnected Peers: %v\n"+
+		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
 			"Validators Count: %v\nCurrent Block Height: %v\nTotal Power: %v\nTotal Committee Power: %v\n"+
-			"> Note📝: This info is from one random network node. so, non-blockchain data maybe won't be same every time.",
+			"> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.CurrentBlockHeight, net.TotalNetworkPower, net.TotalCommitteePower), nil
 
 	case CmdBotWallet:
