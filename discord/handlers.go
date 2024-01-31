@@ -72,7 +72,7 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 
 		// Check if db or db.BotEngine is nil
 		if db == nil || db.BotEngine == nil {
-			msg := "Database or bot engine is nil."
+			msg := "db or bot engine is nil."
 			_, _ = s.ChannelMessageSend(i.ChannelID, msg)
 			return
 		}
