@@ -102,7 +102,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 	case CmdBotWallet:
 		addr, blnc := be.BotWallet()
-		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v\n", addr, blnc), nil
+		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v\n", addr, util.ChangeToString(blnc)), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)
