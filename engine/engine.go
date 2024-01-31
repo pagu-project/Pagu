@@ -187,7 +187,7 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 	}
 
 	if isValidator {
-		return "", errors.New("this address is already a validator")
+		return "", errors.New("this address is already a staked validator")
 	}
 
 	if utils.AtomicToCoin(be.Wallet.Balance()) <= 500 {
