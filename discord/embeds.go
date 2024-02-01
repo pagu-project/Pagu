@@ -68,6 +68,13 @@ func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result
 	}
 }
 
+func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed{
+		Title:       "Claim Status📃",
+		Description: result,
+	}
+}
+
 func errorEmbedMessage(reason string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Error",

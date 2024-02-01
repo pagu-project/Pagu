@@ -65,3 +65,20 @@ func (mr *MockIStoreMockRecorder) ClaimerInfo(testNetValAddr any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClaimerInfo", reflect.TypeOf((*MockIStore)(nil).ClaimerInfo), testNetValAddr)
 }
+
+// Status mocks base method.
+func (m *MockIStore) Status() (int64, int64, int64, int64) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Status")
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(int64)
+	ret3, _ := ret[3].(int64)
+	return ret0, ret1, ret2, ret3
+}
+
+// Status indicates an expected call of Status.
+func (mr *MockIStoreMockRecorder) Status() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockIStore)(nil).Status))
+}
