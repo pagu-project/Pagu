@@ -8,17 +8,22 @@ import (
 )
 
 type Mgr struct {
-	clients map[string]IClient
+	clients []IClient
 }
 
 func NewClientMgr() *Mgr {
 	return &Mgr{
-		clients: make(map[string]IClient),
+		clients: make([]IClient, 0),
 	}
 }
 
-func (cm *Mgr) AddClient(addr string, c IClient) {
-	cm.clients[addr] = c
+func (cm *Mgr) AddClient(c IClient) {
+	cm.clients = append(cm.clients, c)
+}
+
+// NOTE: local client is always the first client.
+func (cm *Mgr) getLocalClient() IClient {
+	return cm.clients[0]
 }
 
 func (cm *Mgr) GetRandomClient() IClient {
@@ -30,52 +35,35 @@ func (cm *Mgr) GetRandomClient() IClient {
 }
 
 func (cm *Mgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
-	for _, c := range cm.clients {
-		info, err := c.GetBlockchainInfo()
-		if err != nil {
-			continue
-		}
-		return info, nil
+	localClient := cm.getLocalClient()
+	info, err := localClient.GetBlockchainInfo()
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, errors.New("unable to get blockchain info")
+	return info, nil
 }
 
 func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
-	for _, c := range cm.clients {
-		height, err := c.GetBlockchainHeight()
-		if err != nil {
-			continue
-		}
-		return height, nil
+	localClient := cm.getLocalClient()
+	height, err := localClient.GetBlockchainHeight()
+	if err != nil {
+		return 0, err
 	}
-
-	return 0, errors.New("unable to get blockchain height")
+	return height, nil
 }
 
 func (cm *Mgr) GetLastBlockTime() (uint32, uint32) {
-	var lastBlockTime uint32 = 0
-	var lastBlockHeight uint32 = 0
-	for _, c := range cm.clients {
-		t, h, err := c.LastBlockTime()
-		if err != nil {
-			continue
-		}
-		if t > lastBlockTime {
-			lastBlockTime = t
-			lastBlockHeight = h
-		}
+	localClient := cm.getLocalClient()
+	lastBlockTime, lastBlockHeight, err := localClient.LastBlockTime()
+	if err != nil {
+		return 0, 0
 	}
 
 	return lastBlockTime, lastBlockHeight
 }
 
 func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
-	for name, c := range cm.clients {
-		if name == "local-node" {
-			continue
-		}
-
+	for _, c := range cm.clients {
 		info, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
@@ -87,11 +75,7 @@ func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 }
 
 func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
-	for name, c := range cm.clients {
-		if name == "local-node" {
-			continue
-		}
-
+	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
@@ -115,11 +99,7 @@ func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
 }
 
 func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
-	for name, c := range cm.clients {
-		if name == "local-node" {
-			continue
-		}
-
+	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo()
 		if err != nil {
 			continue
@@ -139,52 +119,31 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 	return nil, errors.New("peer does not exist")
 }
 
-func (cm *Mgr) IsValidator(address string) (bool, error) {
-	for _, c := range cm.clients {
-		exists, err := c.IsValidator(address)
-		if err != nil {
-			continue
-		}
-		return exists, nil
-	}
-
-	return false, errors.New("validator not found")
-}
-
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
-	for _, c := range cm.clients {
-		val, err := c.GetValidatorInfo(address)
-		if err != nil {
-			continue
-		}
-		return val, nil
+	localClient := cm.getLocalClient()
+	val, err := localClient.GetValidatorInfo(address)
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, errors.New("unable to get validator info")
+	return val, nil
 }
 
 func (cm *Mgr) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorResponse, error) {
-	for _, c := range cm.clients {
-		val, err := c.GetValidatorInfoByNumber(num)
-		if err != nil {
-			continue
-		}
-		return val, nil
+	localClient := cm.getLocalClient()
+	val, err := localClient.GetValidatorInfoByNumber(num)
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, errors.New("unable to get validator info")
+	return val, nil
 }
 
 func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, error) {
-	for _, c := range cm.clients {
-		txData, err := c.GetTransactionData(txID)
-		if err != nil {
-			continue
-		}
-		return txData, nil
+	localClient := cm.getLocalClient()
+	txData, err := localClient.GetTransactionData(txID)
+	if err != nil {
+		return nil, err
 	}
-
-	return nil, errors.New("unable to get transaction data")
+	return txData, nil
 }
 
 func (cm *Mgr) Stop() {

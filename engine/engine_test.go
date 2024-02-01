@@ -2,6 +2,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -25,7 +26,7 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	mockClient := client.NewMockIClient(ctrl)
 
 	cm := client.NewClientMgr()
-	cm.AddClient("addr-1", mockClient)
+	cm.AddClient(mockClient)
 
 	// mocking mockWallet.
 	mockWallet := wallet.NewMockIWallet(ctrl)
@@ -140,9 +141,9 @@ func TestNodeInfo(t *testing.T) {
 }
 
 func TestClaim(t *testing.T) {
-	eng, client, store, wallet := setup(t)
-
 	t.Run("everything normal and good", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
 		pubKey := "public-key"
@@ -154,6 +155,10 @@ func TestClaim(t *testing.T) {
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
 		).MaxTimes(2)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
@@ -186,21 +191,47 @@ func TestClaim(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, expectedTx, txID)
 
-		//! can't claim twice:
+		//! can't claim twice immediately before transaction is committed:
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
+		).Times(1)
+
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
 			&rpstore.Claimer{
 				DiscordID:   discordID,
 				TotalReward: amount,
 				ClaimedTxID: txID,
 			},
-		)
+		).Times(1)
 
 		expectedTx, err = eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.Error(t, err)
 		assert.Empty(t, expectedTx)
 	})
 
+	t.Run("should fail, already staked", func(t *testing.T) {
+		eng, client, _, _ := setup(t)
+
+		mainnetAddr := "mainnet-addr-fail-balance"
+		testnetAddr := "testnet-addr-fail-balance"
+		discordID := "123456789-already staked"
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			&pactus.GetValidatorResponse{
+				Validator: &pactus.ValidatorInfo{
+					Stake: 1,
+				},
+			}, nil,
+		).Times(1)
+
+		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
+		assert.EqualError(t, err, "this address is already a staked validator")
+		assert.Empty(t, expectedTx)
+	})
+
 	t.Run("should fail, low balance", func(t *testing.T) {
+		eng, client, _, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
 		discordID := "123456789-fail-balance"
@@ -209,18 +240,27 @@ func TestClaim(t *testing.T) {
 			utils.CoinToAtomic(499),
 		)
 
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
 		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.EqualError(t, err, "insufficient wallet balance")
 		assert.Empty(t, expectedTx)
 	})
 
 	t.Run("should fail, claimer not found", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-fail-notfound"
 		testnetAddr := "testnet-addr-fail-notfound"
 		discordID := "123456789-fail-notfound"
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -233,12 +273,18 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, different Discord ID", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-fail-different-id"
 		testnetAddr := "testnet-addr-fail-different-id"
 		discordID := "123456789-fail-different-id"
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -253,12 +299,18 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, not first validator address", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-fail-not-first-validator"
 		testnetAddr := "testnet-addr-fail-not-first-validator"
 		discordID := "123456789-fail-not-first-validator"
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -284,12 +336,18 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, validator not found", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-fail-validator-not-found"
 		testnetAddr := "testnet-addr-fail-validator-not-found"
 		discordID := "123456789-fail-validator-not-found"
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -315,6 +373,8 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, empty transaction hash", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
 		testnetAddr := "testnet-addr-fail-empty-tx-hash"
 		pubKey := "public-key-fail-empty-tx-hash"
@@ -324,6 +384,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(
@@ -355,6 +419,8 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should panic, add claimer failed", func(t *testing.T) {
+		eng, client, store, wallet := setup(t)
+
 		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
 		testnetAddr := "testnet-addr-panic-add-claimer-failed"
 		pubKey := "public-key-panic-add-claimer-failed"
@@ -365,6 +431,10 @@ func TestClaim(t *testing.T) {
 
 		wallet.EXPECT().Balance().Return(
 			utils.CoinToAtomic(501),
+		)
+
+		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
 		store.EXPECT().ClaimerInfo(testnetAddr).Return(

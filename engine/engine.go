@@ -26,20 +26,20 @@ type BotEngine struct {
 func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	cm := client.NewClientMgr()
 
-	c, err := client.NewClient(cfg.LocalNode)
+	localClient, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
 		log.Error("can't make a new local client", "err", err, "addr", cfg.LocalNode)
 		return nil, err
 	}
 
-	cm.AddClient("local-node", c)
+	cm.AddClient(localClient)
 
 	for _, nn := range cfg.NetworkNodes {
 		c, err := client.NewClient(nn)
 		if err != nil {
 			log.Error("can't add new network node client", "err", err, "addr", nn)
 		}
-		cm.AddClient("client", c)
+		cm.AddClient(c)
 	}
 
 	// initializing logger global instance.
@@ -180,6 +180,11 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 	defer be.Unlock()
 
 	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
+
+	valInfo, _ := be.Cm.GetValidatorInfo(mainnetAddr)
+	if valInfo != nil {
+		return "", errors.New("this address is already a staked validator")
+	}
 
 	if utils.AtomicToCoin(be.Wallet.Balance()) <= 500 {
 		be.logger.Warn("bot wallet hasn't enough balance")
