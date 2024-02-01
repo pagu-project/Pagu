@@ -67,6 +67,25 @@ func (s *Store) AddClaimTransaction(testnetAddr string, txID string) error {
 	return nil
 }
 
+func (s *Store) Status() (int64, int64, int64, int64) {
+	var claimed int64
+	var claimedAmount int64
+
+	var notClaimed int64
+	var notClaimedAmount int64
+
+	for _, c := range s.claimers {
+		if c.IsClaimed() {
+			claimed++
+			claimedAmount += c.TotalReward
+		} else {
+			notClaimed++
+			notClaimedAmount += c.TotalReward
+		}
+	}
+	return claimed, claimedAmount, notClaimed, notClaimedAmount
+}
+
 func (s *Store) save() error {
 	data, err := json.Marshal(s.claimers)
 	if err != nil {

@@ -14,6 +14,7 @@ const (
 	CmdNetworkStatus = "network"        //!
 	CmdNetworkHealth = "network-health" //!
 	CmdBotWallet     = "bot-wallet"     //!
+	CmdClaimStatus   = "claim-status"   //!
 )
 
 // The input is always string.
@@ -84,10 +85,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 		return fmt.Sprintf("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
 			"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
-			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP19-Score: %s\nStake: %v\n",
+			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP19-Score: %s\nStake: %v PAC's\n",
 			nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
 			nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, nodeInfo.ValidatorNum,
-			pip19Score, nodeInfo.StakeAmount), nil
+			pip19Score, util.ChangeToString(nodeInfo.StakeAmount)), nil
 
 	case CmdNetworkStatus:
 		net, err := be.NetworkStatus()
@@ -96,13 +97,19 @@ func (be *BotEngine) Run(input string) (string, error) {
 		}
 
 		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
-			"Validators Count: %v\nCurrent Block Height: %v\nTotal Power: %v\nTotal Committee Power: %v\n"+
+			"Validators Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC's\nTotal Committee Power: %v PAC's\n"+
 			"> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
-			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.CurrentBlockHeight, net.TotalNetworkPower, net.TotalCommitteePower), nil
+			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.CurrentBlockHeight, util.ChangeToString(net.TotalNetworkPower),
+			util.ChangeToString(net.TotalCommitteePower)), nil
 
 	case CmdBotWallet:
 		addr, blnc := be.BotWallet()
 		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v\n", addr, util.ChangeToString(blnc)), nil
+
+	case CmdClaimStatus:
+		claimed, claimedAmount, notClaimed, notClaimedAmount := be.ClaimStatus()
+		return fmt.Sprintf("Claimed rewards count: %v\nClaimed coins: %v PAC's\nNot-claimed rewards count: %v\nNot-claim coins: %v PAC's\n",
+			claimed, util.ChangeToString(claimedAmount), notClaimed, util.ChangeToString(notClaimedAmount)), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

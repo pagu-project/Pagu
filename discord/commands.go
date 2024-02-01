@@ -9,7 +9,7 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "claim",
-		Description: "Command to claim Pactus coins",
+		Description: "Command to claim the Pactus TestNet rewards coins",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -51,15 +51,19 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "network-health",
-		Description: "information on network health",
+		Description: "network health status",
 	},
 	{
 		Name:        "network-status",
-		Description: "status of Pactus network",
+		Description: "status of The Pactus network",
 	},
 	{
 		Name:        "bot-wallet",
-		Description: "RoboPac wallet address and balance",
+		Description: "The RoboPac wallet address and balance",
+	},
+	{
+		Name:        "claim-status",
+		Description: "TestNet reward claim status",
 	},
 }
 
@@ -71,4 +75,5 @@ var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordg
 	"network-health": networkHealthCommandHandler,
 	"network-status": networkStatusCommandHandler,
 	"bot-wallet":     botWalletCommandHandler,
+	"claim-status":   claimStatusCommandHandler,
 }
