@@ -45,7 +45,7 @@ func nodeInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result 
 	return &discordgo.MessageEmbed{
 		Title:       "Node Info🛟",
 		Description: result,
-		Color:       0x052D5A, //pactus color
+		Color:       0x052D5A, // pactus color
 	}
 }
 
@@ -69,7 +69,7 @@ func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result
 	return &discordgo.MessageEmbed{
 		Title:       "Bot Wallet🪙",
 		Description: result,
-		Color:       0x052D5A, //pactus color
+		Color:       0x052D5A, // pactus color
 	}
 }
 
@@ -77,7 +77,7 @@ func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, resu
 	return &discordgo.MessageEmbed{
 		Title:       "Claim's Status📃",
 		Description: result,
-		Color:       0x052D5A, //pactus color
+		Color:       0x052D5A, // pactus color
 	}
 }
 
