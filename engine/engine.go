@@ -123,6 +123,7 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 		TotalNetworkPower:   chainInfo.TotalPower,
 		TotalCommitteePower: chainInfo.CommitteePower,
 		NetworkName:         netInfo.NetworkName,
+		TotalAccounts:       int(chainInfo.TotalAccounts),
 	}, nil
 }
 
