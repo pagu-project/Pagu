@@ -30,6 +30,7 @@ func claimEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result str
 	return &discordgo.MessageEmbed{
 		Title:       "Claim Result💸",
 		Description: result,
+		Color:       0x008000, // green
 	}
 }
 
@@ -44,6 +45,7 @@ func nodeInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result 
 	return &discordgo.MessageEmbed{
 		Title:       "Node Info🛟",
 		Description: result,
+		Color:       0x008000, // green
 	}
 }
 
@@ -51,6 +53,7 @@ func networkHealthEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, re
 	return &discordgo.MessageEmbed{
 		Title:       "Network Health🧑‍⚕️",
 		Description: result,
+		Color:       0x008000, // green
 	}
 }
 
@@ -58,6 +61,7 @@ func networkStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, re
 	return &discordgo.MessageEmbed{
 		Title:       "Network Status🕸️",
 		Description: result,
+		Color:       0x052D5A, // Pactus color
 	}
 }
 
@@ -65,13 +69,15 @@ func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result
 	return &discordgo.MessageEmbed{
 		Title:       "Bot Wallet🪙",
 		Description: result,
+		Color:       0x008000, // green
 	}
 }
 
 func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "Claim Status📃",
+		Title:       "Claim's Status📃",
 		Description: result,
+		Color:       0x008000, // green
 	}
 }
 
