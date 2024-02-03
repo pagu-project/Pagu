@@ -19,6 +19,7 @@ type NetStatus struct {
 	TotalNetworkPower   int64
 	TotalCommitteePower int64
 	NetworkName         string
+	TotalAccounts       int
 }
 
 type NodeInfo struct {
