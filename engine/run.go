@@ -98,7 +98,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
 			"Validators Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC's\nTotal Committee Power: %v PAC's\n"+
-			"Total Accounts: %v\n"+
+			"Accounts Count : %v\n"+
 			"> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.CurrentBlockHeight, util.ChangeToString(net.TotalNetworkPower),
 			util.ChangeToString(net.TotalCommitteePower), net.TotalAccounts), nil
