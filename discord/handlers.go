@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/log"
@@ -163,7 +164,14 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		return
 	}
 
-	embed := networkHealthEmbed(s, i, result)
+	var color int
+	if strings.Contains(result, "Healthy") {
+		color = GREEN
+	} else {
+		color = RED
+	}
+
+	embed := networkHealthEmbed(s, i, result, color)
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
