@@ -50,8 +50,26 @@ func TestNetworkStatus(t *testing.T) {
 
 	client.EXPECT().GetBlockchainInfo().Return(
 		&pactus.GetBlockchainInfoResponse{
-			TotalPower: 1234,
+			TotalPower:      1234,
+			LastBlockHeight: 150,
+			TotalAccounts:   158,
 		}, nil,
+	).AnyTimes()
+
+	client.EXPECT().GetBalance("pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z").Return(
+		int64(100), nil,
+	)
+
+	client.EXPECT().GetBalance("pc1zprhnvcsy3pthekdcu28cw8muw4f432hkwgfasv").Return(
+		int64(100), nil,
+	)
+
+	client.EXPECT().GetBalance("pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45").Return(
+		int64(100), nil,
+	)
+
+	client.EXPECT().GetBalance("pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3").Return(
+		int64(100), nil,
 	)
 
 	status, err := eng.NetworkStatus()
