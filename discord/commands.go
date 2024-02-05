@@ -65,7 +65,7 @@ var commands = []*discordgo.ApplicationCommand{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "time",
 				Description: "in a day/month/year",
-				Required:    false,
+				Required:    true,
 				Choices: []*discordgo.ApplicationCommandOptionChoice{
 					{
 						Name:  "day",
