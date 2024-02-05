@@ -87,7 +87,7 @@ func (s *Store) Status() (int64, int64, int64, int64) {
 }
 
 func (s *Store) GetUnclaimeds() []Claimer {
-	unclaimed := make([]Claimer, 300)
+	unclaimed := make([]Claimer, 0)
 	for _, c := range s.claimers {
 		if !c.IsClaimed() {
 			unclaimed = append(unclaimed, *c)
