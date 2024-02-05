@@ -112,9 +112,6 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
-	if i.Member.User.ID != "1081629757793374218" {
-		return
-	}
 
 	valAddress := i.ApplicationCommandData().Options[0].StringValue()
 	command := fmt.Sprintf("node-info %s", valAddress)
