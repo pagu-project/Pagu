@@ -257,12 +257,14 @@ func unclaimedCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.
 		return
 	}
 
+	log.Info("new unclaimed get attempt")
+
 	result := make([]UnClaimed, 300)
 	uc := db.BotEngine.Unclaimed()
 
 	for _, claimer := range uc {
 		user, err := db.Session.User(claimer.DiscordID)
-		if err != nil {
+		if err != nil || user == nil {
 			continue
 		}
 		result = append(result, UnClaimed{
