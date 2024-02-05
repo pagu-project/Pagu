@@ -256,7 +256,7 @@ func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo
 	}
 
 	stake := i.ApplicationCommandData().Options[0].StringValue()
-	time := i.ApplicationCommandData().Options[1].StringValue()
+	time := i.ApplicationCommandData().Options[0].StringValue()
 
 	result, err := db.BotEngine.Run(fmt.Sprintf("calc-reward %v %v", stake, time))
 	if err != nil {

@@ -1,6 +1,8 @@
 package discord
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+)
 
 var commands = []*discordgo.ApplicationCommand{
 	{
@@ -62,8 +64,22 @@ var commands = []*discordgo.ApplicationCommand{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "time",
-				Description: "in a day/month/year (default is a day)",
+				Description: "in a day/month/year",
 				Required:    false,
+				Choices: []*discordgo.ApplicationCommandOptionChoice{
+					{
+						Name:  "day",
+						Value: "day",
+					},
+					{
+						Name:  "month",
+						Value: "month",
+					},
+					{
+						Name:  "year",
+						Value: "year",
+					},
+				},
 			},
 		},
 	},

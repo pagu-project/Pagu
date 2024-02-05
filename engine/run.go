@@ -128,8 +128,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("You will get: %v :pac: reward, with %v stake 🔒 on your validator in one %s ⏰ with %v total power ⚡ of committee."+
-			"\n\n> Note📝: This is an estimation not a 100 percent correct data and with increasing total power, validators and your stake amount this number will change.",
+		return fmt.Sprintf("You will get: %v PAC's reward, with %v stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
 			reward, stake, time, util.ChangeToString(totalPower)), nil
 
 	default:
