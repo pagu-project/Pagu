@@ -72,7 +72,6 @@ var commands = []*discordgo.ApplicationCommand{
 }
 
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
-	"not-claimed":    unclaimedCommandHandler,
 	"help":           helpCommandHandler,
 	"claim":          claimCommandHandler,
 	"claimer-info":   claimerInfoCommandHandler,

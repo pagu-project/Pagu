@@ -1,9 +1,7 @@
 package discord
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -249,69 +247,5 @@ func claimStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 		},
 	}
 
-	_ = s.InteractionRespond(i.Interaction, response)
-}
-
-func unclaimedCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
-		return
-	}
-
-	log.Info("new unclaimed get attempt")
-
-	result := make([]UnClaimed, 0)
-	uc := db.BotEngine.Unclaimed()
-	log.Info("getting list", "first", uc[0], "len", len(uc))
-
-	for i, claimer := range uc {
-		log.Info("in loop", "index", i, "claimer", claimer)
-		user, err := db.Session.User(claimer.DiscordID)
-		if err != nil || user == nil {
-			continue
-		}
-		result = append(result, UnClaimed{
-			DiscordUserName: user.Username,
-			DiscordID:       claimer.DiscordID,
-		})
-	}
-
-	data, err := json.Marshal(result)
-	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
-
-		return
-	}
-
-	err = os.WriteFile("unclaimed.json", data, 0o600)
-	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
-
-		return
-	}
-
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: "successfully saved on `unclaimed.json`!",
-		},
-	}
 	_ = s.InteractionRespond(i.Interaction, response)
 }

@@ -86,16 +86,6 @@ func (s *Store) Status() (int64, int64, int64, int64) {
 	return claimed, claimedAmount, notClaimed, notClaimedAmount
 }
 
-func (s *Store) GetUnclaimeds() []Claimer {
-	unclaimed := make([]Claimer, 0)
-	for _, c := range s.claimers {
-		if !c.IsClaimed() {
-			unclaimed = append(unclaimed, *c)
-		}
-	}
-	return unclaimed
-}
-
 func (s *Store) save() error {
 	data, err := json.Marshal(s.claimers)
 	if err != nil {

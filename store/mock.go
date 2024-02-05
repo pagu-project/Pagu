@@ -66,20 +66,6 @@ func (mr *MockIStoreMockRecorder) ClaimerInfo(testNetValAddr any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClaimerInfo", reflect.TypeOf((*MockIStore)(nil).ClaimerInfo), testNetValAddr)
 }
 
-// GetUnclaimeds mocks base method.
-func (m *MockIStore) GetUnclaimeds() []Claimer {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUnclaimeds")
-	ret0, _ := ret[0].([]Claimer)
-	return ret0
-}
-
-// GetUnclaimeds indicates an expected call of GetUnclaimeds.
-func (mr *MockIStoreMockRecorder) GetUnclaimeds() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUnclaimeds", reflect.TypeOf((*MockIStore)(nil).GetUnclaimeds))
-}
-
 // Status mocks base method.
 func (m *MockIStore) Status() (int64, int64, int64, int64) {
 	m.ctrl.T.Helper()
