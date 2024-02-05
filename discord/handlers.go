@@ -214,7 +214,7 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 	_ = s.InteractionRespond(i.Interaction, response)
 }
 
-func botWalletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func walletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
@@ -240,6 +240,41 @@ func claimStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 	result, _ := db.BotEngine.Run("claim-status")
 
 	embed := claimStatusEmbed(s, i, result)
+	response := &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	}
+
+	_ = s.InteractionRespond(i.Interaction, response)
+}
+
+func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	stake := i.ApplicationCommandData().Options[0].StringValue()
+	time := i.ApplicationCommandData().Options[1].StringValue()
+
+	result, err := db.BotEngine.Run(fmt.Sprintf("calc-reward %v %v", stake, time))
+	if err != nil {
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
+
+		return
+	}
+
+	embed := rewardCalcEmbed(s, i, result)
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

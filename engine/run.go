@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/pactus-project/pactus/util"
@@ -13,8 +14,9 @@ const (
 	CmdNodeInfo      = "node-info"      //!
 	CmdNetworkStatus = "network"        //!
 	CmdNetworkHealth = "network-health" //!
-	CmdBotWallet     = "bot-wallet"     //!
+	CmdBotWallet     = "wallet"         //!
 	CmdClaimStatus   = "claim-status"   //!
+	CmdRewardCalc    = "calc-reward"    //!
 )
 
 // The input is always string.
@@ -98,7 +100,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
 			"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC's\nTotal Committee Power: %v PAC's\n"+
-			"> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
+			"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.TotalAccounts, net.CurrentBlockHeight, util.ChangeToString(net.TotalNetworkPower),
 			util.ChangeToString(net.TotalCommitteePower)), nil
 
@@ -110,6 +112,25 @@ func (be *BotEngine) Run(input string) (string, error) {
 		claimed, claimedAmount, notClaimed, notClaimedAmount := be.ClaimStatus()
 		return fmt.Sprintf("Claimed rewards count: %v\nClaimed coins: %v PAC's\nNot-claimed rewards count: %v\nNot-claim coins: %v PAC's\n",
 			claimed, util.ChangeToString(claimedAmount), notClaimed, util.ChangeToString(notClaimedAmount)), nil
+
+	case CmdRewardCalc:
+		if len(args) != 2 {
+			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		}
+
+		stake, err := strconv.Atoi(args[0])
+		if err != nil {
+			return "", err
+		}
+
+		reward, time, totalPower, err := be.RewardCalculate(int64(stake), args[1])
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("You will get: %v :pac: reward, with %v stake 🔒 on your validator in one %s ⏰ with %v total power ⚡ of committee."+
+			"\n\n> Note📝: This is an estimation not a 100 percent correct data and with increasing total power, validators and your stake amount this number will change.",
+			reward, stake, time, util.ChangeToString(totalPower)), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)
