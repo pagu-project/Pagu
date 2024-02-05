@@ -261,8 +261,10 @@ func unclaimedCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.
 
 	result := make([]UnClaimed, 300)
 	uc := db.BotEngine.Unclaimed()
+	log.Info("getting list", "first", uc[0], "len", len(uc))
 
 	for _, claimer := range uc {
+		log.Info("in loop")
 		user, err := db.Session.User(claimer.DiscordID)
 		if err != nil || user == nil {
 			continue
