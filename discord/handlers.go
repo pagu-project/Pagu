@@ -1,7 +1,9 @@
 package discord
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -108,6 +110,9 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 
 func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+	if i.Member.User.ID != "1081629757793374218" {
 		return
 	}
 
@@ -247,5 +252,65 @@ func claimStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 		},
 	}
 
+	_ = s.InteractionRespond(i.Interaction, response)
+}
+
+func unclaimedCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	result := make([]UnClaimed, 300)
+	uc := db.BotEngine.Unclaimed()
+
+	for _, claimer := range uc {
+		user, err := db.Session.User(claimer.DiscordID)
+		if err != nil {
+			continue
+		}
+		result = append(result, UnClaimed{
+			DiscordUserName: user.Username,
+			DiscordID:       claimer.DiscordID,
+		})
+	}
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
+
+		return
+	}
+
+	err = os.WriteFile("unclaimed.json", data, 0o600)
+	if err != nil {
+		errorEmbed := errorEmbedMessage(err.Error())
+
+		response := &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{errorEmbed},
+			},
+		}
+
+		_ = s.InteractionRespond(i.Interaction, response)
+
+		return
+	}
+
+	response := &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "successfully saved on `unclaimed.json`!",
+		},
+	}
 	_ = s.InteractionRespond(i.Interaction, response)
 }

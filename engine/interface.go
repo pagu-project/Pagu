@@ -9,6 +9,7 @@ type IEngine interface {
 	ClaimerInfo(discordID string) (*store.Claimer, error)
 	Claim(discordID string, testnetAddr string, mainnetAddr string) (string, error)
 	BotWallet() (string, int64)
+	Unclaimed() []*store.Claimer
 
 	Run(input string) (string, error)
 

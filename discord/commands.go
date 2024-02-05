@@ -65,6 +65,10 @@ var commands = []*discordgo.ApplicationCommand{
 		Name:        "claim-status",
 		Description: "TestNet reward claim status",
 	},
+	{
+		Name:        "unclaimed",
+		Description: "Admin Only",
+	},
 }
 
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
@@ -76,4 +80,5 @@ var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordg
 	"network-status": networkStatusCommandHandler,
 	"bot-wallet":     botWalletCommandHandler,
 	"claim-status":   claimStatusCommandHandler,
+	"unclaimed":      unclaimedCommandHandler,
 }
