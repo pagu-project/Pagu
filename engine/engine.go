@@ -246,7 +246,7 @@ func (be *BotEngine) ClaimStatus() (int64, int64, int64, int64) {
 	return be.Store.Status()
 }
 
-func (be *BotEngine) Unclaimed() []*store.Claimer {
+func (be *BotEngine) Unclaimed() []store.Claimer {
 	return be.Store.GetUnclaimeds()
 }
 

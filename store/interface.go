@@ -14,5 +14,5 @@ type IStore interface {
 	ClaimerInfo(testNetValAddr string) *Claimer
 	AddClaimTransaction(testNetValAddr string, txID string) error
 	Status() (int64, int64, int64, int64)
-	GetUnclaimeds() []*Claimer
+	GetUnclaimeds() []Claimer
 }

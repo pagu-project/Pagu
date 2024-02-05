@@ -67,10 +67,10 @@ func (mr *MockIStoreMockRecorder) ClaimerInfo(testNetValAddr any) *gomock.Call {
 }
 
 // GetUnclaimeds mocks base method.
-func (m *MockIStore) GetUnclaimeds() []*Claimer {
+func (m *MockIStore) GetUnclaimeds() []Claimer {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUnclaimeds")
-	ret0, _ := ret[0].([]*Claimer)
+	ret0, _ := ret[0].([]Claimer)
 	return ret0
 }
 
