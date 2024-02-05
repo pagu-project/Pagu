@@ -128,9 +128,9 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("You will get: %v PAC's reward, with %v stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+		return fmt.Sprintf("Approximately you earn %v PAC's reward, with %v stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
-			reward, stake, time, util.ChangeToString(totalPower)), nil
+			reward, stake, time, totalPower), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

@@ -248,6 +248,10 @@ func (be *BotEngine) ClaimStatus() (int64, int64, int64, int64) {
 }
 
 func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int64, error) {
+	if stake < 1 || stake > 1_000 {
+		return 0, "", 0, errors.New("minimum of stake is 1 PAC and maximum is 1,000 PAC")
+	}
+
 	var blocks int64
 	time := t
 	switch t {
@@ -268,7 +272,7 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 	}
 
 	reward := (stake * int64(blocks)) / int64(putils.ChangeToCoin(bi.TotalPower))
-	return reward, time, bi.TotalPower, nil
+	return reward, time, utils.AtomicToCoin(bi.TotalPower), nil
 }
 
 func (be *BotEngine) Stop() {
