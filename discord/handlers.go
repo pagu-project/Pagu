@@ -219,7 +219,7 @@ func walletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Int
 		return
 	}
 
-	result, _ := db.BotEngine.Run("bot-wallet")
+	result, _ := db.BotEngine.Run("wallet")
 
 	embed := botWalletEmbed(s, i, result)
 	response := &discordgo.InteractionResponse{

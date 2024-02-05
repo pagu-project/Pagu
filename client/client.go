@@ -138,6 +138,17 @@ func (c *Client) GetTransactionData(txID string) (*pactus.GetTransactionResponse
 	})
 }
 
+func (c *Client) GetBalance(address string) (int64, error) {
+	account, err := c.blockchainClient.GetAccount(context.Background(), &pactus.GetAccountRequest{
+		Address: address,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return account.Account.Balance, nil
+}
+
 func (c *Client) Close() error {
 	return c.conn.Close()
 }

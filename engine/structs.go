@@ -11,6 +11,7 @@ type NetHealthResponse struct {
 }
 
 type NetStatus struct {
+	NetworkName         string
 	ConnectedPeersCount uint32
 	ValidatorsCount     int32
 	TotalBytesSent      uint32
@@ -18,8 +19,8 @@ type NetStatus struct {
 	CurrentBlockHeight  uint32
 	TotalNetworkPower   int64
 	TotalCommitteePower int64
-	NetworkName         string
 	TotalAccounts       int32
+	CirculatingSupply   int64
 }
 
 type NodeInfo struct {

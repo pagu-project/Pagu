@@ -53,6 +53,21 @@ func (mr *MockIClientMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockIClient)(nil).Close))
 }
 
+// GetBalance mocks base method.
+func (m *MockIClient) GetBalance(arg0 string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBalance", arg0)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBalance indicates an expected call of GetBalance.
+func (mr *MockIClientMockRecorder) GetBalance(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalance", reflect.TypeOf((*MockIClient)(nil).GetBalance), arg0)
+}
+
 // GetBlockchainHeight mocks base method.
 func (m *MockIClient) GetBlockchainHeight() (uint32, error) {
 	m.ctrl.T.Helper()

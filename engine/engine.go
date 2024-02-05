@@ -115,6 +115,11 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 		return nil, err
 	}
 
+	cs, err := be.Cm.GetCirculatingSupply()
+	if err != nil {
+		cs = 0
+	}
+
 	return &NetStatus{
 		ConnectedPeersCount: netInfo.ConnectedPeersCount,
 		ValidatorsCount:     chainInfo.TotalValidators,
@@ -125,6 +130,7 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 		TotalCommitteePower: chainInfo.CommitteePower,
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
+		CirculatingSupply:   cs,
 	}, nil
 }
 

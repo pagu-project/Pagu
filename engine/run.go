@@ -99,10 +99,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 		}
 
 		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
-			"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC's\nTotal Committee Power: %v PAC's\n"+
+			"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC\nTotal Committee Power: %v PAC\nCirculating Supply: %v PAC\n"+
 			"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.TotalAccounts, net.CurrentBlockHeight, util.ChangeToString(net.TotalNetworkPower),
-			util.ChangeToString(net.TotalCommitteePower)), nil
+			util.ChangeToString(net.TotalCommitteePower), util.ChangeToString(net.CirculatingSupply)), nil
 
 	case CmdBotWallet:
 		addr, blnc := be.BotWallet()
@@ -128,7 +128,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", err
 		}
 
-		return fmt.Sprintf("Approximately you earn %v PAC's reward, with %v stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+		return fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
 			reward, stake, time, totalPower), nil
 

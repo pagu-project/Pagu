@@ -85,7 +85,7 @@ func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, resu
 
 func rewardCalcEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "Vlidator reward calculation🧮",
+		Title:       "Validator reward calculation🧮",
 		Description: result,
 		Color:       PACTUS,
 	}
