@@ -59,14 +59,12 @@ func (db *DiscordBot) Start() {
 func (db *DiscordBot) UpdateStatusInfo() {
 	log.Info("info status started")
 	for {
-		log.Info("showing status finished")
-
 		ns, err := db.BotEngine.NetworkStatus()
 		if err != nil {
 			continue
 		}
 
-		err = db.Session.UpdateStatusComplex(newStatus("validators count", ns.ValidatorsCount))
+		err = db.Session.UpdateListeningStatus(newStatus("validators count", ns.ValidatorsCount))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -74,7 +72,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 2)
 
-		err = db.Session.UpdateStatusComplex(newStatus("height", ns.CurrentBlockHeight))
+		err = db.Session.UpdateListeningStatus(newStatus("height", ns.CurrentBlockHeight))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -82,7 +80,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 2)
 
-		err = db.Session.UpdateStatusComplex(newStatus("circulating supply", ns.CirculatingSupply))
+		err = db.Session.UpdateListeningStatus(newStatus("circulating supply", ns.CirculatingSupply))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -90,7 +88,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 2)
 
-		err = db.Session.UpdateStatusComplex(newStatus("total accounts", ns.TotalAccounts))
+		err = db.Session.UpdateListeningStatus(newStatus("total accounts", ns.TotalAccounts))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -98,7 +96,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 2)
 
-		err = db.Session.UpdateStatusComplex(newStatus("total power", ns.TotalNetworkPower))
+		err = db.Session.UpdateListeningStatus(newStatus("total power", ns.TotalNetworkPower))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue

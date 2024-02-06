@@ -19,8 +19,6 @@ func checkMessage(i *discordgo.InteractionCreate, s *discordgo.Session, guildID,
 	return true
 }
 
-func newStatus(name string, value interface{}) discordgo.UpdateStatusData {
-	return discordgo.UpdateStatusData{
-		Status: fmt.Sprintf("%s: %v", name, value),
-	}
+func newStatus(name string, value interface{}) string {
+	return fmt.Sprintf("%s: %v", name, value)
 }
