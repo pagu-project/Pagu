@@ -71,7 +71,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 			continue
 		}
 
-		time.Sleep(time.Second * 4)
+		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("height", ns.CurrentBlockHeight))
 		if err != nil {
@@ -79,7 +79,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 			continue
 		}
 
-		time.Sleep(time.Second * 4)
+		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("circulating supply", util.ChangeToString(ns.CirculatingSupply)))
 		if err != nil {
@@ -87,7 +87,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 			continue
 		}
 
-		time.Sleep(time.Second * 4)
+		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("total accounts", ns.TotalAccounts))
 		if err != nil {
@@ -95,7 +95,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 			continue
 		}
 
-		time.Sleep(time.Second * 4)
+		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("total power", util.ChangeToString(ns.TotalNetworkPower)))
 		if err != nil {
@@ -103,7 +103,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 			continue
 		}
 
-		time.Sleep(time.Second * 4)
+		time.Sleep(time.Second * 5)
 	}
 }
 
