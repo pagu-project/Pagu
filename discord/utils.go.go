@@ -25,7 +25,7 @@ func newStatus(name string, value interface{}) discordgo.UpdateStatusData {
 		Activities: []*discordgo.Activity{
 			{
 				Type: discordgo.ActivityTypeCustom,
-				Name: "",
+				Name: fmt.Sprintf("%s: %v", name, value),
 			},
 		},
 	}
