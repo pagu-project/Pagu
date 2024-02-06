@@ -24,7 +24,7 @@ func newStatus(name string, value interface{}) discordgo.UpdateStatusData {
 		Status: "online",
 		Activities: []*discordgo.Activity{
 			{
-				Type: discordgo.ActivityTypeCustom,
+				Type: discordgo.ActivityTypeCompeting,
 				Name: fmt.Sprintf("%s: %v", name, value),
 				URL:  "",
 			},
