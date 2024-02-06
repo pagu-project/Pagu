@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"time"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
@@ -39,6 +41,9 @@ func (db *DiscordBot) Start() {
 		log.Panic("can't open discord session", "err", err)
 	}
 
+	// Updating bot status in real-time by network info.
+	go db.UpdateStatusInfo()
+
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
 	for i, v := range commands {
 		cmd, err := db.Session.ApplicationCommandCreate(db.Session.State.User.ID, db.GuildID, v)
@@ -47,6 +52,30 @@ func (db *DiscordBot) Start() {
 		}
 		registeredCommands[i] = cmd
 		log.Info("discord command registered", "name", v.Name)
+	}
+}
+
+func (db *DiscordBot) UpdateStatusInfo() {
+	for {
+		ns, err := db.BotEngine.NetworkStatus()
+		if err != nil {
+			continue
+		}
+
+		_ = db.Session.UpdateStatusComplex(newStatus("validators count", ns.ValidatorsCount))
+		time.Sleep(time.Second * 2)
+
+		_ = db.Session.UpdateStatusComplex(newStatus("height", ns.CurrentBlockHeight))
+		time.Sleep(time.Second * 2)
+
+		_ = db.Session.UpdateStatusComplex(newStatus("circulating supply", ns.CirculatingSupply))
+		time.Sleep(time.Second * 2)
+
+		_ = db.Session.UpdateStatusComplex(newStatus("total accounts", ns.TotalAccounts))
+		time.Sleep(time.Second * 2)
+
+		_ = db.Session.UpdateStatusComplex(newStatus("total power", ns.TotalNetworkPower))
+		time.Sleep(time.Second * 2)
 	}
 }
 

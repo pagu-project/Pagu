@@ -1,6 +1,10 @@
 package discord
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"fmt"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 const (
 	GREEN  = 0x008000
@@ -8,15 +12,15 @@ const (
 	PACTUS = 0x052D5A
 )
 
-type UnClaimed struct {
-	TestNetAddr     string `json:"testnet_validator_address"`
-	DiscordUserName string `json:"discord_username"`
-	DiscordID       string `json:"discord_id"`
-}
-
 func checkMessage(i *discordgo.InteractionCreate, s *discordgo.Session, guildID, userID string) bool {
 	if i.GuildID != guildID || s.State.User.ID == userID {
 		return false
 	}
 	return true
+}
+
+func newStatus(name string, value interface{}) discordgo.UpdateStatusData {
+	return discordgo.UpdateStatusData{
+		Status: fmt.Sprintf("%s: %v", name, value),
+	}
 }
