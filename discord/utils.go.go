@@ -21,11 +21,12 @@ func checkMessage(i *discordgo.InteractionCreate, s *discordgo.Session, guildID,
 
 func newStatus(name string, value interface{}) discordgo.UpdateStatusData {
 	return discordgo.UpdateStatusData{
-		Status: fmt.Sprintf("%s: %v", name, value),
+		Status: "online",
 		Activities: []*discordgo.Activity{
 			{
 				Type: discordgo.ActivityTypeCustom,
 				Name: fmt.Sprintf("%s: %v", name, value),
+				URL:  "",
 			},
 		},
 	}
