@@ -146,6 +146,45 @@ func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, 
 	return txData, nil
 }
 
+func (cm *Mgr) GetCirculatingSupply() (int64, error) {
+	localClient := cm.getLocalClient()
+
+	height, err := localClient.GetBlockchainInfo()
+	if err != nil {
+		return 0, err
+	}
+	minted := float64(height.LastBlockHeight) * 1e9
+	staked := height.TotalPower
+
+	var addr1Out int64 = 0
+	var addr2Out int64 = 0
+	var addr3Out int64 = 0
+	var addr4Out int64 = 0
+
+	balance1, err := localClient.GetBalance("pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z")
+	if err == nil {
+		addr1Out = 8_400_000_000_000_000 - balance1
+	}
+
+	balance2, err := localClient.GetBalance("pc1zprhnvcsy3pthekdcu28cw8muw4f432hkwgfasv")
+	if err == nil {
+		addr2Out = 6_300_000_000_000_000 - balance2
+	}
+
+	balance3, err := localClient.GetBalance("pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45")
+	if err == nil {
+		addr3Out = 4_200_000_000_000_000 - balance3
+	}
+
+	balance4, err := localClient.GetBalance("pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3")
+	if err == nil {
+		addr4Out = 2_100_000_000_000_000 - balance4
+	}
+
+	circulating := (addr1Out + addr2Out + addr3Out + addr4Out + int64(minted)) - staked
+	return circulating, nil
+}
+
 func (cm *Mgr) Stop() {
 	for addr, c := range cm.clients {
 		if err := c.Close(); err != nil {

@@ -1,6 +1,8 @@
 package discord
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+)
 
 var commands = []*discordgo.ApplicationCommand{
 	{
@@ -50,6 +52,38 @@ var commands = []*discordgo.ApplicationCommand{
 		},
 	},
 	{
+		Name:        "reward-calc",
+		Description: "calculates how much PAC coins you will earn in a (day/month/year) based on your stake.",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "stake",
+				Description: "your validator stake amount",
+				Required:    true,
+			},
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "time",
+				Description: "in a day/month/year",
+				Required:    true,
+				Choices: []*discordgo.ApplicationCommandOptionChoice{
+					{
+						Name:  "day",
+						Value: "day",
+					},
+					{
+						Name:  "month",
+						Value: "month",
+					},
+					{
+						Name:  "year",
+						Value: "year",
+					},
+				},
+			},
+		},
+	},
+	{
 		Name:        "network-health",
 		Description: "network health status",
 	},
@@ -58,12 +92,16 @@ var commands = []*discordgo.ApplicationCommand{
 		Description: "status of The Pactus network",
 	},
 	{
-		Name:        "bot-wallet",
-		Description: "The RoboPac wallet address and balance",
+		Name:        "wallet",
+		Description: "The RoboPac wallet info",
 	},
 	{
 		Name:        "claim-status",
 		Description: "TestNet reward claim status",
+	},
+	{
+		Name:        "not-claimed",
+		Description: "Admin Only",
 	},
 }
 
@@ -74,6 +112,7 @@ var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordg
 	"node-info":      nodeInfoCommandHandler,
 	"network-health": networkHealthCommandHandler,
 	"network-status": networkStatusCommandHandler,
-	"bot-wallet":     botWalletCommandHandler,
+	"wallet":         walletCommandHandler,
 	"claim-status":   claimStatusCommandHandler,
+	"reward-calc":    rewardCalcCommandHandler,
 }

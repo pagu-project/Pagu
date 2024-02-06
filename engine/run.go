@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/pactus-project/pactus/util"
@@ -13,8 +14,9 @@ const (
 	CmdNodeInfo      = "node-info"      //!
 	CmdNetworkStatus = "network"        //!
 	CmdNetworkHealth = "network-health" //!
-	CmdBotWallet     = "bot-wallet"     //!
+	CmdBotWallet     = "wallet"         //!
 	CmdClaimStatus   = "claim-status"   //!
+	CmdRewardCalc    = "calc-reward"    //!
 )
 
 // The input is always string.
@@ -97,10 +99,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 		}
 
 		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
-			"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC's\nTotal Committee Power: %v PAC's\n"+
-			"> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
+			"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC\nTotal Committee Power: %v PAC\nCirculating Supply: %v PAC\n"+
+			"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.TotalAccounts, net.CurrentBlockHeight, util.ChangeToString(net.TotalNetworkPower),
-			util.ChangeToString(net.TotalCommitteePower)), nil
+			util.ChangeToString(net.TotalCommitteePower), util.ChangeToString(net.CirculatingSupply)), nil
 
 	case CmdBotWallet:
 		addr, blnc := be.BotWallet()
@@ -110,6 +112,25 @@ func (be *BotEngine) Run(input string) (string, error) {
 		claimed, claimedAmount, notClaimed, notClaimedAmount := be.ClaimStatus()
 		return fmt.Sprintf("Claimed rewards count: %v\nClaimed coins: %v PAC's\nNot-claimed rewards count: %v\nNot-claim coins: %v PAC's\n",
 			claimed, util.ChangeToString(claimedAmount), notClaimed, util.ChangeToString(notClaimedAmount)), nil
+
+	case CmdRewardCalc:
+		if len(args) != 2 {
+			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		}
+
+		stake, err := strconv.Atoi(args[0])
+		if err != nil {
+			return "", err
+		}
+
+		reward, time, totalPower, err := be.RewardCalculate(int64(stake), args[1])
+		if err != nil {
+			return "", err
+		}
+
+		return fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
+			reward, stake, time, totalPower), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

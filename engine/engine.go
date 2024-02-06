@@ -12,6 +12,7 @@ import (
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
+	putils "github.com/pactus-project/pactus/util"
 )
 
 type BotEngine struct {
@@ -114,6 +115,11 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 		return nil, err
 	}
 
+	cs, err := be.Cm.GetCirculatingSupply()
+	if err != nil {
+		cs = 0
+	}
+
 	return &NetStatus{
 		ConnectedPeersCount: netInfo.ConnectedPeersCount,
 		ValidatorsCount:     chainInfo.TotalValidators,
@@ -124,6 +130,7 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 		TotalCommitteePower: chainInfo.CommitteePower,
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
+		CirculatingSupply:   cs,
 	}, nil
 }
 
@@ -244,6 +251,34 @@ func (be *BotEngine) BotWallet() (string, int64) {
 
 func (be *BotEngine) ClaimStatus() (int64, int64, int64, int64) {
 	return be.Store.Status()
+}
+
+func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int64, error) {
+	if stake < 1 || stake > 1_000 {
+		return 0, "", 0, errors.New("minimum of stake is 1 PAC and maximum is 1,000 PAC")
+	}
+
+	var blocks int64
+	time := t
+	switch t {
+	case "day":
+		blocks = 8640
+	case "month":
+		blocks = 259200
+	case "year":
+		blocks = 3110400
+	default:
+		blocks = 8640
+		time = "day"
+	}
+
+	bi, err := be.Cm.GetBlockchainInfo()
+	if err != nil {
+		return 0, "", 0, nil
+	}
+
+	reward := (stake * int64(blocks)) / int64(putils.ChangeToCoin(bi.TotalPower))
+	return reward, time, utils.AtomicToCoin(bi.TotalPower), nil
 }
 
 func (be *BotEngine) Stop() {
