@@ -42,6 +42,7 @@ func (db *DiscordBot) Start() {
 	}
 
 	// Updating bot status in real-time by network info.
+	log.Info("starting info status")
 	go db.UpdateStatusInfo()
 
 	registeredCommands := make([]*discordgo.ApplicationCommand, len(commands))
@@ -56,25 +57,53 @@ func (db *DiscordBot) Start() {
 }
 
 func (db *DiscordBot) UpdateStatusInfo() {
+	log.Info("info status started")
 	for {
+		log.Info("showing status finished")
+
 		ns, err := db.BotEngine.NetworkStatus()
 		if err != nil {
 			continue
 		}
 
-		_ = db.Session.UpdateStatusComplex(newStatus("validators count", ns.ValidatorsCount))
+		err = db.Session.UpdateStatusComplex(newStatus("validators count", ns.ValidatorsCount))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
 		time.Sleep(time.Second * 2)
 
-		_ = db.Session.UpdateStatusComplex(newStatus("height", ns.CurrentBlockHeight))
+		err = db.Session.UpdateStatusComplex(newStatus("height", ns.CurrentBlockHeight))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
 		time.Sleep(time.Second * 2)
 
-		_ = db.Session.UpdateStatusComplex(newStatus("circulating supply", ns.CirculatingSupply))
+		err = db.Session.UpdateStatusComplex(newStatus("circulating supply", ns.CirculatingSupply))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
 		time.Sleep(time.Second * 2)
 
-		_ = db.Session.UpdateStatusComplex(newStatus("total accounts", ns.TotalAccounts))
+		err = db.Session.UpdateStatusComplex(newStatus("total accounts", ns.TotalAccounts))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
 		time.Sleep(time.Second * 2)
 
-		_ = db.Session.UpdateStatusComplex(newStatus("total power", ns.TotalNetworkPower))
+		err = db.Session.UpdateStatusComplex(newStatus("total power", ns.TotalNetworkPower))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
 		time.Sleep(time.Second * 2)
 	}
 }
