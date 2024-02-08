@@ -100,8 +100,27 @@ var commands = []*discordgo.ApplicationCommand{
 		Description: "TestNet reward claim status",
 	},
 	{
-		Name:        "not-claimed",
-		Description: "Admin Only",
+		Name:        "get-discount",
+		Description: "get twitter campaign discount code",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "twitter-username",
+				Description: "your twitter username",
+				Required:    true,
+			},
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "tweet-link",
+				Description: "reposted tweet link",
+				Required:    true, 
+			},
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "validator-address",
+				Description: "your validator address",
+				Required:    true, 
+			},
 	},
 }
 
@@ -115,4 +134,5 @@ var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordg
 	"wallet":         walletCommandHandler,
 	"claim-status":   claimStatusCommandHandler,
 	"reward-calc":    rewardCalcCommandHandler,
+	"get-discount": twitterDiscountCampaignCommandHandler,
 }

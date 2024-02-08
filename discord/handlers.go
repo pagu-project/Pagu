@@ -284,3 +284,11 @@ func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo
 
 	_ = s.InteractionRespond(i.Interaction, response)
 }
+
+func twitterDiscountCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	// code goes here.
+}
