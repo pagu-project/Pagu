@@ -159,6 +159,7 @@ func (s *Store) AddTwitterParty(party *TwitterParty) error {
 	}
 	return nil
 }
+
 func (s *Store) GetTwitterParty(twitterName string) *TwitterParty {
 	return s.twitterParties[twitterName]
 }

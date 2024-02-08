@@ -88,7 +88,8 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
-	tc twitter_api.IClient) *BotEngine {
+	tc twitter_api.IClient,
+) *BotEngine {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &BotEngine{

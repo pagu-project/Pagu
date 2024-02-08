@@ -27,7 +27,6 @@ type Client struct {
 func NewClient(bearerToken string, twitterID string) (*Client, error) {
 	client := &twitter.Client{
 		Authorizer: authorize{
-
 			Token: bearerToken,
 		},
 		Client: http.DefaultClient,

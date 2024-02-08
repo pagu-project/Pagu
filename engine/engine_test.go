@@ -495,23 +495,90 @@ func TestClaim(t *testing.T) {
 }
 
 func TestTwitterCampaign(t *testing.T) {
-	t.Run("non-existing twitter", func(t *testing.T) {
-		eng, _, _, _, twitter := setup(t)
+	t.Run("staked validator", func(t *testing.T) {
+		eng, client, _, _, _ := setup(t)
 
-		username := "non-existing"
+		username := "anything"
+		valAddr := "staked-validator"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			&pactus.GetValidatorResponse{}, nil,
+		)
+
+		_, err := eng.TwitterCampaign(username, valAddr)
+		assert.Error(t, err)
+	})
+
+	t.Run("non-existing validator", func(t *testing.T) {
+		eng, client, _, _, _ := setup(t)
+
+		username := "anything"
+		valAddr := "non-existing-validator"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			nil, nil,
+		)
+
+		_, err := eng.TwitterCampaign(username, valAddr)
+		assert.Error(t, err)
+	})
+
+	t.Run("non-existing twitter account", func(t *testing.T) {
+		eng, client, _, _, twitter := setup(t)
+
+		username := "non-existing-twitter"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
 		expectedErr := errors.New("not exists")
 		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
 			nil, expectedErr,
 		)
 
-		_, err := eng.TwitterCampaign("non-existing", username)
+		_, err := eng.TwitterCampaign(username, valAddr)
 		assert.ErrorIs(t, err, expectedErr)
 	})
 
 	t.Run("not old enough", func(t *testing.T) {
-		eng, _, _, _, twitter := setup(t)
+		eng, client, _, _, twitter := setup(t)
 
 		username := "abcd"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
 			&twitter_api.UserInfo{
@@ -519,14 +586,31 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign("abcd", username)
+		_, err := eng.TwitterCampaign(username, valAddr)
 		assert.Error(t, err)
 	})
 
 	t.Run("less than 200 followers", func(t *testing.T) {
-		eng, _, _, _, twitter := setup(t)
+		eng, client, _, _, twitter := setup(t)
 
 		username := "abcd"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
 			&twitter_api.UserInfo{
@@ -535,31 +619,31 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign("abcd", username)
+		_, err := eng.TwitterCampaign(username, valAddr)
 		assert.Error(t, err)
 	})
 
-	t.Run("verified account", func(t *testing.T) {
-		eng, _, _, _, twitter := setup(t)
+	t.Run("active account, but not retweeted", func(t *testing.T) {
+		eng, client, _, _, twitter := setup(t)
 
 		username := "abcd"
+		valAddr := "addr"
+		valPubKey := "pub-key"
 
-		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
-			&twitter_api.UserInfo{
-				CreatedAt:  time.Now().AddDate(-1, 0, 0),
-				Followers:  100,
-				IsVerified: true,
-			}, nil,
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
 		)
 
-		_, err := eng.TwitterCampaign("abcd", username)
-		assert.NoError(t, err)
-	})
-
-	t.Run("active account", func(t *testing.T) {
-		eng, _, _, _, twitter := setup(t)
-
-		username := "abcd"
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
 			&twitter_api.UserInfo{
@@ -569,7 +653,138 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign("abcd", username)
+		twitter.EXPECT().RetweetSearch(eng.ctx, "#Pactus", username).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		_, err := eng.TwitterCampaign(username, valAddr)
+		assert.Error(t, err)
+	})
+
+	t.Run("active account, retweeted, but less than 24 hours", func(t *testing.T) {
+		eng, client, _, _, twitter := setup(t)
+
+		username := "abcd"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt:  time.Now().AddDate(-4, 0, 0),
+				Followers:  300,
+				IsVerified: false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, "#Pactus", username).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now(),
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign(username, valAddr)
+		assert.Error(t, err)
+	})
+
+	t.Run("active account, retweeted and more than 24 hours", func(t *testing.T) {
+		eng, client, store, _, twitter := setup(t)
+
+		username := "abcd"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt:  time.Now().AddDate(-4, 0, 0),
+				Followers:  300,
+				IsVerified: false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, "#Pactus", username).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		_, err := eng.TwitterCampaign(username, valAddr)
 		assert.NoError(t, err)
 	})
+
+	t.Run("verified account", func(t *testing.T) {
+		eng, client, store, _, twitter := setup(t)
+
+		username := "abcd"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt:  time.Now().AddDate(-1, 0, 0),
+				Followers:  100,
+				IsVerified: true,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, "#Pactus", username).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		_, err := eng.TwitterCampaign(username, valAddr)
+		assert.NoError(t, err)
+	})
+
 }
