@@ -8,7 +8,7 @@ import (
 
 func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title: "RoboPac Help🆘",
+		Title: "RoboPac Help 🆘",
 		URL:   "https://pactus.org",
 		Author: &discordgo.MessageEmbedAuthor{
 			URL:     "https://pactus.org",
@@ -22,7 +22,8 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 			"```/node-info``` Shows a node and validator info in network and blockchain.\n" +
 			"```/network-status``` Shows a brief info about network.\n" +
 			"```/network-health``` Check and shows network health status.\n" +
-			"```/bot-wallet``` Shows RoboPac wallet address and balance.\n",
+			"```/bot-wallet``` Shows RoboPac wallet address and balance.\n" +
+			"```/twitter-campaign``` Get discounted PAC coin on Twitter Campaign.\n",
 		Color: PACTUS,
 	}
 }
@@ -86,6 +87,14 @@ func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, resu
 func rewardCalcEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Validator reward calculation🧮",
+		Description: result,
+		Color:       PACTUS,
+	}
+}
+
+func twitterCampaignEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed{
+		Title:       "Twitter(X) Campaign 𝕏",
 		Description: result,
 		Color:       PACTUS,
 	}

@@ -9,14 +9,15 @@ import (
 )
 
 const (
-	CmdClaim         = "claim"          //!
-	CmdClaimerInfo   = "claimer-info"   //!
-	CmdNodeInfo      = "node-info"      //!
-	CmdNetworkStatus = "network"        //!
-	CmdNetworkHealth = "network-health" //!
-	CmdBotWallet     = "wallet"         //!
-	CmdClaimStatus   = "claim-status"   //!
-	CmdRewardCalc    = "calc-reward"    //!
+	CmdClaim           = "claim"            //!
+	CmdClaimerInfo     = "claimer-info"     //!
+	CmdNodeInfo        = "node-info"        //!
+	CmdNetworkStatus   = "network"          //!
+	CmdNetworkHealth   = "network-health"   //!
+	CmdBotWallet       = "wallet"           //!
+	CmdClaimStatus     = "claim-status"     //!
+	CmdRewardCalc      = "calc-reward"      //!
+	CmdTwitterCampaign = "twitter-campaign" //!
 )
 
 // The input is always string.
@@ -131,6 +132,22 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
 			reward, stake, time, totalPower), nil
+
+	case CmdTwitterCampaign:
+		if len(args) != 2 {
+			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		}
+
+		twitter := args[0]
+		valAddr := args[1]
+		discountCode, err := be.TwitterCampaign(twitter, valAddr)
+		if err != nil {
+			return "", err
+		}
+		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
+			"Visit https://app.turboswap.io/ to claim your discounted staked PAC coins.",
+			valAddr, discountCode)
+		return msg, nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

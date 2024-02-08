@@ -4,6 +4,15 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+//
+// TODO: what is "unclaimed" command
+//
+
+// TODO: change it to
+//
+// func (db *DiscordBot) commands() []*discordgo.ApplicationCommand{
+// ...
+// }
 var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "help",
@@ -100,8 +109,8 @@ var commands = []*discordgo.ApplicationCommand{
 		Description: "TestNet reward claim status",
 	},
 	{
-		Name:        "get-discount",
-		Description: "get twitter campaign discount code",
+		Name:        "twitter-campaign",
+		Description: "Twitter campaign code",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -111,28 +120,28 @@ var commands = []*discordgo.ApplicationCommand{
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "tweet-link",
-				Description: "reposted tweet link",
-				Required:    true, 
-			},
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "validator-address",
 				Description: "your validator address",
-				Required:    true, 
+				Required:    true,
 			},
+		},
 	},
 }
 
+// TODO: change it to
+//
+// func (db *DiscordBot) commandHandlers() []func(*discordgo.Session, *discordgo.InteractionCreate){...}
+// ...
+// }
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
-	"help":           helpCommandHandler,
-	"claim":          claimCommandHandler,
-	"claimer-info":   claimerInfoCommandHandler,
-	"node-info":      nodeInfoCommandHandler,
-	"network-health": networkHealthCommandHandler,
-	"network-status": networkStatusCommandHandler,
-	"wallet":         walletCommandHandler,
-	"claim-status":   claimStatusCommandHandler,
-	"reward-calc":    rewardCalcCommandHandler,
-	"get-discount": twitterDiscountCampaignCommandHandler,
+	"help":             helpCommandHandler,
+	"claim":            claimCommandHandler,
+	"claimer-info":     claimerInfoCommandHandler,
+	"node-info":        nodeInfoCommandHandler,
+	"network-health":   networkHealthCommandHandler,
+	"network-status":   networkStatusCommandHandler,
+	"wallet":           walletCommandHandler,
+	"claim-status":     claimStatusCommandHandler,
+	"reward-calc":      rewardCalcCommandHandler,
+	"twitter-campaign": twitterCampaignCommandHandler,
 }

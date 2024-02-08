@@ -8,12 +8,12 @@ import (
 	"github.com/kehiy/RoboPac/log"
 )
 
-func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
-		return
-	}
+func (db *DiscordBot) respondErrMsg(cmdErr error, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	errorEmbed := errorEmbedMessage(cmdErr.Error())
+	db.respondEmbed(errorEmbed, s, i)
+}
 
-	embed := helpEmbed(s)
+func (db *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -21,7 +21,23 @@ func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inter
 		},
 	}
 
-	_ = s.InteractionRespond(i.Interaction, response)
+	err := s.InteractionRespond(i.Interaction, response)
+	if err != nil {
+		log.Error("InteractionRespond error:", "error", err)
+	}
+}
+
+// TODO: change it to :
+// func (db *DiscordBot) helpCommandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+// ...
+// }
+func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	embed := helpEmbed(s)
+	db.respondEmbed(embed, s, i)
 }
 
 func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -46,29 +62,13 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
+		db.respondErrMsg(err, s, i)
 
 		return
 	}
 
 	embed := claimEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -81,29 +81,13 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
+		db.respondErrMsg(err, s, i)
 
 		return
 	}
 
 	embed := claimerInfoEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -116,29 +100,13 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
+		db.respondErrMsg(err, s, i)
 
 		return
 	}
 
 	embed := nodeInfoEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -150,16 +118,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	result, err := db.BotEngine.Run(command)
 	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
+		db.respondErrMsg(err, s, i)
 
 		return
 	}
@@ -172,14 +131,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 	}
 
 	embed := networkHealthEmbed(s, i, result, color)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -189,29 +141,12 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	result, err := db.BotEngine.Run("network")
 	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
-
+		db.respondErrMsg(err, s, i)
 		return
 	}
 
 	embed := networkStatusEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func walletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -222,14 +157,7 @@ func walletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Int
 	result, _ := db.BotEngine.Run("wallet")
 
 	embed := botWalletEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func claimStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -240,14 +168,7 @@ func claimStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 	result, _ := db.BotEngine.Run("claim-status")
 
 	embed := claimStatusEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
 func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -260,35 +181,29 @@ func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo
 
 	result, err := db.BotEngine.Run(fmt.Sprintf("calc-reward %v %v", stake, time))
 	if err != nil {
-		errorEmbed := errorEmbedMessage(err.Error())
-
-		response := &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{errorEmbed},
-			},
-		}
-
-		_ = s.InteractionRespond(i.Interaction, response)
+		db.respondErrMsg(err, s, i)
 
 		return
 	}
 
 	embed := rewardCalcEmbed(s, i, result)
-	response := &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	}
-
-	_ = s.InteractionRespond(i.Interaction, response)
+	db.respondEmbed(embed, s, i)
 }
 
-func twitterDiscountCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func twitterCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
-	// code goes here.
+	twitterID := i.ApplicationCommandData().Options[0].StringValue()
+	valAddr := i.ApplicationCommandData().Options[1].StringValue()
+
+	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign %v %v", twitterID, valAddr))
+	if err != nil {
+		db.respondErrMsg(err, s, i)
+		return
+	}
+
+	embed := twitterCampaignEmbed(s, i, result)
+	db.respondEmbed(embed, s, i)
 }

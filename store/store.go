@@ -11,29 +11,61 @@ import (
 
 // Store is a thread-safe cache.
 type Store struct {
-	claimers map[string]*Claimer
-	cfg      *config.Config
-	logger   *log.SubLogger
+	claimers       map[string]*Claimer
+	twitterParties map[string]*TwitterParty
+	cfg            *config.Config
+	logger         *log.SubLogger
 }
 
 func NewStore(cfg *config.Config, logger *log.SubLogger) (IStore, error) {
-	data, err := os.ReadFile(cfg.StorePath)
-	if err != nil {
-		return nil, fmt.Errorf("error loading data file: %w", err)
-	}
-	if len(data) == 0 {
-		return nil, fmt.Errorf("empty file: %s", cfg.StorePath)
+	loadClaimers := func() (map[string]*Claimer, error) {
+		data, err := os.ReadFile(cfg.StorePath)
+		if err != nil {
+			return nil, fmt.Errorf("error loading data file: %w", err)
+		}
+		if len(data) == 0 {
+			return nil, fmt.Errorf("empty file: %s", cfg.StorePath)
+		}
+
+		claimers := make(map[string]*Claimer)
+		if err := json.Unmarshal(data, &claimers); err != nil {
+			return nil, err
+		}
+
+		return claimers, nil
 	}
 
-	claimers := make(map[string]*Claimer)
-	if err := json.Unmarshal(data, &claimers); err != nil {
+	loadTwitterParties := func() (map[string]*TwitterParty, error) {
+		data, err := os.ReadFile(cfg.TwitterStorePath)
+		if err != nil {
+			return nil, fmt.Errorf("error loading data file: %w", err)
+		}
+		if len(data) == 0 {
+			return nil, fmt.Errorf("empty file: %s", cfg.TwitterStorePath)
+		}
+
+		parties := make(map[string]*TwitterParty)
+		if err := json.Unmarshal(data, &parties); err != nil {
+			return nil, err
+		}
+
+		return parties, nil
+	}
+
+	claimers, err := loadClaimers()
+	if err != nil {
+		return nil, err
+	}
+	twitterParties, err := loadTwitterParties()
+	if err != nil {
 		return nil, err
 	}
 
 	ss := &Store{
-		claimers: claimers,
-		cfg:      cfg,
-		logger:   logger,
+		claimers:       claimers,
+		twitterParties: twitterParties,
+		cfg:            cfg,
+		logger:         logger,
 	}
 	return ss, nil
 }
@@ -54,7 +86,7 @@ func (s *Store) AddClaimTransaction(testnetAddr string, txID string) error {
 	}
 
 	entry.ClaimedTxID = txID
-	err := s.save()
+	err := s.saveClaimers()
 	if err != nil {
 		return err
 	}
@@ -86,7 +118,7 @@ func (s *Store) Status() (int64, int64, int64, int64) {
 	return claimed, claimedAmount, notClaimed, notClaimedAmount
 }
 
-func (s *Store) save() error {
+func (s *Store) saveClaimers() error {
 	data, err := json.Marshal(s.claimers)
 	if err != nil {
 		return err
@@ -97,4 +129,36 @@ func (s *Store) save() error {
 	}
 
 	return nil
+}
+
+func (s *Store) saveTwitterParties() error {
+	data, err := json.Marshal(s.twitterParties)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(s.cfg.TwitterStorePath, data, 0o600)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) AddTwitterParty(party *TwitterParty) error {
+	found, exists := s.twitterParties[party.TwitterName]
+	if exists {
+		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
+			found.TwitterName, party.DiscountCode)
+	}
+
+	s.twitterParties[party.TwitterName] = party
+
+	err := s.saveTwitterParties()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s *Store) GetTwitterParty(twitterName string) *TwitterParty {
+	return s.twitterParties[twitterName]
 }

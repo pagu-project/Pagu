@@ -9,6 +9,7 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/log"
 	rpstore "github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -17,7 +18,9 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet) {
+// TODO:
+// create a structure and keep all mocked module there
+func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
@@ -34,12 +37,15 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	// mocking mockStore.
 	mockStore := rpstore.NewMockIStore(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore)
-	return eng, mockClient, mockStore, mockWallet
+	// mocking mockStore.
+	mockTwitter := twitter_api.NewMockIClient(ctrl)
+
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter)
+	return eng, mockClient, mockStore, mockWallet, mockTwitter
 }
 
 func TestNetworkStatus(t *testing.T) {
-	eng, client, _, _ := setup(t)
+	eng, client, _, _, _ := setup(t)
 
 	client.EXPECT().GetNetworkInfo().Return(
 		&pactus.GetNetworkInfoResponse{
@@ -81,7 +87,7 @@ func TestNetworkStatus(t *testing.T) {
 }
 
 func TestNetworkHealth(t *testing.T) {
-	eng, client, _, _ := setup(t)
+	eng, client, _, _, _ := setup(t)
 
 	t.Run("should be healthy", func(t *testing.T) {
 		currentTime := time.Now().Unix()
@@ -111,7 +117,7 @@ func TestNetworkHealth(t *testing.T) {
 }
 
 func TestNodeInfo(t *testing.T) {
-	eng, client, _, _ := setup(t)
+	eng, client, _, _, _ := setup(t)
 	t.Run("should work, valid address", func(t *testing.T) {
 		valAddress := "valid-address"
 		pubKey := "pub-key"
@@ -160,7 +166,7 @@ func TestNodeInfo(t *testing.T) {
 
 func TestClaim(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
@@ -228,7 +234,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, already staked", func(t *testing.T) {
-		eng, client, _, _ := setup(t)
+		eng, client, _, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -248,7 +254,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, low balance", func(t *testing.T) {
-		eng, client, _, wallet := setup(t)
+		eng, client, _, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -267,7 +273,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, claimer not found", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-notfound"
 		testnetAddr := "testnet-addr-fail-notfound"
@@ -291,7 +297,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, different Discord ID", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-different-id"
 		testnetAddr := "testnet-addr-fail-different-id"
@@ -317,7 +323,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, not first validator address", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-not-first-validator"
 		testnetAddr := "testnet-addr-fail-not-first-validator"
@@ -354,7 +360,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, validator not found", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-validator-not-found"
 		testnetAddr := "testnet-addr-fail-validator-not-found"
@@ -391,7 +397,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, empty transaction hash", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
 		testnetAddr := "testnet-addr-fail-empty-tx-hash"
@@ -437,7 +443,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should panic, add claimer failed", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
 		testnetAddr := "testnet-addr-panic-add-claimer-failed"
@@ -485,5 +491,85 @@ func TestClaim(t *testing.T) {
 		assert.Panics(t, func() {
 			_, _ = eng.Claim(discordID, testnetAddr, mainnetAddr)
 		})
+	})
+}
+
+func TestTwitterCampaign(t *testing.T) {
+	t.Run("non-existing twitter", func(t *testing.T) {
+		eng, _, _, _, twitter := setup(t)
+
+		username := "non-existing"
+		expectedErr := errors.New("not exists")
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			nil, expectedErr,
+		)
+
+		_, err := eng.TwitterCampaign("non-existing", username)
+		assert.ErrorIs(t, err, expectedErr)
+	})
+
+	t.Run("not old enough", func(t *testing.T) {
+		eng, _, _, _, twitter := setup(t)
+
+		username := "abcd"
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt: time.Now().AddDate(-1, 0, 0),
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign("abcd", username)
+		assert.Error(t, err)
+	})
+
+	t.Run("less than 200 followers", func(t *testing.T) {
+		eng, _, _, _, twitter := setup(t)
+
+		username := "abcd"
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt: time.Now().AddDate(-4, 0, 0),
+				Followers: 100,
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign("abcd", username)
+		assert.Error(t, err)
+	})
+
+	t.Run("verified account", func(t *testing.T) {
+		eng, _, _, _, twitter := setup(t)
+
+		username := "abcd"
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt:  time.Now().AddDate(-1, 0, 0),
+				Followers:  100,
+				IsVerified: true,
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign("abcd", username)
+		assert.NoError(t, err)
+	})
+
+	t.Run("active account", func(t *testing.T) {
+		eng, _, _, _, twitter := setup(t)
+
+		username := "abcd"
+
+		twitter.EXPECT().UserInfo(eng.ctx, username).Return(
+			&twitter_api.UserInfo{
+				CreatedAt:  time.Now().AddDate(-4, 0, 0),
+				Followers:  300,
+				IsVerified: false,
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign("abcd", username)
+		assert.NoError(t, err)
 	})
 }

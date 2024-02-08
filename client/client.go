@@ -35,6 +35,9 @@ func NewClient(endpoint string) (*Client, error) {
 }
 
 func (c *Client) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
+	// TODO: Better to pass context as function parameter:
+	// GetBlockchainInfo(ctx context.Context)
+	//
 	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
 		return nil, err

@@ -1,7 +1,9 @@
 package engine
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -9,17 +11,24 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 	putils "github.com/pactus-project/pactus/util"
 )
 
 type BotEngine struct {
+	ctx    context.Context
+	cancel func()
+
 	Wallet wallet.IWallet
 	Store  store.IStore
 	Cm     *client.Mgr
 	logger *log.SubLogger
+
+	twitterClient twitter_api.IClient
 
 	sync.RWMutex
 }
@@ -68,18 +77,28 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	if err != nil {
 		log.Panic("could not load store", "err", err, "path", cfg.StorePath)
 	}
-
 	log.Info("store loaded successfully", "path", cfg.StorePath)
 
-	return newBotEngine(eSl, cm, wallet, store), nil
+	twitterClient, err := twitter_api.NewClient(cfg.TwitterAPICfg.BearerToken, cfg.TwitterAPICfg.TwitterID)
+	if err != nil {
+		log.Panic("could not start twitter client", "err", err)
+	}
+
+	return newBotEngine(eSl, cm, wallet, store, twitterClient), nil
 }
 
-func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore) *BotEngine {
+func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
+	tc twitter_api.IClient) *BotEngine {
+	ctx, cancel := context.WithCancel(context.Background())
+
 	return &BotEngine{
-		logger: logger,
-		Wallet: w,
-		Cm:     cm,
-		Store:  s,
+		ctx:           ctx,
+		cancel:        cancel,
+		logger:        logger,
+		Wallet:        w,
+		Cm:            cm,
+		Store:         s,
+		twitterClient: tc,
 	}
 }
 
@@ -213,13 +232,13 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 		return "", errors.New("this claimer have already claimed rewards")
 	}
 
-	peerInfo, err := be.Cm.GetPeerInfoFirstVal(mainnetAddr)
+	pubKey, err := be.Cm.FindPublicKey(mainnetAddr, true)
 	if err != nil {
 		return "", err
 	}
 
 	memo := "TestNet reward claim from RoboPac"
-	txID, err := be.Wallet.BondTransaction(peerInfo.ConsensusKeys[0], mainnetAddr, memo, claimer.TotalReward)
+	txID, err := be.Wallet.BondTransaction(pubKey, mainnetAddr, memo, claimer.TotalReward)
 	if err != nil {
 		return "", err
 	}
@@ -284,9 +303,77 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 func (be *BotEngine) Stop() {
 	be.logger.Info("shutting bot engine down...")
 
+	be.cancel()
 	be.Cm.Stop()
 }
 
 func (be *BotEngine) Start() {
 	be.logger.Info("starting the bot engine...")
+}
+
+func (be *BotEngine) TwitterCampaign(username, valAddr string) (string, error) {
+	valInfo, _ := be.Cm.GetValidatorInfo(valAddr)
+	if valInfo != nil {
+		return "", errors.New("this address is already a staked validator")
+	}
+
+	pubKey, err := be.Cm.FindPublicKey(valAddr, false)
+	if err != nil {
+		return "", err
+	}
+
+	userInfo, err := be.twitterClient.UserInfo(be.ctx, username)
+	if err != nil {
+		return "", err
+	}
+	if !userInfo.IsVerified {
+		threeYearsAgo := time.Now().AddDate(-2, 0, 0)
+		if userInfo.CreatedAt.After(threeYearsAgo) {
+			return "", errors.New("the Twitter account is less than 2 years old." +
+				" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
+		}
+
+		if userInfo.Followers < 200 {
+			return "", errors.New("the Twitter account has less tha 200 followers." +
+				" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
+		}
+	}
+
+	hashtag := "#Pactus"
+	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, hashtag, username)
+	if err != nil {
+		return "", err
+	}
+
+	oneDayAgo := time.Now().AddDate(0, 0, -1)
+	if tweetInfo.CreatedAt.After(oneDayAgo) {
+		return "", fmt.Errorf("the Quote Tweet with hashtag `%v` found, but it is posted less than 24 hours ago: %v",
+			hashtag, tweetInfo.Link)
+	}
+
+	discountCode, err := gonanoid.Generate("0123456789", 6)
+	if err != nil {
+		return "", err
+	}
+
+	price := 20
+	if userInfo.Followers > 1000 {
+		price = 10
+	}
+
+	party := &store.TwitterParty{
+		TwitterName:   username,
+		TweetID:       tweetInfo.ID,
+		PricePerCents: price,
+		ValAddr:       valAddr,
+		ValPubKey:     pubKey,
+		AmountInPAC:   200,
+		DiscountCode:  discountCode,
+	}
+	err = be.Store.AddTwitterParty(party)
+	if err != nil {
+		return "", err
+	}
+
+	return discountCode, nil
 }
