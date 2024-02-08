@@ -1,6 +1,7 @@
 package turboswap
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -8,22 +9,13 @@ import (
 	"github.com/kehiy/RoboPac/store"
 )
 
-type authorize struct {
-	Token string
-}
-
-func (a authorize) Add(req *http.Request) {
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
-}
-
 type Turboswap struct {
-	APIKey string
+	APIToken string
 }
 
-func NewTurboswap(apiKey string) (*Turboswap, error) {
-
+func NewTurboswap(apiToken string) (*Turboswap, error) {
 	return &Turboswap{
-		APIKey: apiKey,
+		APIToken: apiToken,
 	}, nil
 }
 
@@ -33,6 +25,24 @@ func (ts *Turboswap) GetDiscountCodeStatus(ctx context.Context, pubKey string) e
 }
 
 func (ts *Turboswap) AddDiscountCode(ctx context.Context, party *store.TwitterParty) error {
+	url := "https://swap-api.sensifia.vc/pactus/discount"
+	jsonStr := fmt.Sprintf(`{"apiKey":"%v","code":"%v","validatorPublicKey":"%v","priceInCents":"%v"}`,
+		ts.APIToken, party.DiscountCode, party.ValPubKey, party.UnitPrice)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonStr)))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
 	return nil
 }

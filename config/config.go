@@ -20,6 +20,11 @@ type Config struct {
 	TwitterStorePath string
 	DiscordBotCfg    DiscordBotConfig
 	TwitterAPICfg    TwitterAPIConfig
+	TurboswapConfig  TurboswapConfig
+}
+
+type TurboswapConfig struct {
+	APIToken string
 }
 
 type TwitterAPIConfig struct {
@@ -55,6 +60,9 @@ func Load(filePaths ...string) (*Config, error) {
 		TwitterAPICfg: TwitterAPIConfig{
 			BearerToken: os.Getenv("TWITTER_BEARER_TOKEN"),
 			TwitterID:   os.Getenv("TWITTER_ID"),
+		},
+		TurboswapConfig: TurboswapConfig{
+			APIToken: os.Getenv("TURBOSWAP_API_TOKEN"),
 		},
 	}
 

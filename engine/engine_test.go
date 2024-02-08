@@ -9,6 +9,7 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/log"
 	rpstore "github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/turboswap"
 	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
@@ -20,7 +21,7 @@ import (
 
 // TODO:
 // create a structure and keep all mocked module there
-func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient) {
+func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient, *turboswap.MockITurboSwap) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
@@ -31,21 +32,17 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	cm := client.NewClientMgr()
 	cm.AddClient(mockClient)
 
-	// mocking mockWallet.
 	mockWallet := wallet.NewMockIWallet(ctrl)
-
-	// mocking mockStore.
 	mockStore := rpstore.NewMockIStore(ctrl)
-
-	// mocking mockStore.
 	mockTwitter := twitter_api.NewMockIClient(ctrl)
+	mockTurboswap := turboswap.NewMockITurboSwap(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter)
-	return eng, mockClient, mockStore, mockWallet, mockTwitter
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockTurboswap)
+	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockTurboswap
 }
 
 func TestNetworkStatus(t *testing.T) {
-	eng, client, _, _, _ := setup(t)
+	eng, client, _, _, _, _ := setup(t)
 
 	client.EXPECT().GetNetworkInfo().Return(
 		&pactus.GetNetworkInfoResponse{
@@ -87,7 +84,7 @@ func TestNetworkStatus(t *testing.T) {
 }
 
 func TestNetworkHealth(t *testing.T) {
-	eng, client, _, _, _ := setup(t)
+	eng, client, _, _, _, _ := setup(t)
 
 	t.Run("should be healthy", func(t *testing.T) {
 		currentTime := time.Now().Unix()
@@ -117,7 +114,7 @@ func TestNetworkHealth(t *testing.T) {
 }
 
 func TestNodeInfo(t *testing.T) {
-	eng, client, _, _, _ := setup(t)
+	eng, client, _, _, _, _ := setup(t)
 	t.Run("should work, valid address", func(t *testing.T) {
 		valAddress := "valid-address"
 		pubKey := "pub-key"
@@ -166,7 +163,7 @@ func TestNodeInfo(t *testing.T) {
 
 func TestClaim(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
@@ -234,7 +231,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, already staked", func(t *testing.T) {
-		eng, client, _, _, _ := setup(t)
+		eng, client, _, _, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -254,7 +251,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, low balance", func(t *testing.T) {
-		eng, client, _, wallet, _ := setup(t)
+		eng, client, _, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -273,7 +270,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, claimer not found", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-notfound"
 		testnetAddr := "testnet-addr-fail-notfound"
@@ -297,7 +294,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, different Discord ID", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-different-id"
 		testnetAddr := "testnet-addr-fail-different-id"
@@ -323,7 +320,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, not first validator address", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-not-first-validator"
 		testnetAddr := "testnet-addr-fail-not-first-validator"
@@ -360,7 +357,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, validator not found", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-validator-not-found"
 		testnetAddr := "testnet-addr-fail-validator-not-found"
@@ -397,7 +394,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, empty transaction hash", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
 		testnetAddr := "testnet-addr-fail-empty-tx-hash"
@@ -443,7 +440,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should panic, add claimer failed", func(t *testing.T) {
-		eng, client, store, wallet, _ := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
 		testnetAddr := "testnet-addr-panic-add-claimer-failed"
@@ -496,21 +493,25 @@ func TestClaim(t *testing.T) {
 
 func TestTwitterCampaign(t *testing.T) {
 	t.Run("staked validator", func(t *testing.T) {
-		eng, client, _, _, _ := setup(t)
+		eng, client, store, _, _, _ := setup(t)
 
-		username := "anything"
+		twitterName := "anything"
 		valAddr := "staked-validator"
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
 
 		client.EXPECT().GetValidatorInfo(valAddr).Return(
 			&pactus.GetValidatorResponse{}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(username, valAddr)
+		_, err := eng.TwitterCampaign(twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
 	t.Run("non-existing validator", func(t *testing.T) {
-		eng, client, _, _, _ := setup(t)
+		eng, client, _, _, _, _ := setup(t)
 
 		username := "anything"
 		valAddr := "non-existing-validator"
@@ -528,7 +529,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("non-existing twitter account", func(t *testing.T) {
-		eng, client, _, _, twitter := setup(t)
+		eng, client, _, _, twitter, _ := setup(t)
 
 		username := "non-existing-twitter"
 		valAddr := "addr"
@@ -559,7 +560,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("not old enough", func(t *testing.T) {
-		eng, client, _, _, twitter := setup(t)
+		eng, client, _, _, twitter, _ := setup(t)
 
 		username := "abcd"
 		valAddr := "addr"
@@ -591,7 +592,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("less than 200 followers", func(t *testing.T) {
-		eng, client, _, _, twitter := setup(t)
+		eng, client, _, _, twitter, _ := setup(t)
 
 		username := "abcd"
 		valAddr := "addr"
@@ -624,7 +625,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("active account, but not retweeted", func(t *testing.T) {
-		eng, client, _, _, twitter := setup(t)
+		eng, client, _, _, twitter, _ := setup(t)
 
 		username := "abcd"
 		valAddr := "addr"
@@ -662,7 +663,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("active account, retweeted, but less than 24 hours", func(t *testing.T) {
-		eng, client, _, _, twitter := setup(t)
+		eng, client, _, _, twitter, _ := setup(t)
 
 		username := "abcd"
 		valAddr := "addr"
@@ -702,7 +703,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("active account, retweeted and more than 24 hours", func(t *testing.T) {
-		eng, client, store, _, twitter := setup(t)
+		eng, client, store, _, twitter, _ := setup(t)
 
 		username := "abcd"
 		valAddr := "addr"
@@ -745,7 +746,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("verified account", func(t *testing.T) {
-		eng, client, store, _, twitter := setup(t)
+		eng, client, store, _, twitter, _ := setup(t)
 
 		username := "abcd"
 		valAddr := "addr"

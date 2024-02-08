@@ -11,6 +11,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/turboswap"
 	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
@@ -23,10 +24,11 @@ type BotEngine struct {
 	ctx    context.Context
 	cancel func()
 
-	Wallet wallet.IWallet
-	Store  store.IStore
-	Cm     *client.Mgr
-	logger *log.SubLogger
+	Wallet    wallet.IWallet
+	Store     store.IStore
+	turboswap turboswap.ITurboSwap
+	Cm        *client.Mgr
+	logger    *log.SubLogger
 
 	twitterClient twitter_api.IClient
 
@@ -84,11 +86,16 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 		log.Panic("could not start twitter client", "err", err)
 	}
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient), nil
+	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken)
+	if err != nil {
+		log.Panic("could not start twitter client", "err", err)
+	}
+
+	return newBotEngine(eSl, cm, wallet, store, twitterClient, turboswap), nil
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
-	tc twitter_api.IClient,
+	twitterClient twitter_api.IClient, turboswap turboswap.ITurboSwap,
 ) *BotEngine {
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -99,7 +106,8 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		Wallet:        w,
 		Cm:            cm,
 		Store:         s,
-		twitterClient: tc,
+		twitterClient: twitterClient,
+		turboswap:     turboswap,
 	}
 }
 
@@ -379,6 +387,11 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		TotalPrice:   amountInPAC * unitPrice / 100,
 		AmountInPAC:  amountInPAC,
 		DiscountCode: discountCode,
+	}
+
+	err = be.turboswap.AddDiscountCode(be.ctx, party)
+	if err != nil {
+		return nil, err
 	}
 
 	err = be.Store.AddTwitterParty(party)
