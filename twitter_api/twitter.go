@@ -69,7 +69,7 @@ func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, erro
 	dictionaries := res.Raw.UserDictionaries()
 
 	for _, userDic := range dictionaries {
-		t, err := time.Parse(time.RFC3339, userDic.User.CreatedAt)
+		createdAt, err := time.Parse(time.RFC3339, userDic.User.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -78,9 +78,11 @@ func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, erro
 		logger.Debug("found user", "tweet", string(enc))
 
 		userInfo := &UserInfo{
-			CreatedAt:  t,
-			Followers:  userDic.User.PublicMetrics.Followers,
-			IsVerified: userDic.User.Verified,
+			TwitterID:   userDic.User.ID,
+			TwitterName: username,
+			CreatedAt:   createdAt,
+			Followers:   userDic.User.PublicMetrics.Followers,
+			IsVerified:  userDic.User.Verified,
 		}
 		return userInfo, nil
 	}

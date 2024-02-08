@@ -80,18 +80,18 @@ func (mr *MockIStoreMockRecorder) ClaimerInfo(testNetValAddr any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClaimerInfo", reflect.TypeOf((*MockIStore)(nil).ClaimerInfo), testNetValAddr)
 }
 
-// GetTwitterParty mocks base method.
-func (m *MockIStore) GetTwitterParty(twitterName string) *TwitterParty {
+// FindTwitterParty mocks base method.
+func (m *MockIStore) FindTwitterParty(twitterName string) *TwitterParty {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTwitterParty", twitterName)
+	ret := m.ctrl.Call(m, "FindTwitterParty", twitterName)
 	ret0, _ := ret[0].(*TwitterParty)
 	return ret0
 }
 
-// GetTwitterParty indicates an expected call of GetTwitterParty.
-func (mr *MockIStoreMockRecorder) GetTwitterParty(twitterName any) *gomock.Call {
+// FindTwitterParty indicates an expected call of FindTwitterParty.
+func (mr *MockIStoreMockRecorder) FindTwitterParty(twitterName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTwitterParty", reflect.TypeOf((*MockIStore)(nil).GetTwitterParty), twitterName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindTwitterParty", reflect.TypeOf((*MockIStore)(nil).FindTwitterParty), twitterName)
 }
 
 // Status mocks base method.

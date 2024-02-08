@@ -110,7 +110,7 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "twitter-campaign",
-		Description: "Twitter campaign code",
+		Description: "Get Twitter campaign discount code",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -126,6 +126,18 @@ var commands = []*discordgo.ApplicationCommand{
 			},
 		},
 	},
+	{
+		Name:        "twitter-campaign-status",
+		Description: "Status of Twitter campaign",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "twitter-username",
+				Description: "your twitter username",
+				Required:    true,
+			},
+		},
+	},
 }
 
 // TODO: change it to
@@ -134,14 +146,15 @@ var commands = []*discordgo.ApplicationCommand{
 // ...
 // }
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
-	"help":             helpCommandHandler,
-	"claim":            claimCommandHandler,
-	"claimer-info":     claimerInfoCommandHandler,
-	"node-info":        nodeInfoCommandHandler,
-	"network-health":   networkHealthCommandHandler,
-	"network-status":   networkStatusCommandHandler,
-	"wallet":           walletCommandHandler,
-	"claim-status":     claimStatusCommandHandler,
-	"reward-calc":      rewardCalcCommandHandler,
-	"twitter-campaign": twitterCampaignCommandHandler,
+	"help":                    helpCommandHandler,
+	"claim":                   claimCommandHandler,
+	"claimer-info":            claimerInfoCommandHandler,
+	"node-info":               nodeInfoCommandHandler,
+	"network-health":          networkHealthCommandHandler,
+	"network-status":          networkStatusCommandHandler,
+	"wallet":                  walletCommandHandler,
+	"claim-status":            claimStatusCommandHandler,
+	"reward-calc":             rewardCalcCommandHandler,
+	"twitter-campaign":        twitterCampaignCommandHandler,
+	"twitter-campaign-status": twitterCampaignStatusCommandHandler,
 }

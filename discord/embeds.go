@@ -23,7 +23,8 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 			"```/network-status``` Shows a brief info about network.\n" +
 			"```/network-health``` Check and shows network health status.\n" +
 			"```/bot-wallet``` Shows RoboPac wallet address and balance.\n" +
-			"```/twitter-campaign``` Get discounted PAC coin on Twitter Campaign.\n",
+			"```/twitter-campaign``` Get discount code on Twitter Campaign.\n" +
+			"```/twitter-campaign-status``` Check the status of Twitter Campaign.\n",
 		Color: PACTUS,
 	}
 }

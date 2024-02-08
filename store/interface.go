@@ -7,13 +7,15 @@ type Claimer struct {
 }
 
 type TwitterParty struct {
-	TwitterName   string `json:"twitter"`
-	TweetID       string `json:"tweet"`
-	PricePerCents int    `json:"price"`
-	ValAddr       string `json:"val_addr"`
-	ValPubKey     string `json:"val_pub"`
-	AmountInPAC   int    `json:"amount"`
-	DiscountCode  string `json:"code"`
+	TwitterID    string `json:"twitter_id"`
+	TwitterName  string `json:"twitter_name"`
+	RetweetID    string `json:"retweet_id"`
+	ValAddr      string `json:"val_addr"`
+	ValPubKey    string `json:"val_pub"`
+	DiscountCode string `json:"discount_code"`
+	UnitPrice    int    `json:"unit_price_in_cents"`
+	TotalPrice   int    `json:"total_price"`
+	AmountInPAC  int    `json:"amount_in_pac"`
 }
 
 func (c *Claimer) IsClaimed() bool {
@@ -24,6 +26,6 @@ type IStore interface {
 	ClaimerInfo(testNetValAddr string) *Claimer
 	AddClaimTransaction(testNetValAddr string, txID string) error
 	AddTwitterParty(party *TwitterParty) error
-	GetTwitterParty(twitterName string) *TwitterParty
+	FindTwitterParty(twitterName string) *TwitterParty
 	Status() (int64, int64, int64, int64)
 }

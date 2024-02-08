@@ -179,6 +179,7 @@ func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo
 	stake := i.ApplicationCommandData().Options[0].StringValue()
 	time := i.ApplicationCommandData().Options[1].StringValue()
 
+	// TODO: Use `CmdRewardCalc` here. Try to not repeat...
 	result, err := db.BotEngine.Run(fmt.Sprintf("calc-reward %v %v", stake, time))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
@@ -198,7 +199,26 @@ func twitterCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *disc
 	twitterID := i.ApplicationCommandData().Options[0].StringValue()
 	valAddr := i.ApplicationCommandData().Options[1].StringValue()
 
+	// TODO: Use `CmdTwitterCampaign` here. Try to not repeat...
 	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign %v %v", twitterID, valAddr))
+	if err != nil {
+		db.respondErrMsg(err, s, i)
+		return
+	}
+
+	embed := twitterCampaignEmbed(s, i, result)
+	db.respondEmbed(embed, s, i)
+}
+
+func twitterCampaignStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	twitterID := i.ApplicationCommandData().Options[0].StringValue()
+
+	// TODO: Use `CmdTwitterCampaignStatus` here. Try to not repeat...
+	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign-status %v", twitterID))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return

@@ -25,6 +25,7 @@ mock:
 	mockgen -source=./wallet/interface.go      -destination=./wallet/mock.go      -package=wallet
 	mockgen -source=./store/interface.go       -destination=./store/mock.go       -package=store
 	mockgen -source=./twitter_api/interface.go -destination=./twitter_api/mock.go -package=twitter_api
+	mockgen -source=./turboswap/interface.go   -destination=./turboswap/mock.go   -package=turboswap
 
 ### Formatting, linting, and vetting
 fmt:

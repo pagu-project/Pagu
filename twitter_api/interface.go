@@ -6,9 +6,11 @@ import (
 )
 
 type UserInfo struct {
-	CreatedAt  time.Time
-	Followers  int
-	IsVerified bool
+	TwitterID   string
+	TwitterName string
+	CreatedAt   time.Time
+	Followers   int
+	IsVerified  bool
 }
 
 type TweetInfo struct {

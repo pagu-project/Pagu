@@ -312,69 +312,87 @@ func (be *BotEngine) Start() {
 	be.logger.Info("starting the bot engine...")
 }
 
-func (be *BotEngine) TwitterCampaign(username, valAddr string) (string, error) {
+func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.TwitterParty, error) {
+	existingParty := be.Store.FindTwitterParty(twitterName)
+	if existingParty != nil {
+		return existingParty, nil
+	}
+
 	valInfo, _ := be.Cm.GetValidatorInfo(valAddr)
 	if valInfo != nil {
-		return "", errors.New("this address is already a staked validator")
+		return nil, errors.New("this address is already a staked validator")
 	}
 
 	pubKey, err := be.Cm.FindPublicKey(valAddr, false)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	userInfo, err := be.twitterClient.UserInfo(be.ctx, username)
+	userInfo, err := be.twitterClient.UserInfo(be.ctx, twitterName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if !userInfo.IsVerified {
-		threeYearsAgo := time.Now().AddDate(-2, 0, 0)
+		threeYearsAgo := time.Now().AddDate(-3, 0, 0)
 		if userInfo.CreatedAt.After(threeYearsAgo) {
-			return "", errors.New("the Twitter account is less than 2 years old." +
+			return nil, errors.New("the Twitter account is less than 3 years old." +
 				" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
 		}
 
 		if userInfo.Followers < 200 {
-			return "", errors.New("the Twitter account has less tha 200 followers." +
+			return nil, errors.New("the Twitter account has less tha 200 followers." +
 				" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
 		}
 	}
 
 	hashtag := "#Pactus"
-	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, hashtag, username)
+	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, hashtag, twitterName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	oneDayAgo := time.Now().AddDate(0, 0, -1)
-	if tweetInfo.CreatedAt.After(oneDayAgo) {
-		return "", fmt.Errorf("the Quote Tweet with hashtag `%v` found, but it is posted less than 24 hours ago: %v",
-			hashtag, tweetInfo.Link)
-	}
+	// oneDayAgo := time.Now().AddDate(0, 0, -1)
+	// if tweetInfo.CreatedAt.After(oneDayAgo) {
+	// 	return nil, fmt.Errorf("the Quote Tweet with hashtag `%v` found,"+
+	// 		" but it is posted less than 24 hours ago: %v",
+	// 		hashtag, tweetInfo.Link)
+	// }
 
 	discountCode, err := gonanoid.Generate("0123456789", 6)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	price := 20
+	unitPrice := 20
 	if userInfo.Followers > 1000 {
-		price = 10
+		unitPrice = 10
 	}
+	amountInPAC := 200
 
 	party := &store.TwitterParty{
-		TwitterName:   username,
-		TweetID:       tweetInfo.ID,
-		PricePerCents: price,
-		ValAddr:       valAddr,
-		ValPubKey:     pubKey,
-		AmountInPAC:   200,
-		DiscountCode:  discountCode,
-	}
-	err = be.Store.AddTwitterParty(party)
-	if err != nil {
-		return "", err
+		TwitterID:    userInfo.TwitterID,
+		TwitterName:  userInfo.TwitterName,
+		RetweetID:    tweetInfo.ID,
+		ValAddr:      valAddr,
+		ValPubKey:    pubKey,
+		UnitPrice:    unitPrice,
+		TotalPrice:   amountInPAC * unitPrice / 100,
+		AmountInPAC:  amountInPAC,
+		DiscountCode: discountCode,
 	}
 
-	return discountCode, nil
+	err = be.Store.AddTwitterParty(party)
+	if err != nil {
+		return nil, err
+	}
+
+	return party, nil
+}
+
+func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterParty, error) {
+	party := be.Store.FindTwitterParty(twitterName)
+	if party == nil {
+		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
+	}
+	return party, nil
 }

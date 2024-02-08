@@ -145,13 +145,13 @@ func (s *Store) saveTwitterParties() error {
 }
 
 func (s *Store) AddTwitterParty(party *TwitterParty) error {
-	found, exists := s.twitterParties[party.TwitterName]
+	found, exists := s.twitterParties[party.TwitterID]
 	if exists {
 		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
 			found.TwitterName, party.DiscountCode)
 	}
 
-	s.twitterParties[party.TwitterName] = party
+	s.twitterParties[party.TwitterID] = party
 
 	err := s.saveTwitterParties()
 	if err != nil {
@@ -160,6 +160,11 @@ func (s *Store) AddTwitterParty(party *TwitterParty) error {
 	return nil
 }
 
-func (s *Store) GetTwitterParty(twitterName string) *TwitterParty {
-	return s.twitterParties[twitterName]
+func (s *Store) FindTwitterParty(twitterName string) *TwitterParty {
+	for _, party := range s.twitterParties {
+		if party.TwitterName == twitterName {
+			return party
+		}
+	}
+	return nil
 }

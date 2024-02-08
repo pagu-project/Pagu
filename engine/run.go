@@ -9,15 +9,16 @@ import (
 )
 
 const (
-	CmdClaim           = "claim"            //!
-	CmdClaimerInfo     = "claimer-info"     //!
-	CmdNodeInfo        = "node-info"        //!
-	CmdNetworkStatus   = "network"          //!
-	CmdNetworkHealth   = "network-health"   //!
-	CmdBotWallet       = "wallet"           //!
-	CmdClaimStatus     = "claim-status"     //!
-	CmdRewardCalc      = "calc-reward"      //!
-	CmdTwitterCampaign = "twitter-campaign" //!
+	CmdClaim                 = "claim"                   //!
+	CmdClaimerInfo           = "claimer-info"            //!
+	CmdNodeInfo              = "node-info"               //!
+	CmdNetworkStatus         = "network"                 //!
+	CmdNetworkHealth         = "network-health"          //!
+	CmdBotWallet             = "wallet"                  //!
+	CmdClaimStatus           = "claim-status"            //!
+	CmdRewardCalc            = "calc-reward"             //!
+	CmdTwitterCampaign       = "twitter-campaign"        //!
+	CmdTwitterCampaignStatus = "twitter-campaign-status" //!
 )
 
 // The input is always string.
@@ -138,15 +139,30 @@ func (be *BotEngine) Run(input string) (string, error) {
 			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
 		}
 
-		twitter := args[0]
+		twitterName := args[0]
 		valAddr := args[1]
-		discountCode, err := be.TwitterCampaign(twitter, valAddr)
+		party, err := be.TwitterCampaign(twitterName, valAddr)
 		if err != nil {
 			return "", err
 		}
 		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
-			"Visit https://app.turboswap.io/ to claim your discounted staked PAC coins.",
-			valAddr, discountCode)
+			"Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins.",
+			party.ValAddr, party.DiscountCode)
+		return msg, nil
+
+	case CmdTwitterCampaignStatus:
+		if len(args) != 1 {
+			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
+		}
+
+		twitterName := args[0]
+		party, err := be.TwitterCampaignStatus(twitterName)
+		if err != nil {
+			return "", err
+		}
+		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
+			"Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins.",
+			party.ValAddr, party.DiscountCode)
 		return msg, nil
 
 	default:
