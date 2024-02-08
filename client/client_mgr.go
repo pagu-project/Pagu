@@ -155,11 +155,14 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	}
 	minted := float64(height.LastBlockHeight) * 1e9
 	staked := height.TotalPower
+	warm := 630_000_000_000_000
 
 	var addr1Out int64 = 0
 	var addr2Out int64 = 0
 	var addr3Out int64 = 0
 	var addr4Out int64 = 0
+	var addr5Out int64 = 0
+	var addr6Out int64 = 0
 
 	balance1, err := localClient.GetBalance("pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z")
 	if err == nil {
@@ -181,7 +184,18 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 		addr4Out = 2_100_000_000_000_000 - balance4
 	}
 
-	circulating := (addr1Out + addr2Out + addr3Out + addr4Out + int64(minted)) - staked
+	balance5, err := localClient.GetBalance("pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g")
+	if err == nil {
+		addr5Out = 420_000_000_000_000 - balance5
+	}
+
+	balance6, err := localClient.GetBalance("pc1zf0gyc4kxlfsvu64pheqzmk8r9eyzxqvxlk6s6t")
+	if err == nil {
+		addr6Out = 210_000_000_000_000 - balance6
+	}
+
+
+	circulating := (addr1Out + addr2Out + addr3Out + addr4Out + addr5Out + addr6Out + int64(minted)) - staked - warm
 	return circulating, nil
 }
 
