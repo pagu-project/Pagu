@@ -40,30 +40,30 @@ func (m *MockITurboSwap) EXPECT() *MockITurboSwapMockRecorder {
 	return m.recorder
 }
 
-// AddDiscountCode mocks base method.
-func (m *MockITurboSwap) AddDiscountCode(ctx context.Context, party *store.TwitterParty) error {
+// GetStatus mocks base method.
+func (m *MockITurboSwap) GetStatus(ctx context.Context, pubKey string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddDiscountCode", ctx, party)
+	ret := m.ctrl.Call(m, "GetStatus", ctx, pubKey)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AddDiscountCode indicates an expected call of AddDiscountCode.
-func (mr *MockITurboSwapMockRecorder) AddDiscountCode(ctx, party any) *gomock.Call {
+// GetStatus indicates an expected call of GetStatus.
+func (mr *MockITurboSwapMockRecorder) GetStatus(ctx, pubKey any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddDiscountCode", reflect.TypeOf((*MockITurboSwap)(nil).AddDiscountCode), ctx, party)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockITurboSwap)(nil).GetStatus), ctx, pubKey)
 }
 
-// GetDiscountCodeStatus mocks base method.
-func (m *MockITurboSwap) GetDiscountCodeStatus(ctx context.Context, pubKey string) error {
+// SendDiscountCode mocks base method.
+func (m *MockITurboSwap) SendDiscountCode(ctx context.Context, party *store.TwitterParty) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDiscountCodeStatus", ctx, pubKey)
+	ret := m.ctrl.Call(m, "SendDiscountCode", ctx, party)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// GetDiscountCodeStatus indicates an expected call of GetDiscountCodeStatus.
-func (mr *MockITurboSwapMockRecorder) GetDiscountCodeStatus(ctx, pubKey any) *gomock.Call {
+// SendDiscountCode indicates an expected call of SendDiscountCode.
+func (mr *MockITurboSwapMockRecorder) SendDiscountCode(ctx, party any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDiscountCodeStatus", reflect.TypeOf((*MockITurboSwap)(nil).GetDiscountCodeStatus), ctx, pubKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDiscountCode", reflect.TypeOf((*MockITurboSwap)(nil).SendDiscountCode), ctx, party)
 }

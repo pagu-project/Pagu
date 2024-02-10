@@ -19,15 +19,15 @@ func NewTurboswap(apiToken string) (*Turboswap, error) {
 	}, nil
 }
 
-func (ts *Turboswap) GetDiscountCodeStatus(ctx context.Context, pubKey string) error {
+func (ts *Turboswap) GetStatus(ctx context.Context, pubKey string) error {
 
 	return nil
 }
 
-func (ts *Turboswap) AddDiscountCode(ctx context.Context, party *store.TwitterParty) error {
+func (ts *Turboswap) SendDiscountCode(ctx context.Context, party *store.TwitterParty) error {
 	url := "https://swap-api.sensifia.vc/pactus/discount"
-	jsonStr := fmt.Sprintf(`{"apiKey":"%v","code":"%v","validatorPublicKey":"%v","priceInCents":"%v"}`,
-		ts.APIToken, party.DiscountCode, party.ValPubKey, party.UnitPrice)
+	jsonStr := fmt.Sprintf(`{"api_key":"%v","code":"%v","validator_public_key":"%v","total_coins":"%v","total_price_in_usd":"%v","created_at":"%v"}`,
+		ts.APIToken, party.DiscountCode, party.ValPubKey, party.AmountInPAC, party.TotalPrice, party.CreatedAt)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonStr)))
 	if err != nil {

@@ -7,6 +7,6 @@ import (
 )
 
 type ITurboSwap interface {
-	GetDiscountCodeStatus(ctx context.Context, pubKey string) error
-	AddDiscountCode(ctx context.Context, party *store.TwitterParty) error
+	GetStatus(ctx context.Context, pubKey string) error
+	SendDiscountCode(ctx context.Context, party *store.TwitterParty) error
 }

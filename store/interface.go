@@ -16,6 +16,7 @@ type TwitterParty struct {
 	UnitPrice    int    `json:"unit_price_in_cents"`
 	TotalPrice   int    `json:"total_price"`
 	AmountInPAC  int    `json:"amount_in_pac"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 func (c *Claimer) IsClaimed() bool {

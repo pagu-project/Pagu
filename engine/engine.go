@@ -359,13 +359,6 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		return nil, err
 	}
 
-	// oneDayAgo := time.Now().AddDate(0, 0, -1)
-	// if tweetInfo.CreatedAt.After(oneDayAgo) {
-	// 	return nil, fmt.Errorf("the Quote Tweet with hashtag `%v` found,"+
-	// 		" but it is posted less than 24 hours ago: %v",
-	// 		hashtag, tweetInfo.Link)
-	// }
-
 	discountCode, err := gonanoid.Generate("0123456789", 6)
 	if err != nil {
 		return nil, err
@@ -387,9 +380,10 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		TotalPrice:   amountInPAC * unitPrice / 100,
 		AmountInPAC:  amountInPAC,
 		DiscountCode: discountCode,
+		CreatedAt:    time.Now().Unix(),
 	}
 
-	err = be.turboswap.AddDiscountCode(be.ctx, party)
+	err = be.turboswap.SendDiscountCode(be.ctx, party)
 	if err != nil {
 		return nil, err
 	}
