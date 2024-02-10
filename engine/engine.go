@@ -401,5 +401,9 @@ func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterPa
 	if party == nil {
 		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
 	}
+	err := be.turboswap.GetStatus(be.ctx, party)
+	if err != nil {
+		return nil, err
+	}
 	return party, nil
 }

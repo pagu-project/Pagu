@@ -41,17 +41,17 @@ func (m *MockITurboSwap) EXPECT() *MockITurboSwapMockRecorder {
 }
 
 // GetStatus mocks base method.
-func (m *MockITurboSwap) GetStatus(ctx context.Context, pubKey string) error {
+func (m *MockITurboSwap) GetStatus(ctx context.Context, party *store.TwitterParty) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetStatus", ctx, pubKey)
+	ret := m.ctrl.Call(m, "GetStatus", ctx, party)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // GetStatus indicates an expected call of GetStatus.
-func (mr *MockITurboSwapMockRecorder) GetStatus(ctx, pubKey any) *gomock.Call {
+func (mr *MockITurboSwapMockRecorder) GetStatus(ctx, party any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockITurboSwap)(nil).GetStatus), ctx, pubKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockITurboSwap)(nil).GetStatus), ctx, party)
 }
 
 // SendDiscountCode mocks base method.

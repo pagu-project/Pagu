@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pactus-project/pactus/util"
 )
@@ -145,9 +146,11 @@ func (be *BotEngine) Run(input string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
 		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
-			"Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins.",
-			party.ValAddr, party.DiscountCode)
+			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
+			" The Discount code will expire on %v",
+			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
 		return msg, nil
 
 	case CmdTwitterCampaignStatus:
@@ -160,9 +163,11 @@ func (be *BotEngine) Run(input string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
 		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
-			"Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins.",
-			party.ValAddr, party.DiscountCode)
+			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
+			" The Discount code will expire on %v",
+			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
 		return msg, nil
 
 	default:

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/kehiy/RoboPac/store"
+	"github.com/pactus-project/pactus/util/logger"
 )
 
 type Turboswap struct {
@@ -19,8 +20,28 @@ func NewTurboswap(apiToken string) (*Turboswap, error) {
 	}, nil
 }
 
-func (ts *Turboswap) GetStatus(ctx context.Context, pubKey string) error {
+func (ts *Turboswap) GetStatus(ctx context.Context, party *store.TwitterParty) error {
+	url := fmt.Sprintf("https://swap-api.sensifia.vc/pactus/discount/status/%v/%v", party.ValPubKey, ts.APIToken)
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer(nil))
+	if err != nil {
+		return err
+	}
+	client := &http.Client{}
 
+	logger.Info("calling swap-api/status", "twitter", party.TwitterName)
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	buf := make([]byte, 0, 1024)
+	_, err = resp.Body.Read(buf)
+	if err != nil {
+		return err
+	}
+
+	logger.Info("response from turboswap", "res", string(buf))
 	return nil
 }
 
@@ -36,13 +57,19 @@ func (ts *Turboswap) SendDiscountCode(ctx context.Context, party *store.TwitterP
 
 	req.Header.Set("Content-Type", "application/json")
 
+	logger.Info("calling swap-api/discount", "twitter", party.TwitterName)
 	client := &http.Client{}
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
+	buf := make([]byte, 0, 1024)
+	_, err = resp.Body.Read(buf)
+	if err != nil {
+		return err
+	}
+	logger.Info("response from turboswap", "res", string(buf))
 	return nil
 }
