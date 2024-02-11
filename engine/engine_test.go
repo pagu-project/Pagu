@@ -571,8 +571,13 @@ func TestTwitterCampaign(t *testing.T) {
 		eng, client, store, _, twitter, _ := setup(t)
 
 		twitterName := "abcd"
+		twitterID := "1234"
 		valAddr := "addr"
 		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
@@ -595,6 +600,7 @@ func TestTwitterCampaign(t *testing.T) {
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
 			&twitter_api.UserInfo{
+				TwitterID: twitterID,
 				CreatedAt: time.Now().AddDate(-1, 0, 0),
 			}, nil,
 		)
@@ -607,8 +613,13 @@ func TestTwitterCampaign(t *testing.T) {
 		eng, client, store, _, twitter, _ := setup(t)
 
 		twitterName := "abcd"
+		twitterID := "1234"
 		valAddr := "addr"
 		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
@@ -631,6 +642,7 @@ func TestTwitterCampaign(t *testing.T) {
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
 			&twitter_api.UserInfo{
+				TwitterID: twitterID,
 				CreatedAt: time.Now().AddDate(-4, 0, 0),
 				Followers: 100,
 			}, nil,
@@ -644,8 +656,13 @@ func TestTwitterCampaign(t *testing.T) {
 		eng, client, store, _, twitter, _ := setup(t)
 
 		twitterName := "abcd"
+		twitterID := "1234"
 		valAddr := "addr"
 		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
@@ -668,6 +685,7 @@ func TestTwitterCampaign(t *testing.T) {
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
 			&twitter_api.UserInfo{
+				TwitterID:  twitterID,
 				CreatedAt:  time.Now().AddDate(-4, 0, 0),
 				Followers:  300,
 				IsVerified: false,
@@ -686,8 +704,13 @@ func TestTwitterCampaign(t *testing.T) {
 		eng, client, store, _, twitter, turboswap := setup(t)
 
 		twitterName := "abcd"
+		twitterID := "1234"
 		valAddr := "addr"
 		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
@@ -710,6 +733,7 @@ func TestTwitterCampaign(t *testing.T) {
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
 			&twitter_api.UserInfo{
+				TwitterID:  twitterID,
 				CreatedAt:  time.Now().AddDate(-4, 0, 0),
 				Followers:  300,
 				IsVerified: false,

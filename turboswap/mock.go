@@ -41,11 +41,12 @@ func (m *MockITurboSwap) EXPECT() *MockITurboSwapMockRecorder {
 }
 
 // GetStatus mocks base method.
-func (m *MockITurboSwap) GetStatus(ctx context.Context, party *store.TwitterParty) error {
+func (m *MockITurboSwap) GetStatus(ctx context.Context, party *store.TwitterParty) (*DiscountStatus, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStatus", ctx, party)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*DiscountStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetStatus indicates an expected call of GetStatus.

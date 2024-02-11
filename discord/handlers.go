@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/log"
+	"github.com/pactus-project/pactus/util/logger"
 )
 
 func (db *DiscordBot) respondErrMsg(cmdErr error, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -25,6 +26,8 @@ func (db *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.S
 	if err != nil {
 		log.Error("InteractionRespond error:", "error", err)
 	}
+
+	logger.Debug("send embedded message", "msg", embed.Description)
 }
 
 // TODO: change it to :
@@ -219,6 +222,24 @@ func twitterCampaignStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i
 
 	// TODO: Use `CmdTwitterCampaignStatus` here. Try to not repeat...
 	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign-status %v", twitterID))
+	if err != nil {
+		db.respondErrMsg(err, s, i)
+		return
+	}
+
+	embed := twitterCampaignEmbed(s, i, result)
+	db.respondEmbed(embed, s, i)
+}
+
+func twitterCampaignWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+
+	twitterName := i.ApplicationCommandData().Options[0].StringValue()
+
+	// TODO: Use `CmdTwitterCampaignWhitelist` here. Try to not repeat...
+	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign-whitelist %v %v", twitterName, i.Member.User.ID))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return

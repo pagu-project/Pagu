@@ -10,17 +10,16 @@ import (
 )
 
 type Config struct {
-	Network          string
-	WalletAddress    string
-	WalletPath       string
-	WalletPassword   string
-	NetworkNodes     []string
-	LocalNode        string
-	StorePath        string
-	TwitterStorePath string
-	DiscordBotCfg    DiscordBotConfig
-	TwitterAPICfg    TwitterAPIConfig
-	TurboswapConfig  TurboswapConfig
+	Network         string
+	WalletAddress   string
+	WalletPath      string
+	WalletPassword  string
+	NetworkNodes    []string
+	LocalNode       string
+	StorePath       string
+	DiscordBotCfg   DiscordBotConfig
+	TwitterAPICfg   TwitterAPIConfig
+	TurboswapConfig TurboswapConfig
 }
 
 type TurboswapConfig struct {
@@ -45,14 +44,13 @@ func Load(filePaths ...string) (*Config, error) {
 
 	// Fetch config values from environment variables.
 	cfg := &Config{
-		Network:          os.Getenv("NETWORK"),
-		WalletAddress:    os.Getenv("WALLET_ADDRESS"),
-		WalletPath:       os.Getenv("WALLET_PATH"),
-		WalletPassword:   os.Getenv("WALLET_PASSWORD"),
-		LocalNode:        os.Getenv("LOCAL_NODE"),
-		NetworkNodes:     strings.Split(os.Getenv("NETWORK_NODES"), ","),
-		StorePath:        os.Getenv("STORE_PATH"),
-		TwitterStorePath: os.Getenv("TWITTER_STORE_PATH"),
+		Network:        os.Getenv("NETWORK"),
+		WalletAddress:  os.Getenv("WALLET_ADDRESS"),
+		WalletPath:     os.Getenv("WALLET_PATH"),
+		WalletPassword: os.Getenv("WALLET_PASSWORD"),
+		LocalNode:      os.Getenv("LOCAL_NODE"),
+		NetworkNodes:   strings.Split(os.Getenv("NETWORK_NODES"), ","),
+		StorePath:      os.Getenv("STORE_PATH"),
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
 			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),

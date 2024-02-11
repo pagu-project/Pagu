@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 
@@ -75,9 +76,9 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	log.Info("wallet opened successfully", "address", wallet.Address())
 
 	// load store.
-	store, err := store.NewStore(cfg, sSl)
+	store, err := store.NewStore(cfg.StorePath, sSl)
 	if err != nil {
-		log.Panic("could not load store", "err", err, "path", cfg.StorePath)
+		log.Panic("could not load store", "err", err)
 	}
 	log.Info("store loaded successfully", "path", cfg.StorePath)
 
@@ -85,11 +86,13 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	if err != nil {
 		log.Panic("could not start twitter client", "err", err)
 	}
+	log.Info("twitterClient loaded successfully")
 
 	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken)
 	if err != nil {
 		log.Panic("could not start twitter client", "err", err)
 	}
+	log.Info("turboswap loaded successfully")
 
 	return newBotEngine(eSl, cm, wallet, store, twitterClient, turboswap), nil
 }
@@ -278,7 +281,7 @@ func (be *BotEngine) BotWallet() (string, int64) {
 }
 
 func (be *BotEngine) ClaimStatus() (int64, int64, int64, int64) {
-	return be.Store.Status()
+	return be.Store.ClaimStatus()
 }
 
 func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int64, error) {
@@ -321,6 +324,9 @@ func (be *BotEngine) Start() {
 }
 
 func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.TwitterParty, error) {
+	be.Lock()
+	defer be.Unlock()
+
 	existingParty := be.Store.FindTwitterParty(twitterName)
 	if existingParty != nil {
 		return existingParty, nil
@@ -341,15 +347,17 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		return nil, err
 	}
 	if !userInfo.IsVerified {
-		threeYearsAgo := time.Now().AddDate(-3, 0, 0)
-		if userInfo.CreatedAt.After(threeYearsAgo) {
-			return nil, errors.New("the Twitter account is less than 3 years old." +
-				" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
-		}
+		if !be.Store.IsWhitelisted(userInfo.TwitterID) {
+			threeYearsAgo := time.Now().AddDate(-3, 0, 0)
+			if userInfo.CreatedAt.After(threeYearsAgo) {
+				return nil, errors.New("the Twitter account is less than 3 years old." +
+					" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
+			}
 
-		if userInfo.Followers < 200 {
-			return nil, errors.New("the Twitter account has less tha 200 followers." +
-				" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
+			if userInfo.Followers < 200 {
+				return nil, errors.New("the Twitter account has less tha 200 followers." +
+					" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
+			}
 		}
 	}
 
@@ -396,14 +404,37 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 	return party, nil
 }
 
-func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterParty, error) {
+func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterParty, *turboswap.DiscountStatus, error) {
 	party := be.Store.FindTwitterParty(twitterName)
 	if party == nil {
-		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
+		return nil, nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
 	}
-	err := be.turboswap.GetStatus(be.ctx, party)
+	status, err := be.turboswap.GetStatus(be.ctx, party)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return party, nil
+
+	return party, status, nil
+}
+
+func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDiscordID string) error {
+	// TODO: Get from config
+	authorizedIDs := []string{}
+
+	if !slices.Contains(authorizedIDs, authorizedDiscordID) {
+		return fmt.Errorf("unauthorize person")
+	}
+
+	foundParty := be.Store.FindTwitterParty(twitterName)
+	if foundParty != nil {
+		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
+			foundParty.TwitterName, foundParty.DiscountCode)
+	}
+
+	userInfo, err := be.twitterClient.UserInfo(be.ctx, twitterName)
+	if err != nil {
+		return err
+	}
+
+	return be.Store.WhitelistTwitterAccount(userInfo.TwitterID, userInfo.TwitterName, authorizedDiscordID)
 }

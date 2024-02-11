@@ -66,6 +66,23 @@ func (mr *MockIStoreMockRecorder) AddTwitterParty(party any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTwitterParty", reflect.TypeOf((*MockIStore)(nil).AddTwitterParty), party)
 }
 
+// ClaimStatus mocks base method.
+func (m *MockIStore) ClaimStatus() (int64, int64, int64, int64) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClaimStatus")
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(int64)
+	ret3, _ := ret[3].(int64)
+	return ret0, ret1, ret2, ret3
+}
+
+// ClaimStatus indicates an expected call of ClaimStatus.
+func (mr *MockIStoreMockRecorder) ClaimStatus() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClaimStatus", reflect.TypeOf((*MockIStore)(nil).ClaimStatus))
+}
+
 // ClaimerInfo mocks base method.
 func (m *MockIStore) ClaimerInfo(testNetValAddr string) *Claimer {
 	m.ctrl.T.Helper()
@@ -94,19 +111,30 @@ func (mr *MockIStoreMockRecorder) FindTwitterParty(twitterName any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindTwitterParty", reflect.TypeOf((*MockIStore)(nil).FindTwitterParty), twitterName)
 }
 
-// Status mocks base method.
-func (m *MockIStore) Status() (int64, int64, int64, int64) {
+// IsWhitelisted mocks base method.
+func (m *MockIStore) IsWhitelisted(twitterID string) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Status")
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(int64)
-	ret2, _ := ret[2].(int64)
-	ret3, _ := ret[3].(int64)
-	return ret0, ret1, ret2, ret3
+	ret := m.ctrl.Call(m, "IsWhitelisted", twitterID)
+	ret0, _ := ret[0].(bool)
+	return ret0
 }
 
-// Status indicates an expected call of Status.
-func (mr *MockIStoreMockRecorder) Status() *gomock.Call {
+// IsWhitelisted indicates an expected call of IsWhitelisted.
+func (mr *MockIStoreMockRecorder) IsWhitelisted(twitterID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Status", reflect.TypeOf((*MockIStore)(nil).Status))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsWhitelisted", reflect.TypeOf((*MockIStore)(nil).IsWhitelisted), twitterID)
+}
+
+// WhitelistTwitterAccount mocks base method.
+func (m *MockIStore) WhitelistTwitterAccount(twitterID, twitterName, authorizedDiscordID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WhitelistTwitterAccount", twitterID, twitterName, authorizedDiscordID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// WhitelistTwitterAccount indicates an expected call of WhitelistTwitterAccount.
+func (mr *MockIStoreMockRecorder) WhitelistTwitterAccount(twitterID, twitterName, authorizedDiscordID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WhitelistTwitterAccount", reflect.TypeOf((*MockIStore)(nil).WhitelistTwitterAccount), twitterID, twitterName, authorizedDiscordID)
 }

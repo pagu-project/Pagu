@@ -7,20 +7,25 @@ import (
 	"time"
 
 	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/util/logger"
 )
 
+// TODO: Move help here
 const (
-	CmdClaim                 = "claim"                   //!
-	CmdClaimerInfo           = "claimer-info"            //!
-	CmdNodeInfo              = "node-info"               //!
-	CmdNetworkStatus         = "network"                 //!
-	CmdNetworkHealth         = "network-health"          //!
-	CmdBotWallet             = "wallet"                  //!
-	CmdClaimStatus           = "claim-status"            //!
-	CmdRewardCalc            = "calc-reward"             //!
-	CmdTwitterCampaign       = "twitter-campaign"        //!
-	CmdTwitterCampaignStatus = "twitter-campaign-status" //!
+	CmdClaim                    = "claim"                      //!
+	CmdClaimerInfo              = "claimer-info"               //!
+	CmdNodeInfo                 = "node-info"                  //!
+	CmdNetworkStatus            = "network"                    //!
+	CmdNetworkHealth            = "network-health"             //!
+	CmdBotWallet                = "wallet"                     //!
+	CmdClaimStatus              = "claim-status"               //!
+	CmdRewardCalc               = "calc-reward"                //!
+	CmdTwitterCampaign          = "twitter-campaign"           //!
+	CmdTwitterCampaignStatus    = "twitter-campaign-status"    //!
+	CmdTwitterCampaignWhitelist = "twitter-campaign-whitelist" //!
 )
+
+// TODO: Command format is like: [Source (Discord, Telegram, ...)] [Issuer_ID] [Command]
 
 // The input is always string.
 //
@@ -28,6 +33,8 @@ const (
 //
 // The output is always string, but format might be JSON. ???
 func (be *BotEngine) Run(input string) (string, error) {
+	logger.Debug("parse command", "input", input)
+
 	cmd, args := be.parseQuery(input)
 
 	switch cmd {
@@ -155,19 +162,35 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 	case CmdTwitterCampaignStatus:
 		if len(args) != 1 {
+			// TODO: Make a function: `checkArgs(requiredArg int) error`
 			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
 		}
 
 		twitterName := args[0]
-		party, err := be.TwitterCampaignStatus(twitterName)
+		party, _, err := be.TwitterCampaignStatus(twitterName)
 		if err != nil {
 			return "", err
 		}
+		// TODO: check the status
 		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
 		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
 			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
 			" The Discount code will expire on %v",
 			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
+		return msg, nil
+
+	case CmdTwitterCampaignWhitelist:
+		if len(args) != 2 {
+			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		}
+
+		twitterName := args[0]
+		authorizedDiscordID := args[1]
+		err := be.TwitterCampaignWhitelist(twitterName, authorizedDiscordID)
+		if err != nil {
+			return "", err
+		}
+		msg := fmt.Sprintf("Twitter `%s` whitelisted", twitterName)
 		return msg, nil
 
 	default:

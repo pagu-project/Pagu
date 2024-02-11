@@ -47,13 +47,16 @@ func setup(t *testing.T) store.IStore {
 	_, err = copy("./test/.env.test", path.Join(tempDir, "/.env"))
 	require.NoError(t, err)
 
-	_, err = copy("./test/store_example.json", path.Join(tempDir, "/store_example.json"))
+	_, err = copy("./test/claimers.json", path.Join(tempDir, "/claimers.json"))
 	require.NoError(t, err)
 
-	_, err = copy("./test/twitter_example.json", path.Join(tempDir, "/twitter_example.json"))
+	_, err = copy("./test/twitter_campaign.json", path.Join(tempDir, "/twitter_campaign.json"))
 	require.NoError(t, err)
 
-	_, err = copy("./test/test_wallet.json", path.Join(tempDir, "/test_wallet.json"))
+	_, err = copy("./test/twitter_whitelisted.json", path.Join(tempDir, "/twitter_whitelisted.json"))
+	require.NoError(t, err)
+
+	_, err = copy("./test/wallet.json", path.Join(tempDir, "/wallet.json"))
 	require.NoError(t, err)
 
 	os.Chdir(tempDir)
@@ -64,7 +67,7 @@ func setup(t *testing.T) store.IStore {
 	log.InitGlobalLogger()
 	logger := log.NewSubLogger("store_test")
 
-	store, err := store.NewStore(cfg, logger)
+	store, err := store.NewStore(cfg.StorePath, logger)
 	require.NoError(t, err)
 
 	return store
