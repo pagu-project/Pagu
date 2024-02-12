@@ -3,7 +3,9 @@ module github.com/kehiy/RoboPac
 go 1.21.1
 
 require (
+	github.com/g8rswimmer/go-twitter/v2 v2.1.5
 	github.com/joho/godotenv v1.5.1
+	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/pactus-project/pactus v0.20.1-0.20240123172127-c5fe20fc3942
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4

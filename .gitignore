@@ -2,7 +2,7 @@
 .DS_Store
 .vscode
 todo
-*.local.*
+*local*
 dist/
 .releaser.yml
 pactus-*
@@ -16,3 +16,4 @@ dev_wallet
 /build
 .env
 *.log
+

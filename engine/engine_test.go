@@ -9,6 +9,8 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/log"
 	rpstore "github.com/kehiy/RoboPac/store"
+	"github.com/kehiy/RoboPac/turboswap"
+	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -17,7 +19,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet) {
+func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient, *turboswap.MockITurboSwap) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
@@ -28,18 +30,17 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	cm := client.NewClientMgr()
 	cm.AddClient(mockClient)
 
-	// mocking mockWallet.
 	mockWallet := wallet.NewMockIWallet(ctrl)
-
-	// mocking mockStore.
 	mockStore := rpstore.NewMockIStore(ctrl)
+	mockTwitter := twitter_api.NewMockIClient(ctrl)
+	mockTurboswap := turboswap.NewMockITurboSwap(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore)
-	return eng, mockClient, mockStore, mockWallet
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockTurboswap)
+	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockTurboswap
 }
 
 func TestNetworkStatus(t *testing.T) {
-	eng, client, _, _ := setup(t)
+	eng, client, _, _, _, _ := setup(t)
 
 	client.EXPECT().GetNetworkInfo().Return(
 		&pactus.GetNetworkInfoResponse{
@@ -81,7 +82,7 @@ func TestNetworkStatus(t *testing.T) {
 }
 
 func TestNetworkHealth(t *testing.T) {
-	eng, client, _, _ := setup(t)
+	eng, client, _, _, _, _ := setup(t)
 
 	t.Run("should be healthy", func(t *testing.T) {
 		currentTime := time.Now().Unix()
@@ -111,7 +112,7 @@ func TestNetworkHealth(t *testing.T) {
 }
 
 func TestNodeInfo(t *testing.T) {
-	eng, client, _, _ := setup(t)
+	eng, client, _, _, _, _ := setup(t)
 	t.Run("should work, valid address", func(t *testing.T) {
 		valAddress := "valid-address"
 		pubKey := "pub-key"
@@ -160,7 +161,7 @@ func TestNodeInfo(t *testing.T) {
 
 func TestClaim(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
@@ -228,7 +229,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, already staked", func(t *testing.T) {
-		eng, client, _, _ := setup(t)
+		eng, client, _, _, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -248,7 +249,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, low balance", func(t *testing.T) {
-		eng, client, _, wallet := setup(t)
+		eng, client, _, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -267,7 +268,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, claimer not found", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-notfound"
 		testnetAddr := "testnet-addr-fail-notfound"
@@ -291,7 +292,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, different Discord ID", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-different-id"
 		testnetAddr := "testnet-addr-fail-different-id"
@@ -317,7 +318,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, not first validator address", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-not-first-validator"
 		testnetAddr := "testnet-addr-fail-not-first-validator"
@@ -354,7 +355,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, validator not found", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-validator-not-found"
 		testnetAddr := "testnet-addr-fail-validator-not-found"
@@ -391,7 +392,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, empty transaction hash", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
 		testnetAddr := "testnet-addr-fail-empty-tx-hash"
@@ -437,7 +438,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should panic, add claimer failed", func(t *testing.T) {
-		eng, client, store, wallet := setup(t)
+		eng, client, store, wallet, _, _ := setup(t)
 
 		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
 		testnetAddr := "testnet-addr-panic-add-claimer-failed"
@@ -485,5 +486,479 @@ func TestClaim(t *testing.T) {
 		assert.Panics(t, func() {
 			_, _ = eng.Claim(discordID, testnetAddr, mainnetAddr)
 		})
+	})
+}
+
+func TestTwitterCampaign(t *testing.T) {
+	t.Run("staked validator", func(t *testing.T) {
+		eng, client, store, _, _, _ := setup(t)
+
+		twitterName := "anything"
+		discordName := "discord-name"
+		discordID := "123456789"
+		valAddr := "staked-validator"
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			&pactus.GetValidatorResponse{}, nil,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.Error(t, err)
+	})
+
+	t.Run("non-existing validator", func(t *testing.T) {
+		eng, client, store, _, _, _ := setup(t)
+
+		twitterName := "anything"
+		discordName := "discord-name"
+		discordID := "123456789"
+		valAddr := "non-existing-validator"
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			nil, nil,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.Error(t, err)
+	})
+
+	t.Run("non-existing twitter account", func(t *testing.T) {
+		eng, client, store, _, twitter, _ := setup(t)
+
+		twitterName := "non-existing-twitter"
+		discordName := "discord-name"
+		discordID := "123456789"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		expectedErr := errors.New("not exists")
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			nil, expectedErr,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.ErrorIs(t, err, expectedErr)
+	})
+
+	t.Run("not old enough", func(t *testing.T) {
+		eng, client, store, _, twitter, _ := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterID: twitterID,
+				CreatedAt: time.Now().AddDate(-1, 0, 0),
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.Error(t, err)
+	})
+
+	t.Run("less than 200 followers", func(t *testing.T) {
+		eng, client, store, _, twitter, _ := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterID: twitterID,
+				CreatedAt: time.Now().AddDate(-4, 0, 0),
+				Followers: 100,
+			}, nil,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.Error(t, err)
+	})
+
+	t.Run("active account, but not retweeted", func(t *testing.T) {
+		eng, client, store, _, twitter, _ := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterID:  twitterID,
+				CreatedAt:  time.Now().AddDate(-4, 0, 0),
+				Followers:  300,
+				IsVerified: false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.Error(t, err)
+	})
+
+	t.Run("active account, less that 1000 followers", func(t *testing.T) {
+		eng, client, store, _, twitter, turboswap := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterName: twitterName,
+				TwitterID:   twitterID,
+				CreatedAt:   time.Now().AddDate(-4, 0, 0),
+				Followers:   300,
+				IsVerified:  false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+			nil,
+		)
+
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		party, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.NoError(t, err)
+
+		assert.Equal(t, 150, party.AmountInPAC)
+		assert.Equal(t, 50, party.TotalPrice)
+		assert.Equal(t, twitterName, party.TwitterName)
+		assert.Equal(t, twitterID, party.TwitterID)
+		assert.Equal(t, valAddr, party.ValAddr)
+		assert.Equal(t, valPubKey, party.ValPubKey)
+	})
+
+	t.Run("active account, more that 1000 followers", func(t *testing.T) {
+		eng, client, store, _, twitter, turboswap := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterName: twitterName,
+				TwitterID:   twitterID,
+				CreatedAt:   time.Now().AddDate(-4, 0, 0),
+				Followers:   1001,
+				IsVerified:  false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+			nil,
+		)
+
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		party, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.NoError(t, err)
+
+		assert.Equal(t, 200, party.AmountInPAC)
+		assert.Equal(t, 50, party.TotalPrice)
+		assert.Equal(t, twitterName, party.TwitterName)
+		assert.Equal(t, twitterID, party.TwitterID)
+		assert.Equal(t, valAddr, party.ValAddr)
+		assert.Equal(t, valPubKey, party.ValPubKey)
+	})
+
+	t.Run("verified account", func(t *testing.T) {
+		eng, client, store, _, twitter, turboswap := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterID:   twitterID,
+				TwitterName: twitterName,
+				CreatedAt:   time.Now().AddDate(-1, 0, 0),
+				Followers:   100,
+				IsVerified:  true,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+
+		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+			nil,
+		)
+
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.NoError(t, err)
+	})
+
+	t.Run("whitelisted account", func(t *testing.T) {
+		eng, client, store, _, twitter, turboswap := setup(t)
+
+		twitterName := "abcd"
+		discordName := "discord-name"
+		discordID := "123456789"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			true,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterID:   twitterID,
+				TwitterName: twitterName,
+				CreatedAt:   time.Now().AddDate(-1, 0, 0),
+				Followers:   100,
+				IsVerified:  false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+
+		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+			nil,
+		)
+
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		assert.NoError(t, err)
 	})
 }

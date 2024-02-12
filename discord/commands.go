@@ -100,39 +100,60 @@ var commands = []*discordgo.ApplicationCommand{
 		Description: "TestNet reward claim status",
 	},
 	{
-		Name:        "get-discount",
-		Description: "get twitter campaign discount code",
+		Name:        "twitter-campaign",
+		Description: "Get Twitter campaign discount code",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "twitter-username",
-				Description: "your twitter username",
+				Description: "your Twitter username",
 				Required:    true,
-			},
-			{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "tweet-link",
-				Description: "reposted tweet link",
-				Required:    true, 
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "validator-address",
 				Description: "your validator address",
-				Required:    true, 
+				Required:    true,
 			},
+		},
+	},
+	{
+		Name:        "twitter-campaign-status",
+		Description: "Status of Twitter campaign",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "twitter-username",
+				Description: "your Twitter username",
+				Required:    true,
+			},
+		},
+	},
+	{
+		Name:        "twitter-campaign-whitelist",
+		Description: "Whitelist a non-active Twitter account for Twitter campaign",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "twitter-username",
+				Description: "Twitter username",
+				Required:    true,
+			},
+		},
 	},
 }
 
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
-	"help":           helpCommandHandler,
-	"claim":          claimCommandHandler,
-	"claimer-info":   claimerInfoCommandHandler,
-	"node-info":      nodeInfoCommandHandler,
-	"network-health": networkHealthCommandHandler,
-	"network-status": networkStatusCommandHandler,
-	"wallet":         walletCommandHandler,
-	"claim-status":   claimStatusCommandHandler,
-	"reward-calc":    rewardCalcCommandHandler,
-	"get-discount": twitterDiscountCampaignCommandHandler,
+	"help":                       helpCommandHandler,
+	"claim":                      claimCommandHandler,
+	"claimer-info":               claimerInfoCommandHandler,
+	"node-info":                  nodeInfoCommandHandler,
+	"network-health":             networkHealthCommandHandler,
+	"network-status":             networkStatusCommandHandler,
+	"wallet":                     walletCommandHandler,
+	"claim-status":               claimStatusCommandHandler,
+	"reward-calc":                rewardCalcCommandHandler,
+	"twitter-campaign":           twitterCampaignCommandHandler,
+	"twitter-campaign-status":    twitterCampaignStatusCommandHandler,
+	"twitter-campaign-whitelist": twitterCampaignWhitelistCommandHandler,
 }

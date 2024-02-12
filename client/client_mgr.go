@@ -74,28 +74,22 @@ func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	return nil, errors.New("unable to get network info")
 }
 
-func (cm *Mgr) GetPeerInfoFirstVal(address string) (*pactus.PeerInfo, error) {
-	for _, c := range cm.clients {
-		networkInfo, err := c.GetNetworkInfo()
-		if err != nil {
-			continue
-		}
+func (cm *Mgr) FindPublicKey(address string, firstVal bool) (string, error) {
+	peerInfo, err := cm.GetPeerInfo(address)
+	if err != nil {
+		return "", err
+	}
 
-		if networkInfo != nil {
-			for _, p := range networkInfo.ConnectedPeers {
-				for i, addr := range p.ConsensusAddress {
-					if addr == address {
-						if i != 0 {
-							return nil, errors.New("please enter the first validator address")
-						}
-						return p, nil
-					}
-				}
+	for i, addr := range peerInfo.ConsensusAddress {
+		if addr == address {
+			if firstVal && i != 0 {
+				return "", errors.New("please enter the first validator address")
 			}
+			return peerInfo.ConsensusKeys[i], nil
 		}
 	}
 
-	return nil, errors.New("peer does not exist")
+	panic("unreachable")
 }
 
 func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
