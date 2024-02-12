@@ -1,0 +1,12 @@
+{
+    "123456": {
+        "twitter_id": "123456",
+        "twitter_name": "jack",
+        "retweet_id": "2222222222222222222",
+        "val_addr": "tpc1pqrdnar2qcd9vmd0elmtxaksq58zmqht4yw8ca6",
+        "val_pub": "tpublic1p3d2nh75jd0rqhf79vcea4exg2f54tnsuxxuxr357q6rfgctfg9pg4ld50jt8ea5gqmks9u35mnm4gyv5ee5zew32xu2e47amsa7duk6gt4gpxgxj0drs506d60x738l9d6j59hdzcl4frap35cxth05p3yhcnmx4",
+        "discount_code": "344775",
+        "total_price": 40,
+        "amount_in_pac": 200
+    }
+}
