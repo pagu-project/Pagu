@@ -4,19 +4,24 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/util/logger"
 )
 
 const (
-	CmdClaim         = "claim"          //!
-	CmdClaimerInfo   = "claimer-info"   //!
-	CmdNodeInfo      = "node-info"      //!
-	CmdNetworkStatus = "network"        //!
-	CmdNetworkHealth = "network-health" //!
-	CmdBotWallet     = "wallet"         //!
-	CmdClaimStatus   = "claim-status"   //!
-	CmdRewardCalc    = "calc-reward"    //!
+	CmdClaim                    = "claim"                      //!
+	CmdClaimerInfo              = "claimer-info"               //!
+	CmdNodeInfo                 = "node-info"                  //!
+	CmdNetworkStatus            = "network"                    //!
+	CmdNetworkHealth            = "network-health"             //!
+	CmdBotWallet                = "wallet"                     //!
+	CmdClaimStatus              = "claim-status"               //!
+	CmdRewardCalc               = "calc-reward"                //!
+	CmdTwitterCampaign          = "twitter-campaign"           //!
+	CmdTwitterCampaignStatus    = "twitter-campaign-status"    //!
+	CmdTwitterCampaignWhitelist = "twitter-campaign-whitelist" //!
 )
 
 // The input is always string.
@@ -25,6 +30,8 @@ const (
 //
 // The output is always string, but format might be JSON. ???
 func (be *BotEngine) Run(input string) (string, error) {
+	logger.Debug("parse command", "input", input)
+
 	cmd, args := be.parseQuery(input)
 
 	switch cmd {
@@ -131,6 +138,57 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
 			reward, stake, time, totalPower), nil
+
+	case CmdTwitterCampaign:
+		if len(args) != 3 {
+			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
+		}
+
+		discordName := args[0]
+		twitterName := args[1]
+		valAddr := args[2]
+		party, err := be.TwitterCampaign(discordName, twitterName, valAddr)
+		if err != nil {
+			return "", err
+		}
+		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
+		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
+			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
+			" The Discount code will expire on %v",
+			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
+		return msg, nil
+
+	case CmdTwitterCampaignStatus:
+		if len(args) != 1 {
+			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
+		}
+
+		twitterName := args[0]
+		party, _, err := be.TwitterCampaignStatus(twitterName)
+		if err != nil {
+			return "", err
+		}
+		// TODO: check the status
+		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
+		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
+			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
+			" The Discount code will expire on %v",
+			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
+		return msg, nil
+
+	case CmdTwitterCampaignWhitelist:
+		if len(args) != 2 {
+			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		}
+
+		twitterName := args[0]
+		authorizedDiscordID := args[1]
+		err := be.TwitterCampaignWhitelist(twitterName, authorizedDiscordID)
+		if err != nil {
+			return "", err
+		}
+		msg := fmt.Sprintf("Twitter `%s` whitelisted", twitterName)
+		return msg, nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

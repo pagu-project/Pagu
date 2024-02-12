@@ -10,14 +10,25 @@ import (
 )
 
 type Config struct {
-	Network        string
-	WalletAddress  string
-	WalletPath     string
-	WalletPassword string
-	NetworkNodes   []string
-	LocalNode      string
-	StorePath      string
-	DiscordBotCfg  DiscordBotConfig
+	Network         string
+	WalletAddress   string
+	WalletPath      string
+	WalletPassword  string
+	NetworkNodes    []string
+	LocalNode       string
+	StorePath       string
+	DiscordBotCfg   DiscordBotConfig
+	TwitterAPICfg   TwitterAPIConfig
+	TurboswapConfig TurboswapConfig
+}
+
+type TurboswapConfig struct {
+	APIToken string
+}
+
+type TwitterAPIConfig struct {
+	BearerToken string
+	TwitterID   string
 }
 
 type DiscordBotConfig struct {
@@ -43,6 +54,12 @@ func Load(filePaths ...string) (*Config, error) {
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
 			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),
+		},
+		TwitterAPICfg: TwitterAPIConfig{
+			BearerToken: os.Getenv("TWITTER_BEARER_TOKEN"),
+		},
+		TurboswapConfig: TurboswapConfig{
+			APIToken: os.Getenv("TURBOSWAP_API_TOKEN"),
 		},
 	}
 

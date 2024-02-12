@@ -2,36 +2,80 @@ package store_test
 
 import (
 	_ "embed"
+	"fmt"
+	"io"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-//go:embed test/store_example.json
-var exampleStore []byte
+func copy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
 
-func setup(t *testing.T) (store.IStore, string) {
-	cfg, err := config.Load("./test/.env.test")
-	assert.NoError(t, err)
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
 
-	err = os.WriteFile(cfg.StorePath, exampleStore, 0o600)
-	assert.NoError(t, err)
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
+}
+
+func setup(t *testing.T) store.IStore {
+	tempDir, err := os.MkdirTemp("", "RoboPAC")
+	require.NoError(t, err)
+
+	_, err = copy("./test/.env.test", path.Join(tempDir, "/.env"))
+	require.NoError(t, err)
+
+	_, err = copy("./test/claimers.json", path.Join(tempDir, "/claimers.json"))
+	require.NoError(t, err)
+
+	_, err = copy("./test/twitter_campaign.json", path.Join(tempDir, "/twitter_campaign.json"))
+	require.NoError(t, err)
+
+	_, err = copy("./test/twitter_whitelisted.json", path.Join(tempDir, "/twitter_whitelisted.json"))
+	require.NoError(t, err)
+
+	_, err = copy("./test/wallet.json", path.Join(tempDir, "/wallet.json"))
+	require.NoError(t, err)
+
+	fmt.Println("store location: " + tempDir)
+	os.Chdir(tempDir)
+
+	cfg, err := config.Load(".env")
+	require.NoError(t, err)
 
 	log.InitGlobalLogger()
 	logger := log.NewSubLogger("store_test")
 
-	store, err := store.NewStore(cfg, logger)
-	assert.NoError(t, err)
+	store, err := store.NewStore(cfg.StorePath, logger)
+	require.NoError(t, err)
 
-	return store, cfg.StorePath
+	return store
 }
 
 func TestStore(t *testing.T) {
-	store, path := setup(t)
+	store := setup(t)
 
 	t.Run("unknown claimer", func(t *testing.T) {
 		claimer := store.ClaimerInfo("unknown-addr")
@@ -73,10 +117,4 @@ func TestStore(t *testing.T) {
 		assert.Equal(t, "964550933793103912", claimer.DiscordID)
 		assert.True(t, claimer.IsClaimed())
 	})
-
-	err := os.Remove(path)
-	assert.NoError(t, err)
-
-	err = os.Remove("RoboPac.log")
-	assert.NoError(t, err)
 }
