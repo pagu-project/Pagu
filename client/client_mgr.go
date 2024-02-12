@@ -194,7 +194,6 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 		addr6Out = 210_000_000_000_000 - balance6
 	}
 
-
 	circulating := (addr1Out + addr2Out + addr3Out + addr4Out + addr5Out + addr6Out + int64(minted)) - staked - warm
 	return circulating, nil
 }
