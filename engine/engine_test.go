@@ -19,8 +19,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-// TODO:
-// create a structure and keep all mocked module there
 func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient, *turboswap.MockITurboSwap) {
 	t.Helper()
 	ctrl := gomock.NewController(t)

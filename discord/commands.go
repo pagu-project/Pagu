@@ -4,15 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-//
-// TODO: what is "unclaimed" command
-//
 
-// TODO: change it to
-//
-// func (db *DiscordBot) commands() []*discordgo.ApplicationCommand{
-// ...
-// }
 var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "help",
@@ -152,11 +144,6 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 }
 
-// TODO: change it to
-//
-// func (db *DiscordBot) commandHandlers() []func(*discordgo.Session, *discordgo.InteractionCreate){...}
-// ...
-// }
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
 	"help":                       helpCommandHandler,
 	"claim":                      claimCommandHandler,

@@ -10,7 +10,6 @@ import (
 	"github.com/pactus-project/pactus/util/logger"
 )
 
-// TODO: Move help here
 const (
 	CmdClaim                    = "claim"                      //!
 	CmdClaimerInfo              = "claimer-info"               //!
@@ -25,7 +24,6 @@ const (
 	CmdTwitterCampaignWhitelist = "twitter-campaign-whitelist" //!
 )
 
-// TODO: Command format is like: [Source (Discord, Telegram, ...)] [Issuer_ID] [Command]
 
 // The input is always string.
 //
@@ -162,7 +160,6 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 	case CmdTwitterCampaignStatus:
 		if len(args) != 1 {
-			// TODO: Make a function: `checkArgs(requiredArg int) error`
 			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
 		}
 

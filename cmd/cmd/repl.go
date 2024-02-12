@@ -15,7 +15,6 @@ import (
 const PROMPT = "\n>> "
 
 func REPLCommand(parentCmd *cobra.Command) {
-	// TODO: remove this subcommand
 	connect := &cobra.Command{
 		Use:   "repl",
 		Short: "Runs a local RoboPac instance which is connects to a local-net Pactus node",

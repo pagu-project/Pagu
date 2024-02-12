@@ -58,10 +58,6 @@ func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, erro
 	}
 	res, err := c.client.UserNameLookup(ctx, []string{username}, opts)
 	if err != nil {
-		// TODO: I used the global logger instance.
-		// Change it to local loggers, or just use a global instance for all modules.
-		// Also, try to set log-level inside the .env file
-		// Here, one logger is simpler and better to manage
 		logger.Error("user lookup error", "error", err)
 		return nil, err
 	}

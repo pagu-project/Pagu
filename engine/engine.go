@@ -417,7 +417,6 @@ func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterPa
 }
 
 func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDiscordID string) error {
-	// TODO: Get from config
 	authorizedIDs := []string{}
 
 	if !slices.Contains(authorizedIDs, authorizedDiscordID) {
