@@ -35,16 +35,16 @@ func NewClient(bearerToken string, twitterID string) (*Client, error) {
 
 	// test the connection and everything is OK
 	opts := twitter.UserLookupOpts{}
-	username, err := client.UserLookup(context.Background(), []string{twitterID}, opts)
+	res, err := client.UserLookup(context.Background(), []string{twitterID}, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(username.Raw.Users) == 0 || username.Raw.Users[0] == nil {
+	if len(res.Raw.Users) == 0 || res.Raw.Users[0] == nil {
 		return nil, fmt.Errorf("unable to find %v", twitterID)
 	}
 
-	logger.Info("found twitter", "name", username.Raw.Users[0].Name, "id", twitterID)
+	logger.Info("found twitter", "name", res.Raw.Users[0].Name, "id", twitterID)
 
 	return &Client{
 		client:    client,
@@ -52,14 +52,17 @@ func NewClient(bearerToken string, twitterID string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, error) {
+func (c *Client) UserInfo(ctx context.Context, twitterName string) (*UserInfo, error) {
 	opts := twitter.UserLookupOpts{
 		UserFields: []twitter.UserField{twitter.UserFieldCreatedAt, twitter.UserFieldVerified, twitter.UserFieldPublicMetrics},
 	}
-	res, err := c.client.UserNameLookup(ctx, []string{username}, opts)
+	res, err := c.client.UserNameLookup(ctx, []string{twitterName}, opts)
 	if err != nil {
 		logger.Error("user lookup error", "error", err)
 		return nil, err
+	}
+	if len(res.Raw.Errors) > 0 {
+		return nil, fmt.Errorf("the Twitter API returned error: %v", res.Raw.Errors[0].Detail)
 	}
 
 	dictionaries := res.Raw.UserDictionaries()
@@ -75,7 +78,7 @@ func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, erro
 
 		userInfo := &UserInfo{
 			TwitterID:   userDic.User.ID,
-			TwitterName: username,
+			TwitterName: twitterName,
 			CreatedAt:   createdAt,
 			Followers:   userDic.User.PublicMetrics.Followers,
 			IsVerified:  userDic.User.Verified,
@@ -83,15 +86,15 @@ func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, erro
 		return userInfo, nil
 	}
 
-	return nil, fmt.Errorf("no user found with %v", username)
+	return nil, fmt.Errorf("no user found with %v", twitterName)
 }
 
-func (c *Client) RetweetSearch(ctx context.Context, discordName string, username string) (*TweetInfo, error) {
+func (c *Client) RetweetSearch(ctx context.Context, discordName string, twitterName string) (*TweetInfo, error) {
 	opts := twitter.TweetRecentSearchOpts{
 		UserFields:  []twitter.UserField{twitter.UserFieldName},
 		TweetFields: []twitter.TweetField{twitter.TweetFieldCreatedAt},
 	}
-	query := fmt.Sprintf("#Pactus AND %v from:%v is:quote", discordName, username)
+	query := fmt.Sprintf("%v #Pactus from:%v is:quote", discordName, twitterName)
 	logger.Debug("search query", "query", query)
 
 	res, err := c.client.TweetRecentSearch(ctx, query, opts)
@@ -99,9 +102,10 @@ func (c *Client) RetweetSearch(ctx context.Context, discordName string, username
 		logger.Error("retweet lookup error", "error", err)
 		return nil, err
 	}
-	if res == nil {
-		return nil, fmt.Errorf("UserRetweetLookup result is nil")
+	if len(res.Raw.Errors) > 0 {
+		return nil, fmt.Errorf("the Twitter API returned error: %v", res.Raw.Errors[0].Detail)
 	}
+
 	if len(res.Raw.Tweets) == 0 {
 		return nil, fmt.Errorf("no quote tweet with the hashtag '#Pactus' found. "+
 			"Please select a tweet from https://x.com/PactusChain and retweet it. "+
@@ -122,7 +126,7 @@ func (c *Client) RetweetSearch(ctx context.Context, discordName string, username
 
 	return &TweetInfo{
 		ID:        quoteTweet.ID,
-		Link:      fmt.Sprintf("https://x.com/%v/status/%v", username, quoteTweet.ID),
+		Link:      fmt.Sprintf("https://x.com/%v/status/%v", twitterName, quoteTweet.ID),
 		CreatedAt: createdAt,
 	}, nil
 }

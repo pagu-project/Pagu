@@ -40,31 +40,31 @@ func (m *MockIClient) EXPECT() *MockIClientMockRecorder {
 }
 
 // RetweetSearch mocks base method.
-func (m *MockIClient) RetweetSearch(ctx context.Context, hashtag, username string) (*TweetInfo, error) {
+func (m *MockIClient) RetweetSearch(ctx context.Context, discordName, twitterName string) (*TweetInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RetweetSearch", ctx, hashtag, username)
+	ret := m.ctrl.Call(m, "RetweetSearch", ctx, discordName, twitterName)
 	ret0, _ := ret[0].(*TweetInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RetweetSearch indicates an expected call of RetweetSearch.
-func (mr *MockIClientMockRecorder) RetweetSearch(ctx, hashtag, username any) *gomock.Call {
+func (mr *MockIClientMockRecorder) RetweetSearch(ctx, discordName, twitterName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetweetSearch", reflect.TypeOf((*MockIClient)(nil).RetweetSearch), ctx, hashtag, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetweetSearch", reflect.TypeOf((*MockIClient)(nil).RetweetSearch), ctx, discordName, twitterName)
 }
 
 // UserInfo mocks base method.
-func (m *MockIClient) UserInfo(ctx context.Context, username string) (*UserInfo, error) {
+func (m *MockIClient) UserInfo(ctx context.Context, twitterName string) (*UserInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UserInfo", ctx, username)
+	ret := m.ctrl.Call(m, "UserInfo", ctx, twitterName)
 	ret0, _ := ret[0].(*UserInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UserInfo indicates an expected call of UserInfo.
-func (mr *MockIClientMockRecorder) UserInfo(ctx, username any) *gomock.Call {
+func (mr *MockIClientMockRecorder) UserInfo(ctx, twitterName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserInfo", reflect.TypeOf((*MockIClient)(nil).UserInfo), ctx, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserInfo", reflect.TypeOf((*MockIClient)(nil).UserInfo), ctx, twitterName)
 }

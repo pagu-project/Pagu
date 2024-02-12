@@ -323,7 +323,7 @@ func (be *BotEngine) Start() {
 	be.logger.Info("starting the bot engine...")
 }
 
-func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.TwitterParty, error) {
+func (be *BotEngine) TwitterCampaign(discordName, twitterName, valAddr string) (*store.TwitterParty, error) {
 	be.Lock()
 	defer be.Unlock()
 
@@ -361,8 +361,7 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		}
 	}
 
-	hashtag := "#Pactus"
-	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, hashtag, twitterName)
+	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, discordName, twitterName)
 	if err != nil {
 		return nil, err
 	}

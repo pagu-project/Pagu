@@ -24,7 +24,6 @@ const (
 	CmdTwitterCampaignWhitelist = "twitter-campaign-whitelist" //!
 )
 
-
 // The input is always string.
 //
 //	The input format is like: [Command] <Arguments ...>
@@ -141,13 +140,14 @@ func (be *BotEngine) Run(input string) (string, error) {
 			reward, stake, time, totalPower), nil
 
 	case CmdTwitterCampaign:
-		if len(args) != 2 {
-			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		if len(args) != 3 {
+			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
 		}
 
-		twitterName := args[0]
-		valAddr := args[1]
-		party, err := be.TwitterCampaign(twitterName, valAddr)
+		discordName := args[0]
+		twitterName := args[1]
+		valAddr := args[2]
+		party, err := be.TwitterCampaign(discordName, twitterName, valAddr)
 		if err != nil {
 			return "", err
 		}

@@ -20,6 +20,6 @@ type TweetInfo struct {
 }
 
 type IClient interface {
-	UserInfo(ctx context.Context, username string) (*UserInfo, error)
-	RetweetSearch(ctx context.Context, hashtag string, username string) (*TweetInfo, error)
+	UserInfo(ctx context.Context, twitterName string) (*UserInfo, error)
+	RetweetSearch(ctx context.Context, discordName, twitterName string) (*TweetInfo, error)
 }

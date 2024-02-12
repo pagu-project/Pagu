@@ -57,7 +57,6 @@ func Load(filePaths ...string) (*Config, error) {
 		},
 		TwitterAPICfg: TwitterAPIConfig{
 			BearerToken: os.Getenv("TWITTER_BEARER_TOKEN"),
-			TwitterID:   os.Getenv("TWITTER_ID"),
 		},
 		TurboswapConfig: TurboswapConfig{
 			APIToken: os.Getenv("TURBOSWAP_API_TOKEN"),

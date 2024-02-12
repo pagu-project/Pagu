@@ -197,7 +197,7 @@ func twitterCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *disc
 	twitterID := i.ApplicationCommandData().Options[0].StringValue()
 	valAddr := i.ApplicationCommandData().Options[1].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign %v %v", twitterID, valAddr))
+	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign %v %v %v", i.Member.User.Username, twitterID, valAddr))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
