@@ -90,12 +90,12 @@ func (c *Client) UserInfo(ctx context.Context, username string) (*UserInfo, erro
 	return nil, fmt.Errorf("no user found with %v", username)
 }
 
-func (c *Client) RetweetSearch(ctx context.Context, hashtag string, username string) (*TweetInfo, error) {
+func (c *Client) RetweetSearch(ctx context.Context, discordName string, username string) (*TweetInfo, error) {
 	opts := twitter.TweetRecentSearchOpts{
 		UserFields:  []twitter.UserField{twitter.UserFieldName},
 		TweetFields: []twitter.TweetField{twitter.TweetFieldCreatedAt},
 	}
-	query := fmt.Sprintf("%v from:%v is:quote", hashtag, username)
+	query := fmt.Sprintf("#Pactus AND %v from:%v is:quote", discordName, username)
 	logger.Debug("search query", "query", query)
 
 	res, err := c.client.TweetRecentSearch(ctx, query, opts)
@@ -107,8 +107,11 @@ func (c *Client) RetweetSearch(ctx context.Context, hashtag string, username str
 		return nil, fmt.Errorf("UserRetweetLookup result is nil")
 	}
 	if len(res.Raw.Tweets) == 0 {
-		return nil, fmt.Errorf("no quote tweet with the hashtag '%v' found. "+
-			"Please select a tweet from https://x.com/PactusChain to quote", hashtag)
+		return nil, fmt.Errorf("no quote tweet with the hashtag '#Pactus' found. "+
+			"Please select a tweet from https://x.com/PactusChain and retweet it. "+
+			"Don't forget to add '#Pactus' and your Discord name '%v'. "+
+			"For example you can tweet: \n"+
+			"`#Pactus Blockchain is running a Twitter campaign to add more validators. Don't miss out!\n%v`", discordName, discordName)
 	}
 
 	quoteTweet := res.Raw.Tweets[0]

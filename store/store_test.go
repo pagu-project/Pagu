@@ -59,6 +59,7 @@ func setup(t *testing.T) store.IStore {
 	_, err = copy("./test/wallet.json", path.Join(tempDir, "/wallet.json"))
 	require.NoError(t, err)
 
+	fmt.Println("store location: " + tempDir)
 	os.Chdir(tempDir)
 
 	cfg, err := config.Load(".env")
