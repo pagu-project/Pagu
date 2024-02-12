@@ -140,14 +140,15 @@ func (be *BotEngine) Run(input string) (string, error) {
 			reward, stake, time, totalPower), nil
 
 	case CmdTwitterCampaign:
-		if len(args) != 3 {
+		if len(args) != 4 {
 			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
 		}
 
 		discordName := args[0]
 		twitterName := args[1]
 		valAddr := args[2]
-		party, err := be.TwitterCampaign(discordName, twitterName, valAddr)
+		discordID := args[3]
+		party, err := be.TwitterCampaign(discordName, twitterName, valAddr, discordID)
 		if err != nil {
 			return "", err
 		}
@@ -168,7 +169,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		// TODO: check the status
+
+		// check the status (tOdO)
 		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
 		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
 			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+

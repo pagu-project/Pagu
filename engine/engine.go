@@ -22,7 +22,7 @@ import (
 )
 
 type BotEngine struct {
-	ctx    context.Context
+	ctx    context.Context //nolint
 	cancel func()
 
 	wallet    wallet.IWallet
@@ -312,18 +312,7 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 	return reward, time, utils.AtomicToCoin(bi.TotalPower), nil
 }
 
-func (be *BotEngine) Stop() {
-	be.logger.Info("shutting bot engine down...")
-
-	be.cancel()
-	be.clientMgr.Stop()
-}
-
-func (be *BotEngine) Start() {
-	be.logger.Info("starting the bot engine...")
-}
-
-func (be *BotEngine) TwitterCampaign(discordName, twitterName, valAddr string) (*store.TwitterParty, error) {
+func (be *BotEngine) TwitterCampaign(discordName, twitterName, valAddr, discordID string) (*store.TwitterParty, error) {
 	be.Lock()
 	defer be.Unlock()
 
@@ -386,6 +375,7 @@ func (be *BotEngine) TwitterCampaign(discordName, twitterName, valAddr string) (
 		TotalPrice:   totalPrice,
 		AmountInPAC:  amountInPAC,
 		DiscountCode: discountCode,
+		DiscordID:    discordID,
 		CreatedAt:    time.Now().Unix(),
 	}
 
@@ -434,4 +424,15 @@ func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDisc
 	}
 
 	return be.store.WhitelistTwitterAccount(userInfo.TwitterID, userInfo.TwitterName, authorizedDiscordID)
+}
+
+func (be *BotEngine) Stop() {
+	be.logger.Info("shutting bot engine down...")
+
+	be.cancel()
+	be.clientMgr.Stop()
+}
+
+func (be *BotEngine) Start() {
+	be.logger.Info("starting the bot engine...")
 }

@@ -12,6 +12,7 @@ type TwitterParty struct {
 	RetweetID    string `json:"retweet_id"`
 	ValAddr      string `json:"val_addr"`
 	ValPubKey    string `json:"val_pub"`
+	DiscordID    string `json:"discord_id"`
 	DiscountCode string `json:"discount_code"`
 	TotalPrice   int    `json:"total_price"`
 	AmountInPAC  int    `json:"amount_in_pac"`

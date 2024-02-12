@@ -60,7 +60,7 @@ func setup(t *testing.T) store.IStore {
 	require.NoError(t, err)
 
 	fmt.Println("store location: " + tempDir)
-	os.Chdir(tempDir)
+	_ = os.Chdir(tempDir)
 
 	cfg, err := config.Load(".env")
 	require.NoError(t, err)
