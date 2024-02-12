@@ -7,17 +7,15 @@ type Claimer struct {
 }
 
 type TwitterParty struct {
-	TwitterID     string `json:"twitter_id"`
-	TwitterName   string `json:"twitter_name"`
-	RetweetID     string `json:"retweet_id"`
-	ValAddr       string `json:"val_addr"`
-	ValPubKey     string `json:"val_pub"`
-	DiscountCode  string `json:"discount_code"`
-	UnitPrice     int    `json:"unit_price_in_cents"`
-	TotalPrice    int    `json:"total_price"`
-	AmountInPAC   int    `json:"amount_in_pac"`
-	CreatedAt     int64  `json:"created_at"`
-	WhitelistedBy string `json:"whitelisted_by"`
+	TwitterID    string `json:"twitter_id"`
+	TwitterName  string `json:"twitter_name"`
+	RetweetID    string `json:"retweet_id"`
+	ValAddr      string `json:"val_addr"`
+	ValPubKey    string `json:"val_pub"`
+	DiscountCode string `json:"discount_code"`
+	TotalPrice   int    `json:"total_price"`
+	AmountInPAC  int    `json:"amount_in_pac"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 type WhitelistInfo struct {

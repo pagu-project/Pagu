@@ -25,10 +25,10 @@ type BotEngine struct {
 	ctx    context.Context
 	cancel func()
 
-	Wallet    wallet.IWallet
-	Store     store.IStore
+	wallet    wallet.IWallet
+	store     store.IStore
 	turboswap turboswap.ITurboSwap
-	Cm        *client.Mgr
+	clientMgr *client.Mgr
 	logger    *log.SubLogger
 
 	twitterClient twitter_api.IClient
@@ -106,16 +106,16 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		ctx:           ctx,
 		cancel:        cancel,
 		logger:        logger,
-		Wallet:        w,
-		Cm:            cm,
-		Store:         s,
+		wallet:        w,
+		clientMgr:     cm,
+		store:         s,
 		twitterClient: twitterClient,
 		turboswap:     turboswap,
 	}
 }
 
 func (be *BotEngine) NetworkHealth() (*NetHealthResponse, error) {
-	lastBlockTime, lastBlockHeight := be.Cm.GetLastBlockTime()
+	lastBlockTime, lastBlockHeight := be.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0)
 	currentTime := time.Now()
 
@@ -136,17 +136,17 @@ func (be *BotEngine) NetworkHealth() (*NetHealthResponse, error) {
 }
 
 func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
-	netInfo, err := be.Cm.GetNetworkInfo()
+	netInfo, err := be.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return nil, err
 	}
 
-	chainInfo, err := be.Cm.GetBlockchainInfo()
+	chainInfo, err := be.clientMgr.GetBlockchainInfo()
 	if err != nil {
 		return nil, err
 	}
 
-	cs, err := be.Cm.GetCirculatingSupply()
+	cs, err := be.clientMgr.GetCirculatingSupply()
 	if err != nil {
 		cs = 0
 	}
@@ -166,7 +166,7 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 }
 
 func (be *BotEngine) NodeInfo(valAddress string) (*NodeInfo, error) {
-	peerInfo, err := be.Cm.GetPeerInfo(valAddress)
+	peerInfo, err := be.clientMgr.GetPeerInfo(valAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (be *BotEngine) NodeInfo(valAddress string) (*NodeInfo, error) {
 	ip := utils.ExtractIPFromMultiAddr(peerInfo.Address)
 	geoData := utils.GetGeoIP(ip)
 
-	val, err := be.Cm.GetValidatorInfo(valAddress)
+	val, err := be.clientMgr.GetValidatorInfo(valAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func (be *BotEngine) ClaimerInfo(testNetValAddr string) (*store.Claimer, error) 
 	be.RLock()
 	defer be.RUnlock()
 
-	claimer := be.Store.ClaimerInfo(testNetValAddr)
+	claimer := be.store.ClaimerInfo(testNetValAddr)
 	if claimer == nil {
 		return nil, errors.New("not found")
 	}
@@ -220,17 +220,17 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 
 	be.logger.Info("new claim request", "mainnetAddr", mainnetAddr, "testnetAddr", testnetAddr, "discordID", discordID)
 
-	valInfo, _ := be.Cm.GetValidatorInfo(mainnetAddr)
+	valInfo, _ := be.clientMgr.GetValidatorInfo(mainnetAddr)
 	if valInfo != nil {
 		return "", errors.New("this address is already a staked validator")
 	}
 
-	if utils.AtomicToCoin(be.Wallet.Balance()) <= 500 {
+	if utils.AtomicToCoin(be.wallet.Balance()) <= 500 {
 		be.logger.Warn("bot wallet hasn't enough balance")
 		return "", errors.New("insufficient wallet balance")
 	}
 
-	claimer := be.Store.ClaimerInfo(testnetAddr)
+	claimer := be.store.ClaimerInfo(testnetAddr)
 	if claimer == nil {
 		return "", errors.New("claimer not found")
 	}
@@ -244,13 +244,13 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 		return "", errors.New("this claimer have already claimed rewards")
 	}
 
-	pubKey, err := be.Cm.FindPublicKey(mainnetAddr, true)
+	pubKey, err := be.clientMgr.FindPublicKey(mainnetAddr, true)
 	if err != nil {
 		return "", err
 	}
 
 	memo := "TestNet reward claim from RoboPac"
-	txID, err := be.Wallet.BondTransaction(pubKey, mainnetAddr, memo, claimer.TotalReward)
+	txID, err := be.wallet.BondTransaction(pubKey, mainnetAddr, memo, claimer.TotalReward)
 	if err != nil {
 		return "", err
 	}
@@ -261,7 +261,7 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 
 	be.logger.Info("new bond transaction sent", "txID", txID)
 
-	err = be.Store.AddClaimTransaction(testnetAddr, txID)
+	err = be.store.AddClaimTransaction(testnetAddr, txID)
 	if err != nil {
 		be.logger.Panic("unable to add the claim transaction",
 			"error", err,
@@ -277,11 +277,11 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 }
 
 func (be *BotEngine) BotWallet() (string, int64) {
-	return be.Wallet.Address(), be.Wallet.Balance()
+	return be.wallet.Address(), be.wallet.Balance()
 }
 
 func (be *BotEngine) ClaimStatus() (int64, int64, int64, int64) {
-	return be.Store.ClaimStatus()
+	return be.store.ClaimStatus()
 }
 
 func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int64, error) {
@@ -303,7 +303,7 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 		time = "day"
 	}
 
-	bi, err := be.Cm.GetBlockchainInfo()
+	bi, err := be.clientMgr.GetBlockchainInfo()
 	if err != nil {
 		return 0, "", 0, nil
 	}
@@ -316,7 +316,7 @@ func (be *BotEngine) Stop() {
 	be.logger.Info("shutting bot engine down...")
 
 	be.cancel()
-	be.Cm.Stop()
+	be.clientMgr.Stop()
 }
 
 func (be *BotEngine) Start() {
@@ -327,17 +327,17 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 	be.Lock()
 	defer be.Unlock()
 
-	existingParty := be.Store.FindTwitterParty(twitterName)
+	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
 		return existingParty, nil
 	}
 
-	valInfo, _ := be.Cm.GetValidatorInfo(valAddr)
+	valInfo, _ := be.clientMgr.GetValidatorInfo(valAddr)
 	if valInfo != nil {
 		return nil, errors.New("this address is already a staked validator")
 	}
 
-	pubKey, err := be.Cm.FindPublicKey(valAddr, false)
+	pubKey, err := be.clientMgr.FindPublicKey(valAddr, false)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,7 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		return nil, err
 	}
 	if !userInfo.IsVerified {
-		if !be.Store.IsWhitelisted(userInfo.TwitterID) {
+		if !be.store.IsWhitelisted(userInfo.TwitterID) {
 			threeYearsAgo := time.Now().AddDate(-3, 0, 0)
 			if userInfo.CreatedAt.After(threeYearsAgo) {
 				return nil, errors.New("the Twitter account is less than 3 years old." +
@@ -372,11 +372,11 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		return nil, err
 	}
 
-	unitPrice := 20
+	totalPrice := 50
+	amountInPAC := 150
 	if userInfo.Followers > 1000 {
-		unitPrice = 10
+		amountInPAC = 200
 	}
-	amountInPAC := 200
 
 	party := &store.TwitterParty{
 		TwitterID:    userInfo.TwitterID,
@@ -384,8 +384,7 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		RetweetID:    tweetInfo.ID,
 		ValAddr:      valAddr,
 		ValPubKey:    pubKey,
-		UnitPrice:    unitPrice,
-		TotalPrice:   amountInPAC * unitPrice / 100,
+		TotalPrice:   totalPrice,
 		AmountInPAC:  amountInPAC,
 		DiscountCode: discountCode,
 		CreatedAt:    time.Now().Unix(),
@@ -396,7 +395,7 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 		return nil, err
 	}
 
-	err = be.Store.AddTwitterParty(party)
+	err = be.store.AddTwitterParty(party)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +404,7 @@ func (be *BotEngine) TwitterCampaign(twitterName, valAddr string) (*store.Twitte
 }
 
 func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterParty, *turboswap.DiscountStatus, error) {
-	party := be.Store.FindTwitterParty(twitterName)
+	party := be.store.FindTwitterParty(twitterName)
 	if party == nil {
 		return nil, nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
 	}
@@ -425,7 +424,7 @@ func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDisc
 		return fmt.Errorf("unauthorize person")
 	}
 
-	foundParty := be.Store.FindTwitterParty(twitterName)
+	foundParty := be.store.FindTwitterParty(twitterName)
 	if foundParty != nil {
 		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
 			foundParty.TwitterName, foundParty.DiscountCode)
@@ -436,5 +435,5 @@ func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDisc
 		return err
 	}
 
-	return be.Store.WhitelistTwitterAccount(userInfo.TwitterID, userInfo.TwitterName, authorizedDiscordID)
+	return be.store.WhitelistTwitterAccount(userInfo.TwitterID, userInfo.TwitterName, authorizedDiscordID)
 }

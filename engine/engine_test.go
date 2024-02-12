@@ -700,7 +700,7 @@ func TestTwitterCampaign(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("active account", func(t *testing.T) {
+	t.Run("active account, less that 1000 followers", func(t *testing.T) {
 		eng, client, store, _, twitter, turboswap := setup(t)
 
 		twitterName := "abcd"
@@ -733,10 +733,11 @@ func TestTwitterCampaign(t *testing.T) {
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
 			&twitter_api.UserInfo{
-				TwitterID:  twitterID,
-				CreatedAt:  time.Now().AddDate(-4, 0, 0),
-				Followers:  300,
-				IsVerified: false,
+				TwitterName: twitterName,
+				TwitterID:   twitterID,
+				CreatedAt:   time.Now().AddDate(-4, 0, 0),
+				Followers:   300,
+				IsVerified:  false,
 			}, nil,
 		)
 
@@ -753,14 +754,87 @@ func TestTwitterCampaign(t *testing.T) {
 			nil,
 		)
 
-		_, err := eng.TwitterCampaign(twitterName, valAddr)
+		party, err := eng.TwitterCampaign(twitterName, valAddr)
 		assert.NoError(t, err)
+
+		assert.Equal(t, 150, party.AmountInPAC)
+		assert.Equal(t, 50, party.TotalPrice)
+		assert.Equal(t, twitterName, party.TwitterName)
+		assert.Equal(t, twitterID, party.TwitterID)
+		assert.Equal(t, valAddr, party.ValAddr)
+		assert.Equal(t, valPubKey, party.ValPubKey)
+	})
+
+	t.Run("active account, more that 1000 followers", func(t *testing.T) {
+		eng, client, store, _, twitter, turboswap := setup(t)
+
+		twitterName := "abcd"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			false,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterName: twitterName,
+				TwitterID:   twitterID,
+				CreatedAt:   time.Now().AddDate(-4, 0, 0),
+				Followers:   1001,
+				IsVerified:  false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, "#Pactus", twitterName).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+			nil,
+		)
+
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		party, err := eng.TwitterCampaign(twitterName, valAddr)
+		assert.NoError(t, err)
+
+		assert.Equal(t, 200, party.AmountInPAC)
+		assert.Equal(t, 50, party.TotalPrice)
+		assert.Equal(t, twitterName, party.TwitterName)
+		assert.Equal(t, twitterID, party.TwitterID)
+		assert.Equal(t, valAddr, party.ValAddr)
+		assert.Equal(t, valPubKey, party.ValPubKey)
 	})
 
 	t.Run("verified account", func(t *testing.T) {
 		eng, client, store, _, twitter, turboswap := setup(t)
 
 		twitterName := "abcd"
+		twitterID := "1234"
 		valAddr := "addr"
 		valPubKey := "pub-key"
 
@@ -785,9 +859,11 @@ func TestTwitterCampaign(t *testing.T) {
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
 			&twitter_api.UserInfo{
-				CreatedAt:  time.Now().AddDate(-1, 0, 0),
-				Followers:  100,
-				IsVerified: true,
+				TwitterID:   twitterID,
+				TwitterName: twitterName,
+				CreatedAt:   time.Now().AddDate(-1, 0, 0),
+				Followers:   100,
+				IsVerified:  true,
 			}, nil,
 		)
 
@@ -809,4 +885,62 @@ func TestTwitterCampaign(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("whitelisted account", func(t *testing.T) {
+		eng, client, store, _, twitter, turboswap := setup(t)
+
+		twitterName := "abcd"
+		twitterID := "1234"
+		valAddr := "addr"
+		valPubKey := "pub-key"
+
+		store.EXPECT().IsWhitelisted(twitterID).Return(
+			true,
+		)
+
+		store.EXPECT().FindTwitterParty(twitterName).Return(
+			nil,
+		)
+
+		client.EXPECT().GetValidatorInfo(valAddr).Return(
+			nil, fmt.Errorf("not found"),
+		)
+
+		client.EXPECT().GetNetworkInfo().Return(
+			&pactus.GetNetworkInfoResponse{
+				ConnectedPeers: []*pactus.PeerInfo{
+					{
+						ConsensusAddress: []string{valAddr},
+						ConsensusKeys:    []string{valPubKey},
+					},
+				},
+			}, nil,
+		)
+
+		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
+			&twitter_api.UserInfo{
+				TwitterID:   twitterID,
+				TwitterName: twitterName,
+				CreatedAt:   time.Now().AddDate(-1, 0, 0),
+				Followers:   100,
+				IsVerified:  false,
+			}, nil,
+		)
+
+		twitter.EXPECT().RetweetSearch(eng.ctx, "#Pactus", twitterName).Return(
+			&twitter_api.TweetInfo{
+				CreatedAt: time.Now().AddDate(0, 0, -2),
+			}, nil,
+		)
+
+		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+			nil,
+		)
+
+		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+			nil,
+		)
+
+		_, err := eng.TwitterCampaign(twitterName, valAddr)
+		assert.NoError(t, err)
+	})
 }
