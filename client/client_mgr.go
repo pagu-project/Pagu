@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/kehiy/RoboPac/log"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -110,7 +111,7 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 		}
 	}
 
-	return nil, errors.New("peer does not exist")
+	return nil, fmt.Errorf("peer does not exist with this address: %v", address)
 }
 
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {

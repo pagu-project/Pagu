@@ -312,7 +312,7 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 	return reward, time, utils.AtomicToCoin(bi.TotalPower), nil
 }
 
-func (be *BotEngine) TwitterCampaign(discordID, discordName, twitterName, valAddr string) (*store.TwitterParty, error) {
+func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*store.TwitterParty, error) {
 	be.Lock()
 	defer be.Unlock()
 
