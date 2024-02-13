@@ -24,7 +24,6 @@ func NewTurboswap(apiToken, url string) (*Turboswap, error) {
 }
 
 func (ts *Turboswap) GetStatus(ctx context.Context, party *store.TwitterParty) (*DiscountStatus, error) {
-	// TODO
 	url := fmt.Sprintf("%s/pactus/discount/status/%v", ts.url, party.DiscountCode)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(nil))
 	if err != nil {
