@@ -506,7 +506,7 @@ func TestTwitterCampaign(t *testing.T) {
 			&pactus.GetValidatorResponse{}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -530,7 +530,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -567,7 +567,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil, expectedErr,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.ErrorIs(t, err, expectedErr)
 	})
 
@@ -611,7 +611,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -656,7 +656,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -702,11 +702,11 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordID, twitterName).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -753,7 +753,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordID, twitterName).Return(
 			&twitter_api.TweetInfo{
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
@@ -766,7 +766,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil,
 		)
 
-		party, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		party, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.NoError(t, err)
 
 		assert.Equal(t, 150, party.AmountInPAC)
@@ -820,7 +820,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordID, twitterName).Return(
 			&twitter_api.TweetInfo{
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
@@ -833,7 +833,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil,
 		)
 
-		party, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		party, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.NoError(t, err)
 
 		assert.Equal(t, 200, party.AmountInPAC)
@@ -883,7 +883,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordID, twitterName).Return(
 			&twitter_api.TweetInfo{
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
@@ -897,7 +897,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.NoError(t, err)
 	})
 
@@ -944,7 +944,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		twitter.EXPECT().RetweetSearch(eng.ctx, discordName, twitterName).Return(
+		twitter.EXPECT().RetweetSearch(eng.ctx, discordID, twitterName).Return(
 			&twitter_api.TweetInfo{
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
@@ -958,7 +958,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		_, err := eng.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		assert.NoError(t, err)
 	})
 }

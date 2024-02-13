@@ -141,14 +141,14 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 	case CmdTwitterCampaign:
 		if len(args) != 4 {
-			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
+			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args)-1)
 		}
 
 		discordName := args[0]
 		twitterName := args[1]
 		valAddr := args[2]
 		discordID := args[3]
-		party, err := be.TwitterCampaign(discordName, twitterName, valAddr, discordID)
+		party, err := be.TwitterCampaign(discordID, discordName, twitterName, valAddr)
 		if err != nil {
 			return "", err
 		}
