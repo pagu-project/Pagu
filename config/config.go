@@ -10,16 +10,17 @@ import (
 )
 
 type Config struct {
-	Network         string
-	WalletAddress   string
-	WalletPath      string
-	WalletPassword  string
-	NetworkNodes    []string
-	LocalNode       string
-	StorePath       string
-	DiscordBotCfg   DiscordBotConfig
-	TwitterAPICfg   TwitterAPIConfig
-	TurboswapConfig TurboswapConfig
+	Network              string
+	WalletAddress        string
+	WalletPath           string
+	WalletPassword       string
+	NetworkNodes         []string
+	LocalNode            string
+	StorePath            string
+	DiscordBotCfg        DiscordBotConfig
+	TwitterAPICfg        TwitterAPIConfig
+	TurboswapConfig      TurboswapConfig
+	AuthorizedDiscordIDs []string
 }
 
 type TurboswapConfig struct {
@@ -64,6 +65,7 @@ func Load(filePaths ...string) (*Config, error) {
 			APIToken: os.Getenv("TURBOSWAP_API_TOKEN"),
 			URL:      os.Getenv("TURBOSWAP_URL"),
 		},
+		AuthorizedDiscordIDs: strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
 	}
 
 	// Check if the required configurations are set.
