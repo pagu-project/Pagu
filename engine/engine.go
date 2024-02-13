@@ -32,6 +32,7 @@ type BotEngine struct {
 	logger    *log.SubLogger
 
 	twitterClient twitter_api.IClient
+	config        config.Config
 
 	sync.RWMutex
 }
@@ -406,7 +407,7 @@ func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterPa
 }
 
 func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDiscordID string) error {
-	authorizedIDs := []string{}
+	authorizedIDs := be.config.AuthorizedDiscordIDs
 
 	if !slices.Contains(authorizedIDs, authorizedDiscordID) {
 		return fmt.Errorf("unauthorize person")
