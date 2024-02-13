@@ -33,6 +33,8 @@ type BotEngine struct {
 
 	twitterClient twitter_api.IClient
 
+	AuthorizedDiscordIDs []string
+
 	sync.RWMutex
 }
 
@@ -94,23 +96,24 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("turboswap loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient, turboswap), nil
+	return newBotEngine(eSl, cm, wallet, store, twitterClient, turboswap, cfg.AuthorizedDiscordIDs), nil
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
-	twitterClient twitter_api.IClient, turboswap turboswap.ITurboSwap,
+	twitterClient twitter_api.IClient, turboswap turboswap.ITurboSwap, authorizedDiscordIDs []string,
 ) *BotEngine {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &BotEngine{
-		ctx:           ctx,
-		cancel:        cancel,
-		logger:        logger,
-		wallet:        w,
-		clientMgr:     cm,
-		store:         s,
-		twitterClient: twitterClient,
-		turboswap:     turboswap,
+		ctx:                  ctx,
+		cancel:               cancel,
+		logger:               logger,
+		wallet:               w,
+		clientMgr:            cm,
+		store:                s,
+		twitterClient:        twitterClient,
+		turboswap:            turboswap,
+		AuthorizedDiscordIDs: authorizedDiscordIDs,
 	}
 }
 
@@ -406,9 +409,7 @@ func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterPa
 }
 
 func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDiscordID string) error {
-	authorizedIDs := []string{}
-
-	if !slices.Contains(authorizedIDs, authorizedDiscordID) {
+	if !slices.Contains(be.AuthorizedDiscordIDs, authorizedDiscordID) {
 		return fmt.Errorf("unauthorize person")
 	}
 

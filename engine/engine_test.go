@@ -35,7 +35,10 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	mockTwitter := twitter_api.NewMockIClient(ctrl)
 	mockTurboswap := turboswap.NewMockITurboSwap(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockTurboswap)
+	// Define your authorized Discord IDs
+	authorizedDiscordIDs := []string{"discordID1", "discordID2"}
+
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockTurboswap, authorizedDiscordIDs)
 	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockTurboswap
 }
 
