@@ -36,8 +36,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 	switch cmd {
 	case CmdClaim:
-		if len(args) != 3 {
-			return "", fmt.Errorf("expected to have 3 arguments, but it received %d", len(args))
+		if err := CheckArgs(3, args); err != nil {
+			return "", err
 		}
 
 		txHash, err := be.Claim(args[0], args[1], args[2])
@@ -47,8 +47,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return fmt.Sprintf("Reward claimed successfully✅\nYour claim transaction: https://pacscan.org/transactions/%s", txHash), nil
 
 	case CmdClaimerInfo:
-		if len(args) != 1 {
-			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
+		if err := CheckArgs(1, args); err != nil {
+			return "", err
 		}
 
 		claimer, err := be.ClaimerInfo(args[0])
@@ -76,8 +76,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 			status, health.CurrentTime.Format("02/01/2006, 15:04:05"), health.LastBlockTime.Format("02/01/2006, 15:04:05"), health.TimeDifference, health.LastBlockHeight), nil
 
 	case CmdNodeInfo:
-		if len(args) != 1 {
-			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
+		if err := CheckArgs(1, args); err != nil {
+			return "", err
 		}
 
 		nodeInfo, err := be.NodeInfo(args[0])
@@ -121,8 +121,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 			claimed, util.ChangeToString(claimedAmount), notClaimed, util.ChangeToString(notClaimedAmount)), nil
 
 	case CmdRewardCalc:
-		if len(args) != 2 {
-			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		if err := CheckArgs(2, args); err != nil {
+			return "", err
 		}
 
 		stake, err := strconv.Atoi(args[0])
@@ -140,8 +140,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 			reward, stake, time, totalPower), nil
 
 	case CmdTwitterCampaign:
-		if len(args) != 3 {
-			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args)-1)
+		if err := CheckArgs(3, args); err != nil {
+			return "", err
 		}
 
 		discordID := args[0]
@@ -160,8 +160,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return msg, nil
 
 	case CmdTwitterCampaignStatus:
-		if len(args) != 1 {
-			return "", fmt.Errorf("expected to have 1 arguments, but it received %d", len(args))
+		if err := CheckArgs(1, args); err != nil {
+			return "", err
 		}
 
 		twitterName := args[0]
@@ -179,8 +179,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return msg, nil
 
 	case CmdTwitterCampaignWhitelist:
-		if len(args) != 2 {
-			return "", fmt.Errorf("expected to have 2 arguments, but it received %d", len(args))
+		if err := CheckArgs(2, args); err != nil {
+			return "", err
 		}
 
 		twitterName := args[0]
