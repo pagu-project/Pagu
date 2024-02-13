@@ -24,6 +24,7 @@ type Config struct {
 
 type TurboswapConfig struct {
 	APIToken string
+	URL      string
 }
 
 type TwitterAPIConfig struct {
@@ -61,6 +62,7 @@ func Load(filePaths ...string) (*Config, error) {
 		},
 		TurboswapConfig: TurboswapConfig{
 			APIToken: os.Getenv("TURBOSWAP_API_TOKEN"),
+			URL:      os.Getenv("TURBOSWAP_URL"),
 		},
 	}
 
