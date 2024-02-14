@@ -73,6 +73,14 @@ func TestNetworkStatus(t *testing.T) {
 		int64(100), nil,
 	)
 
+	client.EXPECT().GetBalance("pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g").Return(
+		int64(100), nil,
+	)
+
+	client.EXPECT().GetBalance("pc1zf0gyc4kxlfsvu64pheqzmk8r9eyzxqvxlk6s6t").Return(
+		int64(100), nil,
+	)
+
 	status, err := eng.NetworkStatus()
 	assert.NoError(t, err)
 

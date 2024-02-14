@@ -171,12 +171,12 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 
 	balance3, err := localClient.GetBalance("pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45")
 	if err == nil {
-		addr3Out = 3.78e+15 - balance3
+		addr3Out = 4_200_000_000_000_000 - balance3
 	}
 
 	balance4, err := localClient.GetBalance("pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3")
 	if err == nil {
-		addr4Out = 1.89e+15 - balance4
+		addr4Out = 2_100_000_000_000_000 - balance4
 	}
 
 	balance5, err := localClient.GetBalance("pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g")
