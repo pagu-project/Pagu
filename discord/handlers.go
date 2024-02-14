@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/log"
-	"github.com/pactus-project/pactus/util/logger"
 )
 
 func (db *DiscordBot) respondErrMsg(cmdErr error, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -26,8 +25,6 @@ func (db *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.S
 	if err != nil {
 		log.Error("InteractionRespond error:", "error", err)
 	}
-
-	logger.Debug("send embedded message", "msg", embed.Description)
 }
 
 func helpCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -52,10 +49,6 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 	mainnetAddr := data.Options[1].StringValue()
 
 	log.Info("new claim request", "discordID", i.Member.User.ID, "mainNetAddr", mainnetAddr, "testNetAddr", testnetAddr)
-
-	//! Do we need these two?
-	// testnetAddr = strings.TrimPrefix(testnetAddr, "testnet-addr:")
-	// mainnetAddr = strings.TrimPrefix(mainnetAddr, "mainnet-addr:")
 
 	command := fmt.Sprintf("claim %s %s %s", i.Member.User.ID, testnetAddr, mainnetAddr)
 
