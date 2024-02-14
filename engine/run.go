@@ -8,7 +8,6 @@ import (
 
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/pactus-project/pactus/util"
-	"github.com/pactus-project/pactus/util/logger"
 )
 
 const (
@@ -31,8 +30,6 @@ const (
 //
 // The output is always string, but format might be JSON. ???
 func (be *BotEngine) Run(input string) (string, error) {
-	logger.Debug("parse command", "input", input)
-
 	cmd, args := be.parseQuery(input)
 
 	switch cmd {

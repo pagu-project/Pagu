@@ -40,5 +40,10 @@ build:
 	go build -o build/robopac-discord ./cmd/discord
 	go build -o build/robopac-cmd     ./cmd/cmd
 
+build-cmd:
+	go build -o build/robopac-cmd     ./cmd/cmd
+
+build-dc:
+	go build -o build/robopac-discord ./cmd/discord
 
 .PHONY: build

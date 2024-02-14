@@ -73,6 +73,14 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
+		err = db.Session.UpdateStatusComplex(newStatus("total accounts", utils.FormatNumber(int64(ns.TotalAccounts))))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
+		time.Sleep(time.Second * 5)
+
 		err = db.Session.UpdateStatusComplex(newStatus("height", utils.FormatNumber(int64(ns.CurrentBlockHeight))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
@@ -82,15 +90,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("circ supply",
-			utils.FormatNumber(int64(utils.ChangeToCoin(ns.CirculatingSupply)))+"PAC"))
-		if err != nil {
-			log.Error("can't set status", "err", err)
-			continue
-		}
-
-		time.Sleep(time.Second * 5)
-
-		err = db.Session.UpdateStatusComplex(newStatus("total accounts", utils.FormatNumber(int64(ns.TotalAccounts))))
+			utils.FormatNumber(int64(utils.ChangeToCoin(ns.CirculatingSupply)))+" PAC"))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -99,7 +99,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("total power",
-			utils.FormatNumber(int64(utils.ChangeToCoin(ns.TotalNetworkPower)))+"PAC"))
+			utils.FormatNumber(int64(utils.ChangeToCoin(ns.TotalNetworkPower)))+" PAC"))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
