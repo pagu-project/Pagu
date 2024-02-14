@@ -92,7 +92,7 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 
 	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken, cfg.TurboswapConfig.URL)
 	if err != nil {
-		log.Panic("could not start twitter client", "err", err)
+		log.Error("could not start twitter client", "err", err)
 	}
 	log.Info("turboswap loaded successfully")
 
@@ -228,7 +228,7 @@ func (be *BotEngine) Claim(discordID string, testnetAddr string, mainnetAddr str
 		return "", errors.New("this address is already a staked validator")
 	}
 
-	if utils.AtomicToCoin(be.wallet.Balance()) <= 500 {
+	if utils.ChangeToCoin(be.wallet.Balance()) <= 500 {
 		be.logger.Warn("bot wallet hasn't enough balance")
 		return "", errors.New("insufficient wallet balance")
 	}
@@ -312,7 +312,7 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 	}
 
 	reward := (stake * int64(blocks)) / int64(putils.ChangeToCoin(bi.TotalPower))
-	return reward, time, utils.AtomicToCoin(bi.TotalPower), nil
+	return reward, time, int64(utils.ChangeToCoin(bi.TotalPower)), nil
 }
 
 func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*store.TwitterParty, error) {

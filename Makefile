@@ -31,8 +31,7 @@ mock:
 fmt:
 	gofumpt -l -w .
 	go mod tidy
-	godot -w .
-
+	
 check:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
 
@@ -41,5 +40,10 @@ build:
 	go build -o build/robopac-discord ./cmd/discord
 	go build -o build/robopac-cmd     ./cmd/cmd
 
+build-cmd:
+	go build -o build/robopac-cmd     ./cmd/cmd
+
+build-dc:
+	go build -o build/robopac-discord ./cmd/discord
 
 .PHONY: build

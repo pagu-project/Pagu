@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
-	"github.com/pactus-project/pactus/util"
+	"github.com/kehiy/RoboPac/utils"
 )
 
 type DiscordBot struct {
@@ -65,7 +65,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 			continue
 		}
 
-		err = db.Session.UpdateStatusComplex(newStatus("validators count", ns.ValidatorsCount))
+		err = db.Session.UpdateStatusComplex(newStatus("validators count", utils.FormatNumber(int64(ns.ValidatorsCount))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -73,7 +73,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("height", ns.CurrentBlockHeight))
+		err = db.Session.UpdateStatusComplex(newStatus("total accounts", utils.FormatNumber(int64(ns.TotalAccounts))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -81,7 +81,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("circulating supply", util.ChangeToString(ns.CirculatingSupply)))
+		err = db.Session.UpdateStatusComplex(newStatus("height", utils.FormatNumber(int64(ns.CurrentBlockHeight))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -89,7 +89,8 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("total accounts", ns.TotalAccounts))
+		err = db.Session.UpdateStatusComplex(newStatus("circ supply",
+			utils.FormatNumber(int64(utils.ChangeToCoin(ns.CirculatingSupply)))+" PAC"))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -97,7 +98,8 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("total power", util.ChangeToString(ns.TotalNetworkPower)))
+		err = db.Session.UpdateStatusComplex(newStatus("total power",
+			utils.FormatNumber(int64(utils.ChangeToCoin(ns.TotalNetworkPower)))+" PAC"))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue

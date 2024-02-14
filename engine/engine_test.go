@@ -76,6 +76,14 @@ func TestNetworkStatus(t *testing.T) {
 		int64(100), nil,
 	)
 
+	client.EXPECT().GetBalance("pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g").Return(
+		int64(100), nil,
+	)
+
+	client.EXPECT().GetBalance("pc1zf0gyc4kxlfsvu64pheqzmk8r9eyzxqvxlk6s6t").Return(
+		int64(100), nil,
+	)
+
 	status, err := eng.NetworkStatus()
 	assert.NoError(t, err)
 
@@ -175,7 +183,7 @@ func TestClaim(t *testing.T) {
 		txID := "tx-id"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		).MaxTimes(2)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -259,7 +267,7 @@ func TestClaim(t *testing.T) {
 		discordID := "123456789-fail-balance"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(499),
+			utils.CoinToChange(499),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -278,7 +286,7 @@ func TestClaim(t *testing.T) {
 		discordID := "123456789-fail-notfound"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -302,7 +310,7 @@ func TestClaim(t *testing.T) {
 		discordID := "123456789-fail-different-id"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -328,7 +336,7 @@ func TestClaim(t *testing.T) {
 		discordID := "123456789-fail-not-first-validator"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -365,7 +373,7 @@ func TestClaim(t *testing.T) {
 		discordID := "123456789-fail-validator-not-found"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -405,7 +413,7 @@ func TestClaim(t *testing.T) {
 		memo := "TestNet reward claim from RoboPac"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
@@ -452,7 +460,7 @@ func TestClaim(t *testing.T) {
 		txID := "tx-id-panic-add-claimer-failed"
 
 		wallet.EXPECT().Balance().Return(
-			utils.CoinToAtomic(501),
+			utils.CoinToChange(501),
 		)
 
 		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(

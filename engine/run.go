@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kehiy/RoboPac/utils"
 	"github.com/pactus-project/pactus/util"
-	"github.com/pactus-project/pactus/util/logger"
 )
 
 const (
@@ -30,8 +30,6 @@ const (
 //
 // The output is always string, but format might be JSON. ???
 func (be *BotEngine) Run(input string) (string, error) {
-	logger.Debug("parse command", "input", input)
-
 	cmd, args := be.parseQuery(input)
 
 	switch cmd {
@@ -73,7 +71,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 		}
 
 		return fmt.Sprintf("Network is %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
-			status, health.CurrentTime.Format("02/01/2006, 15:04:05"), health.LastBlockTime.Format("02/01/2006, 15:04:05"), health.TimeDifference, health.LastBlockHeight), nil
+			status, health.CurrentTime.Format("02/01/2006, 15:04:05"), health.LastBlockTime.Format("02/01/2006, 15:04:05"), health.TimeDifference, utils.FormatNumber(int64(health.LastBlockHeight))), nil
 
 	case CmdNodeInfo:
 		if err := CheckArgs(1, args); err != nil {
@@ -94,10 +92,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 		return fmt.Sprintf("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
 			"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
-			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP19-Score: %s\nStake: %v PAC's\n",
+			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 			nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
-			nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, nodeInfo.ValidatorNum,
-			pip19Score, util.ChangeToString(nodeInfo.StakeAmount)), nil
+			nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils.FormatNumber(int64(nodeInfo.ValidatorNum)),
+			pip19Score, utils.FormatNumber(int64(util.ChangeToCoin(nodeInfo.StakeAmount)))), nil
 
 	case CmdNetworkStatus:
 		net, err := be.NetworkStatus()
@@ -108,12 +106,19 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
 			"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC\nTotal Committee Power: %v PAC\nCirculating Supply: %v PAC\n"+
 			"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
-			net.NetworkName, net.ConnectedPeersCount, net.ValidatorsCount, net.TotalAccounts, net.CurrentBlockHeight, util.ChangeToString(net.TotalNetworkPower),
-			util.ChangeToString(net.TotalCommitteePower), util.ChangeToString(net.CirculatingSupply)), nil
+			net.NetworkName,
+			utils.FormatNumber(int64(net.ConnectedPeersCount)),
+			utils.FormatNumber(int64(net.ValidatorsCount)),
+			utils.FormatNumber(int64(net.TotalAccounts)),
+			utils.FormatNumber(int64(net.CurrentBlockHeight)),
+			utils.FormatNumber(int64(util.ChangeToCoin(net.TotalNetworkPower))),
+			utils.FormatNumber(int64(util.ChangeToCoin(net.TotalCommitteePower))),
+			utils.FormatNumber(int64(util.ChangeToCoin(net.CirculatingSupply))),
+		), nil
 
 	case CmdBotWallet:
 		addr, blnc := be.BotWallet()
-		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v\n", addr, util.ChangeToString(blnc)), nil
+		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v PAC\n", addr, utils.FormatNumber(int64(util.ChangeToCoin(blnc)))), nil
 
 	case CmdClaimStatus:
 		claimed, claimedAmount, notClaimed, notClaimedAmount := be.ClaimStatus()
@@ -137,7 +142,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 		return fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
-			reward, stake, time, totalPower), nil
+			utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(totalPower)), nil
 
 	case CmdTwitterCampaign:
 		if err := CheckArgs(3, args); err != nil {
