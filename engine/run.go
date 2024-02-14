@@ -94,7 +94,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 
 		return fmt.Sprintf("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
 			"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
-			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP19-Score: %s\nStake: %v PAC's\n",
+			"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 			nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
 			nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, nodeInfo.ValidatorNum,
 			pip19Score, util.ChangeToString(nodeInfo.StakeAmount)), nil
