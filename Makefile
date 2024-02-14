@@ -31,8 +31,7 @@ mock:
 fmt:
 	gofumpt -l -w .
 	go mod tidy
-	godot -w .
-
+	
 check:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
 

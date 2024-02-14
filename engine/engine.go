@@ -90,7 +90,7 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 
 	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken, cfg.TurboswapConfig.URL)
 	if err != nil {
-		log.Panic("could not start twitter client", "err", err)
+		log.Error("could not start twitter client", "err", err)
 	}
 	log.Info("turboswap loaded successfully")
 
