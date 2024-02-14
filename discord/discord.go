@@ -81,7 +81,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("circ supply", utils.FormatNumber(utils.CoinToChange(float64(ns.CirculatingSupply)))))
+		err = db.Session.UpdateStatusComplex(newStatus("circ supply", utils.FormatNumber(int64(utils.ChangeToCoin(ns.CirculatingSupply)))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -97,7 +97,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("total power", utils.FormatNumber(utils.CoinToChange(float64(ns.TotalNetworkPower)))))
+		err = db.Session.UpdateStatusComplex(newStatus("total power", utils.FormatNumber(int64(utils.ChangeToCoin(ns.TotalNetworkPower)))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
