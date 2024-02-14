@@ -88,9 +88,9 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("twitterClient loaded successfully")
 
-	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken)
+	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken, cfg.TurboswapConfig.URL)
 	if err != nil {
-		log.Panic("could not start twitter client", "err", err)
+		log.Error("could not start twitter client", "err", err)
 	}
 	log.Info("turboswap loaded successfully")
 
@@ -312,7 +312,7 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 	return reward, time, utils.AtomicToCoin(bi.TotalPower), nil
 }
 
-func (be *BotEngine) TwitterCampaign(discordName, twitterName, valAddr, discordID string) (*store.TwitterParty, error) {
+func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*store.TwitterParty, error) {
 	be.Lock()
 	defer be.Unlock()
 
@@ -350,7 +350,7 @@ func (be *BotEngine) TwitterCampaign(discordName, twitterName, valAddr, discordI
 		}
 	}
 
-	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, discordName, twitterName)
+	tweetInfo, err := be.twitterClient.RetweetSearch(be.ctx, discordID, twitterName)
 	if err != nil {
 		return nil, err
 	}

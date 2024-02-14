@@ -13,16 +13,18 @@ import (
 
 type Turboswap struct {
 	APIToken string
+	url      string
 }
 
-func NewTurboswap(apiToken string) (*Turboswap, error) {
+func NewTurboswap(apiToken, url string) (*Turboswap, error) {
 	return &Turboswap{
 		APIToken: apiToken,
+		url:      url,
 	}, nil
 }
 
 func (ts *Turboswap) GetStatus(ctx context.Context, party *store.TwitterParty) (*DiscountStatus, error) {
-	url := fmt.Sprintf("https://swap-api.sensifia.vc/pactus/discount/status/%v/%v", party.ValPubKey, ts.APIToken)
+	url := fmt.Sprintf("%s/pactus/discount/status/%v", ts.url, party.DiscountCode)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(nil))
 	if err != nil {
 		return nil, err
@@ -58,7 +60,7 @@ func (ts *Turboswap) GetStatus(ctx context.Context, party *store.TwitterParty) (
 }
 
 func (ts *Turboswap) SendDiscountCode(ctx context.Context, party *store.TwitterParty) error {
-	url := "https://swap-api.sensifia.vc/pactus/discount"
+	url := fmt.Sprintf("%s/pactus/discount", ts.url)
 	jsonStr := fmt.Sprintf(`{"api_key":"%v","code":"%v","validator_public_key":"%v","total_coins":"%v","total_price_in_usd":"%v"}`,
 		ts.APIToken, party.DiscountCode, party.ValPubKey, party.AmountInPAC, party.TotalPrice)
 

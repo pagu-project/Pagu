@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/kehiy/RoboPac/log"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -110,7 +111,7 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 		}
 	}
 
-	return nil, errors.New("peer does not exist")
+	return nil, fmt.Errorf("peer does not exist with this address: %v", address)
 }
 
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
@@ -155,8 +156,8 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	var addr2Out int64 = 0
 	var addr3Out int64 = 0
 	var addr4Out int64 = 0
-	var addr5Out int64 = 0
-	var addr6Out int64 = 0
+	var addr5Out int64 = 0 // warm wallet
+	var addr6Out int64 = 0 // warm wallet
 
 	balance1, err := localClient.GetBalance("pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z")
 	if err == nil {
@@ -170,12 +171,12 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 
 	balance3, err := localClient.GetBalance("pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45")
 	if err == nil {
-		addr3Out = 4_200_000_000_000_000 - balance3
+		addr3Out = 3.78e+15 - balance3
 	}
 
 	balance4, err := localClient.GetBalance("pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3")
 	if err == nil {
-		addr4Out = 2_100_000_000_000_000 - balance4
+		addr4Out = 1.89e+15 - balance4
 	}
 
 	balance5, err := localClient.GetBalance("pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g")
