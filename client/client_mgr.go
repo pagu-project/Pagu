@@ -149,7 +149,7 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	}
 	minted := float64(height.LastBlockHeight) * 1e9
 	staked := height.TotalPower
-	warm := 630_000_000_000_000
+	warm := int64(630_000_000_000_000)
 
 	var addr1Out int64 = 0
 	var addr2Out int64 = 0
