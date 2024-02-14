@@ -57,14 +57,14 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 		amount, opts...)
 	if err != nil {
 		w.logger.Error("error creating bond transaction", "err", err, "to",
-			toAddress, "amount", utils.AtomicToCoin(amount))
+			toAddress, "amount", utils.ChangeToCoin(amount))
 		return "", err
 	}
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		w.logger.Error("error signing bond transaction", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 		return "", err
 	}
 
@@ -72,14 +72,14 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		w.logger.Error("error broadcasting bond transaction", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		w.logger.Error("error saving wallet transaction history", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 	}
 	return res, nil // return transaction hash
 }
@@ -98,7 +98,7 @@ func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount int6
 	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, int64(amount), opts...)
 	if err != nil {
 		w.logger.Error("error creating transfer transaction", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 		return "", err
 	}
 
@@ -106,7 +106,7 @@ func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount int6
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		w.logger.Error("error signing transfer transaction", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 		return "", err
 	}
 
@@ -114,14 +114,14 @@ func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount int6
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		w.logger.Error("error broadcasting transfer transaction", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		w.logger.Error("error saving wallet transaction history", "err", err,
-			"to", toAddress, "amount", utils.AtomicToCoin(amount))
+			"to", toAddress, "amount", utils.ChangeToCoin(amount))
 	}
 	return res, nil // return transaction hash
 }
