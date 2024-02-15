@@ -101,7 +101,7 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "booster-payment",
-		Description: "Get Twitter campaign discount code",
+		Description: "Create payment link in Validator Booster Program",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -119,7 +119,7 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "booster-claim",
-		Description: "Claim the stake PAC coin in Twitter campaign",
+		Description: "Claim the stake PAC coin in Validator Booster Program",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -131,7 +131,7 @@ var commands = []*discordgo.ApplicationCommand{
 	},
 	{
 		Name:        "booster-whitelist",
-		Description: "Whitelist a non-active Twitter account for Twitter campaign",
+		Description: "Whitelist a non-active Twitter account in Validator Booster Program",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
