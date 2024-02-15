@@ -35,6 +35,7 @@ type BotEngine struct {
 	logger      *log.SubLogger
 
 	twitterClient twitter_api.IClient
+	AuthIDs       []string
 
 	sync.RWMutex
 }
@@ -97,11 +98,11 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("nowpayments loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments), nil
+	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs), nil
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
-	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment,
+	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
 ) *BotEngine {
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -114,6 +115,7 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		store:         s,
 		twitterClient: twitterClient,
 		nowpayments:   nowpayments,
+		AuthIDs:       authIDs,
 	}
 }
 
@@ -431,9 +433,7 @@ func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, erro
 }
 
 func (be *BotEngine) BoosterWhitelist(twitterName string, authorizedDiscordID string) error {
-	authorizedIDs := []string{}
-
-	if !slices.Contains(authorizedIDs, authorizedDiscordID) {
+	if !slices.Contains(be.AuthIDs, authorizedDiscordID) {
 		return fmt.Errorf("unauthorize person")
 	}
 
