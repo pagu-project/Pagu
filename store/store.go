@@ -143,13 +143,7 @@ func (s *Store) saveTwitterWhitelist() error {
 	return saveMap(s.twitterWhitelistPath, s.twitterWhitelisted)
 }
 
-func (s *Store) AddTwitterParty(party *TwitterParty) error {
-	found, exists := s.twitterParties[party.TwitterID]
-	if exists {
-		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
-			found.TwitterName, found.DiscountCode)
-	}
-
+func (s *Store) SaveTwitterParty(party *TwitterParty) error {
 	s.twitterParties[party.TwitterID] = party
 
 	return s.saveTwitterParties()

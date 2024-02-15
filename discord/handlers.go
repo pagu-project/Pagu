@@ -182,7 +182,7 @@ func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo
 	db.respondEmbed(embed, s, i)
 }
 
-func twitterCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func boosterPaymentCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
@@ -190,46 +190,46 @@ func twitterCampaignCommandHandler(db *DiscordBot, s *discordgo.Session, i *disc
 	twitterName := i.ApplicationCommandData().Options[0].StringValue()
 	valAddr := i.ApplicationCommandData().Options[1].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign %v %v %v", i.Member.User.ID, twitterName, valAddr))
+	result, err := db.BotEngine.Run(fmt.Sprintf("booster-payment %v %v %v", i.Member.User.ID, twitterName, valAddr))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
 	}
 
-	embed := twitterCampaignEmbed(s, i, result)
+	embed := boosterEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
 }
 
-func twitterCampaignStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func boosterClaimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
 	twitterID := i.ApplicationCommandData().Options[0].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign-status %v", twitterID))
+	result, err := db.BotEngine.Run(fmt.Sprintf("booster-payment-claim %v", twitterID))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
 	}
 
-	embed := twitterCampaignEmbed(s, i, result)
+	embed := boosterEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
 }
 
-func twitterCampaignWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func boosterWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
 
 	twitterName := i.ApplicationCommandData().Options[0].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("twitter-campaign-whitelist %v %v", twitterName, i.Member.User.ID))
+	result, err := db.BotEngine.Run(fmt.Sprintf("booster-payment-whitelist %v %v", twitterName, i.Member.User.ID))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
 	}
 
-	embed := twitterCampaignEmbed(s, i, result)
+	embed := boosterEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
 }
