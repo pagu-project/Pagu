@@ -178,7 +178,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 		var msg string
 		if party.NowPaymentsFinished {
 			msg = fmt.Sprintf("Validator `%s` received %v stake-PAC coins."+
-				" Transaction: https://http://pacscan.org/transactions/%v.",
+				" Transaction: https://pacscan.org/transactions/%v.",
 				party.ValAddr, party.AmountInPAC, party.TransactionID)
 		} else {
 			expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
