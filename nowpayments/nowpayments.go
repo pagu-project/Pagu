@@ -104,36 +104,6 @@ func (s *NowPayments) webhookFunc(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// curl --location 'https://api.nowpayments.io/v1/invoice' \
-// --header 'x-api-key: {{api-key}}' \
-// --header 'Content-Type: application/json' \
-//
-//	--data '{
-//	  "price_amount": 1000,
-//	  "price_currency": "usd",
-//	  "order_id": "RGDBP-21314",
-//	  "order_description": "Apple Macbook Pro 2019 x 1",
-//	  "ipn_callback_url": "https://nowpayments.io",
-//	  "success_url": "https://nowpayments.io",
-//	  "cancel_url": "https://nowpayments.io"
-//	}
-
-// return
-//
-//	{
-//		"id": "4522625843",
-//		"order_id": "RGDBP-21314",
-//		"order_description": "Apple Macbook Pro 2019 x 1",
-//		"price_amount": "1000",
-//		"price_currency": "usd",
-//		"pay_currency": null,
-//		"ipn_callback_url": "https://nowpayments.io",
-//		"invoice_url": "https://nowpayments.io/payment/?iid=4522625843",
-//		"success_url": "https://nowpayments.io",
-//		"cancel_url": "https://nowpayments.io",
-//		"created_at": "2020-12-22T15:05:58.290Z",
-//		"updated_at": "2020-12-22T15:05:58.290Z"
-//	  }
 func (s *NowPayments) CreatePayment(party *store.TwitterParty) error {
 	url := fmt.Sprintf("%v/v1/invoice", s.apiURL)
 	// jsonStr := fmt.Sprintf(`{"price_amount":%v,"price_currency":"usd","ipn_callback_url":"%v","order_id":"%v"}`,
@@ -164,7 +134,6 @@ func (s *NowPayments) CreatePayment(party *store.TwitterParty) error {
 	}
 
 	logger.Debug("CreatePayment Response", "res", string(data))
-	// http.StatusOK = 200
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to call NowPayments. Status code: %v, status: %v", resp.StatusCode, resp.Status)
 	}
@@ -175,7 +144,6 @@ func (s *NowPayments) CreatePayment(party *store.TwitterParty) error {
 		return err
 	}
 
-	// fmt.Println(string(data))
 	party.NowPaymentsInvoiceID = resultJSON["id"].(string)
 
 	return nil
@@ -211,7 +179,6 @@ func (s *NowPayments) UpdatePayment(party *store.TwitterParty) error {
 	}
 
 	logger.Debug("ListOfPayments Response", "res", string(data))
-	// http.StatusOK = 200
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to call NowPayments:Payment. Status code: %v", resp.StatusCode)
 	}
@@ -257,7 +224,6 @@ func (s *NowPayments) getJWTToken() (string, error) {
 		return "", err
 	}
 
-	// http.StatusOK = 200
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("failed to call Auth. Status code: %v, status: %v", resp.StatusCode, resp.Status)
 	}
