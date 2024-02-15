@@ -80,7 +80,7 @@ func (s *NowPayments) webhookFunc(w http.ResponseWriter, r *http.Request) {
 		logger.Error("json.Unmarshal read error", "error", err)
 		return
 	}
-	//marshal it again, it will be sorted
+	// marshal it again, it will be sorted
 	sortedData, _ := json.Marshal(result)
 
 	if !bytes.Equal(sortedData, data) {
@@ -95,7 +95,7 @@ func (s *NowPayments) webhookFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	expectedMAC := mac.Sum(nil)
 	if !hmac.Equal(expectedMAC, msgMAC) {
-		// TODO: fix me
+		/// TODO: fix me
 		// w.WriteHeader(http.StatusBadRequest)
 		logger.Error("HMAC is invalid", "expectedMAC", expectedMAC, "msgMAC", msgMAC)
 		// return

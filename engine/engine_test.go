@@ -770,7 +770,7 @@ func TestBoosterProgram(t *testing.T) {
 		party, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
 
-		assert.Equal(t, 150, party.AmountInPAC)
+		assert.Equal(t, int64(150), party.AmountInPAC)
 		assert.Equal(t, BoosterPrice, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
@@ -836,7 +836,7 @@ func TestBoosterProgram(t *testing.T) {
 		party, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
 
-		assert.Equal(t, 200, party.AmountInPAC)
+		assert.Equal(t, int64(200), party.AmountInPAC)
 		assert.Equal(t, BoosterPrice, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
