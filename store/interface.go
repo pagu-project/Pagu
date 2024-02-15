@@ -7,16 +7,19 @@ type Claimer struct {
 }
 
 type TwitterParty struct {
-	TwitterID    string `json:"twitter_id"`
-	TwitterName  string `json:"twitter_name"`
-	RetweetID    string `json:"retweet_id"`
-	ValAddr      string `json:"val_addr"`
-	ValPubKey    string `json:"val_pub"`
-	DiscordID    string `json:"discord_id"`
-	DiscountCode string `json:"discount_code"`
-	TotalPrice   int    `json:"total_price"`
-	AmountInPAC  int    `json:"amount_in_pac"`
-	CreatedAt    int64  `json:"created_at"`
+	TwitterID            string `json:"twitter_id"`
+	TwitterName          string `json:"twitter_name"`
+	RetweetID            string `json:"retweet_id"`
+	ValAddr              string `json:"val_addr"`
+	ValPubKey            string `json:"val_pub"`
+	DiscordID            string `json:"discord_id"`
+	DiscountCode         string `json:"discount_code"`
+	TotalPrice           int    `json:"total_price"`
+	AmountInPAC          int64  `json:"amount_in_pac"`
+	CreatedAt            int64  `json:"created_at"`
+	NowPaymentsInvoiceID string `json:"nowpayments_id"`
+	NowPaymentsFinished  bool   `json:"nowpayments_finished"`
+	TransactionID        string `json:"tx_id"`
 }
 
 type WhitelistInfo struct {
@@ -34,7 +37,7 @@ type IStore interface {
 	AddClaimTransaction(testNetValAddr string, txID string) error
 	ClaimStatus() (int64, int64, int64, int64)
 
-	AddTwitterParty(party *TwitterParty) error
+	SaveTwitterParty(party *TwitterParty) error
 	FindTwitterParty(twitterName string) *TwitterParty
 
 	WhitelistTwitterAccount(twitterID, twitterName, authorizedDiscordID string) error

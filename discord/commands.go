@@ -100,7 +100,7 @@ var commands = []*discordgo.ApplicationCommand{
 		Description: "TestNet reward claim status",
 	},
 	{
-		Name:        "twitter-campaign",
+		Name:        "booster-payment",
 		Description: "Get Twitter campaign discount code",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -118,8 +118,8 @@ var commands = []*discordgo.ApplicationCommand{
 		},
 	},
 	{
-		Name:        "twitter-campaign-status",
-		Description: "Status of Twitter campaign",
+		Name:        "booster-claim",
+		Description: "Claim the stake PAC coin in Twitter campaign",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
@@ -130,7 +130,7 @@ var commands = []*discordgo.ApplicationCommand{
 		},
 	},
 	{
-		Name:        "twitter-campaign-whitelist",
+		Name:        "booster-whitelist",
 		Description: "Whitelist a non-active Twitter account for Twitter campaign",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
@@ -144,16 +144,16 @@ var commands = []*discordgo.ApplicationCommand{
 }
 
 var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordgo.InteractionCreate){
-	"help":                       helpCommandHandler,
-	"claim":                      claimCommandHandler,
-	"claimer-info":               claimerInfoCommandHandler,
-	"node-info":                  nodeInfoCommandHandler,
-	"network-health":             networkHealthCommandHandler,
-	"network-status":             networkStatusCommandHandler,
-	"wallet":                     walletCommandHandler,
-	"claim-status":               claimStatusCommandHandler,
-	"reward-calc":                rewardCalcCommandHandler,
-	"twitter-campaign":           twitterCampaignCommandHandler,
-	"twitter-campaign-status":    twitterCampaignStatusCommandHandler,
-	"twitter-campaign-whitelist": twitterCampaignWhitelistCommandHandler,
+	"help":              helpCommandHandler,
+	"claim":             claimCommandHandler,
+	"claimer-info":      claimerInfoCommandHandler,
+	"node-info":         nodeInfoCommandHandler,
+	"network-health":    networkHealthCommandHandler,
+	"network-status":    networkStatusCommandHandler,
+	"wallet":            walletCommandHandler,
+	"claim-status":      claimStatusCommandHandler,
+	"reward-calc":       rewardCalcCommandHandler,
+	"booster-payment":   boosterPaymentCommandHandler,
+	"booster-claim":     boosterClaimCommandHandler,
+	"booster-whitelist": boosterWhitelistCommandHandler,
 }

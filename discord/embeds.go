@@ -23,8 +23,8 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 			"```/network-status``` Shows a brief info about network.\n" +
 			"```/network-health``` Check and shows network health status.\n" +
 			"```/wallet``` Shows RoboPac wallet address and balance.\n" +
-			"```/twitter-campaign``` Get discount code on Twitter Campaign.\n" +
-			"```/twitter-campaign-status``` Check the status of Twitter Campaign.\n",
+			"```/booster-payment``` Create payment link in Validator Booster Program.\n" +
+			"```/booster-claim``` Claim the stake PAC coin in Validator Booster Program.\n",
 		Color: PACTUS,
 	}
 }
@@ -93,9 +93,9 @@ func rewardCalcEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, resul
 	}
 }
 
-func twitterCampaignEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func boosterEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
-		Title:       "Twitter(X) Campaign 𝕏",
+		Title:       "Pactus Validator Booster Program ✨",
 		Description: result,
 		Color:       PACTUS,
 	}

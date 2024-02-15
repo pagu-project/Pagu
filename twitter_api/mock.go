@@ -40,18 +40,18 @@ func (m *MockIClient) EXPECT() *MockIClientMockRecorder {
 }
 
 // RetweetSearch mocks base method.
-func (m *MockIClient) RetweetSearch(ctx context.Context, discordName, twitterName string) (*TweetInfo, error) {
+func (m *MockIClient) RetweetSearch(ctx context.Context, discordID, twitterName string) (*TweetInfo, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RetweetSearch", ctx, discordName, twitterName)
+	ret := m.ctrl.Call(m, "RetweetSearch", ctx, discordID, twitterName)
 	ret0, _ := ret[0].(*TweetInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RetweetSearch indicates an expected call of RetweetSearch.
-func (mr *MockIClientMockRecorder) RetweetSearch(ctx, discordName, twitterName any) *gomock.Call {
+func (mr *MockIClientMockRecorder) RetweetSearch(ctx, discordID, twitterName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetweetSearch", reflect.TypeOf((*MockIClient)(nil).RetweetSearch), ctx, discordName, twitterName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetweetSearch", reflect.TypeOf((*MockIClient)(nil).RetweetSearch), ctx, discordID, twitterName)
 }
 
 // UserInfo mocks base method.
