@@ -94,7 +94,7 @@ func (c *Client) RetweetSearch(ctx context.Context, discordID string, twitterNam
 		UserFields:  []twitter.UserField{twitter.UserFieldName},
 		TweetFields: []twitter.TweetField{twitter.TweetFieldCreatedAt},
 	}
-	query := fmt.Sprintf("%v (#Pactus pr #PactusBoosterProgram) from:%v is:quote", discordID, twitterName)
+	query := fmt.Sprintf("%v (#Pactus or #PactusBoosterProgram) from:%v is:quote", discordID, twitterName)
 	logger.Debug("search query", "query", query)
 
 	res, err := c.client.TweetRecentSearch(ctx, query, opts)
