@@ -207,7 +207,7 @@ func boosterClaimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discord
 
 	twitterID := i.ApplicationCommandData().Options[0].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("booster-payment-claim %v", twitterID))
+	result, err := db.BotEngine.Run(fmt.Sprintf("booster-claim %v", twitterID))
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
@@ -224,7 +224,7 @@ func boosterWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *dis
 
 	twitterName := i.ApplicationCommandData().Options[0].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("booster-payment-whitelist %v %v", twitterName, i.Member.User.ID))
+	result, err := db.BotEngine.Run(fmt.Sprintf("booster-whitelist %v %v", twitterName, i.Member.User.ID)) 
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
