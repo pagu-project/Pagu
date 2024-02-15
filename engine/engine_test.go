@@ -8,8 +8,8 @@ import (
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/log"
+	"github.com/kehiy/RoboPac/nowpayments"
 	rpstore "github.com/kehiy/RoboPac/store"
-	"github.com/kehiy/RoboPac/turboswap"
 	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
@@ -19,7 +19,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient, *turboswap.MockITurboSwap) {
+func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient, *nowpayments.MockINowpayment) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
@@ -33,13 +33,10 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	mockWallet := wallet.NewMockIWallet(ctrl)
 	mockStore := rpstore.NewMockIStore(ctrl)
 	mockTwitter := twitter_api.NewMockIClient(ctrl)
-	mockTurboswap := turboswap.NewMockITurboSwap(ctrl)
+	mockNowPayments := nowpayments.NewMockINowpayment(ctrl)
 
-	// Define your authorized Discord IDs
-	authorizedDiscordIDs := []string{"discordID1", "discordID2"}
-
-	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockTurboswap, authorizedDiscordIDs)
-	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockTurboswap
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockNowPayments, []string{""})
+	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockNowPayments
 }
 
 func TestNetworkStatus(t *testing.T) {
@@ -500,7 +497,7 @@ func TestClaim(t *testing.T) {
 	})
 }
 
-func TestTwitterCampaign(t *testing.T) {
+func TestBoosterProgram(t *testing.T) {
 	t.Run("staked validator", func(t *testing.T) {
 		eng, client, store, _, _, _ := setup(t)
 
@@ -516,7 +513,7 @@ func TestTwitterCampaign(t *testing.T) {
 			&pactus.GetValidatorResponse{}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -539,7 +536,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -575,7 +572,7 @@ func TestTwitterCampaign(t *testing.T) {
 			nil, expectedErr,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.ErrorIs(t, err, expectedErr)
 	})
 
@@ -618,7 +615,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -662,7 +659,7 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
@@ -711,12 +708,12 @@ func TestTwitterCampaign(t *testing.T) {
 			nil, fmt.Errorf("not found"),
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.Error(t, err)
 	})
 
 	t.Run("active account, less that 1000 followers", func(t *testing.T) {
-		eng, client, store, _, twitter, turboswap := setup(t)
+		eng, client, store, _, twitter, nowPayments := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
@@ -762,19 +759,19 @@ func TestTwitterCampaign(t *testing.T) {
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
 		)
-		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
 
-		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+		store.EXPECT().SaveTwitterParty(gomock.Any()).Return(
 			nil,
 		)
 
-		party, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		party, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
 
-		assert.Equal(t, 150, party.AmountInPAC)
-		assert.Equal(t, 50, party.TotalPrice)
+		assert.Equal(t, int64(150), party.AmountInPAC)
+		assert.Equal(t, BoosterPrice, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -782,7 +779,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("active account, more that 1000 followers", func(t *testing.T) {
-		eng, client, store, _, twitter, turboswap := setup(t)
+		eng, client, store, _, twitter, nowPayments := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
@@ -828,19 +825,19 @@ func TestTwitterCampaign(t *testing.T) {
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
 		)
-		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
 
-		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+		store.EXPECT().SaveTwitterParty(gomock.Any()).Return(
 			nil,
 		)
 
-		party, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		party, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
 
-		assert.Equal(t, 200, party.AmountInPAC)
-		assert.Equal(t, 50, party.TotalPrice)
+		assert.Equal(t, int64(200), party.AmountInPAC)
+		assert.Equal(t, BoosterPrice, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -848,7 +845,7 @@ func TestTwitterCampaign(t *testing.T) {
 	})
 
 	t.Run("verified account", func(t *testing.T) {
-		eng, client, store, _, twitter, turboswap := setup(t)
+		eng, client, store, _, twitter, nowPayments := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
@@ -891,20 +888,20 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
 
-		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+		store.EXPECT().SaveTwitterParty(gomock.Any()).Return(
 			nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
 	})
 
 	t.Run("whitelisted account", func(t *testing.T) {
-		eng, client, store, _, twitter, turboswap := setup(t)
+		eng, client, store, _, twitter, nowPayments := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
@@ -951,15 +948,15 @@ func TestTwitterCampaign(t *testing.T) {
 			}, nil,
 		)
 
-		turboswap.EXPECT().SendDiscountCode(eng.ctx, gomock.Any()).Return(
+		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
 
-		store.EXPECT().AddTwitterParty(gomock.Any()).Return(
+		store.EXPECT().SaveTwitterParty(gomock.Any()).Return(
 			nil,
 		)
 
-		_, err := eng.TwitterCampaign(discordID, twitterName, valAddr)
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
 	})
 }

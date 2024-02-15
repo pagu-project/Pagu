@@ -5,12 +5,11 @@ import (
 	"os"
 	"strings"
 
-	cobra "github.com/spf13/cobra"
-
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
+	cobra "github.com/spf13/cobra"
 )
 
 const PROMPT = "\n>> "
@@ -20,7 +19,6 @@ func main() {
 		Use:     "robopac-cmd",
 		Version: "0.0.1",
 		Run: func(cmd *cobra.Command, args []string) {
-
 			log.InitGlobalLogger()
 
 			log.Info("initializing repl...")
@@ -39,6 +37,7 @@ func main() {
 			if err != nil {
 				log.Panic("could not start discord bot", "err", err)
 			}
+
 			botEngine.Start()
 
 			log.Info("repl started")
