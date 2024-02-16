@@ -323,7 +323,11 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
-		return existingParty, nil
+		if existingParty.TransactionID != "" {
+			return nil, fmt.Errorf("transaction is processed before: https://pacscan.org/transactions/%v", existingParty.TransactionID)
+		} else {
+			return existingParty, nil
+		}
 	}
 
 	valInfo, _ := be.clientMgr.GetValidatorInfo(valAddr)

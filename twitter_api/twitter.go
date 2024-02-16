@@ -112,7 +112,7 @@ func (c *Client) RetweetSearch(ctx context.Context, discordID string, twitterNam
 			"Don't forget to add '#PactusBoosterProgram' and your Discord ID '%v'. "+
 			"For example you can tweet: \n\n"+
 			"```"+
-			"#Pactus Blockchain just started the Validator Booster Program on Twitter Campaign. Don't miss out! https://discord.com/invite/H5vZkNnXCu\n"+
+			"#Pactus Blockchain just started the Validator Booster Program Campaign. Don't miss out! https://discord.com/invite/H5vZkNnXCu\n\n"+
 			"#PactusBoosterProgram %v"+
 			"```", discordID, discordID)
 	}
