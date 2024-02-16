@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 	"sync"
 	"time"
 
@@ -322,8 +321,6 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 	be.Lock()
 	defer be.Unlock()
 
-	twitterName = strings.ToLower(twitterName)
-
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
 		if existingParty.TransactionID != "" {
@@ -405,8 +402,6 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 }
 
 func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, error) {
-	twitterName = strings.ToLower(twitterName)
-
 	party := be.store.FindTwitterParty(twitterName)
 	if party == nil {
 		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
@@ -445,8 +440,6 @@ func (be *BotEngine) BoosterWhitelist(twitterName string, authorizedDiscordID st
 	if !slices.Contains(be.AuthIDs, authorizedDiscordID) {
 		return fmt.Errorf("unauthorize person")
 	}
-
-	twitterName = strings.ToLower(twitterName)
 
 	foundParty := be.store.FindTwitterParty(twitterName)
 	if foundParty != nil {
