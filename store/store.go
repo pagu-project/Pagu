@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/util/logger"
@@ -151,7 +152,7 @@ func (s *Store) SaveTwitterParty(party *TwitterParty) error {
 
 func (s *Store) FindTwitterParty(twitterName string) *TwitterParty {
 	for _, party := range s.twitterParties {
-		if party.TwitterName == twitterName {
+		if strings.EqualFold(party.TwitterName, twitterName) {
 			return party
 		}
 	}
