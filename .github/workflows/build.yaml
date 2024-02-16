@@ -23,28 +23,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4.1.1
 
-      - name: Install Dependencies
-        run: |
-          go get -v github.com/matoous/go-nanoid/v2
-          go get -v github.com/libp2p/go-libp2p/core/peer
-          go get -v github.com/bwmarrin/discordgo
-          go get -v github.com/golang/mock/gomock
-          go get -v github.com/g8rswimmer/go-twitter/v2
-          go get -v github.com/stretchr/testify/...
-          go get -v github.com/kehiy/RoboPac/...
-          go get -v github.com/pactus-project/pactus/...
-          go get -v github.com/rs/zerolog/...
-          go get -v github.com/libp2p/go-libp2p/core/peer
-          go get -v github.com/spf13/cobra
-          go get -v google.golang.org/grpc/...
-          go get -v go.uber.org/mock/gomock
-          go get -v gopkg.in/natefinch/lumberjack.v2
-
-
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.21
+          go-version: 1.21.1
 
       - name: Installing golangci-lint
         run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1
