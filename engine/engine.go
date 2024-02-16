@@ -48,7 +48,8 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 
 	localClient, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
-		log.Panic("can't make a new local client", "err", err, "addr", cfg.LocalNode)
+		cancel()
+		log.Error("can't make a new local client", "err", err, "addr", cfg.LocalNode)
 	}
 
 	cm.AddClient(localClient)
