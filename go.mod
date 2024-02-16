@@ -1,6 +1,6 @@
 module github.com/kehiy/RoboPac
 
-go 1.21.1
+go 1.23
 
 require (
 	github.com/g8rswimmer/go-twitter/v2 v2.1.5
