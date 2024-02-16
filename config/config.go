@@ -6,26 +6,22 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/kehiy/RoboPac/nowpayments"
 	"github.com/pactus-project/pactus/util"
 )
 
 type Config struct {
-	Network              string
-	WalletAddress        string
-	WalletPath           string
-	WalletPassword       string
-	NetworkNodes         []string
-	LocalNode            string
-	StorePath            string
-	DiscordBotCfg        DiscordBotConfig
-	TwitterAPICfg        TwitterAPIConfig
-	TurboswapConfig      TurboswapConfig
-	AuthorizedDiscordIDs []string
-}
-
-type TurboswapConfig struct {
-	APIToken string
-	URL      string
+	Network           string
+	WalletAddress     string
+	WalletPath        string
+	WalletPassword    string
+	NetworkNodes      []string
+	LocalNode         string
+	StorePath         string
+	AuthIDs           []string
+	DiscordBotCfg     DiscordBotConfig
+	TwitterAPICfg     TwitterAPIConfig
+	NowPaymentsConfig nowpayments.Config
 }
 
 type TwitterAPIConfig struct {
@@ -53,6 +49,7 @@ func Load(filePaths ...string) (*Config, error) {
 		LocalNode:      os.Getenv("LOCAL_NODE"),
 		NetworkNodes:   strings.Split(os.Getenv("NETWORK_NODES"), ","),
 		StorePath:      os.Getenv("STORE_PATH"),
+		AuthIDs:        strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
 			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),
@@ -61,11 +58,15 @@ func Load(filePaths ...string) (*Config, error) {
 			BearerToken: os.Getenv("TWITTER_BEARER_TOKEN"),
 			TwitterID:   os.Getenv("TWITTER_ID"),
 		},
-		TurboswapConfig: TurboswapConfig{
-			APIToken: os.Getenv("TURBOSWAP_API_TOKEN"),
-			URL:      os.Getenv("TURBOSWAP_URL"),
+		NowPaymentsConfig: nowpayments.Config{
+			ListenPort: os.Getenv("NOWPAYMENTS_LISTEN_PORT"),
+			Webhook:    os.Getenv("NOWPAYMENTS_WEBHOOK"),
+			APIToken:   os.Getenv("NOWPAYMENTS_API_KEY"),
+			APIUrl:     os.Getenv("NOWPAYMENTS_API_URL"),
+			IPNSecret:  os.Getenv("NOWPAYMENTS_IPN_SECRET"),
+			Username:   os.Getenv("NOWPAYMENTS_USERNAME"),
+			Password:   os.Getenv("NOWPAYMENTS_PASSWORD"),
 		},
-		AuthorizedDiscordIDs: strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
 	}
 
 	// Check if the required configurations are set.

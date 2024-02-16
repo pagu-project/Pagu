@@ -75,15 +75,15 @@ func setup(t *testing.T) store.IStore {
 }
 
 func TestStore(t *testing.T) {
-	store := setup(t)
+	mockStore := setup(t)
 
 	t.Run("unknown claimer", func(t *testing.T) {
-		claimer := store.ClaimerInfo("unknown-addr")
+		claimer := mockStore.ClaimerInfo("unknown-addr")
 		assert.Nil(t, claimer)
 	})
 
 	t.Run("get claimer", func(t *testing.T) {
-		claimer := store.ClaimerInfo("tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf")
+		claimer := mockStore.ClaimerInfo("tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf")
 		assert.False(t, claimer.IsClaimed())
 		assert.Equal(t, int64(100*1e9), claimer.TotalReward)
 		assert.Equal(t, "123456789", claimer.DiscordID)
@@ -94,15 +94,15 @@ func TestStore(t *testing.T) {
 		discordID := "123456789"
 		testNetValAddr := "tpc1pqn7uaeduklpg00rqt6uq0m9wy5txnyt0kmxmgf"
 
-		claimer := store.ClaimerInfo(testNetValAddr)
+		claimer := mockStore.ClaimerInfo(testNetValAddr)
 
 		isClaimed := claimer.IsClaimed()
 		assert.False(t, isClaimed)
 
-		err := store.AddClaimTransaction(testNetValAddr, txID)
+		err := mockStore.AddClaimTransaction(testNetValAddr, txID)
 		assert.NoError(t, err)
 
-		claimedInfo := store.ClaimerInfo(testNetValAddr)
+		claimedInfo := mockStore.ClaimerInfo(testNetValAddr)
 		assert.Equal(t, discordID, claimedInfo.DiscordID)
 		assert.Equal(t, int64(100*1e9), claimedInfo.TotalReward)
 		assert.Equal(t, txID, claimedInfo.ClaimedTxID)
@@ -112,9 +112,36 @@ func TestStore(t *testing.T) {
 	})
 
 	t.Run("is claimed test", func(t *testing.T) {
-		claimer := store.ClaimerInfo("tpc1pesz6kuv7jts6al6la3794fyj5xaj7wm93k7z6y")
+		claimer := mockStore.ClaimerInfo("tpc1pesz6kuv7jts6al6la3794fyj5xaj7wm93k7z6y")
 		assert.Equal(t, int64(12*1e9), claimer.TotalReward)
 		assert.Equal(t, "964550933793103912", claimer.DiscordID)
 		assert.True(t, claimer.IsClaimed())
+	})
+}
+
+func TestStoreTwitterCampaign(t *testing.T) {
+	mockStore := setup(t)
+
+	t.Run("not found", func(t *testing.T) {
+		p := mockStore.FindTwitterParty("robopac-twitter")
+		assert.Nil(t, p)
+	})
+
+	t.Run("case insensitive", func(t *testing.T) {
+		p := &store.TwitterParty{
+			TwitterID:   "123456789",
+			TwitterName: "AbCd123",
+		}
+
+		err := mockStore.SaveTwitterParty(p)
+		assert.NoError(t, err)
+
+		tp := mockStore.FindTwitterParty("abcd123")
+		assert.Equal(t, "123456789", tp.TwitterID)
+		assert.Equal(t, "AbCd123", tp.TwitterName)
+
+		tp = mockStore.FindTwitterParty("abCd123")
+		assert.Equal(t, "123456789", tp.TwitterID)
+		assert.Equal(t, "AbCd123", tp.TwitterName)
 	})
 }

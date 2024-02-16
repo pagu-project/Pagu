@@ -11,17 +11,17 @@ import (
 )
 
 const (
-	CmdClaim                    = "claim"                      //!
-	CmdClaimerInfo              = "claimer-info"               //!
-	CmdNodeInfo                 = "node-info"                  //!
-	CmdNetworkStatus            = "network"                    //!
-	CmdNetworkHealth            = "network-health"             //!
-	CmdBotWallet                = "wallet"                     //!
-	CmdClaimStatus              = "claim-status"               //!
-	CmdRewardCalc               = "calc-reward"                //!
-	CmdTwitterCampaign          = "twitter-campaign"           //!
-	CmdTwitterCampaignStatus    = "twitter-campaign-status"    //!
-	CmdTwitterCampaignWhitelist = "twitter-campaign-whitelist" //!
+	CmdClaim            = "claim"             //!
+	CmdClaimerInfo      = "claimer-info"      //!
+	CmdNodeInfo         = "node-info"         //!
+	CmdNetworkStatus    = "network"           //!
+	CmdNetworkHealth    = "network-health"    //!
+	CmdBotWallet        = "wallet"            //!
+	CmdClaimStatus      = "claim-status"      //!
+	CmdRewardCalc       = "calc-reward"       //!
+	CmdBoosterPayment   = "booster-payment"   //!
+	CmdBoosterClaim     = "booster-claim"     //!
+	CmdBoosterWhitelist = "booster-whitelist" //!
 )
 
 // The input is always string.
@@ -144,7 +144,7 @@ func (be *BotEngine) Run(input string) (string, error) {
 			"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
 			utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(totalPower)), nil
 
-	case CmdTwitterCampaign:
+	case CmdBoosterPayment:
 		if err := CheckArgs(3, args); err != nil {
 			return "", err
 		}
@@ -153,44 +153,50 @@ func (be *BotEngine) Run(input string) (string, error) {
 		twitterName := args[1]
 		valAddr := args[2]
 
-		party, err := be.TwitterCampaign(discordID, twitterName, valAddr)
+		party, err := be.BoosterPayment(discordID, twitterName, valAddr)
 		if err != nil {
 			return "", err
 		}
 		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
-		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
-			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
+		msg := fmt.Sprintf("Validator `%s` registered to receive %v stake-PAC coins in total price of $%v."+
+			" Visit https://nowpayments.io/payment/?iid=%v to pay it."+
 			" The Discount code will expire on %v",
-			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
+			party.ValAddr, party.AmountInPAC, party.TotalPrice, party.NowPaymentsInvoiceID, expiryDate.Format("2006-01-02"))
 		return msg, nil
 
-	case CmdTwitterCampaignStatus:
+	case CmdBoosterClaim:
 		if err := CheckArgs(1, args); err != nil {
 			return "", err
 		}
 
 		twitterName := args[0]
-		party, _, err := be.TwitterCampaignStatus(twitterName)
+		party, err := be.BoosterClaim(twitterName)
 		if err != nil {
 			return "", err
 		}
 
-		// check the status (tOdO)
-		expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
-		msg := fmt.Sprintf("Validator `%s` registered with Discount code `%v`."+
-			" Visit https://app.turboswap.io/ to claim your discounted stake-PAC coins."+
-			" The Discount code will expire on %v",
-			party.ValAddr, party.DiscountCode, expiryDate.Format("2006-01-02"))
+		var msg string
+		if party.NowPaymentsFinished {
+			msg = fmt.Sprintf("Validator `%s` received %v stake-PAC coins."+
+				" Transaction: https://pacscan.org/transactions/%v.",
+				party.ValAddr, party.AmountInPAC, party.TransactionID)
+		} else {
+			expiryDate := time.Unix(party.CreatedAt, 0).AddDate(0, 0, 7)
+			msg = fmt.Sprintf("Validator `%s` registered to receive %v stake-PAC coins in total price of $%v."+
+				" Visit https://nowpayments.io/payment/?iid=%v and pay the total amount."+
+				" The Discount code will expire on %v",
+				party.ValAddr, party.AmountInPAC, party.TotalPrice, party.NowPaymentsInvoiceID, expiryDate.Format("2006-01-02"))
+		}
 		return msg, nil
 
-	case CmdTwitterCampaignWhitelist:
+	case CmdBoosterWhitelist:
 		if err := CheckArgs(2, args); err != nil {
 			return "", err
 		}
 
 		twitterName := args[0]
 		authorizedDiscordID := args[1]
-		err := be.TwitterCampaignWhitelist(twitterName, authorizedDiscordID)
+		err := be.BoosterWhitelist(twitterName, authorizedDiscordID)
 		if err != nil {
 			return "", err
 		}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/util/logger"
@@ -143,13 +144,7 @@ func (s *Store) saveTwitterWhitelist() error {
 	return saveMap(s.twitterWhitelistPath, s.twitterWhitelisted)
 }
 
-func (s *Store) AddTwitterParty(party *TwitterParty) error {
-	found, exists := s.twitterParties[party.TwitterID]
-	if exists {
-		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
-			found.TwitterName, found.DiscountCode)
-	}
-
+func (s *Store) SaveTwitterParty(party *TwitterParty) error {
 	s.twitterParties[party.TwitterID] = party
 
 	return s.saveTwitterParties()
@@ -157,7 +152,7 @@ func (s *Store) AddTwitterParty(party *TwitterParty) error {
 
 func (s *Store) FindTwitterParty(twitterName string) *TwitterParty {
 	for _, party := range s.twitterParties {
-		if party.TwitterName == twitterName {
+		if strings.EqualFold(party.TwitterName, twitterName) {
 			return party
 		}
 	}

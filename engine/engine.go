@@ -11,29 +11,31 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
+	"github.com/kehiy/RoboPac/nowpayments"
 	"github.com/kehiy/RoboPac/store"
-	"github.com/kehiy/RoboPac/turboswap"
 	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 	"github.com/libp2p/go-libp2p/core/peer"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	putils "github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/util/logger"
 )
+
+var BoosterPrice = 30
 
 type BotEngine struct {
 	ctx    context.Context //nolint
 	cancel func()
 
-	wallet    wallet.IWallet
-	store     store.IStore
-	turboswap turboswap.ITurboSwap
-	clientMgr *client.Mgr
-	logger    *log.SubLogger
+	wallet      wallet.IWallet
+	store       store.IStore
+	nowpayments nowpayments.INowpayment
+	clientMgr   *client.Mgr
+	logger      *log.SubLogger
 
 	twitterClient twitter_api.IClient
-
-	AuthorizedDiscordIDs []string
+	AuthIDs       []string
 
 	sync.RWMutex
 }
@@ -90,30 +92,30 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("twitterClient loaded successfully")
 
-	turboswap, err := turboswap.NewTurboswap(cfg.TurboswapConfig.APIToken, cfg.TurboswapConfig.URL)
+	nowpayments, err := nowpayments.NewNowPayments(&cfg.NowPaymentsConfig)
 	if err != nil {
 		log.Error("could not start twitter client", "err", err)
 	}
-	log.Info("turboswap loaded successfully")
+	log.Info("nowpayments loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient, turboswap, cfg.AuthorizedDiscordIDs), nil
+	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs), nil
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
-	twitterClient twitter_api.IClient, turboswap turboswap.ITurboSwap, authorizedDiscordIDs []string,
+	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
 ) *BotEngine {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &BotEngine{
-		ctx:                  ctx,
-		cancel:               cancel,
-		logger:               logger,
-		wallet:               w,
-		clientMgr:            cm,
-		store:                s,
-		twitterClient:        twitterClient,
-		turboswap:            turboswap,
-		AuthorizedDiscordIDs: authorizedDiscordIDs,
+		ctx:           ctx,
+		cancel:        cancel,
+		logger:        logger,
+		wallet:        w,
+		clientMgr:     cm,
+		store:         s,
+		twitterClient: twitterClient,
+		nowpayments:   nowpayments,
+		AuthIDs:       authIDs,
 	}
 }
 
@@ -315,13 +317,17 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 	return reward, time, int64(utils.ChangeToCoin(bi.TotalPower)), nil
 }
 
-func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*store.TwitterParty, error) {
+func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*store.TwitterParty, error) {
 	be.Lock()
 	defer be.Unlock()
 
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
-		return existingParty, nil
+		if existingParty.TransactionID != "" {
+			return nil, fmt.Errorf("transaction is processed before: https://pacscan.org/transactions/%v", existingParty.TransactionID)
+		} else {
+			return existingParty, nil
+		}
 	}
 
 	valInfo, _ := be.clientMgr.GetValidatorInfo(valAddr)
@@ -358,13 +364,13 @@ func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*s
 		return nil, err
 	}
 
-	discountCode, err := gonanoid.Generate("0123456789", 6)
+	discountCode, err := gonanoid.Generate("0123456789", 8)
 	if err != nil {
 		return nil, err
 	}
 
-	totalPrice := 50
-	amountInPAC := 150
+	totalPrice := BoosterPrice
+	amountInPAC := int64(150)
 	if userInfo.Followers > 1000 {
 		amountInPAC = 200
 	}
@@ -382,12 +388,12 @@ func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*s
 		CreatedAt:    time.Now().Unix(),
 	}
 
-	err = be.turboswap.SendDiscountCode(be.ctx, party)
+	err = be.nowpayments.CreatePayment(party)
 	if err != nil {
 		return nil, err
 	}
 
-	err = be.store.AddTwitterParty(party)
+	err = be.store.SaveTwitterParty(party)
 	if err != nil {
 		return nil, err
 	}
@@ -395,21 +401,43 @@ func (be *BotEngine) TwitterCampaign(discordID, twitterName, valAddr string) (*s
 	return party, nil
 }
 
-func (be *BotEngine) TwitterCampaignStatus(twitterName string) (*store.TwitterParty, *turboswap.DiscountStatus, error) {
+func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, error) {
 	party := be.store.FindTwitterParty(twitterName)
 	if party == nil {
-		return nil, nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
+		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
 	}
-	status, err := be.turboswap.GetStatus(be.ctx, party)
+	err := be.nowpayments.UpdatePayment(party)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return party, status, nil
+	if party.NowPaymentsFinished {
+		if party.TransactionID == "" {
+			logger.Info("sending bond transaction", "receiver", party.ValAddr, "amount", party.AmountInPAC)
+			memo := "Booster Program"
+			txID, err := be.wallet.BondTransaction(party.ValPubKey, party.ValAddr, memo, utils.CoinToChange(float64(party.AmountInPAC)))
+			if err != nil {
+				return nil, err
+			}
+
+			if txID == "" {
+				return nil, errors.New("can't send bond transaction")
+			}
+
+			party.TransactionID = txID
+
+			err = be.store.SaveTwitterParty(party)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return party, nil
 }
 
-func (be *BotEngine) TwitterCampaignWhitelist(twitterName string, authorizedDiscordID string) error {
-	if !slices.Contains(be.AuthorizedDiscordIDs, authorizedDiscordID) {
+func (be *BotEngine) BoosterWhitelist(twitterName string, authorizedDiscordID string) error {
+	if !slices.Contains(be.AuthIDs, authorizedDiscordID) {
 		return fmt.Errorf("unauthorize person")
 	}
 

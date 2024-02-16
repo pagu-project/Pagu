@@ -94,7 +94,7 @@ func (c *Client) RetweetSearch(ctx context.Context, discordID string, twitterNam
 		UserFields:  []twitter.UserField{twitter.UserFieldName},
 		TweetFields: []twitter.TweetField{twitter.TweetFieldCreatedAt},
 	}
-	query := fmt.Sprintf("%v #Pactus from:%v is:quote", discordID, twitterName)
+	query := fmt.Sprintf("%v (#Pactus OR #PactusBoosterProgram) from:%v is:quote", discordID, twitterName)
 	logger.Debug("search query", "query", query)
 
 	res, err := c.client.TweetRecentSearch(ctx, query, opts)
@@ -107,11 +107,14 @@ func (c *Client) RetweetSearch(ctx context.Context, discordID string, twitterNam
 	}
 
 	if len(res.Raw.Tweets) == 0 {
-		return nil, fmt.Errorf("no quote tweet with the hashtag '#Pactus' found. "+
+		return nil, fmt.Errorf("no eligible quote tweet found. "+
 			"Please select a tweet from https://x.com/PactusChain and retweet it. "+
-			"Don't forget to add '#Pactus' and your Discord ID '%v'. "+
-			"For example you can tweet: \n"+
-			"`#Pactus Blockchain is running a Twitter campaign to add more validators. Don't miss out!\n%v`", discordID, discordID)
+			"Don't forget to add '#PactusBoosterProgram' and your Discord ID '%v'. "+
+			"For example you can tweet: \n\n"+
+			"```"+
+			"#Pactus Blockchain just started the Validator Booster Program Campaign. Don't miss out! https://discord.com/invite/H5vZkNnXCu\n\n"+
+			"#PactusBoosterProgram %v"+
+			"```", discordID, discordID)
 	}
 
 	quoteTweet := res.Raw.Tweets[0]

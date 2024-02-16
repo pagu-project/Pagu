@@ -52,20 +52,6 @@ func (mr *MockIStoreMockRecorder) AddClaimTransaction(testNetValAddr, txID any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClaimTransaction", reflect.TypeOf((*MockIStore)(nil).AddClaimTransaction), testNetValAddr, txID)
 }
 
-// AddTwitterParty mocks base method.
-func (m *MockIStore) AddTwitterParty(party *TwitterParty) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddTwitterParty", party)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AddTwitterParty indicates an expected call of AddTwitterParty.
-func (mr *MockIStoreMockRecorder) AddTwitterParty(party any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTwitterParty", reflect.TypeOf((*MockIStore)(nil).AddTwitterParty), party)
-}
-
 // ClaimStatus mocks base method.
 func (m *MockIStore) ClaimStatus() (int64, int64, int64, int64) {
 	m.ctrl.T.Helper()
@@ -123,6 +109,20 @@ func (m *MockIStore) IsWhitelisted(twitterID string) bool {
 func (mr *MockIStoreMockRecorder) IsWhitelisted(twitterID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsWhitelisted", reflect.TypeOf((*MockIStore)(nil).IsWhitelisted), twitterID)
+}
+
+// SaveTwitterParty mocks base method.
+func (m *MockIStore) SaveTwitterParty(party *TwitterParty) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveTwitterParty", party)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveTwitterParty indicates an expected call of SaveTwitterParty.
+func (mr *MockIStoreMockRecorder) SaveTwitterParty(party any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveTwitterParty", reflect.TypeOf((*MockIStore)(nil).SaveTwitterParty), party)
 }
 
 // WhitelistTwitterAccount mocks base method.
