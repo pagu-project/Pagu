@@ -74,7 +74,7 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore,
 	mockClient := client.NewMockIClient(ctrl)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	cm := client.NewClientMgr(ctx, cancel)
+	cm := client.NewClientMgr(ctx)
 	cm.AddClient(mockClient)
 
 	mockClient.EXPECT().GetNetworkInfo(ctx).Return(

@@ -14,7 +14,7 @@ func setup(t *testing.T) (*Mgr, *MockIClient) {
 	ctrl := gomock.NewController(t)
 	mockClient := NewMockIClient(ctrl)
 
-	clientMgr := NewClientMgr(context.WithCancel(context.Background()))
+	clientMgr := NewClientMgr(context.Background())
 	clientMgr.AddClient(mockClient)
 
 	mockClient.EXPECT().GetNetworkInfo(clientMgr.ctx).Return(

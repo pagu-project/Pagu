@@ -17,17 +17,15 @@ type Mgr struct {
 	valMap     map[string]*pactus.PeerInfo
 
 	ctx     context.Context
-	cancel  context.CancelFunc
 	clients []IClient
 }
 
-func NewClientMgr(ctx context.Context, cnl context.CancelFunc) *Mgr {
+func NewClientMgr(ctx context.Context) *Mgr {
 	return &Mgr{
 		clients:    make([]IClient, 0),
 		valMap:     make(map[string]*pactus.PeerInfo),
 		valMapLock: sync.RWMutex{},
 		ctx:        ctx,
-		cancel:     cnl,
 	}
 }
 

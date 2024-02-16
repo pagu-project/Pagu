@@ -44,12 +44,11 @@ type BotEngine struct {
 func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	cm := client.NewClientMgr(ctx, cancel)
+	cm := client.NewClientMgr(ctx)
 
 	localClient, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
-		log.Error("can't make a new local client", "err", err, "addr", cfg.LocalNode)
-		return nil, err
+		log.Panic("can't make a new local client", "err", err, "addr", cfg.LocalNode)
 	}
 
 	cm.AddClient(localClient)
