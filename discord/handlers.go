@@ -230,6 +230,14 @@ func boosterWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *dis
 		return
 	}
 
+	pubMsg := fmt.Sprintf("The Twitter account @%s has been successfully whitelisted!", twitterName)
+	pubEmbed := boosterEmbed(s, i, pubMsg)
+	_, err = s.ChannelMessageSendEmbed("1208143718482182184", pubEmbed)
+	if err != nil {
+		db.respondErrMsg(err, s, i)
+		return
+	}
+
 	embed := boosterEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
 }
