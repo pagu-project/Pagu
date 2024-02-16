@@ -61,6 +61,7 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 		}
 		cm.AddClient(c)
 	}
+	cm.Start()
 
 	// initializing logger global instance.
 	log.InitGlobalLogger()
@@ -450,7 +451,7 @@ func (be *BotEngine) BoosterWhitelist(twitterName string, authorizedDiscordID st
 
 	foundParty := be.store.FindTwitterParty(twitterName)
 	if foundParty != nil {
-		return fmt.Errorf("the Twitter `%v` already registered for the campagna. Discount code is %v",
+		return fmt.Errorf("the Twitter `%v` already registered for the campaign. Discount code is %v",
 			foundParty.TwitterName, foundParty.DiscountCode)
 	}
 
