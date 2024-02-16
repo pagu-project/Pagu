@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"testing"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -13,16 +14,10 @@ func setup(t *testing.T) (*Mgr, *MockIClient) {
 	ctrl := gomock.NewController(t)
 	mockClient := NewMockIClient(ctrl)
 
-	clientMgr := NewClientMgr()
+	clientMgr := NewClientMgr(context.Background())
 	clientMgr.AddClient(mockClient)
 
-	return clientMgr, mockClient
-}
-
-func TestFindPublicKey(t *testing.T) {
-	clientMgr, mockClient := setup(t)
-
-	mockClient.EXPECT().GetNetworkInfo().Return(
+	mockClient.EXPECT().GetNetworkInfo(clientMgr.ctx).Return(
 		&pactus.GetNetworkInfoResponse{
 			ConnectedPeers: []*pactus.PeerInfo{
 				{
@@ -36,6 +31,14 @@ func TestFindPublicKey(t *testing.T) {
 			},
 		}, nil,
 	).AnyTimes()
+
+	clientMgr.Start()
+
+	return clientMgr, mockClient
+}
+
+func TestFindPublicKey(t *testing.T) {
+	clientMgr, _ := setup(t)
 
 	t.Run("not found", func(t *testing.T) {
 		pubKey, err := clientMgr.FindPublicKey("not-exists", false)

@@ -34,24 +34,24 @@ func NewClient(endpoint string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
-	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
+func (c *Client) GetBlockchainInfo(ctx context.Context) (*pactus.GetBlockchainInfoResponse, error) {
+	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
 		return nil, err
 	}
 	return blockchainInfo, nil
 }
 
-func (c *Client) GetBlockchainHeight() (uint32, error) {
-	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
+func (c *Client) GetBlockchainHeight(ctx context.Context) (uint32, error) {
+	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
 		return 0, err
 	}
 	return blockchainInfo.LastBlockHeight, nil
 }
 
-func (c *Client) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
-	networkInfo, err := c.networkClient.GetNetworkInfo(context.Background(), &pactus.GetNetworkInfoRequest{})
+func (c *Client) GetNetworkInfo(ctx context.Context) (*pactus.GetNetworkInfoResponse, error) {
+	networkInfo, err := c.networkClient.GetNetworkInfo(ctx, &pactus.GetNetworkInfoRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (c *Client) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	return networkInfo, nil
 }
 
-func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
-	networkInfo, _ := c.GetNetworkInfo()
+func (c *Client) GetPeerInfo(ctx context.Context, address string) (*pactus.PeerInfo, error) {
+	networkInfo, _ := c.GetNetworkInfo(ctx)
 	if networkInfo != nil {
 		for _, p := range networkInfo.ConnectedPeers {
 			for _, addr := range p.ConsensusAddress {
@@ -75,8 +75,8 @@ func (c *Client) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 	return nil, errors.New("peer does not exist")
 }
 
-func (c *Client) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
-	validator, err := c.blockchainClient.GetValidator(context.Background(),
+func (c *Client) GetValidatorInfo(ctx context.Context, address string) (*pactus.GetValidatorResponse, error) {
+	validator, err := c.blockchainClient.GetValidator(ctx,
 		&pactus.GetValidatorRequest{Address: address})
 	if err != nil {
 		return nil, err
@@ -85,8 +85,8 @@ func (c *Client) GetValidatorInfo(address string) (*pactus.GetValidatorResponse,
 	return validator, nil
 }
 
-func (c *Client) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorResponse, error) {
-	validator, err := c.blockchainClient.GetValidatorByNumber(context.Background(),
+func (c *Client) GetValidatorInfoByNumber(ctx context.Context, num int32) (*pactus.GetValidatorResponse, error) {
+	validator, err := c.blockchainClient.GetValidatorByNumber(ctx,
 		&pactus.GetValidatorByNumberRequest{Number: num})
 	if err != nil {
 		return nil, err
@@ -95,8 +95,8 @@ func (c *Client) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorRespon
 	return validator, nil
 }
 
-func (c *Client) TransactionData(hash string) (*pactus.TransactionInfo, error) {
-	data, err := c.transactionClient.GetTransaction(context.Background(),
+func (c *Client) TransactionData(ctx context.Context, hash string) (*pactus.TransactionInfo, error) {
+	data, err := c.transactionClient.GetTransaction(ctx,
 		&pactus.GetTransactionRequest{
 			Id:        []byte(hash),
 			Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
@@ -108,13 +108,13 @@ func (c *Client) TransactionData(hash string) (*pactus.TransactionInfo, error) {
 	return data.GetTransaction(), nil
 }
 
-func (c *Client) LastBlockTime() (uint32, uint32, error) {
-	info, err := c.blockchainClient.GetBlockchainInfo(context.Background(), &pactus.GetBlockchainInfoRequest{})
+func (c *Client) LastBlockTime(ctx context.Context) (uint32, uint32, error) {
+	info, err := c.blockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
 		return 0, 0, err
 	}
 
-	lastBlockTime, err := c.blockchainClient.GetBlock(context.Background(), &pactus.GetBlockRequest{
+	lastBlockTime, err := c.blockchainClient.GetBlock(ctx, &pactus.GetBlockRequest{
 		Height:    info.LastBlockHeight,
 		Verbosity: pactus.BlockVerbosity_BLOCK_INFO,
 	})
@@ -122,8 +122,8 @@ func (c *Client) LastBlockTime() (uint32, uint32, error) {
 	return lastBlockTime.BlockTime, info.LastBlockHeight, err
 }
 
-func (c *Client) GetNodeInfo() (*pactus.GetNodeInfoResponse, error) {
-	info, err := c.networkClient.GetNodeInfo(context.Background(), &pactus.GetNodeInfoRequest{})
+func (c *Client) GetNodeInfo(ctx context.Context) (*pactus.GetNodeInfoResponse, error) {
+	info, err := c.networkClient.GetNodeInfo(ctx, &pactus.GetNodeInfoRequest{})
 	if err != nil {
 		return &pactus.GetNodeInfoResponse{}, err
 	}
@@ -131,15 +131,15 @@ func (c *Client) GetNodeInfo() (*pactus.GetNodeInfoResponse, error) {
 	return info, err
 }
 
-func (c *Client) GetTransactionData(txID string) (*pactus.GetTransactionResponse, error) {
-	return c.transactionClient.GetTransaction(context.Background(), &pactus.GetTransactionRequest{
+func (c *Client) GetTransactionData(ctx context.Context, txID string) (*pactus.GetTransactionResponse, error) {
+	return c.transactionClient.GetTransaction(ctx, &pactus.GetTransactionRequest{
 		Id:        []byte(txID),
 		Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
 	})
 }
 
-func (c *Client) GetBalance(address string) (int64, error) {
-	account, err := c.blockchainClient.GetAccount(context.Background(), &pactus.GetAccountRequest{
+func (c *Client) GetBalance(ctx context.Context, address string) (int64, error) {
+	account, err := c.blockchainClient.GetAccount(ctx, &pactus.GetAccountRequest{
 		Address: address,
 	})
 	if err != nil {

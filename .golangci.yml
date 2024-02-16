@@ -9,8 +9,7 @@ linters:
     - unused
     - godox 
     - gocritic 
-    - gci 
-    - containedctx
+    - gci
     - contextcheck
     - exhaustive 
     - wastedassign
