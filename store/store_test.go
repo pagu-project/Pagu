@@ -8,7 +8,6 @@ import (
 	"path"
 	"testing"
 
-	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/store"
 	"github.com/stretchr/testify/assert"
@@ -44,9 +43,6 @@ func setup(t *testing.T) store.IStore {
 	tempDir, err := os.MkdirTemp("", "RoboPAC")
 	require.NoError(t, err)
 
-	_, err = copy("./test/.env.test", path.Join(tempDir, "/.env"))
-	require.NoError(t, err)
-
 	_, err = copy("./test/claimers.json", path.Join(tempDir, "/claimers.json"))
 	require.NoError(t, err)
 
@@ -59,16 +55,10 @@ func setup(t *testing.T) store.IStore {
 	_, err = copy("./test/wallet.json", path.Join(tempDir, "/wallet.json"))
 	require.NoError(t, err)
 
-	fmt.Println("store location: " + tempDir)
-	_ = os.Chdir(tempDir)
-
-	cfg, err := config.Load(".env")
-	require.NoError(t, err)
-
 	log.InitGlobalLogger()
 	logger := log.NewSubLogger("store_test")
 
-	store, err := store.NewStore(cfg.StorePath, logger)
+	store, err := store.NewStore(tempDir, logger)
 	require.NoError(t, err)
 
 	return store
