@@ -10,6 +10,7 @@
 package client
 
 import (
+	context "context"
 	reflect "reflect"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -54,114 +55,114 @@ func (mr *MockIClientMockRecorder) Close() *gomock.Call {
 }
 
 // GetBalance mocks base method.
-func (m *MockIClient) GetBalance(arg0 string) (int64, error) {
+func (m *MockIClient) GetBalance(arg0 context.Context, arg1 string) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBalance", arg0)
+	ret := m.ctrl.Call(m, "GetBalance", arg0, arg1)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBalance indicates an expected call of GetBalance.
-func (mr *MockIClientMockRecorder) GetBalance(arg0 any) *gomock.Call {
+func (mr *MockIClientMockRecorder) GetBalance(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalance", reflect.TypeOf((*MockIClient)(nil).GetBalance), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalance", reflect.TypeOf((*MockIClient)(nil).GetBalance), arg0, arg1)
 }
 
 // GetBlockchainHeight mocks base method.
-func (m *MockIClient) GetBlockchainHeight() (uint32, error) {
+func (m *MockIClient) GetBlockchainHeight(arg0 context.Context) (uint32, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBlockchainHeight")
+	ret := m.ctrl.Call(m, "GetBlockchainHeight", arg0)
 	ret0, _ := ret[0].(uint32)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBlockchainHeight indicates an expected call of GetBlockchainHeight.
-func (mr *MockIClientMockRecorder) GetBlockchainHeight() *gomock.Call {
+func (mr *MockIClientMockRecorder) GetBlockchainHeight(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockchainHeight", reflect.TypeOf((*MockIClient)(nil).GetBlockchainHeight))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockchainHeight", reflect.TypeOf((*MockIClient)(nil).GetBlockchainHeight), arg0)
 }
 
 // GetBlockchainInfo mocks base method.
-func (m *MockIClient) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
+func (m *MockIClient) GetBlockchainInfo(arg0 context.Context) (*pactus.GetBlockchainInfoResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBlockchainInfo")
+	ret := m.ctrl.Call(m, "GetBlockchainInfo", arg0)
 	ret0, _ := ret[0].(*pactus.GetBlockchainInfoResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBlockchainInfo indicates an expected call of GetBlockchainInfo.
-func (mr *MockIClientMockRecorder) GetBlockchainInfo() *gomock.Call {
+func (mr *MockIClientMockRecorder) GetBlockchainInfo(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockchainInfo", reflect.TypeOf((*MockIClient)(nil).GetBlockchainInfo))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockchainInfo", reflect.TypeOf((*MockIClient)(nil).GetBlockchainInfo), arg0)
 }
 
 // GetNetworkInfo mocks base method.
-func (m *MockIClient) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
+func (m *MockIClient) GetNetworkInfo(arg0 context.Context) (*pactus.GetNetworkInfoResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNetworkInfo")
+	ret := m.ctrl.Call(m, "GetNetworkInfo", arg0)
 	ret0, _ := ret[0].(*pactus.GetNetworkInfoResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetNetworkInfo indicates an expected call of GetNetworkInfo.
-func (mr *MockIClientMockRecorder) GetNetworkInfo() *gomock.Call {
+func (mr *MockIClientMockRecorder) GetNetworkInfo(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworkInfo", reflect.TypeOf((*MockIClient)(nil).GetNetworkInfo))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworkInfo", reflect.TypeOf((*MockIClient)(nil).GetNetworkInfo), arg0)
 }
 
 // GetTransactionData mocks base method.
-func (m *MockIClient) GetTransactionData(arg0 string) (*pactus.GetTransactionResponse, error) {
+func (m *MockIClient) GetTransactionData(arg0 context.Context, arg1 string) (*pactus.GetTransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTransactionData", arg0)
+	ret := m.ctrl.Call(m, "GetTransactionData", arg0, arg1)
 	ret0, _ := ret[0].(*pactus.GetTransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTransactionData indicates an expected call of GetTransactionData.
-func (mr *MockIClientMockRecorder) GetTransactionData(arg0 any) *gomock.Call {
+func (mr *MockIClientMockRecorder) GetTransactionData(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionData", reflect.TypeOf((*MockIClient)(nil).GetTransactionData), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransactionData", reflect.TypeOf((*MockIClient)(nil).GetTransactionData), arg0, arg1)
 }
 
 // GetValidatorInfo mocks base method.
-func (m *MockIClient) GetValidatorInfo(arg0 string) (*pactus.GetValidatorResponse, error) {
+func (m *MockIClient) GetValidatorInfo(arg0 context.Context, arg1 string) (*pactus.GetValidatorResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetValidatorInfo", arg0)
+	ret := m.ctrl.Call(m, "GetValidatorInfo", arg0, arg1)
 	ret0, _ := ret[0].(*pactus.GetValidatorResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetValidatorInfo indicates an expected call of GetValidatorInfo.
-func (mr *MockIClientMockRecorder) GetValidatorInfo(arg0 any) *gomock.Call {
+func (mr *MockIClientMockRecorder) GetValidatorInfo(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidatorInfo", reflect.TypeOf((*MockIClient)(nil).GetValidatorInfo), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidatorInfo", reflect.TypeOf((*MockIClient)(nil).GetValidatorInfo), arg0, arg1)
 }
 
 // GetValidatorInfoByNumber mocks base method.
-func (m *MockIClient) GetValidatorInfoByNumber(arg0 int32) (*pactus.GetValidatorResponse, error) {
+func (m *MockIClient) GetValidatorInfoByNumber(arg0 context.Context, arg1 int32) (*pactus.GetValidatorResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetValidatorInfoByNumber", arg0)
+	ret := m.ctrl.Call(m, "GetValidatorInfoByNumber", arg0, arg1)
 	ret0, _ := ret[0].(*pactus.GetValidatorResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetValidatorInfoByNumber indicates an expected call of GetValidatorInfoByNumber.
-func (mr *MockIClientMockRecorder) GetValidatorInfoByNumber(arg0 any) *gomock.Call {
+func (mr *MockIClientMockRecorder) GetValidatorInfoByNumber(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidatorInfoByNumber", reflect.TypeOf((*MockIClient)(nil).GetValidatorInfoByNumber), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidatorInfoByNumber", reflect.TypeOf((*MockIClient)(nil).GetValidatorInfoByNumber), arg0, arg1)
 }
 
 // LastBlockTime mocks base method.
-func (m *MockIClient) LastBlockTime() (uint32, uint32, error) {
+func (m *MockIClient) LastBlockTime(arg0 context.Context) (uint32, uint32, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LastBlockTime")
+	ret := m.ctrl.Call(m, "LastBlockTime", arg0)
 	ret0, _ := ret[0].(uint32)
 	ret1, _ := ret[1].(uint32)
 	ret2, _ := ret[2].(error)
@@ -169,7 +170,7 @@ func (m *MockIClient) LastBlockTime() (uint32, uint32, error) {
 }
 
 // LastBlockTime indicates an expected call of LastBlockTime.
-func (mr *MockIClientMockRecorder) LastBlockTime() *gomock.Call {
+func (mr *MockIClientMockRecorder) LastBlockTime(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LastBlockTime", reflect.TypeOf((*MockIClient)(nil).LastBlockTime))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LastBlockTime", reflect.TypeOf((*MockIClient)(nil).LastBlockTime), arg0)
 }

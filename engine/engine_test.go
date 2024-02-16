@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -19,7 +20,52 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, *wallet.MockIWallet, *twitter_api.MockIClient, *nowpayments.MockINowpayment) {
+var peerID, _ = peer.Decode("12D3KooWNwudyHVEwtyRTkTx9JoWgHo65hkPUxU12pKviAreVJYg")
+
+var networkInfo = &pactus.GetNetworkInfoResponse{
+	ConnectedPeersCount: 5,
+	NetworkName:         "test",
+	ConnectedPeers: []*pactus.PeerInfo{
+		{
+			ConsensusKeys:    []string{"pub-key", "mainnet-addr-fail-not-first-validator"},
+			ConsensusAddress: []string{"valid-address2", "mainnet-addr-fail-not-first-validator"},
+		},
+		{
+			ConsensusKeys:    []string{"pubKey-3", "pubKey-4"},
+			ConsensusAddress: []string{"addr-3", "addr-4"},
+		},
+		{
+			ConsensusKeys:    []string{"pub-key", "pubKey-4"},
+			ConsensusAddress: []string{"valid-address", "addr-4"},
+			Agent:            "node=pactus-gui.exe/node-version=v0.20.0/protocol-version=1/os=windows/arch=amd64",
+			PeerId:           []byte(peerID),
+			Address:          "/ip4/000.000.000.000/tcp/21777",
+		},
+		{
+			ConsensusKeys:    []string{"public-key"},
+			ConsensusAddress: []string{"mainnet-addr"},
+		},
+		{
+			ConsensusAddress: []string{"invalid-address", "invalid-address-2"},
+		},
+		{
+			ConsensusAddress: []string{"mainnet-addr-fail-empty-tx-hash"},
+			ConsensusKeys:    []string{"public-key-fail-empty-tx-hash"},
+		},
+		{
+			ConsensusAddress: []string{"mainnet-addr-panic-add-claimer-failed"},
+			ConsensusKeys:    []string{"public-key-panic-add-claimer-failed"},
+		},
+		{
+			ConsensusAddress: []string{"addr"},
+			ConsensusKeys:    []string{"public-key"},
+		},
+	},
+}
+
+func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore,
+	*wallet.MockIWallet, *twitter_api.MockIClient, *nowpayments.MockINowpayment, context.Context,
+) {
 	t.Helper()
 	ctrl := gomock.NewController(t)
 
@@ -27,29 +73,36 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore, 
 	sl := log.NewSubLogger("test")
 	mockClient := client.NewMockIClient(ctrl)
 
-	cm := client.NewClientMgr()
+	ctx, cancel := context.WithCancel(context.Background())
+	cm := client.NewClientMgr(ctx)
 	cm.AddClient(mockClient)
+
+	mockClient.EXPECT().GetNetworkInfo(ctx).Return(
+		networkInfo, nil,
+	)
+
+	cm.Start()
 
 	mockWallet := wallet.NewMockIWallet(ctrl)
 	mockStore := rpstore.NewMockIStore(ctrl)
 	mockTwitter := twitter_api.NewMockIClient(ctrl)
 	mockNowPayments := nowpayments.NewMockINowpayment(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockNowPayments, []string{""})
-	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockNowPayments
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockNowPayments, []string{""}, ctx, cancel)
+	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockNowPayments, ctx
 }
 
 func TestNetworkStatus(t *testing.T) {
-	eng, client, _, _, _, _ := setup(t)
+	eng, client, _, _, _, _, ctx := setup(t)
 
-	client.EXPECT().GetNetworkInfo().Return(
+	client.EXPECT().GetNetworkInfo(ctx).Return(
 		&pactus.GetNetworkInfoResponse{
 			ConnectedPeersCount: 5,
 			NetworkName:         "test",
 		}, nil,
 	)
 
-	client.EXPECT().GetBlockchainInfo().Return(
+	client.EXPECT().GetBlockchainInfo(ctx).Return(
 		&pactus.GetBlockchainInfoResponse{
 			TotalPower:      1234,
 			LastBlockHeight: 150,
@@ -57,27 +110,27 @@ func TestNetworkStatus(t *testing.T) {
 		}, nil,
 	).AnyTimes()
 
-	client.EXPECT().GetBalance("pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z").Return(
+	client.EXPECT().GetBalance(ctx, "pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z").Return(
 		int64(100), nil,
 	)
 
-	client.EXPECT().GetBalance("pc1zprhnvcsy3pthekdcu28cw8muw4f432hkwgfasv").Return(
+	client.EXPECT().GetBalance(ctx, "pc1zprhnvcsy3pthekdcu28cw8muw4f432hkwgfasv").Return(
 		int64(100), nil,
 	)
 
-	client.EXPECT().GetBalance("pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45").Return(
+	client.EXPECT().GetBalance(ctx, "pc1znn2qxsugfrt7j4608zvtnxf8dnz8skrxguyf45").Return(
 		int64(100), nil,
 	)
 
-	client.EXPECT().GetBalance("pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3").Return(
+	client.EXPECT().GetBalance(ctx, "pc1zs64vdggjcshumjwzaskhfn0j9gfpkvche3kxd3").Return(
 		int64(100), nil,
 	)
 
-	client.EXPECT().GetBalance("pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g").Return(
+	client.EXPECT().GetBalance(ctx, "pc1zuavu4sjcxcx9zsl8rlwwx0amnl94sp0el3u37g").Return(
 		int64(100), nil,
 	)
 
-	client.EXPECT().GetBalance("pc1zf0gyc4kxlfsvu64pheqzmk8r9eyzxqvxlk6s6t").Return(
+	client.EXPECT().GetBalance(ctx, "pc1zf0gyc4kxlfsvu64pheqzmk8r9eyzxqvxlk6s6t").Return(
 		int64(100), nil,
 	)
 
@@ -90,11 +143,11 @@ func TestNetworkStatus(t *testing.T) {
 }
 
 func TestNetworkHealth(t *testing.T) {
-	eng, client, _, _, _, _ := setup(t)
+	eng, client, _, _, _, _, ctx := setup(t)
 
 	t.Run("should be healthy", func(t *testing.T) {
 		currentTime := time.Now().Unix()
-		client.EXPECT().LastBlockTime().Return(uint32(currentTime), uint32(100), nil)
+		client.EXPECT().LastBlockTime(ctx).Return(uint32(currentTime), uint32(100), nil)
 
 		time.Sleep(2 * time.Second)
 
@@ -110,7 +163,7 @@ func TestNetworkHealth(t *testing.T) {
 
 	t.Run("should be unhealthy", func(t *testing.T) {
 		currentTime := time.Now().Unix() - 16 // time difference is more than 15 seconds.
-		client.EXPECT().LastBlockTime().Return(uint32(currentTime), uint32(100), nil)
+		client.EXPECT().LastBlockTime(ctx).Return(uint32(currentTime), uint32(100), nil)
 
 		healthy, err := eng.NetworkHealth()
 		assert.NoError(t, err)
@@ -120,7 +173,7 @@ func TestNetworkHealth(t *testing.T) {
 }
 
 func TestNodeInfo(t *testing.T) {
-	eng, client, _, _, _, _ := setup(t)
+	eng, client, _, _, _, _, ctx := setup(t)
 	t.Run("should work, valid address", func(t *testing.T) {
 		valAddress := "valid-address"
 		pubKey := "pub-key"
@@ -128,7 +181,7 @@ func TestNodeInfo(t *testing.T) {
 		peerID, err := peer.Decode("12D3KooWNwudyHVEwtyRTkTx9JoWgHo65hkPUxU12pKviAreVJYg")
 		assert.NoError(t, err)
 
-		client.EXPECT().GetNetworkInfo().Return(
+		client.EXPECT().GetNetworkInfo(ctx).Return(
 			&pactus.GetNetworkInfoResponse{
 				ConnectedPeers: []*pactus.PeerInfo{
 					{
@@ -145,9 +198,9 @@ func TestNodeInfo(t *testing.T) {
 					},
 				},
 			}, nil,
-		)
+		).AnyTimes()
 
-		client.EXPECT().GetValidatorInfo(valAddress).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddress).Return(
 			&pactus.GetValidatorResponse{
 				Validator: &pactus.ValidatorInfo{
 					PublicKey:         pubKey,
@@ -169,7 +222,7 @@ func TestNodeInfo(t *testing.T) {
 
 func TestClaim(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr"
 		testnetAddr := "testnet-addr"
@@ -183,7 +236,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		).MaxTimes(2)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -193,17 +246,6 @@ func TestClaim(t *testing.T) {
 				TotalReward: amount,
 				ClaimedTxID: "",
 			},
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{mainnetAddr},
-						ConsensusKeys:    []string{pubKey},
-					},
-				},
-			}, nil,
 		)
 
 		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
@@ -219,7 +261,7 @@ func TestClaim(t *testing.T) {
 		assert.NotNil(t, expectedTx, txID)
 
 		//! can't claim twice immediately before transaction is committed:
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		).Times(1)
 
@@ -237,13 +279,13 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, already staked", func(t *testing.T) {
-		eng, client, _, _, _, _ := setup(t)
+		eng, client, _, _, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
 		discordID := "123456789-already staked"
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			&pactus.GetValidatorResponse{
 				Validator: &pactus.ValidatorInfo{
 					Stake: 1,
@@ -257,7 +299,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, low balance", func(t *testing.T) {
-		eng, client, _, wallet, _, _ := setup(t)
+		eng, client, _, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-balance"
 		testnetAddr := "testnet-addr-fail-balance"
@@ -267,7 +309,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(499),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
@@ -276,7 +318,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, claimer not found", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-notfound"
 		testnetAddr := "testnet-addr-fail-notfound"
@@ -286,7 +328,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -300,7 +342,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, different Discord ID", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-different-id"
 		testnetAddr := "testnet-addr-fail-different-id"
@@ -310,7 +352,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -326,7 +368,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should fail, not first validator address", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-not-first-validator"
 		testnetAddr := "testnet-addr-fail-not-first-validator"
@@ -336,7 +378,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -347,23 +389,13 @@ func TestClaim(t *testing.T) {
 			},
 		)
 
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{"invalid-address", mainnetAddr},
-					},
-				},
-			}, nil,
-		)
-
 		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.EqualError(t, err, "please enter the first validator address")
 		assert.Empty(t, expectedTx)
 	})
 
 	t.Run("should fail, validator not found", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-validator-not-found"
 		testnetAddr := "testnet-addr-fail-validator-not-found"
@@ -373,7 +405,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -384,23 +416,13 @@ func TestClaim(t *testing.T) {
 			},
 		)
 
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{"invalid-address", "invalid-address-2"},
-					},
-				},
-			}, nil,
-		)
-
 		expectedTx, err := eng.Claim(discordID, testnetAddr, mainnetAddr)
 		assert.EqualError(t, err, "peer does not exist with this address: mainnet-addr-fail-validator-not-found")
 		assert.Empty(t, expectedTx)
 	})
 
 	t.Run("should fail, empty transaction hash", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-fail-empty-tx-hash"
 		testnetAddr := "testnet-addr-fail-empty-tx-hash"
@@ -413,7 +435,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -423,17 +445,6 @@ func TestClaim(t *testing.T) {
 				TotalReward: amount,
 				ClaimedTxID: "",
 			},
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{mainnetAddr},
-						ConsensusKeys:    []string{pubKey},
-					},
-				},
-			}, nil,
 		)
 
 		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
@@ -446,7 +457,7 @@ func TestClaim(t *testing.T) {
 	})
 
 	t.Run("should panic, add claimer failed", func(t *testing.T) {
-		eng, client, store, wallet, _, _ := setup(t)
+		eng, client, store, wallet, _, _, ctx := setup(t)
 
 		mainnetAddr := "mainnet-addr-panic-add-claimer-failed"
 		testnetAddr := "testnet-addr-panic-add-claimer-failed"
@@ -460,7 +471,7 @@ func TestClaim(t *testing.T) {
 			utils.CoinToChange(501),
 		)
 
-		client.EXPECT().GetValidatorInfo(mainnetAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, mainnetAddr).Return(
 			nil, fmt.Errorf("not found"),
 		)
 
@@ -470,17 +481,6 @@ func TestClaim(t *testing.T) {
 				TotalReward: amount,
 				ClaimedTxID: "",
 			},
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{mainnetAddr},
-						ConsensusKeys:    []string{pubKey},
-					},
-				},
-			}, nil,
 		)
 
 		wallet.EXPECT().BondTransaction(pubKey, mainnetAddr, memo, amount).Return(
@@ -499,7 +499,7 @@ func TestClaim(t *testing.T) {
 
 func TestBoosterProgram(t *testing.T) {
 	t.Run("staked validator", func(t *testing.T) {
-		eng, client, store, _, _, _ := setup(t)
+		eng, client, store, _, _, _, ctx := setup(t)
 
 		twitterName := "anything"
 		discordID := "123456789"
@@ -509,7 +509,7 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			&pactus.GetValidatorResponse{}, nil,
 		)
 
@@ -518,7 +518,7 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("non-existing validator", func(t *testing.T) {
-		eng, client, store, _, _, _ := setup(t)
+		eng, client, store, _, _, _, ctx := setup(t)
 
 		twitterName := "anything"
 		discordID := "123456789"
@@ -528,12 +528,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			nil, nil,
 		)
 
 		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
@@ -541,30 +537,18 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("non-existing twitter account", func(t *testing.T) {
-		eng, client, store, _, twitter, _ := setup(t)
+		eng, client, store, _, twitter, _, ctx := setup(t)
 
 		twitterName := "non-existing-twitter"
 		discordID := "123456789"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		expectedErr := errors.New("not exists")
@@ -577,13 +561,12 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("not old enough", func(t *testing.T) {
-		eng, client, store, _, twitter, _ := setup(t)
+		eng, client, store, _, twitter, _, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -593,19 +576,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
@@ -620,13 +592,12 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("less than 200 followers", func(t *testing.T) {
-		eng, client, store, _, twitter, _ := setup(t)
+		eng, client, store, _, twitter, _, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -636,19 +607,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
@@ -664,13 +624,12 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("active account, but not retweeted", func(t *testing.T) {
-		eng, client, store, _, twitter, _ := setup(t)
+		eng, client, store, _, twitter, _, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -680,19 +639,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
@@ -713,13 +661,12 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("active account, less that 1000 followers", func(t *testing.T) {
-		eng, client, store, _, twitter, nowPayments := setup(t)
+		eng, client, store, _, twitter, nowPayments, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -729,19 +676,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
@@ -775,17 +711,15 @@ func TestBoosterProgram(t *testing.T) {
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
-		assert.Equal(t, valPubKey, party.ValPubKey)
 	})
 
 	t.Run("active account, more that 1000 followers", func(t *testing.T) {
-		eng, client, store, _, twitter, nowPayments := setup(t)
+		eng, client, store, _, twitter, nowPayments, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -795,19 +729,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
@@ -841,35 +764,22 @@ func TestBoosterProgram(t *testing.T) {
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
-		assert.Equal(t, valPubKey, party.ValPubKey)
 	})
 
 	t.Run("verified account", func(t *testing.T) {
-		eng, client, store, _, twitter, nowPayments := setup(t)
+		eng, client, store, _, twitter, nowPayments, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
@@ -901,13 +811,12 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("whitelisted account", func(t *testing.T) {
-		eng, client, store, _, twitter, nowPayments := setup(t)
+		eng, client, store, _, twitter, nowPayments, ctx := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
-		valPubKey := "pub-key"
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			true,
@@ -917,19 +826,8 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		client.EXPECT().GetValidatorInfo(valAddr).Return(
+		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
 			nil, fmt.Errorf("not found"),
-		)
-
-		client.EXPECT().GetNetworkInfo().Return(
-			&pactus.GetNetworkInfoResponse{
-				ConnectedPeers: []*pactus.PeerInfo{
-					{
-						ConsensusAddress: []string{valAddr},
-						ConsensusKeys:    []string{valPubKey},
-					},
-				},
-			}, nil,
 		)
 
 		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
