@@ -32,7 +32,7 @@ func NewClientMgr(ctx context.Context, cnl context.CancelFunc) *Mgr {
 }
 
 func (cm *Mgr) Start() {
-	ticker := time.NewTicker(5 * time.Minute)
+	ticker := time.NewTicker(30 * time.Minute)
 
 	go func() {
 		for {
