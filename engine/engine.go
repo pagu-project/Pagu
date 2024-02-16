@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -41,7 +42,9 @@ type BotEngine struct {
 }
 
 func NewBotEngine(cfg *config.Config) (IEngine, error) {
-	cm := client.NewClientMgr()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	cm := client.NewClientMgr(ctx, cancel)
 
 	localClient, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
@@ -98,17 +101,16 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("nowpayments loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs), nil
+	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
 	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
+	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
-	ctx, cancel := context.WithCancel(context.Background())
-
 	return &BotEngine{
 		ctx:           ctx,
-		cancel:        cancel,
+		cancel:        cnl,
 		logger:        logger,
 		wallet:        w,
 		clientMgr:     cm,
@@ -321,6 +323,8 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 	be.Lock()
 	defer be.Unlock()
 
+	twitterName = strings.ToLower(twitterName)
+
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
 		if existingParty.TransactionID != "" {
@@ -402,6 +406,9 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 }
 
 func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, error) {
+	be.Lock() // KAY, move this to store
+	defer be.Unlock()
+
 	party := be.store.FindTwitterParty(twitterName)
 	if party == nil {
 		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
