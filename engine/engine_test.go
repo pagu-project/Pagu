@@ -505,6 +505,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		valAddr := "staked-validator"
 
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
+
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
 		)
@@ -524,6 +530,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		valAddr := "non-existing-validator"
 
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
+
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
 		)
@@ -542,6 +554,12 @@ func TestBoosterProgram(t *testing.T) {
 		twitterName := "non-existing-twitter"
 		discordID := "123456789"
 		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
@@ -567,6 +585,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -599,6 +623,12 @@ func TestBoosterProgram(t *testing.T) {
 		twitterID := "1234"
 		valAddr := "addr"
 
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
+
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
 		)
@@ -630,6 +660,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -668,6 +704,12 @@ func TestBoosterProgram(t *testing.T) {
 		twitterID := "1234"
 		valAddr := "addr"
 
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
+
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
 		)
@@ -695,6 +737,7 @@ func TestBoosterProgram(t *testing.T) {
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
 		)
+
 		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
@@ -707,7 +750,7 @@ func TestBoosterProgram(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(150), party.AmountInPAC)
-		assert.Equal(t, BoosterPrice, party.TotalPrice)
+		assert.Equal(t, 40, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -720,6 +763,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 99,
+			},
+		)
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			false,
@@ -748,6 +797,7 @@ func TestBoosterProgram(t *testing.T) {
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
 		)
+
 		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
@@ -760,7 +810,7 @@ func TestBoosterProgram(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(200), party.AmountInPAC)
-		assert.Equal(t, BoosterPrice, party.TotalPrice)
+		assert.Equal(t, 30, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -773,6 +823,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 400,
+			},
+		)
 
 		store.EXPECT().FindTwitterParty(twitterName).Return(
 			nil,
@@ -806,8 +862,10 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
+		p, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
+
+		assert.Equal(t, 50, p.TotalPrice)
 	})
 
 	t.Run("whitelisted account", func(t *testing.T) {
@@ -817,6 +875,12 @@ func TestBoosterProgram(t *testing.T) {
 		discordID := "123456789"
 		twitterID := "1234"
 		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
 
 		store.EXPECT().IsWhitelisted(twitterID).Return(
 			true,
@@ -856,5 +920,22 @@ func TestBoosterProgram(t *testing.T) {
 
 		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
+	})
+
+	t.Run("program end", func(t *testing.T) {
+		eng, _, store, _, _, _, _ := setup(t)
+
+		twitterName := "abcd"
+		discordID := "123456789"
+		valAddr := "addr"
+
+		store.EXPECT().BoosterStatus().Return(
+			&rpstore.BoosterStatus{
+				AllPkgs: 501,
+			},
+		)
+
+		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
+		assert.EqualError(t, err, "program is finished")
 	})
 }
