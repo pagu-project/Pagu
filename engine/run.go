@@ -22,6 +22,7 @@ const (
 	CmdBoosterPayment   = "booster-payment"   //!
 	CmdBoosterClaim     = "booster-claim"     //!
 	CmdBoosterWhitelist = "booster-whitelist" //!
+	CmdBoosterStatus    = "booster-status"    //!
 )
 
 // The input is always string.
@@ -202,6 +203,12 @@ func (be *BotEngine) Run(input string) (string, error) {
 		}
 		msg := fmt.Sprintf("Twitter `%s` whitelisted", twitterName)
 		return msg, nil
+
+	case CmdBoosterStatus:
+		pac, _, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists := be.BoosterStatus()
+
+		return fmt.Sprintf("Total Coins: %v PAC\nTotal Packages: %v\nClaimed Packages: %v\nUnClaimed Packages: %v\nPayment Done: %v\nPayment Waiting: %v\nWhite Listed: %v\n",
+			pac, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)

@@ -42,4 +42,5 @@ type IStore interface {
 
 	WhitelistTwitterAccount(twitterID, twitterName, authorizedDiscordID string) error
 	IsWhitelisted(twitterID string) bool
+	BoosterStatus() (int, int, int, int, int, int, int, int)
 }

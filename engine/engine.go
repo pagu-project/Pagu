@@ -444,7 +444,7 @@ func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, erro
 	return party, nil
 }
 
-func (be *BotEngine) BoosterWhitelist(twitterName string, authorizedDiscordID string) error {
+func (be *BotEngine) BoosterWhitelist(twitterName, authorizedDiscordID string) error {
 	if !slices.Contains(be.AuthIDs, authorizedDiscordID) {
 		return fmt.Errorf("unauthorize person")
 	}
@@ -461,6 +461,10 @@ func (be *BotEngine) BoosterWhitelist(twitterName string, authorizedDiscordID st
 	}
 
 	return be.store.WhitelistTwitterAccount(userInfo.TwitterID, userInfo.TwitterName, authorizedDiscordID)
+}
+
+func (be *BotEngine) BoosterStatus() (int, int, int, int, int, int, int, int) {
+	return be.store.BoosterStatus()
 }
 
 func (be *BotEngine) Stop() {

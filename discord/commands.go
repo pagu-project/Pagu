@@ -100,6 +100,10 @@ var commands = []*discordgo.ApplicationCommand{
 		Description: "TestNet reward claim status",
 	},
 	{
+		Name:        "booster-status",
+		Description: "Validator Booster Program Status",
+	},
+	{
 		Name:        "booster-payment",
 		Description: "Create payment link in Validator Booster Program",
 		Options: []*discordgo.ApplicationCommandOption{
@@ -156,4 +160,5 @@ var commandHandlers = map[string]func(*DiscordBot, *discordgo.Session, *discordg
 	"booster-payment":   boosterPaymentCommandHandler,
 	"booster-claim":     boosterClaimCommandHandler,
 	"booster-whitelist": boosterWhitelistCommandHandler,
+	"booster-status":    boosterStatusCommandHandler,
 }
