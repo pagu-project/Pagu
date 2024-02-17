@@ -6,15 +6,18 @@ type IEngine interface {
 	NetworkHealth() (*NetHealthResponse, error)
 	NetworkStatus() (*NetStatus, error)
 	NodeInfo(addr string) (*NodeInfo, error)
+	RewardCalculate(int64, string) (int64, string, int64, error)
+
 	ClaimerInfo(discordID string) (*store.Claimer, error)
 	Claim(discordID string, testnetAddr string, mainnetAddr string) (string, error)
+	ClaimStatus() *store.ClaimStatus
+
 	BotWallet() (string, int64)
-	ClaimStatus() (int64, int64, int64, int64)
-	RewardCalculate(int64, string) (int64, string, int64, error)
+
 	BoosterWhitelist(string, string) error
 	BoosterClaim(string) (*store.TwitterParty, error)
 	BoosterPayment(string, string, string) (*store.TwitterParty, error)
-	BoosterStatus() (int, int, int, int, int, int, int, int)
+	BoosterStatus() *store.BoosterStatus
 
 	Run(input string) (string, error)
 

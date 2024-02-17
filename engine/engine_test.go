@@ -695,6 +695,13 @@ func TestBoosterProgram(t *testing.T) {
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
 		)
+
+		store.EXPECT().BoosterStatus().Return(
+			rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
+
 		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
@@ -707,7 +714,7 @@ func TestBoosterProgram(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(150), party.AmountInPAC)
-		assert.Equal(t, BoosterPrice, party.TotalPrice)
+		assert.Equal(t, 30, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -748,6 +755,13 @@ func TestBoosterProgram(t *testing.T) {
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
 		)
+
+		store.EXPECT().BoosterStatus().Return(
+			rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
+		)
+
 		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
@@ -760,7 +774,7 @@ func TestBoosterProgram(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(200), party.AmountInPAC)
-		assert.Equal(t, BoosterPrice, party.TotalPrice)
+		assert.Equal(t, 30, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -798,6 +812,12 @@ func TestBoosterProgram(t *testing.T) {
 			}, nil,
 		)
 
+		store.EXPECT().BoosterStatus().Return(
+			rpstore.BoosterStatus{
+				AllPkgs: 400,
+			},
+		)
+
 		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(
 			nil,
 		)
@@ -806,8 +826,10 @@ func TestBoosterProgram(t *testing.T) {
 			nil,
 		)
 
-		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
+		p, err := eng.BoosterPayment(discordID, twitterName, valAddr)
 		assert.NoError(t, err)
+
+		assert.Equal(t, 50, p.TotalPrice)
 	})
 
 	t.Run("whitelisted account", func(t *testing.T) {
@@ -844,6 +866,12 @@ func TestBoosterProgram(t *testing.T) {
 			&twitter_api.TweetInfo{
 				CreatedAt: time.Now().AddDate(0, 0, -2),
 			}, nil,
+		)
+
+		store.EXPECT().BoosterStatus().Return(
+			rpstore.BoosterStatus{
+				AllPkgs: 100,
+			},
 		)
 
 		nowPayments.EXPECT().CreatePayment(gomock.Any()).Return(

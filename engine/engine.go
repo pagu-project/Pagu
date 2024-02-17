@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 	"sync"
 	"time"
 
@@ -22,8 +21,6 @@ import (
 	putils "github.com/pactus-project/pactus/util"
 	"github.com/pactus-project/pactus/util/logger"
 )
-
-var BoosterPrice = 30
 
 type BotEngine struct {
 	ctx    context.Context //nolint
@@ -288,7 +285,7 @@ func (be *BotEngine) BotWallet() (string, int64) {
 	return be.wallet.Address(), be.wallet.Balance()
 }
 
-func (be *BotEngine) ClaimStatus() (int64, int64, int64, int64) {
+func (be *BotEngine) ClaimStatus() *store.ClaimStatus {
 	return be.store.ClaimStatus()
 }
 
@@ -323,8 +320,6 @@ func (be *BotEngine) RewardCalculate(stake int64, t string) (int64, string, int6
 func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*store.TwitterParty, error) {
 	be.Lock()
 	defer be.Unlock()
-
-	twitterName = strings.ToLower(twitterName)
 
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
@@ -374,7 +369,7 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 		return nil, err
 	}
 
-	totalPrice := BoosterPrice
+	totalPrice := boosterPrice(be.store.BoosterStatus().AllPkgs) // writing a function only for all packages?
 	amountInPAC := int64(150)
 	if userInfo.Followers > 1000 {
 		amountInPAC = 200
@@ -463,7 +458,7 @@ func (be *BotEngine) BoosterWhitelist(twitterName, authorizedDiscordID string) e
 	return be.store.WhitelistTwitterAccount(userInfo.TwitterID, userInfo.TwitterName, authorizedDiscordID)
 }
 
-func (be *BotEngine) BoosterStatus() (int, int, int, int, int, int, int, int) {
+func (be *BotEngine) BoosterStatus() *store.BoosterStatus {
 	return be.store.BoosterStatus()
 }
 

@@ -53,18 +53,11 @@ func (mr *MockIStoreMockRecorder) AddClaimTransaction(testNetValAddr, txID any) 
 }
 
 // BoosterStatus mocks base method.
-func (m *MockIStore) BoosterStatus() (int, int, int, int, int, int, int, int) {
+func (m *MockIStore) BoosterStatus() *BoosterStatus {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BoosterStatus")
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(int)
-	ret2, _ := ret[2].(int)
-	ret3, _ := ret[3].(int)
-	ret4, _ := ret[4].(int)
-	ret5, _ := ret[5].(int)
-	ret6, _ := ret[6].(int)
-	ret7, _ := ret[7].(int)
-	return ret0, ret1, ret2, ret3, ret4, ret5, ret6, ret7
+	ret0, _ := ret[0].(*BoosterStatus)
+	return ret0
 }
 
 // BoosterStatus indicates an expected call of BoosterStatus.
@@ -74,14 +67,11 @@ func (mr *MockIStoreMockRecorder) BoosterStatus() *gomock.Call {
 }
 
 // ClaimStatus mocks base method.
-func (m *MockIStore) ClaimStatus() (int64, int64, int64, int64) {
+func (m *MockIStore) ClaimStatus() *ClaimStatus {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ClaimStatus")
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(int64)
-	ret2, _ := ret[2].(int64)
-	ret3, _ := ret[3].(int64)
-	return ret0, ret1, ret2, ret3
+	ret0, _ := ret[0].(*ClaimStatus)
+	return ret0
 }
 
 // ClaimStatus indicates an expected call of ClaimStatus.
