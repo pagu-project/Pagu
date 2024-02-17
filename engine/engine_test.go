@@ -939,3 +939,22 @@ func TestBoosterProgram(t *testing.T) {
 		assert.EqualError(t, err, "program is finished")
 	})
 }
+
+func TestBoosterPrice(t *testing.T) {
+	for i := 0; i < 501; i++ {
+		if i < 100 {
+			price := boosterPrice(i)
+			assert.Equal(t, 30, price)
+		}
+
+		if i > 100 && i < 200 {
+			price := boosterPrice(i)
+			assert.Equal(t, 40, price)
+		}
+
+		if i > 200 {
+			price := boosterPrice(i)
+			assert.Equal(t, 50, price)
+		}
+	}
+}
