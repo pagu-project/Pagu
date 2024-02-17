@@ -1,4 +1,4 @@
-name: build check 
+name: build 
 
 on: 
   push:
@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build:
@@ -16,11 +15,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Checkout Repository
         uses: actions/checkout@v4.1.1
 
@@ -28,9 +22,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.21.1
-
-      - name: Print go version
-        run: go version
 
       - name: Build the binary
         run:  make build
