@@ -697,7 +697,7 @@ func TestBoosterProgram(t *testing.T) {
 		)
 
 		store.EXPECT().BoosterStatus().Return(
-			rpstore.BoosterStatus{
+			&rpstore.BoosterStatus{
 				AllPkgs: 100,
 			},
 		)
@@ -714,7 +714,7 @@ func TestBoosterProgram(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, int64(150), party.AmountInPAC)
-		assert.Equal(t, 30, party.TotalPrice)
+		assert.Equal(t, 40, party.TotalPrice)
 		assert.Equal(t, twitterName, party.TwitterName)
 		assert.Equal(t, twitterID, party.TwitterID)
 		assert.Equal(t, valAddr, party.ValAddr)
@@ -757,8 +757,8 @@ func TestBoosterProgram(t *testing.T) {
 		)
 
 		store.EXPECT().BoosterStatus().Return(
-			rpstore.BoosterStatus{
-				AllPkgs: 100,
+			&rpstore.BoosterStatus{
+				AllPkgs: 99,
 			},
 		)
 
@@ -813,7 +813,7 @@ func TestBoosterProgram(t *testing.T) {
 		)
 
 		store.EXPECT().BoosterStatus().Return(
-			rpstore.BoosterStatus{
+			&rpstore.BoosterStatus{
 				AllPkgs: 400,
 			},
 		)
@@ -869,7 +869,7 @@ func TestBoosterProgram(t *testing.T) {
 		)
 
 		store.EXPECT().BoosterStatus().Return(
-			rpstore.BoosterStatus{
+			&rpstore.BoosterStatus{
 				AllPkgs: 100,
 			},
 		)
