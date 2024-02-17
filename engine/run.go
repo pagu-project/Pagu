@@ -205,10 +205,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return msg, nil
 
 	case CmdBoosterStatus:
-		pac, usdt, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists := be.BoosterStatus()
+		pac, _, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists := be.BoosterStatus()
 
-		return fmt.Sprintf("Total Coins: %v PAC\nAmount: %v$\nTotal Packages: %v\nClaimed Packages: %v\nUnClaimed Packages: %v\nPayment Done: %v\nPayment Waiting: %v\nWhite Listed: %v\n",
-			pac, usdt, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists), nil
+		return fmt.Sprintf("Total Coins: %v PAC\nTotal Packages: %v\nClaimed Packages: %v\nUnClaimed Packages: %v\nPayment Done: %v\nPayment Waiting: %v\nWhite Listed: %v\n",
+			pac, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)
