@@ -8,12 +8,3 @@ func CheckArgs(requiredArgs int, args []string) error {
 	}
 	return nil
 }
-
-func boosterPrice(packagesCount int) int {
-	if packagesCount < 100 {
-		return 30
-	} else if packagesCount < 200 {
-		return 40
-	}
-	return 50
-}
