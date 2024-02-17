@@ -923,45 +923,16 @@ func TestBoosterProgram(t *testing.T) {
 	})
 
 	t.Run("program end", func(t *testing.T) {
-		eng, client, store, _, twitter, _, ctx := setup(t)
+		eng, _, store, _, _, _, _ := setup(t)
 
 		twitterName := "abcd"
 		discordID := "123456789"
-		twitterID := "1234"
 		valAddr := "addr"
 
 		store.EXPECT().BoosterStatus().Return(
 			&rpstore.BoosterStatus{
 				AllPkgs: 501,
 			},
-		)
-
-		store.EXPECT().IsWhitelisted(twitterID).Return(
-			true,
-		)
-
-		store.EXPECT().FindTwitterParty(twitterName).Return(
-			nil,
-		)
-
-		client.EXPECT().GetValidatorInfo(ctx, valAddr).Return(
-			nil, fmt.Errorf("not found"),
-		)
-
-		twitter.EXPECT().UserInfo(eng.ctx, twitterName).Return(
-			&twitter_api.UserInfo{
-				TwitterID:   twitterID,
-				TwitterName: twitterName,
-				CreatedAt:   time.Now().AddDate(-1, 0, 0),
-				Followers:   100,
-				IsVerified:  false,
-			}, nil,
-		)
-
-		twitter.EXPECT().RetweetSearch(eng.ctx, discordID, twitterName).Return(
-			&twitter_api.TweetInfo{
-				CreatedAt: time.Now().AddDate(0, 0, -2),
-			}, nil,
 		)
 
 		_, err := eng.BoosterPayment(discordID, twitterName, valAddr)
