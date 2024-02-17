@@ -374,7 +374,7 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 		return nil, err
 	}
 
-	totalPrice := be.boosterPrice(boosterStatus.AllPkgs)
+	totalPrice := boosterPrice(boosterStatus.AllPkgs)
 	amountInPAC := int64(150)
 	if userInfo.Followers > 1000 {
 		amountInPAC = 200
@@ -467,7 +467,7 @@ func (be *BotEngine) BoosterStatus() *store.BoosterStatus {
 	return be.store.BoosterStatus()
 }
 
-func (be *BotEngine) boosterPrice(allPackages int) int {
+func boosterPrice(allPackages int) int {
 	if allPackages < 100 {
 		return 30
 	} else if allPackages < 200 {
