@@ -88,7 +88,7 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore,
 	mockTwitter := twitter_api.NewMockIClient(ctrl)
 	mockNowPayments := nowpayments.NewMockINowpayment(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockNowPayments, []string{""}, ctx, cancel)
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockNowPayments, []string{""}, ctx, cancel, Commands)
 	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockNowPayments, ctx
 }
 

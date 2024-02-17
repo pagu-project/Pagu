@@ -22,6 +22,22 @@ import (
 	"github.com/pactus-project/pactus/util/logger"
 )
 
+// CommandSource represents the source of a command.
+type CommandSource int
+
+// Define constants for CommandSource.
+const (
+	CommandSourceDiscord  CommandSource = 0x01
+	CommandSourceTelegram CommandSource = 0x02
+	CommandSourceExplorer CommandSource = 0x04
+)
+
+type Command struct {
+	Name       string
+	HelpString string
+	Source     CommandSource
+}
+
 type BotEngine struct {
 	ctx    context.Context //nolint
 	cancel func()
@@ -35,7 +51,86 @@ type BotEngine struct {
 	twitterClient twitter_api.IClient
 	AuthIDs       []string
 
+	Commands []Command
+
 	sync.RWMutex
+}
+
+// Define command names as constants.
+const (
+	CommandNameHealth           = "health"
+	CommandNameNetworkStatus    = "network-status"
+	CommandNameNodeInfo         = "node-info"
+	CommandNameClaimerInfo      = "claimer-info"
+	CommandNameClaim            = "claim"
+	CommandNameBotWallet        = "bot-wallet"
+	CommandNameClaimStatus      = "claim-status"
+	CommandNameRewardCalculate  = "reward-calculate"
+	CommandNameBoosterPayment   = "booster-payment"
+	CommandNameBoosterClaim     = "booster-claim"
+	CommandNameBoosterWhitelist = "booster-whitelist"
+	CommandNameBoosterStatus    = "booster-status"
+)
+
+var Commands = []Command{
+	{
+		Name:       CommandNameHealth,
+		HelpString: "Will help you check network health.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameNetworkStatus,
+		HelpString: "Will help you check the status of the Pactus network.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameNodeInfo,
+		HelpString: "Will help you check your node information.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameClaimerInfo,
+		HelpString: "Will help you check your claimer information.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameClaim,
+		HelpString: "Will help you claim your Pactus coins.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name: CommandNameBotWallet, HelpString: "This command checks the balance of bot wallet.",
+	},
+	{
+		Name:       CommandNameClaimStatus,
+		HelpString: "This command shows your claim status.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameRewardCalculate,
+		HelpString: "This command will calculate your potential rewards.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameBoosterPayment,
+		HelpString: "This command checks booster program payment.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameBoosterClaim,
+		HelpString: "Will help you claim booster payment.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameBoosterWhitelist,
+		HelpString: "Command to whitelist people to participate in booster program.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
+	{
+		Name:       CommandNameBoosterStatus,
+		HelpString: "Will help you check your booster status.",
+		Source:     CommandSourceDiscord | CommandSourceTelegram | CommandSourceExplorer,
+	},
 }
 
 func NewBotEngine(cfg *config.Config) (IEngine, error) {
@@ -99,12 +194,13 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("nowpayments loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel, Commands), nil
 }
 
 func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
 	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
 	ctx context.Context, cnl context.CancelFunc,
+	commands []Command,
 ) *BotEngine {
 	return &BotEngine{
 		ctx:           ctx,
