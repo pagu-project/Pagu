@@ -241,3 +241,12 @@ func boosterWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *dis
 	embed := boosterEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
 }
+
+func boosterStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
+		return
+	}
+	result, _ := db.BotEngine.Run("booster-status")
+	embed := boosterEmbed(s, i, result)
+	db.respondEmbed(embed, s, i)
+}

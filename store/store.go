@@ -179,3 +179,38 @@ func (s *Store) IsWhitelisted(twitterID string) bool {
 
 	return exists
 }
+
+func (s *Store) BoosterStatus() (int, int, int, int, int, int, int, int) {
+	pac := 0
+	usdt := 0
+	allPkgs := 0
+	claimedPkgs := 0
+	unClaimedPkgs := 0
+	paymentDone := 0
+	paymentWaiting := 0
+
+	whitelists := 0
+
+	for _, p := range s.twitterParties {
+		allPkgs++
+		pac += int(p.AmountInPAC)
+		usdt += p.TotalPrice
+		if p.NowPaymentsFinished {
+			paymentDone++
+		} else {
+			paymentWaiting++
+		}
+
+		if p.TransactionID != "" {
+			claimedPkgs++
+		} else {
+			unClaimedPkgs++
+		}
+	}
+
+	for range s.twitterWhitelisted {
+		whitelists++
+	}
+
+	return pac, usdt, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists
+}
