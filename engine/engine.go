@@ -321,6 +321,8 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 	be.Lock()
 	defer be.Unlock()
 
+	boosterStatus := be.BoosterStatus()
+
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
 		if existingParty.TransactionID != "" {
@@ -369,7 +371,11 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 		return nil, err
 	}
 
-	totalPrice := be.boosterPrice()
+	if boosterStatus.AllPkgs > 500 {
+		return nil, errors.New("program is finished")
+	}
+
+	totalPrice := be.boosterPrice(boosterStatus.AllPkgs)
 	amountInPAC := int64(150)
 	if userInfo.Followers > 1000 {
 		amountInPAC = 200
@@ -462,12 +468,10 @@ func (be *BotEngine) BoosterStatus() *store.BoosterStatus {
 	return be.store.BoosterStatus()
 }
 
-func (be *BotEngine) boosterPrice() int {
-	ap := be.BoosterStatus().AllPkgs
-
-	if ap < 100 {
+func (be *BotEngine) boosterPrice(allPackages int) int {
+	if allPackages < 100 {
 		return 30
-	} else if ap < 200 {
+	} else if allPackages < 200 {
 		return 40
 	}
 	return 50
