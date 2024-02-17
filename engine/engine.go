@@ -322,6 +322,9 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 	defer be.Unlock()
 
 	boosterStatus := be.BoosterStatus()
+	if boosterStatus.AllPkgs > 500 {
+		return nil, errors.New("program is finished")
+	}
 
 	existingParty := be.store.FindTwitterParty(twitterName)
 	if existingParty != nil {
@@ -369,10 +372,6 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 	discountCode, err := gonanoid.Generate("0123456789", 8)
 	if err != nil {
 		return nil, err
-	}
-
-	if boosterStatus.AllPkgs > 500 {
-		return nil, errors.New("program is finished")
 	}
 
 	totalPrice := be.boosterPrice(boosterStatus.AllPkgs)
