@@ -113,23 +113,19 @@ func (s *Store) AddClaimTransaction(testnetAddr string, txID string) error {
 	return nil
 }
 
-func (s *Store) ClaimStatus() (int64, int64, int64, int64) {
-	var claimed int64
-	var claimedAmount int64
-
-	var notClaimed int64
-	var notClaimedAmount int64
+func (s *Store) ClaimStatus() *ClaimStatus {
+	cs := ClaimStatus{}
 
 	for _, c := range s.claimers {
 		if c.IsClaimed() {
-			claimed++
-			claimedAmount += c.TotalReward
+			cs.Claimed++
+			cs.ClaimedAmount += c.TotalReward
 		} else {
-			notClaimed++
-			notClaimedAmount += c.TotalReward
+			cs.NotClaimed++
+			cs.NotClaimedAmount += c.TotalReward
 		}
 	}
-	return claimed, claimedAmount, notClaimed, notClaimedAmount
+	return &cs
 }
 
 func (s *Store) saveClaimers() error {
@@ -180,37 +176,29 @@ func (s *Store) IsWhitelisted(twitterID string) bool {
 	return exists
 }
 
-func (s *Store) BoosterStatus() (int, int, int, int, int, int, int, int) {
-	pac := 0
-	usdt := 0
-	allPkgs := 0
-	claimedPkgs := 0
-	unClaimedPkgs := 0
-	paymentDone := 0
-	paymentWaiting := 0
-
-	whitelists := 0
+func (s *Store) BoosterStatus() *BoosterStatus {
+	bs := BoosterStatus{}
 
 	for _, p := range s.twitterParties {
-		allPkgs++
-		pac += int(p.AmountInPAC)
-		usdt += p.TotalPrice
+		bs.AllPkgs++
+		bs.Pac += int(p.AmountInPAC)
+		bs.Usdt += p.TotalPrice
 		if p.NowPaymentsFinished {
-			paymentDone++
+			bs.PaymentDone++
 		} else {
-			paymentWaiting++
+			bs.PaymentWaiting++
 		}
 
 		if p.TransactionID != "" {
-			claimedPkgs++
+			bs.ClaimedPkgs++
 		} else {
-			unClaimedPkgs++
+			bs.UnClaimedPkgs++
 		}
 	}
 
 	for range s.twitterWhitelisted {
-		whitelists++
+		bs.Whitelists++
 	}
 
-	return pac, usdt, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists
+	return &bs
 }

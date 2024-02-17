@@ -122,9 +122,9 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return fmt.Sprintf("Address: https://pacscan.org/address/%s\nBalance: %v PAC\n", addr, utils.FormatNumber(int64(util.ChangeToCoin(blnc)))), nil
 
 	case CmdClaimStatus:
-		claimed, claimedAmount, notClaimed, notClaimedAmount := be.ClaimStatus()
+		cs := be.ClaimStatus()
 		return fmt.Sprintf("Claimed rewards count: %v\nClaimed coins: %v PAC's\nNot-claimed rewards count: %v\nNot-claim coins: %v PAC's\n",
-			claimed, util.ChangeToString(claimedAmount), notClaimed, util.ChangeToString(notClaimedAmount)), nil
+			cs.Claimed, util.ChangeToString(cs.ClaimedAmount), cs.NotClaimed, util.ChangeToString(cs.NotClaimedAmount)), nil
 
 	case CmdRewardCalc:
 		if err := CheckArgs(2, args); err != nil {
@@ -205,10 +205,10 @@ func (be *BotEngine) Run(input string) (string, error) {
 		return msg, nil
 
 	case CmdBoosterStatus:
-		pac, _, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists := be.BoosterStatus()
+		bs := be.BoosterStatus()
 
 		return fmt.Sprintf("Total Coins: %v PAC\nTotal Packages: %v\nClaimed Packages: %v\nUnClaimed Packages: %v\nPayment Done: %v\nPayment Waiting: %v\nWhite Listed: %v\n",
-			pac, allPkgs, claimedPkgs, unClaimedPkgs, paymentDone, paymentWaiting, whitelists), nil
+			bs.Pac, bs.AllPkgs, bs.ClaimedPkgs, bs.UnClaimedPkgs, bs.PaymentDone, bs.PaymentWaiting, bs.Whitelists), nil
 
 	default:
 		return "", fmt.Errorf("unknown command: %s", cmd)
