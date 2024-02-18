@@ -181,15 +181,15 @@ func (s *Store) BoosterStatus() *BoosterStatus {
 
 	for _, p := range s.twitterParties {
 		bs.AllPkgs++
-		bs.Pac += int(p.AmountInPAC)
-		bs.Usdt += p.TotalPrice
 		if p.NowPaymentsFinished {
+			bs.Usdt += p.TotalPrice
 			bs.PaymentDone++
 		} else {
 			bs.PaymentWaiting++
 		}
 
 		if p.TransactionID != "" {
+			bs.Pac += int(p.AmountInPAC)
 			bs.ClaimedPkgs++
 		} else {
 			bs.UnClaimedPkgs++
