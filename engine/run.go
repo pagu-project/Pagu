@@ -207,6 +207,8 @@ func (be *BotEngine) Run(input string) (string, error) {
 	case CmdBoosterStatus:
 		bs := be.BoosterStatus()
 
+		be.logger.Info("USDT Amount", "amount", bs.Usdt)
+
 		return fmt.Sprintf("Total Coins: %v PAC\nTotal Packages: %v\nClaimed Packages: %v\nUnClaimed Packages: %v\nPayment Done: %v\nPayment Waiting: %v\nWhite Listed: %v\n",
 			bs.Pac, bs.AllPkgs, bs.ClaimedPkgs, bs.UnClaimedPkgs, bs.PaymentDone, bs.PaymentWaiting, bs.Whitelists), nil
 
