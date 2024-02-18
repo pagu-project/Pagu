@@ -358,7 +358,7 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 			}
 
 			if userInfo.Followers < 200 {
-				return nil, errors.New("the Twitter account has less tha 200 followers." +
+				return nil, errors.New("the Twitter account has less than 200 followers." +
 					" To whitelist your Twitter click here: https://forms.gle/fMaN1xtE322RBEYX8")
 			}
 		}
@@ -446,7 +446,7 @@ func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, erro
 
 func (be *BotEngine) BoosterWhitelist(twitterName, authorizedDiscordID string) error {
 	if !slices.Contains(be.AuthIDs, authorizedDiscordID) {
-		return fmt.Errorf("unauthorize person")
+		return fmt.Errorf("unauthorized person")
 	}
 
 	foundParty := be.store.FindTwitterParty(twitterName)
