@@ -184,27 +184,37 @@ func (be *BotEngine) NodeInfo(valAddress string) (*NodeInfo, error) {
 	ip := utils.ExtractIPFromMultiAddr(peerInfo.Address)
 	geoData := utils.GetGeoIP(ip)
 
-	val, err := be.clientMgr.GetValidatorInfo(valAddress)
-	if err != nil {
-		return nil, err
+	nodeInfo := &NodeInfo{
+		PeerID:     peerID.String(),
+		IPAddress:  peerInfo.Address,
+		Agent:      peerInfo.Agent,
+		Moniker:    peerInfo.Moniker,
+		Country:    geoData.CountryName,
+		City:       geoData.City,
+		RegionName: geoData.RegionName,
+		TimeZone:   geoData.TimeZone,
+		ISP:        geoData.ISP,
 	}
 
-	return &NodeInfo{
-		PeerID:              peerID.String(),
-		IPAddress:           peerInfo.Address,
-		Agent:               peerInfo.Agent,
-		Moniker:             peerInfo.Moniker,
-		Country:             geoData.CountryName,
-		City:                geoData.City,
-		RegionName:          geoData.RegionName,
-		TimeZone:            geoData.TimeZone,
-		ISP:                 geoData.ISP,
-		ValidatorNum:        val.Validator.Number,
-		AvailabilityScore:   val.Validator.AvailabilityScore,
-		StakeAmount:         val.Validator.Stake,
-		LastBondingHeight:   val.Validator.LastBondingHeight,
-		LastSortitionHeight: val.Validator.LastSortitionHeight,
-	}, nil
+	// here we check if the node is also a validator.
+	// if its a validator , then we populate the validator data.
+	// if not validator then we set everything to 0/empty .
+	val, err := be.clientMgr.GetValidatorInfo(valAddress)
+	if err == nil && val != nil {
+		nodeInfo.ValidatorNum = val.Validator.Number
+		nodeInfo.AvailabilityScore = val.Validator.AvailabilityScore
+		nodeInfo.StakeAmount = val.Validator.Stake
+		nodeInfo.LastBondingHeight = val.Validator.LastBondingHeight
+		nodeInfo.LastSortitionHeight = val.Validator.LastSortitionHeight
+	} else {
+		nodeInfo.ValidatorNum = 0
+		nodeInfo.AvailabilityScore = 0
+		nodeInfo.StakeAmount = 0
+		nodeInfo.LastBondingHeight = 0
+		nodeInfo.LastSortitionHeight = 0
+	}
+
+	return nodeInfo, nil
 }
 
 func (be *BotEngine) ClaimerInfo(testNetValAddr string) (*store.Claimer, error) {
