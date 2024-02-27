@@ -35,6 +35,8 @@ type BotEngine struct {
 	twitterClient twitter_api.IClient
 	AuthIDs       []string
 
+	Cmds []Command
+
 	sync.RWMutex
 }
 

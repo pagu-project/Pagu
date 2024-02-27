@@ -24,3 +24,7 @@ type IEngine interface {
 	Stop()
 	Start()
 }
+
+type CommandHandler interface {
+	Execute(source AppID, callerID string, args ...string) (*CommandResult, error)
+}
