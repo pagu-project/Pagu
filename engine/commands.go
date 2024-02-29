@@ -23,10 +23,8 @@ type CommandResult struct {
 }
 
 const (
-	AppIdCLI      AppID = 1
-	AppIdDiscord  AppID = 2
-	AppIdTelegram AppID = 3
-	AppIdGrpc     AppID = 4
+	AppIdCLI     AppID = 1
+	AppIdDiscord AppID = 2
 )
 
 func (be *BotEngine) RegisterCommands() {
@@ -35,21 +33,21 @@ func (be *BotEngine) RegisterCommands() {
 		Desc:   "Help command.",
 		Help:   "This is the help command.",
 		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	NetworkHealthCmd := Command{
 		Name:   "NetworkHealth",
 		Desc:   "Command to check network health.",
 		Help:   "Network health.",
 		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	NetworkStatusCmd := Command{
 		Name:   "NetworkStatus",
 		Desc:   "Command to check the status of pactus chain.",
 		Help:   "check the status of the Pactus network.",
 		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	NodeInfoCmd := Command{
 		Name: "NodeInfo",
@@ -62,7 +60,7 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	RewardCalculateCmd := Command{
 		Name: "RewardCalculate",
@@ -80,7 +78,7 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	ClaimerInfoCmd := Command{
 		Name: "ClaimerInfo",
@@ -93,7 +91,7 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	ClaimCmd := Command{
 		Name: "Claim",
@@ -111,21 +109,21 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	ClaimStatusCmd := Command{
 		Name:   "ClaimStatus",
 		Desc:   "Testnet reward claim status",
 		Help:   "Claim status",
 		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	BotWalletCmd := Command{
 		Name:   "BotWallet",
 		Desc:   "Bot wallet balance.",
 		Help:   "Bot wallet balance",
 		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	BoosterWhitelistCmd := Command{
 		Name: "BoosterWhitelist",
@@ -138,7 +136,7 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	BoosterClaimCmd := Command{
 		Name: "BoosterClaim",
@@ -151,7 +149,7 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	BoosterPaymentCmd := Command{
 		Name: "BoosterPayment",
@@ -169,14 +167,14 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 	BoosterStatusCmd := Command{
 		Name:   "BoosterStatus",
 		Desc:   "Validator Booster Program Status",
 		Help:   "Booster status",
 		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram, AppIdGrpc},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 
 	be.Cmds = append(be.Cmds, HelpCmd)
