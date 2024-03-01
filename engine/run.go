@@ -1,11 +1,12 @@
 package engine
 
 import (
+	"fmt"
 	"strings"
 )
 
 // CommandHandler is a function type for handling commands.
-type CommandHandler func(be *BotEngine, args []string) (string, error)
+type CommandHandler func(be *BotEngine, args []string) (*CommandResult, error)
 
 const (
 	CmdClaim            = "claim"             //!
@@ -25,19 +26,19 @@ const (
 
 // CommandHandlers is a map of command names to their corresponding handlers.
 var CommandHandlers = map[string]CommandHandler{
-	CmdClaim:            ClaimHandler,
-	CmdClaimerInfo:      ClaimerInfoHandler,
-	CmdNetworkHealth:    NetworkHealthHandler,
-	CmdNodeInfo:         NodeInfoHandler,
-	CmdNetworkStatus:    NetworkStatusHandler,
-	CmdBotWallet:        BotWalletHandler,
-	CmdClaimStatus:      ClaimStatusHandler,
-	CmdRewardCalc:       RewardCalcHandler,
-	CmdBoosterPayment:   BoosterPaymentHandler,
-	CmdBoosterClaim:     BoosterClaimHandler,
-	CmdBoosterWhitelist: BoosterWhitelistHandler,
-	CmdBoosterStatus:    BoosterStatusHandler,
-	CmdDefault:          DefaultCommandHandler,
+	CmdClaim:            (*BotEngine).ClaimHandler,
+	CmdClaimerInfo:      (*BotEngine).ClaimerInfoHandler,
+	CmdNetworkHealth:    (*BotEngine).NetworkHealthHandler,
+	CmdNodeInfo:         (*BotEngine).NodeInfoHandler,
+	CmdNetworkStatus:    (*BotEngine).NetworkStatusHandler,
+	CmdBotWallet:        (*BotEngine).BotWalletHandler,
+	CmdClaimStatus:      (*BotEngine).ClaimStatusHandler,
+	CmdRewardCalc:       (*BotEngine).RewardCalcHandler,
+	CmdBoosterPayment:   (*BotEngine).BoosterPaymentHandler,
+	CmdBoosterClaim:     (*BotEngine).BoosterClaimHandler,
+	CmdBoosterWhitelist: (*BotEngine).BoosterWhitelistHandler,
+	CmdBoosterStatus:    (*BotEngine).BoosterStatusHandler,
+	CmdDefault:          (*BotEngine).DefaultCommandHandler,
 }
 
 // The input is always string.
@@ -45,12 +46,16 @@ var CommandHandlers = map[string]CommandHandler{
 //	The input format is like: [Command] <Arguments ...>
 //
 // The output is always string, but format might be JSON. ???
-func (be *BotEngine) Run(input string) (string, error) {
-	cmd, args := be.parseQuery(input)
+
+func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*CommandResult, error) {
+	cmd, args := be.parseQuery(strings.Join(inputs, " "))
 	handler, found := CommandHandlers[cmd]
 	if !found {
 		// handler unknown commands.
-		return DefaultCommandHandler(be, args)
+		return &CommandResult{
+			Successful: false,
+			Message:    fmt.Sprintf("unknown command: %s", args[0]),
+		}, nil
 	}
 	return handler(be, args)
 }

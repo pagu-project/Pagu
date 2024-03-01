@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kehiy/RoboPac/engine"
 )
 
 func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
@@ -29,74 +30,74 @@ func helpEmbed(s *discordgo.Session) *discordgo.MessageEmbed {
 	}
 }
 
-func claimEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func claimEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Claim Result💸",
-		Description: result,
+		Description: result.Message,
 		Color:       GREEN,
 	}
 }
 
-func claimerInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func claimerInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Claimer Infoℹ️",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }
 
-func nodeInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func nodeInfoEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Node Info🛟",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }
 
-func networkHealthEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string, color int) *discordgo.MessageEmbed {
+func networkHealthEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult, color int) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Network Health🧑‍⚕️",
-		Description: result,
+		Description: result.Message,
 		Color:       color,
 	}
 }
 
-func networkStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func networkStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Network Status🕸️",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }
 
-func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func botWalletEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Bot Wallet🪙",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }
 
-func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func claimStatusEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Claim's Status📃",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }
 
-func rewardCalcEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func rewardCalcEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Validator reward calculation🧮",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }
 
-func boosterEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result string) *discordgo.MessageEmbed {
+func boosterEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, result *engine.CommandResult) *discordgo.MessageEmbed {
 	return &discordgo.MessageEmbed{
 		Title:       "Pactus Validator Booster Program ✨",
-		Description: result,
+		Description: result.Message,
 		Color:       PACTUS,
 	}
 }

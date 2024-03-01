@@ -27,20 +27,24 @@ func RunCommand(parentCmd *cobra.Command) {
 		config, err := config.Load()
 		if err != nil {
 			log.Panic("error loading configuration", "err", err)
+			return
 		}
 
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
 		if err != nil {
 			log.Panic("could not start discord bot", "err", err)
+			return
 		}
 
+		botEngine.RegisterCommands()
 		botEngine.Start()
 
 		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,
 			config.DiscordBotCfg.DiscordGuildID)
 		if err != nil {
 			log.Panic("could not start discord bot", "err", err)
+			return
 		}
 		discordBot.Start()
 

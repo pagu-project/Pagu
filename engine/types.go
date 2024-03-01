@@ -39,3 +39,8 @@ type NodeInfo struct {
 	LastBondingHeight   uint32
 	LastSortitionHeight uint32
 }
+
+type CommandResult struct {
+	Message    string
+	Successful bool
+}

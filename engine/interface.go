@@ -19,7 +19,10 @@ type IEngine interface {
 	BoosterPayment(string, string, string) (*store.TwitterParty, error)
 	BoosterStatus() *store.BoosterStatus
 
-	Run(input string) (string, error)
+	Run(appID AppID, callerID string, inputs []string) (*CommandResult, error)
+	Commands() []Command
+
+	RegisterCommands()
 
 	Stop()
 	Start()

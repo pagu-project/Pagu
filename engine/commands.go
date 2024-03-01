@@ -17,11 +17,6 @@ type Args struct {
 	Optional bool
 }
 
-type CommandResult struct {
-	Message    string
-	Successful bool
-}
-
 const (
 	AppIdCLI     AppID = 1
 	AppIdDiscord AppID = 2
