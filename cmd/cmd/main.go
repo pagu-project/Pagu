@@ -49,8 +49,6 @@ func run(cmd *cobra.Command, args []string) {
 
 		if strings.ToLower(input) == "exit" {
 			cmd.Println("exiting from repl")
-
-			return
 		}
 
 		callerID := args[0]
