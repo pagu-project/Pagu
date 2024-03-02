@@ -4,15 +4,28 @@ go 1.21.1
 
 require (
 	github.com/g8rswimmer/go-twitter/v2 v2.1.5
+	github.com/glebarez/sqlite v1.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/pactus-project/pactus v0.20.1-0.20240123172127-c5fe20fc3942
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.58.3
+	gorm.io/gorm v1.25.5
 )
 
-require github.com/gorilla/websocket v1.5.1 // indirect
+require (
+	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/glebarez/go-sqlite v1.21.2 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
+	modernc.org/libc v1.22.5 // indirect
+	modernc.org/mathutil v1.5.0 // indirect
+	modernc.org/memory v1.5.0 // indirect
+	modernc.org/sqlite v1.23.1 // indirect
+)
 
 require (
 	github.com/bwmarrin/discordgo v0.27.1
