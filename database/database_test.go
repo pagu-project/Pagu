@@ -24,7 +24,7 @@ func TestMember(t *testing.T) {
 	discordID := "123456789"
 	user := &User{
 		DiscordID:      discordID,
-		Address:        "pc1zrandomaddr",
+		DepositAddress: "pc1zrandomaddr",
 		OpenOffers:     10,
 		HasOpenPayment: false,
 	}
@@ -44,7 +44,7 @@ func TestMember(t *testing.T) {
 		u, err := db.GetUser(discordID)
 		require.NoError(t, err)
 
-		assert.Equal(t, user.Address, u.Address)
+		assert.Equal(t, user.DepositAddress, u.DepositAddress)
 		assert.Equal(t, user.DiscordID, u.DiscordID)
 		assert.Equal(t, user.OpenOffers, u.OpenOffers)
 		assert.Equal(t, user.HasOpenPayment, u.HasOpenPayment)
