@@ -10,6 +10,7 @@ import (
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
+	"github.com/kehiy/RoboPac/database"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/nowpayments"
 	"github.com/kehiy/RoboPac/store"
@@ -28,6 +29,7 @@ type BotEngine struct {
 
 	wallet      wallet.IWallet
 	store       store.IStore
+	db          *database.DB
 	nowpayments nowpayments.INowpayment
 	clientMgr   *client.Mgr
 	logger      *log.SubLogger
@@ -89,11 +91,19 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("store loaded successfully", "path", cfg.StorePath)
 
+	// twitter
 	twitterClient, err := twitter_api.NewClient(cfg.TwitterAPICfg.BearerToken, cfg.TwitterAPICfg.TwitterID)
 	if err != nil {
 		log.Panic("could not start twitter client", "err", err)
 	}
 	log.Info("twitterClient loaded successfully")
+
+	// load database
+	db, err := database.NewDB("robopac.db")
+	if err != nil {
+		log.Panic("could not load database", "err", err)
+	}
+	log.Info("database loaded successfully")
 
 	nowpayments, err := nowpayments.NewNowPayments(&cfg.NowPaymentsConfig)
 	if err != nil {
@@ -101,10 +111,10 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	}
 	log.Info("nowpayments loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(eSl, cm, wallet, store, db, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore,
+func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore, db *database.DB,
 	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
@@ -115,6 +125,7 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		wallet:        w,
 		clientMgr:     cm,
 		store:         s,
+		db:            db,
 		twitterClient: twitterClient,
 		nowpayments:   nowpayments,
 		AuthIDs:       authIDs,

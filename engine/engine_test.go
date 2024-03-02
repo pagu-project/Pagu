@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/kehiy/RoboPac/client"
+	"github.com/kehiy/RoboPac/database"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/nowpayments"
 	rpstore "github.com/kehiy/RoboPac/store"
@@ -88,7 +90,13 @@ func setup(t *testing.T) (*BotEngine, *client.MockIClient, *rpstore.MockIStore,
 	mockTwitter := twitter_api.NewMockIClient(ctrl)
 	mockNowPayments := nowpayments.NewMockINowpayment(ctrl)
 
-	eng := newBotEngine(sl, cm, mockWallet, mockStore, mockTwitter, mockNowPayments, []string{""}, ctx, cancel)
+	file, err := os.CreateTemp("", "temp-db")
+	assert.NoError(t, err)
+
+	db, err := database.NewDB(file.Name())
+	assert.NoError(t, err)
+
+	eng := newBotEngine(sl, cm, mockWallet, mockStore, db, mockTwitter, mockNowPayments, []string{""}, ctx, cancel)
 	return eng, mockClient, mockStore, mockWallet, mockTwitter, mockNowPayments, ctx
 }
 
