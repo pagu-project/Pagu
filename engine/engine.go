@@ -50,7 +50,7 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	localClient, err := client.NewClient(cfg.LocalNode)
 	if err != nil {
 		cancel()
-		log.Error("can't make a new local client", "err", err, "addr", cfg.LocalNode)
+		return nil, err
 	}
 
 	cm.AddClient(localClient)
@@ -79,7 +79,8 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	// load or create wallet.
 	wallet := wallet.Open(cfg, wSl)
 	if wallet == nil {
-		log.Panic("wallet could not be opened, wallet is nil", "path", cfg.WalletPath)
+		cancel()
+		return nil, errors.New("can't open the wallet")
 	}
 
 	log.Info("wallet opened successfully", "address", wallet.Address())
@@ -87,21 +88,24 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	// load store.
 	store, err := store.NewStore(cfg.StorePath, sSl)
 	if err != nil {
-		log.Panic("could not load store", "err", err)
+		cancel()
+		return nil, err
 	}
 	log.Info("store loaded successfully", "path", cfg.StorePath)
 
 	// twitter
 	twitterClient, err := twitter_api.NewClient(cfg.TwitterAPICfg.BearerToken, cfg.TwitterAPICfg.TwitterID)
 	if err != nil {
-		log.Panic("could not start twitter client", "err", err)
+		cancel()
+		return nil, err
 	}
 	log.Info("twitterClient loaded successfully")
 
 	// load database
-	db, err := database.NewDB("robopac.db")
+	db, err := database.NewDB(cfg.DataBasePath)
 	if err != nil {
-		log.Panic("could not load database", "err", err)
+		cancel()
+		return nil, err
 	}
 	log.Info("database loaded successfully")
 
