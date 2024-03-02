@@ -22,7 +22,7 @@ func TestMember(t *testing.T) {
 	db := setup(t)
 
 	discordID := "123456789"
-	user := &User{
+	user := &DiscordUser{
 		DiscordID:      discordID,
 		DepositAddress: "pc1zrandomaddr",
 	}

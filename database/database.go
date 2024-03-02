@@ -17,8 +17,8 @@ func NewDB(path string) (*DB, error) {
 		return nil, errors.New("can't open database")
 	}
 
-	if !db.Migrator().HasTable(&User{}) {
-		if err := db.AutoMigrate(&User{}); err != nil {
+	if !db.Migrator().HasTable(&DiscordUser{}) {
+		if err := db.AutoMigrate(&DiscordUser{}); err != nil {
 			return nil, errors.New("can't auto migrate member table")
 		}
 	}
@@ -28,7 +28,7 @@ func NewDB(path string) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) AddUser(m *User) error {
+func (db *DB) AddUser(m *DiscordUser) error {
 	result := db.Create(m)
 	if result.Error != nil {
 		return result.Error
@@ -37,8 +37,8 @@ func (db *DB) AddUser(m *User) error {
 	return nil
 }
 
-func (db *DB) GetUser(dcID string) (*User, error) {
-	var m User
+func (db *DB) GetUser(dcID string) (*DiscordUser, error) {
+	var m DiscordUser
 
 	result := db.First(&m, "discord_id = ?", dcID)
 	if result.Error != nil {

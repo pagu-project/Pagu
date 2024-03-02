@@ -2,7 +2,7 @@ package database
 
 import "gorm.io/gorm"
 
-type User struct {
+type DiscordUser struct {
 	gorm.Model
 
 	DiscordID      string `gorm:"unique"          json:"discord_id"`
