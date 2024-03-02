@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/log"
 )
 
@@ -52,7 +53,7 @@ func claimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Inte
 
 	command := fmt.Sprintf("claim %s %s %s", i.Member.User.ID, testnetAddr, mainnetAddr)
 
-	result, err := db.BotEngine.Run(command)
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, command, []string{testnetAddr, mainnetAddr})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 
@@ -71,7 +72,7 @@ func claimerInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 	testnetAddr := i.ApplicationCommandData().Options[0].StringValue()
 	command := fmt.Sprintf("claimer-info %s", testnetAddr)
 
-	result, err := db.BotEngine.Run(command)
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, command, []string{testnetAddr})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 
@@ -90,7 +91,7 @@ func nodeInfoCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.I
 	valAddress := i.ApplicationCommandData().Options[0].StringValue()
 	command := fmt.Sprintf("node-info %s", valAddress)
 
-	result, err := db.BotEngine.Run(command)
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, command, []string{valAddress})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 
@@ -108,7 +109,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 
 	command := "network-health"
 
-	result, err := db.BotEngine.Run(command)
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, command, []string{})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 
@@ -116,7 +117,7 @@ func networkHealthCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 	}
 
 	var color int
-	if strings.Contains(result, "Healthy") {
+	if strings.Contains(result.Message, "Healthy") {
 		color = GREEN
 	} else {
 		color = RED
@@ -131,7 +132,7 @@ func networkStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 		return
 	}
 
-	result, err := db.BotEngine.Run("network")
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, "network", []string{})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
@@ -146,7 +147,7 @@ func walletCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.Int
 		return
 	}
 
-	result, _ := db.BotEngine.Run("wallet")
+	result, _ := db.BotEngine.Run(engine.AppIdDiscord, "wallet", []string{})
 
 	embed := botWalletEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
@@ -157,7 +158,7 @@ func claimStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordg
 		return
 	}
 
-	result, _ := db.BotEngine.Run("claim-status")
+	result, _ := db.BotEngine.Run(engine.AppIdDiscord, "claim-status", []string{})
 
 	embed := claimStatusEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
@@ -171,7 +172,7 @@ func rewardCalcCommandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo
 	stake := i.ApplicationCommandData().Options[0].StringValue()
 	time := i.ApplicationCommandData().Options[1].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("calc-reward %v %v", stake, time))
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, fmt.Sprintf("calc-reward %v %v", stake, time), []string{stake, time})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 
@@ -190,7 +191,8 @@ func boosterPaymentCommandHandler(db *DiscordBot, s *discordgo.Session, i *disco
 	twitterName := i.ApplicationCommandData().Options[0].StringValue()
 	valAddr := i.ApplicationCommandData().Options[1].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("booster-payment %v %v %v", i.Member.User.ID, twitterName, valAddr))
+	result, err := db.BotEngine.Run(engine.AppIdDiscord,
+		fmt.Sprintf("booster-payment %v %v %v", i.Member.User.ID, twitterName, valAddr), []string{twitterName, valAddr})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
@@ -207,7 +209,7 @@ func boosterClaimCommandHandler(db *DiscordBot, s *discordgo.Session, i *discord
 
 	twitterID := i.ApplicationCommandData().Options[0].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("booster-claim %v", twitterID))
+	result, err := db.BotEngine.Run(engine.AppIdDiscord, fmt.Sprintf("booster-claim %v", twitterID), []string{twitterID})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
@@ -224,14 +226,20 @@ func boosterWhitelistCommandHandler(db *DiscordBot, s *discordgo.Session, i *dis
 
 	twitterName := i.ApplicationCommandData().Options[0].StringValue()
 
-	result, err := db.BotEngine.Run(fmt.Sprintf("booster-whitelist %v %v", twitterName, i.Member.User.ID))
+	result, err := db.BotEngine.Run(engine.AppIdDiscord,
+		fmt.Sprintf("booster-whitelist %v %v", twitterName, i.Member.User.ID), []string{twitterName})
 	if err != nil {
 		db.respondErrMsg(err, s, i)
 		return
 	}
 
-	pubMsg := fmt.Sprintf("The Twitter account @%s has been successfully whitelisted!", twitterName)
-	pubEmbed := boosterEmbed(s, i, pubMsg)
+	// Create a CommandResult instance with the message
+	pubResult := engine.CommandResult{
+		Message:    fmt.Sprintf("The Twitter account @%s has been successfully whitelisted!", twitterName),
+		Successful: true, // Assuming the operation was successful
+	}
+
+	pubEmbed := boosterEmbed(s, i, &pubResult)
 	_, err = s.ChannelMessageSendEmbed("1208143718482182184", pubEmbed)
 	if err != nil {
 		db.respondErrMsg(err, s, i)
@@ -246,7 +254,7 @@ func boosterStatusCommandHandler(db *DiscordBot, s *discordgo.Session, i *discor
 	if !checkMessage(i, s, db.GuildID, i.Member.User.ID) {
 		return
 	}
-	result, _ := db.BotEngine.Run("booster-status")
+	result, _ := db.BotEngine.Run(engine.AppIdDiscord, "booster-status", []string{})
 	embed := boosterEmbed(s, i, result)
 	db.respondEmbed(embed, s, i)
 }

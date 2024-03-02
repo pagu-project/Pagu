@@ -35,6 +35,7 @@ func RunCommand(parentCmd *cobra.Command) {
 			log.Panic("could not start discord bot", "err", err)
 		}
 
+		botEngine.RegisterCommands()
 		botEngine.Start()
 
 		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,

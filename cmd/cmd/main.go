@@ -34,6 +34,8 @@ func run(cmd *cobra.Command, args []string) {
 		log.Panic("could not start discord bot", "err", err)
 	}
 
+	botEngine.RegisterCommands()
+
 	botEngine.Start()
 
 	log.Info("repl started")
@@ -47,11 +49,12 @@ func run(cmd *cobra.Command, args []string) {
 
 		if strings.ToLower(input) == "exit" {
 			cmd.Println("exiting from repl")
-
-			return
 		}
 
-		response, err := botEngine.Run(input)
+		callerID := args[0]
+		inputs := strings.Split(input, " ")
+
+		response, err := botEngine.Run(engine.AppIdCLI, callerID, inputs)
 		if err != nil {
 			cmd.PrintErr(err)
 		}
