@@ -25,8 +25,6 @@ func TestMember(t *testing.T) {
 	user := &User{
 		DiscordID:      discordID,
 		DepositAddress: "pc1zrandomaddr",
-		OpenOffers:     10,
-		HasOpenPayment: false,
 	}
 
 	t.Run("test add user", func(t *testing.T) {
@@ -46,7 +44,5 @@ func TestMember(t *testing.T) {
 
 		assert.Equal(t, user.DepositAddress, u.DepositAddress)
 		assert.Equal(t, user.DiscordID, u.DiscordID)
-		assert.Equal(t, user.OpenOffers, u.OpenOffers)
-		assert.Equal(t, user.HasOpenPayment, u.HasOpenPayment)
 	})
 }
