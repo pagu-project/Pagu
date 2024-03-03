@@ -43,7 +43,10 @@ func RunCommand(parentCmd *cobra.Command) {
 		if err != nil {
 			log.Panic("could not start discord bot", "err", err)
 		}
-		discordBot.Start()
+
+		if err = discordBot.Start(); err != nil {
+			log.Panic("could not start discord bot", "err", err)
+		}
 
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

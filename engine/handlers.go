@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kehiy/RoboPac/database"
@@ -13,7 +14,6 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/pactus-project/pactus/util"
-	putils "github.com/pactus-project/pactus/util"
 	"github.com/pactus-project/pactus/util/logger"
 )
 
@@ -60,10 +60,7 @@ func (be *BotEngine) networkStatusHandler(_ AppID, _ string, _ ...string) (*Comm
 	}
 
 	net := NetStatus{
-		ConnectedPeersCount: netInfo.ConnectedPeersCount,
 		ValidatorsCount:     chainInfo.TotalValidators,
-		TotalBytesSent:      netInfo.TotalSentBytes,
-		TotalBytesReceived:  netInfo.TotalReceivedBytes,
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
 		TotalNetworkPower:   chainInfo.TotalPower,
 		TotalCommitteePower: chainInfo.CommitteePower,
@@ -265,7 +262,7 @@ func (be *BotEngine) claimStatusHandler(_ AppID, _ string, _ ...string) (*Comman
 	}, nil
 }
 
-func (be *BotEngine) rewardCalculateHandler(_ AppID, _ string, args ...string) (*CommandResult, error) {
+func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*CommandResult, error) {
 	stake, err := strconv.Atoi(args[0])
 	if err != nil {
 		return nil, err
@@ -295,7 +292,7 @@ func (be *BotEngine) rewardCalculateHandler(_ AppID, _ string, args ...string) (
 		return nil, err
 	}
 
-	reward := int64(stake*blocks) / int64(putils.ChangeToCoin(bi.TotalPower))
+	reward := int64(stake*blocks) / int64(util.ChangeToCoin(bi.TotalPower))
 
 	result := fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
@@ -465,7 +462,7 @@ func (be *BotEngine) boosterClaimHandler(_ AppID, _ string, args ...string) (*Co
 	}, nil
 }
 
-func (be *BotEngine) boosterWhitelistHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+func (be *BotEngine) boosterWhitelistHandler(_ AppID, callerID string, args ...string) (*CommandResult, error) {
 	if !slices.Contains(be.AuthIDs, callerID) {
 		return nil, fmt.Errorf("unauthorized person")
 	}
@@ -508,7 +505,7 @@ func (be *BotEngine) boosterStatusHandler(_ AppID, _ string, _ ...string) (*Comm
 	}, nil
 }
 
-func (be *BotEngine) depositAddressHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+func (be *BotEngine) depositAddressHandler(_ AppID, callerID string, _ ...string) (*CommandResult, error) {
 	u, err := be.db.GetUser(callerID)
 	if err == nil {
 		return MakeSuccessfulResult(
@@ -538,4 +535,35 @@ func (be *BotEngine) depositAddressHandler(source AppID, callerID string, args .
 	return MakeSuccessfulResult(
 		"Deposit address crated for you successfully: %s", addr,
 	), nil
+}
+
+func (be *BotEngine) help(source AppID, _ string, args ...string) (*CommandResult, error) {
+	helpStr := ""
+	if len(args) > 0 {
+		cmdName := args[0]
+		cmd := be.commandByName(cmdName)
+		if cmd == nil {
+			return nil, fmt.Errorf("unknown command: %s", cmdName)
+		}
+
+		argsStr := ""
+		for _, arg := range cmd.Args {
+			argsStr += fmt.Sprintf("<%v> ", arg.Name)
+		}
+		argsStr = argsStr[:len(argsStr)-1]
+
+		helpStr += cmd.Desc
+		helpStr += fmt.Sprintf("%v\nUsage: `%v %v`", cmd.Help, cmd.Name, argsStr)
+	} else {
+		helpStr += "List of available commands:\n"
+		for _, cmd := range be.Cmds {
+			if !slices.Contains(cmd.AppIDs, source) {
+				continue
+			}
+
+			padding := 12 - len(cmd.Name)
+			helpStr += fmt.Sprintf("`%s`:%s%v\n", cmd.Name, strings.Repeat(" ", padding), cmd.Desc)
+		}
+	}
+	return MakeSuccessfulResult(helpStr), nil
 }

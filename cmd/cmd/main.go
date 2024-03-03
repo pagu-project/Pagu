@@ -66,7 +66,7 @@ func run(cmd *cobra.Command, args []string) {
 func main() {
 	rootCmd := &cobra.Command{
 		Use:     "robopac-cmd",
-		Version: "0.0.1",
+		Version: "0.0.1", //! should come from version.go file.
 		Run:     run,
 	}
 

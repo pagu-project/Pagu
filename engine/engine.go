@@ -33,7 +33,7 @@ type BotEngine struct {
 	sync.RWMutex              //! remove this.
 }
 
-func NewBotEngine(cfg *config.Config) (IEngine, error) {
+func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	cm := client.NewClientMgr(ctx)
@@ -125,6 +125,36 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		nowpayments:   nowpayments,
 		AuthIDs:       authIDs,
 	}
+}
+
+func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
+	netInfo, err := be.clientMgr.GetNetworkInfo()
+	if err != nil {
+		return nil, err
+	}
+
+	chainInfo, err := be.clientMgr.GetBlockchainInfo()
+	if err != nil {
+		return nil, err
+	}
+
+	cs, err := be.clientMgr.GetCirculatingSupply()
+	if err != nil {
+		cs = 0
+	}
+
+	return &NetStatus{
+		ConnectedPeersCount: netInfo.ConnectedPeersCount,
+		ValidatorsCount:     chainInfo.TotalValidators,
+		TotalBytesSent:      netInfo.TotalSentBytes,
+		TotalBytesReceived:  netInfo.TotalReceivedBytes,
+		CurrentBlockHeight:  chainInfo.LastBlockHeight,
+		TotalNetworkPower:   chainInfo.TotalPower,
+		TotalCommitteePower: chainInfo.CommitteePower,
+		NetworkName:         netInfo.NetworkName,
+		TotalAccounts:       chainInfo.TotalAccounts,
+		CirculatingSupply:   cs,
+	}, nil
 }
 
 func (be *BotEngine) Stop() {
