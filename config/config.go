@@ -18,6 +18,7 @@ type Config struct {
 	NetworkNodes      []string
 	LocalNode         string
 	StorePath         string
+	DataBasePath      string
 	AuthIDs           []string
 	DiscordBotCfg     DiscordBotConfig
 	TwitterAPICfg     TwitterAPIConfig
@@ -49,6 +50,7 @@ func Load(filePaths ...string) (*Config, error) {
 		LocalNode:      os.Getenv("LOCAL_NODE"),
 		NetworkNodes:   strings.Split(os.Getenv("NETWORK_NODES"), ","),
 		StorePath:      os.Getenv("STORE_PATH"),
+		DataBasePath:   os.Getenv("DATABASE_PATH"),
 		AuthIDs:        strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
