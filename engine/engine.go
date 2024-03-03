@@ -494,6 +494,29 @@ func (be *BotEngine) BoosterStatus() *store.BoosterStatus {
 	return be.store.BoosterStatus()
 }
 
+func (be *BotEngine) CreateDepositAddress(discordID string) (string, error) {
+	if be.db.IsUser(discordID) {
+		return "", errors.New("you are already a discord user with deposit address")
+	}
+
+	addr, err := be.wallet.NewAddress(fmt.Sprintf("deposit address for %s", discordID))
+	if err != nil {
+		return "", err
+	}
+
+	err = be.db.AddUser(
+		&database.DiscordUser{
+			DiscordID:      discordID,
+			DepositAddress: addr,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return addr, nil
+}
+
 func (be *BotEngine) Stop() {
 	be.logger.Info("shutting bot engine down...")
 

@@ -81,6 +81,21 @@ func (mr *MockIWalletMockRecorder) BondTransaction(arg0, arg1, arg2, arg3 any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BondTransaction", reflect.TypeOf((*MockIWallet)(nil).BondTransaction), arg0, arg1, arg2, arg3)
 }
 
+// NewAddress mocks base method.
+func (m *MockIWallet) NewAddress(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewAddress", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewAddress indicates an expected call of NewAddress.
+func (mr *MockIWalletMockRecorder) NewAddress(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewAddress", reflect.TypeOf((*MockIWallet)(nil).NewAddress), arg0)
+}
+
 // TransferTransaction mocks base method.
 func (m *MockIWallet) TransferTransaction(arg0, arg1, arg2 string, arg3 int64) (string, error) {
 	m.ctrl.T.Helper()

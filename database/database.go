@@ -47,3 +47,15 @@ func (db *DB) GetUser(dcID string) (*DiscordUser, error) {
 
 	return &m, nil
 }
+
+func (db *DB) IsUser(dcID string) bool {
+	var exists bool
+
+	_ = db.Model(&DiscordUser{}).
+		Select("count(*) > 0").
+		Where("discord_id = ?", dcID).
+		Find(&exists).
+		Error
+
+	return exists
+}
