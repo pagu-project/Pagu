@@ -48,7 +48,7 @@ func (db *DB) GetUser(dcID string) (*DiscordUser, error) {
 	return &m, nil
 }
 
-func (db *DB) IsUser(dcID string) bool {
+func (db *DB) HasUser(dcID string) bool {
 	var exists bool
 
 	_ = db.Model(&DiscordUser{}).

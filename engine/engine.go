@@ -494,9 +494,10 @@ func (be *BotEngine) BoosterStatus() *store.BoosterStatus {
 	return be.store.BoosterStatus()
 }
 
-func (be *BotEngine) CreateDepositAddress(discordID string) (string, error) {
-	if be.db.IsUser(discordID) {
-		return "", errors.New("you are already a discord user with deposit address")
+func (be *BotEngine) DepositAddress(discordID string) (string, error) {
+	u, err := be.db.GetUser(discordID)
+	if err == nil {
+		return u.DepositAddress, nil
 	}
 
 	addr, err := be.wallet.NewAddress(fmt.Sprintf("deposit address for %s", discordID))

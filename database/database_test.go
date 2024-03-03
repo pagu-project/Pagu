@@ -47,7 +47,7 @@ func TestMember(t *testing.T) {
 	})
 }
 
-func TestIsMember(t *testing.T) {
+func TestHasUser(t *testing.T) {
 	db := setup(t)
 
 	err := db.AddUser(&DiscordUser{
@@ -55,6 +55,6 @@ func TestIsMember(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	assert.True(t, db.IsUser("123456"))
-	assert.False(t, db.IsUser("654321"))
+	assert.True(t, db.HasUser("123456"))
+	assert.False(t, db.HasUser("654321"))
 }
