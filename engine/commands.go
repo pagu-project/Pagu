@@ -30,6 +30,7 @@ func (be *BotEngine) RegisterCommands() {
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	NetworkHealthCmd := Command{
 		Name:   "NetworkHealth",
 		Desc:   "Command to check network health.",
@@ -37,6 +38,7 @@ func (be *BotEngine) RegisterCommands() {
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	NetworkStatusCmd := Command{
 		Name:   "NetworkStatus",
 		Desc:   "Command to check the status of pactus chain.",
@@ -44,6 +46,7 @@ func (be *BotEngine) RegisterCommands() {
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	NodeInfoCmd := Command{
 		Name: "NodeInfo",
 		Desc: "Command to see information on your node.",
@@ -57,6 +60,7 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	RewardCalculateCmd := Command{
 		Name: "RewardCalculate",
 		Desc: "Command to calculate your potential staking rewards.",
@@ -75,6 +79,7 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	ClaimerInfoCmd := Command{
 		Name: "ClaimerInfo",
 		Desc: "Get claimer info.",
@@ -88,6 +93,7 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	ClaimCmd := Command{
 		Name: "Claim",
 		Desc: "Claim your Pactus coins.",
@@ -106,6 +112,7 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	ClaimStatusCmd := Command{
 		Name:   "ClaimStatus",
 		Desc:   "Testnet reward claim status",
@@ -113,6 +120,7 @@ func (be *BotEngine) RegisterCommands() {
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	BotWalletCmd := Command{
 		Name:   "BotWallet",
 		Desc:   "Bot wallet balance.",
@@ -120,6 +128,7 @@ func (be *BotEngine) RegisterCommands() {
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	BoosterWhitelistCmd := Command{
 		Name: "BoosterWhitelist",
 		Desc: "Whitelist a non-active Twitter account in Validator Booster Program",
@@ -133,6 +142,7 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	BoosterClaimCmd := Command{
 		Name: "BoosterClaim",
 		Desc: "Claim the stake PAC coin in Validator Booster Program",
@@ -146,6 +156,7 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	BoosterPaymentCmd := Command{
 		Name: "BoosterPayment",
 		Desc: "Create payment link in Validator Booster Program",
@@ -164,10 +175,19 @@ func (be *BotEngine) RegisterCommands() {
 		},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
+
 	BoosterStatusCmd := Command{
 		Name:   "BoosterStatus",
 		Desc:   "Validator Booster Program Status",
 		Help:   "Booster status",
+		Args:   []Args{},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+	}
+
+	DepositAddressCmd := Command{
+		Name:   "deposit-address",
+		Desc:   "Crate a deposit address or get your deposit address",
+		Help:   "",
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
@@ -185,6 +205,7 @@ func (be *BotEngine) RegisterCommands() {
 	be.Cmds = append(be.Cmds, BoosterClaimCmd)
 	be.Cmds = append(be.Cmds, BoosterPaymentCmd)
 	be.Cmds = append(be.Cmds, BoosterStatusCmd)
+	be.Cmds = append(be.Cmds, DepositAddressCmd)
 }
 
 func (be *BotEngine) Commands() []Command {
