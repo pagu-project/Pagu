@@ -135,6 +135,10 @@ func (w *Wallet) Balance() int64 {
 	return balance
 }
 
+func (w *Wallet) NewAddress(lb string) (string, error) {
+	return w.wallet.NewBLSAccountAddress(lb)
+}
+
 func IsValidData(address, pubKey string) bool {
 	addr, err := crypto.AddressFromString(address)
 	if err != nil {

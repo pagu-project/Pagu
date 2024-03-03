@@ -46,3 +46,15 @@ func TestMember(t *testing.T) {
 		assert.Equal(t, user.DiscordID, u.DiscordID)
 	})
 }
+
+func TestHasUser(t *testing.T) {
+	db := setup(t)
+
+	err := db.AddUser(&DiscordUser{
+		DiscordID: "123456",
+	})
+	assert.NoError(t, err)
+
+	assert.True(t, db.HasUser("123456"))
+	assert.False(t, db.HasUser("654321"))
+}
