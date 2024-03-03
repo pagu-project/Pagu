@@ -186,26 +186,58 @@ func (be *BotEngine) RegisterCommands() {
 
 	DepositAddressCmd := Command{
 		Name:   "deposit-address",
-		Desc:   "Crate a deposit address or get your deposit address",
+		Desc:   "create a deposit address or get your deposit address",
 		Help:   "",
 		Args:   []Args{},
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
 	}
 
-	be.Cmds = append(be.Cmds, HelpCmd)
-	be.Cmds = append(be.Cmds, NetworkHealthCmd)
-	be.Cmds = append(be.Cmds, NetworkStatusCmd)
-	be.Cmds = append(be.Cmds, NodeInfoCmd)
-	be.Cmds = append(be.Cmds, RewardCalculateCmd)
-	be.Cmds = append(be.Cmds, ClaimerInfoCmd)
-	be.Cmds = append(be.Cmds, ClaimCmd)
-	be.Cmds = append(be.Cmds, ClaimStatusCmd)
-	be.Cmds = append(be.Cmds, BotWalletCmd)
-	be.Cmds = append(be.Cmds, BoosterWhitelistCmd)
-	be.Cmds = append(be.Cmds, BoosterClaimCmd)
-	be.Cmds = append(be.Cmds, BoosterPaymentCmd)
-	be.Cmds = append(be.Cmds, BoosterStatusCmd)
-	be.Cmds = append(be.Cmds, DepositAddressCmd)
+	CreateOfferCmd := Command{
+		Name: "create",
+		Desc: "create an offer",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "total-amount",
+				Desc:     "total amount of PAC",
+				Optional: false,
+			},
+			{
+				Name:     "total-price",
+				Desc:     "total price which includes gas fee",
+				Optional: false,
+			},
+			{
+				Name:     "chain-type",
+				Desc:     "e.g. BTCUSDT",
+				Optional: false,
+			},
+			{
+				Name:     "address",
+				Desc:     "",
+				Optional: false,
+			},
+		},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+	}
+
+	be.Cmds = append(be.Cmds,
+		HelpCmd,
+		NetworkHealthCmd,
+		NetworkStatusCmd,
+		NodeInfoCmd,
+		RewardCalculateCmd,
+		ClaimerInfoCmd,
+		ClaimCmd,
+		ClaimStatusCmd,
+		BotWalletCmd,
+		BoosterWhitelistCmd,
+		BoosterClaimCmd,
+		BoosterPaymentCmd,
+		BoosterStatusCmd,
+		DepositAddressCmd,
+		CreateOfferCmd,
+	)
 }
 
 func (be *BotEngine) Commands() []Command {

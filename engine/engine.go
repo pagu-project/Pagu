@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/database"
@@ -25,12 +27,12 @@ import (
 
 type BotEngine struct {
 	ctx    context.Context //nolint
-	cancel func()
+	cancel context.CancelFunc
 
 	wallet      wallet.IWallet
 	store       store.IStore
 	db          *database.DB
-	nowpayments nowpayments.INowpayment
+	nowPayments nowpayments.INowpayment
 	clientMgr   *client.Mgr
 	logger      *log.SubLogger
 
@@ -113,7 +115,7 @@ func NewBotEngine(cfg *config.Config) (IEngine, error) {
 	if err != nil {
 		log.Error("could not start twitter client", "err", err)
 	}
-	log.Info("nowpayments loaded successfully")
+	log.Info("nowPayments loaded successfully")
 
 	return newBotEngine(eSl, cm, wallet, store, db, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
 }
@@ -131,7 +133,7 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		store:         s,
 		db:            db,
 		twitterClient: twitterClient,
-		nowpayments:   nowpayments,
+		nowPayments:   nowpayments,
 		AuthIDs:       authIDs,
 	}
 }
@@ -420,7 +422,7 @@ func (be *BotEngine) BoosterPayment(discordID, twitterName, valAddr string) (*st
 		CreatedAt:    time.Now().Unix(),
 	}
 
-	err = be.nowpayments.CreatePayment(party)
+	err = be.nowPayments.CreatePayment(party)
 	if err != nil {
 		return nil, err
 	}
@@ -441,7 +443,7 @@ func (be *BotEngine) BoosterClaim(twitterName string) (*store.TwitterParty, erro
 	if party == nil {
 		return nil, fmt.Errorf("no discount code generated for this Twitter account: `%v`", twitterName)
 	}
-	err := be.nowpayments.UpdatePayment(party)
+	err := be.nowPayments.UpdatePayment(party)
 	if err != nil {
 		return nil, err
 	}
@@ -516,6 +518,37 @@ func (be *BotEngine) DepositAddress(discordID string) (string, error) {
 	}
 
 	return addr, nil
+}
+
+func (be *BotEngine) CreateOffer(ctx context.Context,
+	discordID, chainType, address string, totalAmount, totalPrice int64,
+) error {
+	u, err := be.db.GetUser(discordID)
+	if err != nil {
+		return err
+	}
+
+	rndClient := be.clientMgr.GetRandomClient()
+	uBalance, err := rndClient.GetBalance(ctx, u.DepositAddress)
+	if err != nil {
+		return err
+	}
+
+	if totalAmount != uBalance {
+		return fmt.Errorf("the deposit balance: %d is not equal to offered amount: %d",
+			uBalance, totalAmount)
+	}
+
+	offer := &database.Offer{
+		ID:          uuid.New(),
+		TotalAmount: totalAmount,
+		TotalPrice:  totalPrice,
+		ChainType:   chainType,
+		Address:     address,
+		DiscordUser: *u,
+	}
+
+	return be.db.CreateOffer(offer)
 }
 
 func (be *BotEngine) Stop() {
