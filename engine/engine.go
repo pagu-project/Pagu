@@ -122,7 +122,7 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		store:         s,
 		db:            db,
 		twitterClient: twitterClient,
-		nowPayments:   nowpayments,
+		nowpayments:   nowpayments,
 		AuthIDs:       authIDs,
 	}
 }

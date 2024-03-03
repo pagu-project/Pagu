@@ -207,6 +207,10 @@ func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, 
 	return txData, nil
 }
 
+func (cm *Mgr) GetBalance(addr string) (int64, error) {
+	return cm.getLocalClient().GetBalance(cm.ctx, addr)
+}
+
 func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	localClient := cm.getLocalClient()
 

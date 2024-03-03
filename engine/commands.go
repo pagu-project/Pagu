@@ -26,6 +26,7 @@ const (
 	BoosterStatusCommandName    = "booster-status"
 
 	DepositAddressCommandName = "deposit-address"
+	CreateOfferCommandName    = "create-offer"
 )
 
 func (be *BotEngine) RegisterCommands() {
@@ -213,10 +214,10 @@ func (be *BotEngine) RegisterCommands() {
 		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
 		Handler: be.depositAddressHandler,
 	}
-  
-  CreateOfferCmd := Command{
-		Name: "create",
-		Desc: "create an offer",
+
+	cmdCreateOffer := Command{
+		Name: CreateOfferCommandName,
+		Desc: "create an offer for P2P market",
 		Help: "",
 		Args: []Args{
 			{
@@ -240,7 +241,8 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.createOfferHandler,
 	}
 
 	//! test-net reward commands
@@ -266,7 +268,7 @@ func (be *BotEngine) RegisterCommands() {
 
 	//! P2P offer commands
 	be.Cmds = append(be.Cmds, cmdDepositAddress)
-  be.Cmds = append(be.Cmds, CreateOfferCmd)
+	be.Cmds = append(be.Cmds, cmdCreateOffer)
 }
 
 func (be *BotEngine) Commands() []Command {
