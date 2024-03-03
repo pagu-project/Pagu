@@ -75,7 +75,7 @@ func TestDB_CreateOffer(t *testing.T) {
 		TotalAmount: 10,
 		TotalPrice:  10,
 		UnitPrice:   1,
-		ChainType:   "BTCUSDT",
+		ChainType:   "mainnet",
 		Address:     "addr1",
 		DiscordUser: *u,
 	}

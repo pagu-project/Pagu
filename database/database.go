@@ -32,8 +32,8 @@ func NewDB(path string) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) AddUser(m *DiscordUser) error {
-	return db.Create(m).Error
+func (db *DB) AddUser(u *DiscordUser) error {
+	return db.Create(u).Error
 }
 
 func (db *DB) GetUser(dcID string) (*DiscordUser, error) {
