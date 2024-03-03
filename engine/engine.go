@@ -537,9 +537,12 @@ func (be *BotEngine) CreateOffer(ctx context.Context,
 			uBalance, totalAmount)
 	}
 
+	unitPrice := float64(totalPrice / totalAmount)
+
 	offer := &database.Offer{
 		TotalAmount: totalAmount,
 		TotalPrice:  totalPrice,
+		UnitPrice:   unitPrice,
 		ChainType:   chainType,
 		Address:     address,
 		DiscordUser: *u,

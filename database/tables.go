@@ -13,11 +13,12 @@ type DiscordUser struct {
 }
 
 type Offer struct {
-	ID          int64  `gorm:"primaryKey,autoIncrement" json:"id"`
-	TotalAmount int64  `json:"total_amount"`
-	TotalPrice  int64  `json:"total_price"`
-	ChainType   string `json:"chain_type"`
-	Address     string `json:"address"`
+	ID          int64   `gorm:"primaryKey,autoIncrement" json:"id"`
+	TotalAmount int64   `json:"total_amount"`
+	TotalPrice  int64   `json:"total_price"`
+	UnitPrice   float64 `gorm:"index"                    json:"unit_price"`
+	ChainType   string  `json:"chain_type"`
+	Address     string  `json:"address"`
 
 	DiscordUser DiscordUser
 	gorm.Model
