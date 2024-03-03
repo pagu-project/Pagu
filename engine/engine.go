@@ -8,8 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/database"
@@ -540,7 +538,6 @@ func (be *BotEngine) CreateOffer(ctx context.Context,
 	}
 
 	offer := &database.Offer{
-		ID:          uuid.New(),
 		TotalAmount: totalAmount,
 		TotalPrice:  totalPrice,
 		ChainType:   chainType,

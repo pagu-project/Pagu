@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -73,7 +72,6 @@ func TestDB_CreateOffer(t *testing.T) {
 	u, _ := db.GetUser(someDiscordId)
 
 	offer := &Offer{
-		ID:          uuid.New(),
 		TotalAmount: 10,
 		TotalPrice:  10,
 		ChainType:   "BTCUSDT",
@@ -85,7 +83,7 @@ func TestDB_CreateOffer(t *testing.T) {
 	assert.NoError(t, err)
 
 	var actual Offer
-	err = db.Preload("DiscordUser").First(&actual, offer.ID).Error
+	err = db.Preload("DiscordUser").First(&actual, 1).Error
 	assert.NoError(t, err)
 
 	assert.Equal(t, offer.ChainType, actual.ChainType)
