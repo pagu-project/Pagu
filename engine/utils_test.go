@@ -6,14 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCheckArgs(t *testing.T) {
-	err := CheckArgs(2, []string{"1", "2", "3"})
-	assert.EqualError(t, err, "incorrect number of arguments, expected 2 but got 3")
-
-	err = CheckArgs(2, []string{"1"})
-	assert.EqualError(t, err, "incorrect number of arguments, expected 2 but got 1")
-}
-
 func TestBoosterPrice(t *testing.T) {
 	for i := 0; i < 501; i++ {
 		if i < 100 {

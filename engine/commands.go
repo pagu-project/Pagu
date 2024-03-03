@@ -1,200 +1,223 @@
 package engine
 
-type AppID int
+import (
+	"fmt"
+	"slices"
 
-type Command struct {
-	Name    string
-	Desc    string
-	Help    string
-	Args    []Args
-	AppIDs  []AppID
-	Handler func(source AppID, callerID string, args ...string) (*CommandResult, error)
-}
-
-type Args struct {
-	Name     string
-	Desc     string
-	Optional bool
-}
+	"github.com/kehiy/RoboPac/log"
+)
 
 const (
-	AppIdCLI     AppID = 1
-	AppIdDiscord AppID = 2
+	ClaimCommandName       = "claim"
+	ClaimerInfoCommandName = "claimer-info"
+	ClaimStatusCommandName = "claim-status"
+
+	NodeInfoCommandName      = "node-info"
+	NetworkStatusCommandName = "network"
+	NetworkHealthCommandName = "network-health"
+
+	HelpCommandName       = "help"
+	WalletCommandName     = "wallet"
+	CalcRewardCommandName = "calc-reward"
+
+	BoosterPaymentCommandName   = "booster-payment"
+	BoosterClaimCommandName     = "booster-claim"
+	BoosterWhitelistCommandName = "booster-whitelist"
+	BoosterStatusCommandName    = "booster-status"
+
+	DepositAddressCommandName = "deposit-address"
+	CreateOfferCommandName    = "create-offer"
 )
 
 func (be *BotEngine) RegisterCommands() {
-	HelpCmd := Command{
-		Name:   "Help",
-		Desc:   "Help command.",
-		Help:   "This is the help command.",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	NetworkHealthCmd := Command{
-		Name:   "NetworkHealth",
-		Desc:   "Command to check network health.",
-		Help:   "Network health.",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	NetworkStatusCmd := Command{
-		Name:   "NetworkStatus",
-		Desc:   "Command to check the status of pactus chain.",
-		Help:   "check the status of the Pactus network.",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	NodeInfoCmd := Command{
-		Name: "NodeInfo",
-		Desc: "Command to see information on your node.",
-		Help: "This command will help you check info on your node",
+	cmdClaim := Command{
+		Name: ClaimCommandName,
+		Desc: "claim your test-net rewards",
+		Help: "",
 		Args: []Args{
 			{
-				Name:     "nodeID",
-				Desc:     "ID of the node to get information about.",
+				Name:     "mainnet-address",
+				Desc:     "your main-net (validator) address like: pc1p...",
+				Optional: false,
+			},
+			{
+				Name:     "testnet-address",
+				Desc:     "your test-net (validator) address like: tpc1p...",
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.claimHandler,
 	}
 
-	RewardCalculateCmd := Command{
-		Name: "RewardCalculate",
-		Desc: "Command to calculate your potential staking rewards.",
-		Help: "This command will help you calculate your potential staking rewards.",
+	cmdClaimerInfo := Command{
+		Name: ClaimerInfoCommandName,
+		Desc: "check your claim status with your testnet validator address",
+		Help: "",
 		Args: []Args{
 			{
-				Name:     "stake",
-				Desc:     "Your validator stake amount",
-				Optional: false,
-			},
-			{
-				Name:     "time",
-				Desc:     "In a day/month/year",
+				Name:     "testnet-address",
+				Desc:     "your test-net (validator) address like: tpc1p...",
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.claimerInfoHandler,
 	}
 
-	ClaimerInfoCmd := Command{
-		Name: "ClaimerInfo",
-		Desc: "Get claimer info.",
-		Help: "Command to fetch claimer info.",
+	cmdClaimStatus := Command{
+		Name:    ClaimStatusCommandName,
+		Desc:    "check the status of testnet rewards claiming",
+		Help:    "",
+		Args:    []Args{},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.claimStatusHandler,
+	}
+
+	cmdNodeInfo := Command{
+		Name: NodeInfoCommandName,
+		Desc: "check the information of a node by providing it's validator address",
+		Help: "",
 		Args: []Args{
-			{
-				Name:     "claimer-info",
-				Desc:     "Get claimer info",
-				Optional: false,
-			},
-		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	ClaimCmd := Command{
-		Name: "Claim",
-		Desc: "Claim your Pactus coins.",
-		Help: "claim your Pactus coins.",
-		Args: []Args{
-			{
-				Name:     "testnet-addr",
-				Desc:     "Enter your testnet address.",
-				Optional: false,
-			},
-			{
-				Name:     "mainnet-addr",
-				Desc:     "Enter your mainnet address",
-				Optional: false,
-			},
-		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	ClaimStatusCmd := Command{
-		Name:   "ClaimStatus",
-		Desc:   "Testnet reward claim status",
-		Help:   "Claim status",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	BotWalletCmd := Command{
-		Name:   "BotWallet",
-		Desc:   "Bot wallet balance.",
-		Help:   "Bot wallet balance",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	BoosterWhitelistCmd := Command{
-		Name: "BoosterWhitelist",
-		Desc: "Whitelist a non-active Twitter account in Validator Booster Program",
-		Help: "Booster whitelist",
-		Args: []Args{
-			{
-				Name:     "twitter-username",
-				Desc:     "Twitter username",
-				Optional: false,
-			},
-		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	BoosterClaimCmd := Command{
-		Name: "BoosterClaim",
-		Desc: "Claim the stake PAC coin in Validator Booster Program",
-		Help: "your Twitter username",
-		Args: []Args{
-			{
-				Name:     "twitter-username",
-				Desc:     "your Twitter username",
-				Optional: false,
-			},
-		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-	}
-
-	BoosterPaymentCmd := Command{
-		Name: "BoosterPayment",
-		Desc: "Create payment link in Validator Booster Program",
-		Help: "Create payment link in Validator Booster Program",
-		Args: []Args{
-			{
-				Name:     "twitter-username",
-				Desc:     "your Twitter username",
-				Optional: false,
-			},
 			{
 				Name:     "validator-address",
 				Desc:     "your validator address",
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.nodeInfoHandler,
 	}
 
-	BoosterStatusCmd := Command{
-		Name:   "BoosterStatus",
-		Desc:   "Validator Booster Program Status",
-		Help:   "Booster status",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+	cmdNetworkHealth := Command{
+		Name:    NetworkHealthCommandName,
+		Desc:    "checking network health status",
+		Help:    "",
+		Args:    []Args{},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.networkHealthHandler,
 	}
 
-	DepositAddressCmd := Command{
-		Name:   "deposit-address",
-		Desc:   "create a deposit address or get your deposit address",
-		Help:   "",
-		Args:   []Args{},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+	cmdNetworkStatus := Command{
+		Name:    NetworkStatusCommandName,
+		Desc:    "network statistics",
+		Help:    "",
+		Args:    []Args{},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.networkStatusHandler,
 	}
 
-	CreateOfferCmd := Command{
-		Name: "create",
-		Desc: "create an offer",
+	cmdHelp := Command{
+		Name:    HelpCommandName,
+		Desc:    "This is Help!",
+		Help:    "",
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.help,
+		Args: []Args{
+			{Name: "command", Desc: "help", Optional: true},
+		},
+	}
+
+	cmdWallet := Command{
+		Name:    WalletCommandName,
+		Desc:    "check the RoboPac wallet balance and address",
+		Help:    "",
+		Args:    []Args{},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.walletHandler,
+	}
+
+	cmdCalcReward := Command{
+		Name: CalcRewardCommandName,
+		Desc: "claculate how much PAC coins you will earn with your validator stakes",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "stake-amount",
+				Desc:     "amount of stake in your validator (1-1000)",
+				Optional: false,
+			},
+			{
+				Name:     "time-interval",
+				Desc:     "after one: day | month | year",
+				Optional: true,
+			},
+		},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.calcRewardHandler,
+	}
+
+	cmdBoosterPayment := Command{
+		Name: BoosterPaymentCommandName,
+		Desc: "make a payment link for booster program",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "twitter-name",
+				Desc:     "your twitter user name without @",
+				Optional: false,
+			},
+			{
+				Name:     "validator-address",
+				Desc:     "your validator address to be registered",
+				Optional: false,
+			},
+		},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.boosterPaymentHandler,
+	}
+
+	cmdBoosterClaim := Command{
+		Name: BoosterClaimCommandName,
+		Desc: "claim your booster program stakes",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "twitter-name",
+				Desc:     "your twitter user name without @",
+				Optional: false,
+			},
+		},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.boosterClaimHandler,
+	}
+
+	cmdBoosterWhitelist := Command{
+		Name: BoosterWhitelistCommandName,
+		Desc: "whitelist a user for booster program (admin only)",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "twitter-name",
+				Desc:     "your twitter user name without @",
+				Optional: false,
+			},
+		},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.boosterWhitelistHandler,
+	}
+
+	cmdBoosterStatus := Command{
+		Name:    BoosterStatusCommandName,
+		Desc:    "status of booster program claims and ...",
+		Help:    "",
+		Args:    []Args{},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.boosterStatusHandler,
+	}
+
+	cmdDepositAddress := Command{
+		Name:    DepositAddressCommandName,
+		Desc:    "create a deposit address for P2P offer",
+		Help:    "it will show your address if you already have an deposit address",
+		Args:    []Args{},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.depositAddressHandler,
+	}
+
+	cmdCreateOffer := Command{
+		Name: CreateOfferCommandName,
+		Desc: "create an offer for P2P market",
 		Help: "",
 		Args: []Args{
 			{
@@ -218,28 +241,68 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
+		Handler: be.createOfferHandler,
 	}
 
-	be.Cmds = append(be.Cmds,
-		HelpCmd,
-		NetworkHealthCmd,
-		NetworkStatusCmd,
-		NodeInfoCmd,
-		RewardCalculateCmd,
-		ClaimerInfoCmd,
-		ClaimCmd,
-		ClaimStatusCmd,
-		BotWalletCmd,
-		BoosterWhitelistCmd,
-		BoosterClaimCmd,
-		BoosterPaymentCmd,
-		BoosterStatusCmd,
-		DepositAddressCmd,
-		CreateOfferCmd,
-	)
+	//! test-net reward commands
+	be.Cmds = append(be.Cmds, cmdClaim)
+	be.Cmds = append(be.Cmds, cmdClaimerInfo)
+	be.Cmds = append(be.Cmds, cmdClaimStatus)
+
+	//! network info commands
+	be.Cmds = append(be.Cmds, cmdNodeInfo)
+	be.Cmds = append(be.Cmds, cmdNetworkHealth)
+	be.Cmds = append(be.Cmds, cmdNetworkStatus)
+
+	//! bot info and util commands
+	be.Cmds = append(be.Cmds, cmdHelp)
+	be.Cmds = append(be.Cmds, cmdWallet)
+	be.Cmds = append(be.Cmds, cmdCalcReward)
+
+	//! booster program commands
+	be.Cmds = append(be.Cmds, cmdBoosterPayment)
+	be.Cmds = append(be.Cmds, cmdBoosterClaim)
+	be.Cmds = append(be.Cmds, cmdBoosterWhitelist)
+	be.Cmds = append(be.Cmds, cmdBoosterStatus)
+
+	//! P2P offer commands
+	be.Cmds = append(be.Cmds, cmdDepositAddress)
+	be.Cmds = append(be.Cmds, cmdCreateOffer)
 }
 
 func (be *BotEngine) Commands() []Command {
 	return be.Cmds
+}
+
+func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*CommandResult, error) {
+	log.Debug("run command", "callerID", callerID, "inputs", inputs)
+
+	cmdName := inputs[0]
+	cmd := be.commandByName(cmdName)
+	if cmd == nil {
+		return nil, fmt.Errorf("unknown command: %s", cmdName)
+	}
+	if !cmd.HasAppId(appID) {
+		return nil, fmt.Errorf("unauthorized appID: %v", appID)
+	}
+	args := inputs[1:]
+	err := cmd.CheckArgs(args)
+	if err != nil {
+		return nil, err
+	}
+
+	return cmd.Handler(appID, callerID, args...)
+}
+
+func (be *BotEngine) commandByName(cmdName string) *Command {
+	foundIndex := slices.IndexFunc(be.Cmds, func(cmd Command) bool {
+		return cmd.Name == cmdName
+	})
+
+	if foundIndex == -1 {
+		return nil
+	}
+
+	return &be.Cmds[foundIndex]
 }

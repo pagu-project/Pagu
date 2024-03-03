@@ -7,7 +7,6 @@ import (
 
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
-	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
 	cobra "github.com/spf13/cobra"
 )
@@ -15,14 +14,12 @@ import (
 const PROMPT = "\n>> "
 
 func run(cmd *cobra.Command, args []string) {
-	log.InitGlobalLogger()
-
-	log.Info("initializing repl...")
+	cmd.Println("initializing repl...")
 
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
 	config, err := config.Load(*envOpt)
 	if err != nil {
-		log.Panic("can't load config env", "err", err, "path", *envOpt)
+		kill(cmd, err)
 	}
 
 	if config.Network == "Localnet" {
@@ -31,14 +28,14 @@ func run(cmd *cobra.Command, args []string) {
 
 	botEngine, err := engine.NewBotEngine(config)
 	if err != nil {
-		log.Panic("could not start discord bot", "err", err)
+		kill(cmd, err)
 	}
 
 	botEngine.RegisterCommands()
 
 	botEngine.Start()
 
-	log.Info("repl started")
+	cmd.Println("repl started")
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -66,7 +63,7 @@ func run(cmd *cobra.Command, args []string) {
 func main() {
 	rootCmd := &cobra.Command{
 		Use:     "robopac-cmd",
-		Version: "0.0.1",
+		Version: "0.0.1", //! should come from version.go file.
 		Run:     run,
 	}
 
