@@ -17,7 +17,7 @@ import (
 
 type BotEngine struct {
 	ctx    context.Context //nolint
-	cancel func()
+	cancel context.CancelFunc
 
 	wallet        wallet.IWallet
 	db            *database.DB
@@ -104,7 +104,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	if err != nil {
 		log.Error("could not start twitter client", "err", err)
 	}
-	log.Info("nowpayments loaded successfully")
+	log.Info("nowPayments loaded successfully")
 
 	return newBotEngine(eSl, cm, wallet, store, db, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
 }
@@ -122,7 +122,7 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 		store:         s,
 		db:            db,
 		twitterClient: twitterClient,
-		nowpayments:   nowpayments,
+		nowPayments:   nowpayments,
 		AuthIDs:       authIDs,
 	}
 }

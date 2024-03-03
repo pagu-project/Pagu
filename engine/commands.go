@@ -213,6 +213,35 @@ func (be *BotEngine) RegisterCommands() {
 		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
 		Handler: be.depositAddressHandler,
 	}
+  
+  CreateOfferCmd := Command{
+		Name: "create",
+		Desc: "create an offer",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "total-amount",
+				Desc:     "total amount of PAC",
+				Optional: false,
+			},
+			{
+				Name:     "total-price",
+				Desc:     "total price which includes gas fee",
+				Optional: false,
+			},
+			{
+				Name:     "chain-type",
+				Desc:     "e.g. BTCUSDT",
+				Optional: false,
+			},
+			{
+				Name:     "address",
+				Desc:     "",
+				Optional: false,
+			},
+		},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+	}
 
 	//! test-net reward commands
 	be.Cmds = append(be.Cmds, cmdClaim)
@@ -237,6 +266,7 @@ func (be *BotEngine) RegisterCommands() {
 
 	//! P2P offer commands
 	be.Cmds = append(be.Cmds, cmdDepositAddress)
+  be.Cmds = append(be.Cmds, CreateOfferCmd)
 }
 
 func (be *BotEngine) Commands() []Command {
