@@ -18,9 +18,14 @@ func TestBoosterPrice(t *testing.T) {
 			assert.Equal(t, 40, price)
 		}
 
-		if i > 200 {
+		if i > 200 && i < 300 {
 			price := boosterPrice(i)
 			assert.Equal(t, 50, price)
+		}
+
+		if i > 400 {
+			price := boosterPrice(i)
+			assert.Equal(t, 100, price)
 		}
 	}
 }
