@@ -1,26 +1,26 @@
 package engine
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"fmt"
-// 	"os"
-// 	"testing"
-// 	"time"
+import (
+	// "context"
+	// "errors"
+	// "fmt"
+	// "os"
+	// "time".
+	"testing"
 
-// 	"github.com/kehiy/RoboPac/client"
-// 	"github.com/kehiy/RoboPac/database"
-// 	"github.com/kehiy/RoboPac/log"
-// 	"github.com/kehiy/RoboPac/nowpayments"
-// 	rpstore "github.com/kehiy/RoboPac/store"
-// 	"github.com/kehiy/RoboPac/twitter_api"
-// 	"github.com/kehiy/RoboPac/utils"
-// 	"github.com/kehiy/RoboPac/wallet"
-// 	"github.com/libp2p/go-libp2p/core/peer"
-// 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
-// 	"github.com/stretchr/testify/assert"
-// 	"go.uber.org/mock/gomock"
-// )
+	// "github.com/kehiy/RoboPac/client"
+	// "github.com/kehiy/RoboPac/database"
+	// "github.com/kehiy/RoboPac/log"
+	// "github.com/kehiy/RoboPac/nowpayments"
+	// rpstore "github.com/kehiy/RoboPac/store"
+	// "github.com/kehiy/RoboPac/twitter_api"
+	// "github.com/kehiy/RoboPac/utils"
+	// "github.com/kehiy/RoboPac/wallet"
+	// "github.com/libp2p/go-libp2p/core/peer"
+	// pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+	// "go.uber.org/mock/gomock".
+	"github.com/stretchr/testify/assert"
+)
 
 // var peerID, _ = peer.Decode("12D3KooWNwudyHVEwtyRTkTx9JoWgHo65hkPUxU12pKviAreVJYg")
 
@@ -947,3 +947,27 @@ package engine
 // 		assert.EqualError(t, err, "program is finished")
 // 	})
 // }
+
+func TestBoosterPrice(t *testing.T) {
+	for i := 0; i < 501; i++ {
+		if i < 100 {
+			price := boosterPrice(i)
+			assert.Equal(t, 30, price)
+		}
+
+		if i > 100 && i < 200 {
+			price := boosterPrice(i)
+			assert.Equal(t, 40, price)
+		}
+
+		if i > 200 && i < 300 {
+			price := boosterPrice(i)
+			assert.Equal(t, 50, price)
+		}
+
+		if i > 400 {
+			price := boosterPrice(i)
+			assert.Equal(t, 100, price)
+		}
+	}
+}

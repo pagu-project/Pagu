@@ -19,12 +19,49 @@ type Args struct {
 }
 
 type Command struct {
-	Name    string
-	Desc    string
-	Help    string
-	Args    []Args
-	AppIDs  []AppID
-	Handler func(source AppID, callerID string, args ...string) (*CommandResult, error)
+	Name        string
+	Desc        string
+	Help        string
+	Args        []Args //! should be nil for commands.
+	AppIDs      []AppID
+	SubCommands []*Command
+	Handler     func(source AppID, callerID string, args ...string) (*CommandResult, error)
+}
+
+func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*CommandResult, error) {
+	be.logger.Debug("run command", "callerID", callerID, "inputs", inputs)
+
+	cmdName := inputs[0]
+	cmd := be.commandByName(cmdName)
+	if cmd == nil {
+		return nil, fmt.Errorf("unknown command: %s", cmdName)
+	}
+	if !cmd.HasAppId(appID) {
+		return nil, fmt.Errorf("unauthorized appID: %v", appID)
+	}
+	args := inputs[1:]
+	err := cmd.CheckArgs(args)
+	if err != nil {
+		return nil, err
+	}
+
+	return cmd.Handler(appID, callerID, args...)
+}
+
+func (be *BotEngine) commandByName(cmdName string) *Command {
+	foundIndex := slices.IndexFunc(be.Cmds, func(cmd Command) bool {
+		return cmd.Name == cmdName
+	})
+
+	if foundIndex == -1 {
+		return nil
+	}
+
+	return &be.Cmds[foundIndex]
+}
+
+func (be *BotEngine) Commands() []Command {
+	return be.Cmds
 }
 
 type CommandResult struct {
