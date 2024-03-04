@@ -33,7 +33,7 @@ fmt:
 	go mod tidy
 
 check:
-	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
+	golangci-lint run --timeout=20m0s
 
 ### building
 build:

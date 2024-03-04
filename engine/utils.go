@@ -1,10 +1,14 @@
 package engine
 
 func boosterPrice(allPackages int) int {
-	if allPackages < 100 {
+	switch {
+	case allPackages < 100:
 		return 30
-	} else if allPackages < 200 {
+	case allPackages < 200:
 		return 40
+	case allPackages < 300:
+		return 50
+	default:
+		return 100
 	}
-	return 50
 }
