@@ -32,14 +32,16 @@ func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*Comman
 	be.logger.Debug("run command", "callerID", callerID, "inputs", inputs)
 
 	cmdName := inputs[0]
-	cmd := be.commandByName(cmdName)
+	subCmdName := inputs[1]
+	cmd := be.commandByName(cmdName, subCmdName)
 	if cmd == nil {
 		return nil, fmt.Errorf("unknown command: %s", cmdName)
 	}
 	if !cmd.HasAppId(appID) {
 		return nil, fmt.Errorf("unauthorized appID: %v", appID)
 	}
-	args := inputs[1:]
+
+	args := inputs[2:]
 	err := cmd.CheckArgs(args)
 	if err != nil {
 		return nil, err
@@ -48,16 +50,24 @@ func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*Comman
 	return cmd.Handler(appID, callerID, args...)
 }
 
-func (be *BotEngine) commandByName(cmdName string) *Command {
-	foundIndex := slices.IndexFunc(be.Cmds, func(cmd Command) bool {
+func (be *BotEngine) commandByName(cmdName, subCmdName string) *Command {
+	cmdIndex := slices.IndexFunc(be.Cmds, func(cmd Command) bool {
 		return cmd.Name == cmdName
 	})
 
-	if foundIndex == -1 {
+	if cmdIndex == -1 {
 		return nil
 	}
 
-	return &be.Cmds[foundIndex]
+	sCmdIndex := slices.IndexFunc(be.Cmds[cmdIndex].SubCommands, func(cmd *Command) bool {
+		return cmd.Name == subCmdName
+	})
+
+	if sCmdIndex == -1 {
+		return nil
+	}
+
+	return be.Cmds[cmdIndex].SubCommands[sCmdIndex]
 }
 
 func (be *BotEngine) Commands() []Command {
