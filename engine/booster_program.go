@@ -20,7 +20,7 @@ const (
 	BoosterHelpCommandName      = "help"
 )
 
-func (be *BotEngine) RegisterCommands() {
+func (be *BotEngine) RegisterBoosterCommands() {
 	subCmdBoosterPayment := Command{
 		Name: BoosterPaymentCommandName,
 		Desc: "Make a payment link for booster program",

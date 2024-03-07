@@ -31,7 +31,7 @@ func RunCommand(parentCmd *cobra.Command) {
 			kill(cmd, err)
 		}
 
-		botEngine.RegisterCommands()
+		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
 		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,

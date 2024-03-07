@@ -29,6 +29,15 @@ type Command struct {
 	Handler     func(source AppID, callerID string, args ...string) (*CommandResult, error)
 }
 
+func (be *BotEngine) RegisterAllCommands() {
+	be.RegisterBlockchainCommands()
+	be.RegisterBoosterCommands()
+	be.RegisterNetworkCommands()
+	be.RegisterP2PMarketCommands()
+	be.RegisterRoboPacCommands()
+	be.RegisterTestNetRewardsCommands()
+}
+
 func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*CommandResult, error) {
 	be.logger.Debug("run command", "callerID", callerID, "inputs", inputs)
 
