@@ -9,23 +9,24 @@ import (
 )
 
 const (
-	P2PCommandName            = "p2p-market"
+	P2PCommandName            = "p2p"
 	DepositAddressCommandName = "deposit-address"
 	CreateOfferCommandName    = "create-offer"
 	P2PHelpCommandName        = "help"
 )
 
 func (be *BotEngine) RegisterP2PMarketCommands() {
-	cmdDepositAddress := Command{
-		Name:    DepositAddressCommandName,
-		Desc:    "create a deposit address for P2P offer",
-		Help:    "it will show your address if you already have an deposit address",
-		Args:    []Args{},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.depositAddressHandler,
+	subCmdDepositAddress := Command{
+		Name:        DepositAddressCommandName,
+		Desc:        "create a deposit address for P2P offer",
+		Help:        "it will show your address if you already have an deposit address",
+		Args:        []Args{},
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.depositAddressHandler,
 	}
 
-	cmdCreateOffer := Command{
+	subCmdCreateOffer := Command{
 		Name: CreateOfferCommandName,
 		Desc: "create an offer for P2P market",
 		Help: "",
@@ -51,11 +52,12 @@ func (be *BotEngine) RegisterP2PMarketCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.createOfferHandler,
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.createOfferHandler,
 	}
 
-	cmdHelp := Command{
+	subCmdHelp := Command{
 		Name: P2PHelpCommandName,
 		Desc: "p2p market help commands",
 		Help: "",
@@ -73,11 +75,11 @@ func (be *BotEngine) RegisterP2PMarketCommands() {
 
 	cmdP2PMarket := Command{
 		Name:        P2PCommandName,
-		Desc:        "person to person market for pactus trading",
+		Desc:        "Person to Person market for Pactus trading",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdCreateOffer, &cmdDepositAddress, &cmdHelp},
+		SubCommands: []*Command{&subCmdCreateOffer, &subCmdDepositAddress, &subCmdHelp},
 		Handler:     nil,
 	}
 

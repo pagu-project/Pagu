@@ -17,10 +17,10 @@ const (
 )
 
 func (be *BotEngine) RegisterBlockchainCommands() {
-	cmdCalcReward := Command{
+	subCmdCalcReward := Command{
 		Name: CalcRewardCommandName,
-		Desc: "claculate how much PAC coins you will earn with your validator stakes",
-		Help: "",
+		Desc: "Calculate how much PAC coins you will earn with your validator stakes",
+		Help: "Provide an stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC prefix",
 		Args: []Args{
 			{
 				Name:     "stake-amount",
@@ -30,21 +30,22 @@ func (be *BotEngine) RegisterBlockchainCommands() {
 			{
 				Name:     "time-interval",
 				Desc:     "after one: day | month | year",
-				Optional: true,
+				Optional: false,
 			},
 		},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.calcRewardHandler,
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.calcRewardHandler,
 	}
 
-	cmdHelp := Command{
+	subCmdHelp := Command{
 		Name: BlockChainHelpCommandName,
-		Desc: "help for blockchain commands",
-		Help: "provide the command name as parameter",
+		Desc: "Help for Blockchain commands",
+		Help: "Provide the sub command name as parameter",
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it",
+				Desc:     "the subcommand you want to see the related help of it. (optional)",
 				Optional: true,
 			},
 		},
@@ -59,7 +60,7 @@ func (be *BotEngine) RegisterBlockchainCommands() {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdCalcReward, &cmdHelp},
+		SubCommands: []*Command{&subCmdCalcReward, &subCmdHelp},
 		Handler:     nil,
 	}
 

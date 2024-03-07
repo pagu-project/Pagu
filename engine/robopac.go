@@ -14,16 +14,17 @@ const (
 )
 
 func (be *BotEngine) RegisterRoboPacCommands() {
-	cmdWallet := Command{
-		Name:    WalletCommandName,
-		Desc:    "check the RoboPac wallet balance and address",
-		Help:    "",
-		Args:    []Args{},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.walletHandler,
+	subCmdWallet := Command{
+		Name:        WalletCommandName,
+		Desc:        "Check the RoboPac wallet balance and address",
+		Help:        "",
+		Args:        []Args{},
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.walletHandler,
 	}
 
-	cmdHelp := Command{
+	subCmdHelp := Command{
 		Name: RoboPacCommandName,
 		Desc: "This is Help for robopac commands",
 		Help: "provide the command name as parameter",
@@ -45,7 +46,7 @@ func (be *BotEngine) RegisterRoboPacCommands() {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdWallet, &cmdHelp},
+		SubCommands: []*Command{&subCmdWallet, &subCmdHelp},
 		Handler:     nil,
 	}
 

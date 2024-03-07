@@ -13,18 +13,18 @@ import (
 
 const (
 	BoosterCommandName          = "booster"
-	BoosterPaymentCommandName   = "booster-payment"
-	BoosterClaimCommandName     = "booster-claim"
-	BoosterWhitelistCommandName = "booster-whitelist"
-	BoosterStatusCommandName    = "booster-status"
+	BoosterPaymentCommandName   = "payment"
+	BoosterClaimCommandName     = "claim"
+	BoosterWhitelistCommandName = "whitelist"
+	BoosterStatusCommandName    = "status"
 	BoosterHelpCommandName      = "help"
 )
 
 func (be *BotEngine) RegisterCommands() {
-	cmdBoosterPayment := Command{
+	subCmdBoosterPayment := Command{
 		Name: BoosterPaymentCommandName,
-		Desc: "make a payment link for booster program",
-		Help: "",
+		Desc: "Make a payment link for booster program",
+		Help: "Provide your twitter username and mainnet validator address",
 		Args: []Args{
 			{
 				Name:     "twitter-name",
@@ -41,10 +41,10 @@ func (be *BotEngine) RegisterCommands() {
 		Handler: be.boosterPaymentHandler,
 	}
 
-	cmdBoosterClaim := Command{
+	subCmdBoosterClaim := Command{
 		Name: BoosterClaimCommandName,
-		Desc: "claim your booster program stakes",
-		Help: "",
+		Desc: "Claim your booster program stakes",
+		Help: "You have to do a booster payment first, then try to claim it",
 		Args: []Args{
 			{
 				Name:     "twitter-name",
@@ -56,10 +56,10 @@ func (be *BotEngine) RegisterCommands() {
 		Handler: be.boosterClaimHandler,
 	}
 
-	cmdBoosterWhitelist := Command{
+	subCmdBoosterWhitelist := Command{
 		Name: BoosterWhitelistCommandName,
-		Desc: "whitelist a user for booster program (admin only)",
-		Help: "",
+		Desc: "whitelist a user for booster program",
+		Help: "This sub-command is **admin only**",
 		Args: []Args{
 			{
 				Name:     "twitter-name",
@@ -67,22 +67,24 @@ func (be *BotEngine) RegisterCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.boosterWhitelistHandler,
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.boosterWhitelistHandler,
 	}
 
-	cmdBoosterStatus := Command{
-		Name:    BoosterStatusCommandName,
-		Desc:    "status of booster program claims and ...",
-		Help:    "",
-		Args:    []Args{},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.boosterStatusHandler,
+	subCmdBoosterStatus := Command{
+		Name:        BoosterStatusCommandName,
+		Desc:        "status of booster program claims and ...",
+		Help:        "",
+		Args:        []Args{},
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		SubCommands: nil,
+		Handler:     be.boosterStatusHandler,
 	}
 
-	cmdHelp := Command{
+	subCmdHelp := Command{
 		Name: BoosterHelpCommandName,
-		Desc: "help for booster program commands",
+		Desc: "Help for booster program commands",
 		Help: "provide the command name as parameter",
 		Args: []Args{
 			{
@@ -102,7 +104,7 @@ func (be *BotEngine) RegisterCommands() {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdBoosterClaim, &cmdBoosterPayment, &cmdBoosterStatus, &cmdBoosterWhitelist, &cmdHelp},
+		SubCommands: []*Command{&subCmdBoosterClaim, &subCmdBoosterPayment, &subCmdBoosterStatus, &subCmdBoosterWhitelist, &subCmdHelp},
 		Handler:     nil,
 	}
 

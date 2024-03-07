@@ -12,15 +12,15 @@ const (
 	TestNetRewardCommandName     = "testnet-reward"
 	ClaimCommandName             = "claim"
 	ClaimerInfoCommandName       = "claimer-info"
-	ClaimStatusCommandName       = "claims-status"
+	ClaimStatusCommandName       = "status"
 	TestNetRewardHelpCommandName = "help"
 )
 
 func (be *BotEngine) RegisterTestNetRewardsCommands() {
-	cmdClaim := Command{
+	subCmdClaim := Command{
 		Name: ClaimCommandName,
-		Desc: "claim your test-net rewards",
-		Help: "",
+		Desc: "Claim your testnet rewards",
+		Help: "Provide your mainnet validator address and testnet validator address which was eligible",
 		Args: []Args{
 			{
 				Name:     "mainnet-address",
@@ -33,13 +33,14 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.claimHandler,
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.claimHandler,
 	}
 
-	cmdClaimerInfo := Command{
+	subCmdClaimerInfo := Command{
 		Name: ClaimerInfoCommandName,
-		Desc: "check your claim status with your testnet validator address",
+		Desc: "Check your claim status with your testnet validator address",
 		Help: "",
 		Args: []Args{
 			{
@@ -48,20 +49,22 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.claimerInfoHandler,
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.claimerInfoHandler,
 	}
 
-	cmdClaimStatus := Command{
-		Name:    ClaimStatusCommandName,
-		Desc:    "check the status of testnet rewards claiming",
-		Help:    "",
-		Args:    []Args{},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.claimStatusHandler,
+	subCmdClaimStatus := Command{
+		Name:        ClaimStatusCommandName,
+		Desc:        "The status of testnet rewards claiming",
+		Help:        "",
+		Args:        []Args{},
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.claimStatusHandler,
 	}
 
-	cmdHelp := Command{
+	subCmdHelp := Command{
 		Name: RoboPacCommandName,
 		Desc: "This is Help for testnet rewards commands",
 		Help: "provide the command name as parameter",
@@ -83,7 +86,7 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdClaim, &cmdClaimStatus, &cmdClaimerInfo, &cmdHelp},
+		SubCommands: []*Command{&subCmdClaim, &subCmdClaimStatus, &subCmdClaimerInfo, &subCmdHelp},
 		Handler:     nil,
 	}
 

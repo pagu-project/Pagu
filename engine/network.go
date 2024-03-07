@@ -18,10 +18,10 @@ const (
 )
 
 func (be *BotEngine) RegisterNetworkCommands() {
-	sCmdNodeInfo := Command{
+	subCmdNodeInfo := Command{
 		Name: NodeInfoCommandName,
-		Desc: "check the information of a node by providing it's validator address",
-		Help: "",
+		Desc: "Check the information of a node",
+		Help: "Provide your validator address on the specific node to get the validator info and the node info",
 		Args: []Args{
 			{
 				Name:     "validator-address",
@@ -29,31 +29,34 @@ func (be *BotEngine) RegisterNetworkCommands() {
 				Optional: false,
 			},
 		},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.nodeInfoHandler,
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.nodeInfoHandler,
 	}
 
-	sCmdHealth := Command{
-		Name:    NetworkHealthCommandName,
-		Desc:    "checking network health status",
-		Help:    "",
-		Args:    []Args{},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.networkHealthHandler,
+	subCmdHealth := Command{
+		Name:        NetworkHealthCommandName,
+		Desc:        "Checking network health status",
+		Help:        "",
+		Args:        []Args{},
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.networkHealthHandler,
 	}
 
-	sCmdStatus := Command{
-		Name:    NetworkStatusCommandName,
-		Desc:    "network statistics",
-		Help:    "",
-		Args:    []Args{},
-		AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-		Handler: be.networkStatusHandler,
+	subCmdStatus := Command{
+		Name:        NetworkStatusCommandName,
+		Desc:        "Network statistics",
+		Help:        "",
+		Args:        []Args{},
+		SubCommands: nil,
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		Handler:     be.networkStatusHandler,
 	}
 
-	cmdHelp := Command{
+	subCmdHelp := Command{
 		Name: NetworkHelpCommandName,
-		Desc: "network help commands",
+		Desc: "Network help commands",
 		Help: "",
 		Args: []Args{
 			{
@@ -69,11 +72,11 @@ func (be *BotEngine) RegisterNetworkCommands() {
 
 	cmdNetwork := Command{
 		Name:        NetworkCommandName,
-		Desc:        "network related commands",
+		Desc:        "Network related commands",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&sCmdHealth, &sCmdStatus, &sCmdNodeInfo, &cmdHelp},
+		SubCommands: []*Command{&subCmdHealth, &subCmdStatus, &subCmdNodeInfo, &subCmdHelp},
 		Handler:     nil,
 	}
 

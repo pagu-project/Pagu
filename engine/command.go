@@ -145,15 +145,15 @@ func (be *BotEngine) help(_ AppID, _ string, args ...string) (*CommandResult, er
 		return MakeFailedResult("can't find the command: %s", cmdName), nil
 	}
 
-	subCmd := args[1]
+	subCmdName := args[1]
 
-	scmd := be.subCommandByName(cmdName, subCmd)
-	if scmd == nil {
-		return MakeFailedResult("can't find the sub command command: %s", subCmd), nil
+	subCmd := be.subCommandByName(cmdName, subCmdName)
+	if subCmd == nil {
+		return MakeFailedResult("can't find the sub command command: %s", subCmdName), nil
 	}
 
-	helpMsg.WriteString(fmt.Sprintf("Help of %s Command\nDesc: %s\nHelp: %s\n\nArgs:", scmd.Name, scmd.Desc, scmd.Help))
-	for i, a := range scmd.Args {
+	helpMsg.WriteString(fmt.Sprintf("Help of %s Command\nDesc: %s\nHelp: %s\n\nArgs:", subCmd.Name, subCmd.Desc, subCmd.Help))
+	for i, a := range subCmd.Args {
 		helpMsg.WriteString(fmt.Sprintf("%v-%s\nDesc: %s\n optional: %v", i, a.Name, a.Desc, a.Optional))
 	}
 
