@@ -25,7 +25,7 @@ func (be *BotEngine) RegisterNetworkCommands() {
 		Args: []Args{
 			{
 				Name:     "validator-address",
-				Desc:     "your validator address",
+				Desc:     "Your validator address",
 				Optional: false,
 			},
 		},
@@ -61,7 +61,7 @@ func (be *BotEngine) RegisterNetworkCommands() {
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it",
+				Desc:     "The subcommand you want to see the related help of it",
 				Optional: true,
 			},
 		},

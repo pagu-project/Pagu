@@ -24,12 +24,12 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 		Args: []Args{
 			{
 				Name:     "mainnet-address",
-				Desc:     "your main-net (validator) address like: pc1p...",
+				Desc:     "Your main-net (validator) address like: pc1p...",
 				Optional: false,
 			},
 			{
 				Name:     "testnet-address",
-				Desc:     "your test-net (validator) address like: tpc1p...",
+				Desc:     "Your test-net (validator) address like: tpc1p...",
 				Optional: false,
 			},
 		},
@@ -45,7 +45,7 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 		Args: []Args{
 			{
 				Name:     "testnet-address",
-				Desc:     "your test-net (validator) address like: tpc1p...",
+				Desc:     "Your test-net (validator) address like: tpc1p...",
 				Optional: false,
 			},
 		},
@@ -67,11 +67,11 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 	subCmdHelp := Command{
 		Name: RoboPacCommandName,
 		Desc: "This is Help for testnet rewards commands",
-		Help: "provide the command name as parameter",
+		Help: "Provide the command name as parameter",
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it",
+				Desc:     "The subcommand you want to see the related help of it",
 				Optional: true,
 			},
 		},
@@ -82,7 +82,7 @@ func (be *BotEngine) RegisterTestNetRewardsCommands() {
 
 	cmdTestNetReward := Command{
 		Name:        TestNetRewardCommandName,
-		Desc:        "claiming your testnet earned rewards",
+		Desc:        "Claiming your testnet earned rewards",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},

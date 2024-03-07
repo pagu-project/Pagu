@@ -27,11 +27,11 @@ func (be *BotEngine) RegisterRoboPacCommands() {
 	subCmdHelp := Command{
 		Name: RoboPacCommandName,
 		Desc: "This is Help for robopac commands",
-		Help: "provide the command name as parameter",
+		Help: "Provide the command name as parameter",
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it",
+				Desc:     "The subcommand you want to see the related help of it",
 				Optional: true,
 			},
 		},
@@ -42,7 +42,7 @@ func (be *BotEngine) RegisterRoboPacCommands() {
 
 	cmdRoboPac := Command{
 		Name:        RoboPacCommandName,
-		Desc:        "robopac related commands",
+		Desc:        "The RoboPac related commands",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},

@@ -18,8 +18,8 @@ const (
 func (be *BotEngine) RegisterP2PMarketCommands() {
 	subCmdDepositAddress := Command{
 		Name:        DepositAddressCommandName,
-		Desc:        "create a deposit address for P2P offer",
-		Help:        "it will show your address if you already have an deposit address",
+		Desc:        "Create a deposit address for P2P offer",
+		Help:        "It will show your address if you already have an deposit address",
 		Args:        []Args{},
 		SubCommands: nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
@@ -28,17 +28,17 @@ func (be *BotEngine) RegisterP2PMarketCommands() {
 
 	subCmdCreateOffer := Command{
 		Name: CreateOfferCommandName,
-		Desc: "create an offer for P2P market",
+		Desc: "Create an offer for P2P market",
 		Help: "",
 		Args: []Args{
 			{
 				Name:     "total-amount",
-				Desc:     "total amount of PAC",
+				Desc:     "Total amount of PAC",
 				Optional: false,
 			},
 			{
 				Name:     "total-price",
-				Desc:     "total price which includes gas fee",
+				Desc:     "Total price which includes gas fee",
 				Optional: false,
 			},
 			{
@@ -59,12 +59,12 @@ func (be *BotEngine) RegisterP2PMarketCommands() {
 
 	subCmdHelp := Command{
 		Name: P2PHelpCommandName,
-		Desc: "p2p market help commands",
+		Desc: "P2P market help commands",
 		Help: "",
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it",
+				Desc:     "The subcommand you want to see the related help of it",
 				Optional: true,
 			},
 		},
@@ -97,7 +97,7 @@ func (be *BotEngine) depositAddressHandler(_ AppID, callerID string, _ ...string
 	addr, err := be.wallet.NewAddress(fmt.Sprintf("deposit address for %s", callerID))
 	if err != nil {
 		return MakeFailedResult(
-			"can't make a new address: %v", err,
+			"Can't make a new address: %v", err,
 		), nil
 	}
 
@@ -109,7 +109,7 @@ func (be *BotEngine) depositAddressHandler(_ AppID, callerID string, _ ...string
 	)
 	if err != nil {
 		return MakeFailedResult(
-			"can't add discord user to database: %v", err,
+			"Can't add discord user to database: %v", err,
 		), nil
 	}
 

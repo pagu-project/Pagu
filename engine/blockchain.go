@@ -19,17 +19,17 @@ const (
 func (be *BotEngine) RegisterBlockchainCommands() {
 	subCmdCalcReward := Command{
 		Name: CalcRewardCommandName,
-		Desc: "Calculate how much PAC coins you will earn with your validator stakes",
-		Help: "Provide an stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC prefix",
+		Desc: "Calculate how many PAC coins you will earn with your validator stake",
+		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC prefix",
 		Args: []Args{
 			{
 				Name:     "stake-amount",
-				Desc:     "amount of stake in your validator (1-1000)",
+				Desc:     "Amount of stake in your validator (1-1000)",
 				Optional: false,
 			},
 			{
 				Name:     "time-interval",
-				Desc:     "after one: day | month | year",
+				Desc:     "After one: day | month | year",
 				Optional: false,
 			},
 		},
@@ -45,7 +45,7 @@ func (be *BotEngine) RegisterBlockchainCommands() {
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it. (optional)",
+				Desc:     "The subcommand you want to see the related help of it. (optional)",
 				Optional: true,
 			},
 		},
@@ -100,7 +100,7 @@ func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*Comm
 	reward := int64(stake*blocks) / int64(util.ChangeToCoin(bi.TotalPower))
 
 	result := fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
-		"\n\n> Note📝: This is an estimation and the number can get changed by changes of your stake amount, total power and ...",
+		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
 		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
 
 	return &CommandResult{

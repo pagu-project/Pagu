@@ -28,12 +28,12 @@ func (be *BotEngine) RegisterBoosterCommands() {
 		Args: []Args{
 			{
 				Name:     "twitter-name",
-				Desc:     "your twitter user name without @",
+				Desc:     "Your twitter user name without @",
 				Optional: false,
 			},
 			{
 				Name:     "validator-address",
-				Desc:     "your validator address to be registered",
+				Desc:     "Your validator address to be registered",
 				Optional: false,
 			},
 		},
@@ -44,11 +44,11 @@ func (be *BotEngine) RegisterBoosterCommands() {
 	subCmdBoosterClaim := Command{
 		Name: BoosterClaimCommandName,
 		Desc: "Claim your booster program stakes",
-		Help: "You have to do a booster payment first, then try to claim it",
+		Help: "You have to do the booster payment first, then try to claim it",
 		Args: []Args{
 			{
 				Name:     "twitter-name",
-				Desc:     "your twitter user name without @",
+				Desc:     "Your twitter user name without @",
 				Optional: false,
 			},
 		},
@@ -58,12 +58,12 @@ func (be *BotEngine) RegisterBoosterCommands() {
 
 	subCmdBoosterWhitelist := Command{
 		Name: BoosterWhitelistCommandName,
-		Desc: "whitelist a user for booster program",
+		Desc: "Whitelist a user for the booster program",
 		Help: "This sub-command is **admin only**",
 		Args: []Args{
 			{
 				Name:     "twitter-name",
-				Desc:     "your twitter user name without @",
+				Desc:     "Your twitter user name without @",
 				Optional: false,
 			},
 		},
@@ -74,7 +74,7 @@ func (be *BotEngine) RegisterBoosterCommands() {
 
 	subCmdBoosterStatus := Command{
 		Name:        BoosterStatusCommandName,
-		Desc:        "status of booster program claims and ...",
+		Desc:        "Status of booster program claims and ...",
 		Help:        "",
 		Args:        []Args{},
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
@@ -85,11 +85,11 @@ func (be *BotEngine) RegisterBoosterCommands() {
 	subCmdHelp := Command{
 		Name: BoosterHelpCommandName,
 		Desc: "Help for booster program commands",
-		Help: "provide the command name as parameter",
+		Help: "Provide the command name as parameter",
 		Args: []Args{
 			{
 				Name:     "sub-command",
-				Desc:     "the subcommand you want to see the related help of it",
+				Desc:     "The subcommand you want to see the related help of it",
 				Optional: true,
 			},
 		},
