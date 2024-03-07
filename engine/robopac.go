@@ -8,23 +8,12 @@ import (
 )
 
 const (
-	RoboPacCommandName = "robopac"
-	// HelpCommandName    = "help".
-	WalletCommandName = "wallet"
+	RoboPacCommandName     = "robopac"
+	WalletCommandName      = "wallet"
+	RoboPacHelpCommandName = "help"
 )
 
 func (be *BotEngine) RegisterRoboPacCommands() {
-	// cmdHelp := Command{
-	// 	Name:    HelpCommandName,
-	// 	Desc:    "This is Help!",
-	// 	Help:    "",
-	// 	AppIDs:  []AppID{AppIdCLI, AppIdDiscord},
-	// 	Handler: be.help,
-	// 	Args: []Args{
-	// 		{Name: "command", Desc: "help", Optional: true},
-	// 	},
-	// }
-
 	cmdWallet := Command{
 		Name:    WalletCommandName,
 		Desc:    "check the RoboPac wallet balance and address",
@@ -34,13 +23,29 @@ func (be *BotEngine) RegisterRoboPacCommands() {
 		Handler: be.walletHandler,
 	}
 
+	cmdHelp := Command{
+		Name: RoboPacCommandName,
+		Desc: "This is Help for robopac commands",
+		Help: "provide the command name as parameter",
+		Args: []Args{
+			{
+				Name:     "sub-command",
+				Desc:     "the subcommand you want to see the related help of it",
+				Optional: true,
+			},
+		},
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		SubCommands: nil,
+		Handler:     be.robopacHelpHandler,
+	}
+
 	cmdRoboPac := Command{
 		Name:        RoboPacCommandName,
 		Desc:        "robopac related commands",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdWallet},
+		SubCommands: []*Command{&cmdWallet, &cmdHelp},
 		Handler:     nil,
 	}
 
@@ -58,33 +63,9 @@ func (be *BotEngine) walletHandler(_ AppID, _ string, _ ...string) (*CommandResu
 	}, nil
 }
 
-// func (be *BotEngine) help(source AppID, _ string, args ...string) (*CommandResult, error) {
-// 	helpStr := ""
-// 	if len(args) > 0 {
-// 		cmdName := args[0]
-// 		cmd := be.commandByName(cmdName)
-// 		if cmd == nil {
-// 			return nil, fmt.Errorf("unknown command: %s", cmdName)
-// 		}
-
-// 		argsStr := ""
-// 		for _, arg := range cmd.Args {
-// 			argsStr += fmt.Sprintf("<%v> ", arg.Name)
-// 		}
-// 		argsStr = argsStr[:len(argsStr)-1]
-
-// 		helpStr += cmd.Desc
-// 		helpStr += fmt.Sprintf("%v\nUsage: `%v %v`", cmd.Help, cmd.Name, argsStr)
-// 	} else {
-// 		helpStr += "List of available commands:\n"
-// 		for _, cmd := range be.Cmds {
-// 			if !slices.Contains(cmd.AppIDs, source) {
-// 				continue
-// 			}
-
-// 			padding := 12 - len(cmd.Name)
-// 			helpStr += fmt.Sprintf("`%s`:%s%v\n", cmd.Name, strings.Repeat(" ", padding), cmd.Desc)
-// 		}
-// 	}
-// 	return MakeSuccessfulResult(helpStr), nil
-// }
+func (be *BotEngine) robopacHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+	if len(args) == 0 {
+		return be.help(source, callerID, RoboPacCommandName)
+	}
+	return be.help(source, callerID, RoboPacCommandName, args[0])
+}

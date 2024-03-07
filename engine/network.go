@@ -14,6 +14,7 @@ const (
 	NodeInfoCommandName      = "node-info"
 	NetworkStatusCommandName = "status"
 	NetworkHealthCommandName = "health"
+	NetworkHelpCommandName   = "help"
 )
 
 func (be *BotEngine) RegisterNetworkCommands() {
@@ -50,13 +51,29 @@ func (be *BotEngine) RegisterNetworkCommands() {
 		Handler: be.networkStatusHandler,
 	}
 
+	cmdHelp := Command{
+		Name: NetworkHelpCommandName,
+		Desc: "network help commands",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "sub-command",
+				Desc:     "the subcommand you want to see the related help of it",
+				Optional: true,
+			},
+		},
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		SubCommands: nil,
+		Handler:     be.networkHelpHandler,
+	}
+
 	cmdNetwork := Command{
 		Name:        NetworkCommandName,
 		Desc:        "network related commands",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&sCmdHealth, &sCmdStatus, &sCmdNodeInfo},
+		SubCommands: []*Command{&sCmdHealth, &sCmdStatus, &sCmdNodeInfo, &cmdHelp},
 		Handler:     nil,
 	}
 
@@ -197,4 +214,11 @@ func (be *BotEngine) nodeInfoHandler(_ AppID, _ string, args ...string) (*Comman
 		Successful: true,
 		Message:    result,
 	}, nil
+}
+
+func (be *BotEngine) networkHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+	if len(args) == 0 {
+		return be.help(source, callerID, NetworkHelpCommandName)
+	}
+	return be.help(source, callerID, NetworkHelpCommandName, args[0])
 }

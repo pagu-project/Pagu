@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 type AppID int
@@ -33,7 +34,7 @@ func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*Comman
 
 	cmdName := inputs[0]
 	subCmdName := inputs[1]
-	cmd := be.commandByName(cmdName, subCmdName)
+	cmd := be.subCommandByName(cmdName, subCmdName)
 	if cmd == nil {
 		return nil, fmt.Errorf("unknown command: %s", cmdName)
 	}
@@ -50,7 +51,7 @@ func (be *BotEngine) Run(appID AppID, callerID string, inputs []string) (*Comman
 	return cmd.Handler(appID, callerID, args...)
 }
 
-func (be *BotEngine) commandByName(cmdName, subCmdName string) *Command {
+func (be *BotEngine) subCommandByName(cmdName, subCmdName string) *Command {
 	cmdIndex := slices.IndexFunc(be.Cmds, func(cmd Command) bool {
 		return cmd.Name == cmdName
 	})
@@ -68,6 +69,18 @@ func (be *BotEngine) commandByName(cmdName, subCmdName string) *Command {
 	}
 
 	return be.Cmds[cmdIndex].SubCommands[sCmdIndex]
+}
+
+func (be *BotEngine) commandByName(cmdName string) *Command {
+	cmdIndex := slices.IndexFunc(be.Cmds, func(cmd Command) bool {
+		return cmd.Name == cmdName
+	})
+
+	if cmdIndex == -1 {
+		return nil
+	}
+
+	return &be.Cmds[cmdIndex]
 }
 
 func (be *BotEngine) Commands() []Command {
@@ -112,4 +125,37 @@ func (cmd *Command) CheckArgs(input []string) error {
 
 func (cmd *Command) HasAppId(appID AppID) bool {
 	return slices.Contains(cmd.AppIDs, appID)
+}
+
+func (be *BotEngine) help(_ AppID, _ string, args ...string) (*CommandResult, error) {
+	var helpMsg strings.Builder
+
+	cmdName := args[0]
+
+	if args[1] == "" {
+		cmd := be.commandByName(cmdName)
+		if cmd != nil {
+			helpMsg.WriteString(fmt.Sprintf("Help of %s Command\nDesc: %s\nHelp: %s\n\nSubCommands:", cmd.Name, cmd.Desc, cmd.Help))
+			for i, sc := range cmd.SubCommands {
+				helpMsg.WriteString(fmt.Sprintf("%v-%s", i, sc.Name))
+			}
+
+			return MakeSuccessfulResult(helpMsg.String()), nil
+		}
+		return MakeFailedResult("can't find the command: %s", cmdName), nil
+	}
+
+	subCmd := args[1]
+
+	scmd := be.subCommandByName(cmdName, subCmd)
+	if scmd == nil {
+		return MakeFailedResult("can't find the sub command command: %s", subCmd), nil
+	}
+
+	helpMsg.WriteString(fmt.Sprintf("Help of %s Command\nDesc: %s\nHelp: %s\n\nArgs:", scmd.Name, scmd.Desc, scmd.Help))
+	for i, a := range scmd.Args {
+		helpMsg.WriteString(fmt.Sprintf("%v-%s\nDesc: %s\n optional: %v", i, a.Name, a.Desc, a.Optional))
+	}
+
+	return MakeSuccessfulResult(helpMsg.String()), nil
 }

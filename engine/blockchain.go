@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	BlockChainCommandName = "blockchain"
-	CalcRewardCommandName = "calc-reward"
-	CalcFeeCommandName    = "calc-fee"
+	BlockChainCommandName     = "blockchain"
+	CalcRewardCommandName     = "calc-reward"
+	CalcFeeCommandName        = "calc-fee"
+	BlockChainHelpCommandName = "help"
 )
 
 func (be *BotEngine) RegisterBlockchainCommands() {
@@ -36,13 +37,29 @@ func (be *BotEngine) RegisterBlockchainCommands() {
 		Handler: be.calcRewardHandler,
 	}
 
+	cmdHelp := Command{
+		Name: BlockChainHelpCommandName,
+		Desc: "help for blockchain commands",
+		Help: "provide the command name as parameter",
+		Args: []Args{
+			{
+				Name:     "sub-command",
+				Desc:     "the subcommand you want to see the related help of it",
+				Optional: true,
+			},
+		},
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		SubCommands: nil,
+		Handler:     be.blockchainHelpHandler,
+	}
+
 	cmdBlockchain := Command{
 		Name:        BlockChainCommandName,
 		Desc:        "Blockchain information and tools",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdCalcReward},
+		SubCommands: []*Command{&cmdCalcReward, &cmdHelp},
 		Handler:     nil,
 	}
 
@@ -89,4 +106,11 @@ func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*Comm
 		Successful: true,
 		Message:    result,
 	}, nil
+}
+
+func (be *BotEngine) blockchainHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+	if len(args) == 0 {
+		return be.help(source, callerID, BlockChainCommandName)
+	}
+	return be.help(source, callerID, BlockChainCommandName, args[0])
 }

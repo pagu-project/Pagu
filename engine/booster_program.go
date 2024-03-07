@@ -17,6 +17,7 @@ const (
 	BoosterClaimCommandName     = "booster-claim"
 	BoosterWhitelistCommandName = "booster-whitelist"
 	BoosterStatusCommandName    = "booster-status"
+	BoosterHelpCommandName      = "help"
 )
 
 func (be *BotEngine) RegisterCommands() {
@@ -79,13 +80,29 @@ func (be *BotEngine) RegisterCommands() {
 		Handler: be.boosterStatusHandler,
 	}
 
+	cmdHelp := Command{
+		Name: BoosterHelpCommandName,
+		Desc: "help for booster program commands",
+		Help: "provide the command name as parameter",
+		Args: []Args{
+			{
+				Name:     "sub-command",
+				Desc:     "the subcommand you want to see the related help of it",
+				Optional: true,
+			},
+		},
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		SubCommands: nil,
+		Handler:     be.boosterHelpHandler,
+	}
+
 	cmdBooster := Command{
 		Name:        BoosterCommandName,
 		Desc:        "Pactus validator booster program",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdBoosterClaim, &cmdBoosterPayment, &cmdBoosterStatus, &cmdBoosterWhitelist},
+		SubCommands: []*Command{&cmdBoosterClaim, &cmdBoosterPayment, &cmdBoosterStatus, &cmdBoosterWhitelist, &cmdHelp},
 		Handler:     nil,
 	}
 
@@ -291,4 +308,11 @@ func (be *BotEngine) boosterStatusHandler(_ AppID, _ string, _ ...string) (*Comm
 		Successful: true,
 		Message:    result,
 	}, nil
+}
+
+func (be *BotEngine) boosterHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+	if len(args) == 0 {
+		return be.help(source, callerID, BoosterCommandName)
+	}
+	return be.help(source, callerID, BoosterCommandName, args[0])
 }

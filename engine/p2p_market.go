@@ -12,6 +12,7 @@ const (
 	P2PCommandName            = "p2p-market"
 	DepositAddressCommandName = "deposit-address"
 	CreateOfferCommandName    = "create-offer"
+	P2PHelpCommandName        = "help"
 )
 
 func (be *BotEngine) RegisterP2PMarketCommands() {
@@ -54,13 +55,29 @@ func (be *BotEngine) RegisterP2PMarketCommands() {
 		Handler: be.createOfferHandler,
 	}
 
+	cmdHelp := Command{
+		Name: P2PHelpCommandName,
+		Desc: "p2p market help commands",
+		Help: "",
+		Args: []Args{
+			{
+				Name:     "sub-command",
+				Desc:     "the subcommand you want to see the related help of it",
+				Optional: true,
+			},
+		},
+		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
+		SubCommands: nil,
+		Handler:     be.p2pHelpHandler,
+	}
+
 	cmdP2PMarket := Command{
 		Name:        P2PCommandName,
 		Desc:        "person to person market for pactus trading",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&cmdCreateOffer, &cmdDepositAddress},
+		SubCommands: []*Command{&cmdCreateOffer, &cmdDepositAddress, &cmdHelp},
 		Handler:     nil,
 	}
 
@@ -146,4 +163,11 @@ func (be *BotEngine) createOfferHandler(source AppID, callerID string, args ...s
 	return MakeSuccessfulResult(
 		"Offer successfully created, your offer ID: %s", "TODO!!!!!!!",
 	), nil
+}
+
+func (be *BotEngine) p2pHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+	if len(args) == 0 {
+		return be.help(source, callerID, P2PCommandName)
+	}
+	return be.help(source, callerID, P2PCommandName, args[0])
 }
