@@ -43,7 +43,7 @@ func (be *BotEngine) RegisterBoosterCommands() {
 
 	subCmdBoosterClaim := Command{
 		Name: BoosterClaimCommandName,
-		Desc: "Claim your booster program stakes",
+		Desc: "Claim your booster program stake",
 		Help: "You have to do the booster payment first, then try to claim it",
 		Args: []Args{
 			{
