@@ -91,8 +91,8 @@ func (bot *DiscordBot) registerCommands() error {
 }
 
 func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if i.GuildID != "" {
-		bot.respondErrMsg("Send a message in a bottle, ye say? Cast it into me DMs, and I'll be at yer service!", s, i)
+	if i.GuildID != bot.GuildID {
+		bot.respondErrMsg("Please send messages on server chat", s, i)
 		return
 	}
 

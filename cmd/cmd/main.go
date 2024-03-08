@@ -31,7 +31,7 @@ func run(cmd *cobra.Command, args []string) {
 		kill(cmd, err)
 	}
 
-	botEngine.RegisterCommands()
+	botEngine.RegisterAllCommands()
 
 	botEngine.Start()
 
