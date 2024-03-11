@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kehiy/RoboPac/engine/command"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/pactus-project/pactus/util"
 )
@@ -67,7 +68,7 @@ func (be *BotEngine) RegisterBlockchainCommands() {
 	be.Cmds = append(be.Cmds, cmdBlockchain)
 }
 
-func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*CommandResult, error) {
+func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*command.CommandResult, error) {
 	stake, err := strconv.Atoi(args[0])
 	if err != nil {
 		return nil, err
@@ -103,13 +104,13 @@ func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*Comm
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
 		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
 
-	return &CommandResult{
+	return &command.CommandResult{
 		Successful: true,
 		Message:    result,
 	}, nil
 }
 
-func (be *BotEngine) blockchainHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
+func (be *BotEngine) blockchainHelpHandler(source command.AppID, callerID string, args ...string) (*command.CommandResult, error) {
 	if len(args) == 0 {
 		return be.help(source, callerID, BlockChainCommandName)
 	}

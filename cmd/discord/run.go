@@ -8,6 +8,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/discord"
 	"github.com/kehiy/RoboPac/engine"
+	"github.com/kehiy/RoboPac/log"
 	"github.com/spf13/cobra"
 )
 
@@ -16,33 +17,28 @@ func RunCommand(parentCmd *cobra.Command) {
 		Use:   "run",
 		Short: "Runs a mainnet instance of RoboPac",
 	}
+	log.InitGlobalLogger()
+
 	parentCmd.AddCommand(run)
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
 		config, err := config.Load()
-		if err != nil {
-			kill(cmd, err)
-		}
+		ExitOnError(cmd, err)
 
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
-		if err != nil {
-			kill(cmd, err)
-		}
+		ExitOnError(cmd, err)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
 		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,
 			config.DiscordBotCfg.DiscordGuildID)
-		if err != nil {
-			kill(cmd, err)
-		}
+		ExitOnError(cmd, err)
 
-		if err = discordBot.Start(); err != nil {
-			kill(cmd, err)
-		}
+		err = discordBot.Start()
+		ExitOnError(cmd, err)
 
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

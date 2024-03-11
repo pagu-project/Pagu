@@ -3,11 +3,12 @@ package engine
 import (
 	"context"
 	"errors"
-	"sync"
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/database"
+	"github.com/kehiy/RoboPac/engine/command"
+	"github.com/kehiy/RoboPac/engine/command/booster"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/nowpayments"
 	"github.com/kehiy/RoboPac/store"
@@ -16,21 +17,13 @@ import (
 )
 
 type BotEngine struct {
-	ctx    context.Context //nolint
+	ctx    context.Context //nolint //! remove linter
 	cancel context.CancelFunc
 
-	wallet        wallet.IWallet
-	db            *database.DB
-	nowpayments   nowpayments.INowpayment
-	clientMgr     *client.Mgr
-	logger        *log.SubLogger
-	twitterClient twitter_api.IClient
+	clientMgr *client.Mgr
+	rootCmd   *command.Command
 
-	AuthIDs []string
-	Cmds    []Command
-
-	store        store.IStore //!
-	sync.RWMutex              //! remove this.
+	boosterCmd *booster.Booster
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -54,9 +47,6 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		cm.AddClient(c)
 	}
 	cm.Start()
-
-	// initializing logger global instance.
-	log.InitGlobalLogger()
 
 	// new subLogger for engine.
 	eSl := log.NewSubLogger("engine")
@@ -113,18 +103,82 @@ func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s sto
 	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
-	return &BotEngine{
-		ctx:           ctx,
-		cancel:        cnl,
-		logger:        logger,
-		wallet:        w,
-		clientMgr:     cm,
-		store:         s,
-		db:            db,
-		twitterClient: twitterClient,
-		nowpayments:   nowpayments,
-		AuthIDs:       authIDs,
+	rootCmd := &command.Command{
+		Emoji:       "🤖",
+		Name:        "RoboPAC",
+		Desc:        "RoboPAC",
+		Help:        "RoboPAC Help",
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		SubCommands: []*command.Command{},
 	}
+
+	return &BotEngine{
+		ctx:       ctx,
+		cancel:    cnl,
+		clientMgr: cm,
+		rootCmd:   rootCmd,
+	}
+}
+
+func (be *BotEngine) Commands() []*command.Command {
+	return be.rootCmd.SubCommands
+}
+
+func (be *BotEngine) RegisterAllCommands() {
+	be.rootCmd.AddSubCommand(be.boosterCmd.GetCommand())
+
+	be.rootCmd.AddHelpSubCommand()
+}
+
+func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) *command.CommandResult {
+	log.Debug("run command", "callerID", callerID, "inputs", tokens)
+
+	cmd, argsIndex := be.getCommand(tokens)
+	if !cmd.HasAppId(appID) {
+		return cmd.FailedResult("unauthorized appID: %v", appID)
+	}
+
+	if cmd.Handler == nil {
+		return cmd.HelpResult()
+	}
+
+	args := tokens[argsIndex:]
+	err := cmd.CheckArgs(args)
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
+	return cmd.Handler(cmd, appID, callerID, args...)
+}
+
+func (be *BotEngine) getCommand(tokens []string) (*command.Command, int) {
+	index := 0
+	targetCmd := be.rootCmd
+	cmds := be.rootCmd.SubCommands
+	for {
+		if len(tokens) <= index {
+			break
+		}
+		token := tokens[index]
+		index++
+
+		found := false
+		for _, cmd := range cmds {
+			if cmd.Name == token {
+				targetCmd = cmd
+				cmds = cmd.SubCommands
+				found = true
+
+				break
+			}
+		}
+
+		if !found {
+			break
+		}
+	}
+
+	return targetCmd, index
 }
 
 func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
@@ -157,26 +211,13 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 	}, nil
 }
 
-func boosterPrice(allPackages int) int {
-	switch {
-	case allPackages < 100:
-		return 30
-	case allPackages < 200:
-		return 40
-	case allPackages < 300:
-		return 50
-	default:
-		return 100
-	}
-}
-
 func (be *BotEngine) Stop() {
-	be.logger.Info("shutting bot engine down...")
+	log.Info("shutting bot engine down...")
 
 	be.cancel()
 	be.clientMgr.Stop()
 }
 
 func (be *BotEngine) Start() {
-	be.logger.Info("starting the bot engine...")
+	log.Info("starting the bot engine...")
 }

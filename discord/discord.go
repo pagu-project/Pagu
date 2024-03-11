@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/kehiy/RoboPac/engine"
+	"github.com/kehiy/RoboPac/engine/command"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/utils"
 )
@@ -62,7 +63,7 @@ func (bot *DiscordBot) registerCommands() error {
 
 	beCmds := bot.BotEngine.Commands()
 	for _, beCmd := range beCmds {
-		if !beCmd.HasAppId(engine.AppIdDiscord) {
+		if !beCmd.HasAppId(command.AppIdDiscord) {
 			continue
 		}
 		discordCmd := discordgo.ApplicationCommand{
@@ -105,11 +106,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		beInput = append(beInput, opt.StringValue())
 	}
 
-	res, err := db.BotEngine.Run(engine.AppIdDiscord, i.User.ID, beInput)
-	if err != nil {
-		db.respondErrMsg(err.Error(), s, i)
-		return
-	}
+	res := db.BotEngine.Run(command.AppIdDiscord, i.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
 }
@@ -123,7 +120,7 @@ func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *dis
 	bot.respondEmbed(errorEmbed, s, i)
 }
 
-func (bot *DiscordBot) respondResultMsg(res *engine.CommandResult, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *DiscordBot) respondResultMsg(res *command.CommandResult, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var resEmbed *discordgo.MessageEmbed
 	if res.Successful {
 		resEmbed = &discordgo.MessageEmbed{
