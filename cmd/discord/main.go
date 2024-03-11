@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/kehiy/RoboPac/log"
 	"github.com/spf13/cobra"
 )
 
@@ -12,15 +13,17 @@ func main() {
 		Version: "0.0.1",
 	}
 
+	log.InitGlobalLogger()
+
 	RunCommand(rootCmd)
 
 	err := rootCmd.Execute()
-	if err != nil {
-		kill(rootCmd, err)
-	}
+	ExitOnError(rootCmd, err)
 }
 
-func kill(cmd *cobra.Command, err error) {
-	cmd.PrintErr(err.Error())
-	os.Exit(1)
+func ExitOnError(cmd *cobra.Command, err error) {
+	if err != nil {
+		cmd.PrintErr(err.Error())
+		os.Exit(1)
+	}
 }

@@ -7,6 +7,8 @@ import (
 
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
+	"github.com/kehiy/RoboPac/engine/command"
+	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
 	cobra "github.com/spf13/cobra"
 )
@@ -14,28 +16,27 @@ import (
 const PROMPT = "\n>> "
 
 func run(cmd *cobra.Command, args []string) {
-	cmd.Println("initializing repl...")
+	if len(args) != 1 {
+		cmd.Println("Provide your Discord ID as the first argument.")
+		cmd.Println("Usage: js-cli <Discord-ID>")
+		return
+	}
+	log.InitGlobalLogger()
 
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
 	config, err := config.Load(*envOpt)
-	if err != nil {
-		kill(cmd, err)
-	}
+	ExitOnError(cmd, err)
 
 	if config.Network == "Localnet" {
 		crypto.AddressHRP = "tpc"
 	}
 
 	botEngine, err := engine.NewBotEngine(config)
-	if err != nil {
-		kill(cmd, err)
-	}
+	ExitOnError(cmd, err)
 
 	botEngine.RegisterAllCommands()
-
 	botEngine.Start()
 
-	cmd.Println("repl started")
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -46,17 +47,16 @@ func run(cmd *cobra.Command, args []string) {
 
 		if strings.ToLower(input) == "exit" {
 			cmd.Println("exiting from repl")
+
+			return
 		}
 
 		callerID := args[0]
 		inputs := strings.Split(input, " ")
 
-		response, err := botEngine.Run(engine.AppIdCLI, callerID, inputs)
-		if err != nil {
-			cmd.PrintErr(err)
-		}
+		response := botEngine.Run(command.AppIdCLI, callerID, inputs)
 
-		cmd.Print(response)
+		cmd.Printf("%v\n%v", response.Title, response.Message)
 	}
 }
 
@@ -68,12 +68,12 @@ func main() {
 	}
 
 	err := rootCmd.Execute()
-	if err != nil {
-		kill(rootCmd, err)
-	}
+	ExitOnError(rootCmd, err)
 }
 
-func kill(cmd *cobra.Command, err error) {
-	cmd.PrintErr(err.Error())
-	os.Exit(1)
+func ExitOnError(cmd *cobra.Command, err error) {
+	if err != nil {
+		cmd.PrintErr(err.Error())
+		os.Exit(1)
+	}
 }

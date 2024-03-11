@@ -1,13 +1,14 @@
 package engine
 
-import "time"
+import (
+	"time"
+
+	"github.com/kehiy/RoboPac/engine/command"
+)
 
 type IEngine interface {
-	Run(appID AppID, callerID string, inputs []string) (*CommandResult, error)
-	Commands() []Command
-
-	Stop()
-	Start()
+	Run(appID command.AppID, callerID string, tokens []string) (*command.CommandResult, error)
+	Commands() []command.Command
 }
 
 type NetHealthResponse struct {

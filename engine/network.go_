@@ -11,7 +11,7 @@ import (
 
 const (
 	NetworkCommandName       = "network"
-	NodeInfoCommandName      = "node-info"
+	NodeInfoCommandName      = "node-info" // rename to validator-info
 	NetworkStatusCommandName = "status"
 	NetworkHealthCommandName = "health"
 	NetworkHelpCommandName   = "help"
