@@ -8,6 +8,7 @@ import (
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/database"
 	"github.com/kehiy/RoboPac/engine/command"
+	"github.com/kehiy/RoboPac/engine/command/blockchain"
 	"github.com/kehiy/RoboPac/engine/command/booster"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/nowpayments"
@@ -23,7 +24,8 @@ type BotEngine struct {
 	clientMgr *client.Mgr
 	rootCmd   *command.Command
 
-	boosterCmd *booster.Booster
+	boosterCmd    *booster.Booster
+	blockchainCmd *blockchain.Blockchain
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -126,6 +128,7 @@ func (be *BotEngine) Commands() []*command.Command {
 
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.boosterCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
