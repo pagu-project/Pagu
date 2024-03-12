@@ -4,15 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/nowpayments"
-	"github.com/kehiy/RoboPac/store"
-	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/utils"
-	"github.com/kehiy/RoboPac/wallet"
 	"github.com/pactus-project/pactus/util"
 )
 
@@ -24,33 +19,16 @@ const (
 )
 
 type Blockchain struct {
-	sync.RWMutex //! remove this.
-
-	ctx           context.Context
-	AdminIDs      []string
-	store         store.IStore
-	wallet        wallet.IWallet
-	nowpayments   nowpayments.INowpayment
-	clientMgr     *client.Mgr
-	twitterClient twitter_api.IClient
+	ctx       context.Context
+	clientMgr *client.Mgr
 }
 
 func NewBlockchain(ctx context.Context,
-	adminIDs []string,
-	store store.IStore,
-	wallet wallet.IWallet,
-	nowpayments nowpayments.INowpayment,
 	clientMgr *client.Mgr,
-	twitterClient twitter_api.IClient,
 ) *Blockchain {
 	return &Blockchain{
-		ctx:           ctx,
-		AdminIDs:      adminIDs,
-		store:         store,
-		wallet:        wallet,
-		nowpayments:   nowpayments,
-		clientMgr:     clientMgr,
-		twitterClient: twitterClient,
+		ctx:       ctx,
+		clientMgr: clientMgr,
 	}
 }
 
@@ -87,6 +65,8 @@ func (bc *Blockchain) GetCommand() *command.Command {
 	}
 
 	cmdBlockchain.AddSubCommand(subCmdCalcReward)
+
+	cmdBlockchain.AddHelpSubCommand()
 
 	return &cmdBlockchain
 }

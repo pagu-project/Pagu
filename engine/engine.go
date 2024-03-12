@@ -9,23 +9,26 @@ import (
 	"github.com/kehiy/RoboPac/database"
 	"github.com/kehiy/RoboPac/engine/command"
 	"github.com/kehiy/RoboPac/engine/command/blockchain"
-	"github.com/kehiy/RoboPac/engine/command/booster"
+	"github.com/kehiy/RoboPac/engine/command/network"
+	"github.com/kehiy/RoboPac/engine/command/p2pmarket"
+	"github.com/kehiy/RoboPac/engine/command/testnetreward"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/nowpayments"
 	"github.com/kehiy/RoboPac/store"
-	"github.com/kehiy/RoboPac/twitter_api"
 	"github.com/kehiy/RoboPac/wallet"
 )
 
 type BotEngine struct {
-	ctx    context.Context //nolint //! remove linter
+	ctx    context.Context //nolint
 	cancel context.CancelFunc
 
 	clientMgr *client.Mgr
 	rootCmd   *command.Command
 
-	boosterCmd    *booster.Booster
-	blockchainCmd *blockchain.Blockchain
+	blockchainCmd    *blockchain.Blockchain
+	networkCmd       *network.Network
+	testnetrewardCmd *testnetreward.TestNetReward
+	p2pmarketCmd     *p2pmarket.P2PMarket
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -50,9 +53,6 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	cm.Start()
 
-	// new subLogger for engine.
-	eSl := log.NewSubLogger("engine")
-
 	// new subLogger for store.
 	sSl := log.NewSubLogger("store")
 
@@ -76,14 +76,6 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("store loaded successfully", "path", cfg.StorePath)
 
-	// twitter
-	twitterClient, err := twitter_api.NewClient(cfg.TwitterAPICfg.BearerToken, cfg.TwitterAPICfg.TwitterID)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-	log.Info("twitterClient loaded successfully")
-
 	// load database
 	db, err := database.NewDB(cfg.DataBasePath)
 	if err != nil {
@@ -98,27 +90,35 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("nowPayments loaded successfully")
 
-	return newBotEngine(eSl, cm, wallet, store, db, twitterClient, nowpayments, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, wallet, store, db, nowpayments, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(logger *log.SubLogger, cm *client.Mgr, w wallet.IWallet, s store.IStore, db *database.DB,
-	twitterClient twitter_api.IClient, nowpayments nowpayments.INowpayment, authIDs []string,
+func newBotEngine(cm *client.Mgr, w wallet.IWallet, s store.IStore, db *database.DB, nowpayments nowpayments.INowpayment, authIDs []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := &command.Command{
 		Emoji:       "🤖",
-		Name:        "RoboPAC",
+		Name:        "robopac",
 		Desc:        "RoboPAC",
 		Help:        "RoboPAC Help",
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
 		SubCommands: []*command.Command{},
 	}
 
+	netCmd := network.NewNetwork(ctx, cm)
+	bcCmd := blockchain.NewBlockchain(ctx, cm)
+	p2pCmd := p2pmarket.NewP2PMarket(ctx, authIDs, *db, w, nowpayments, cm)
+	tnrCmd := testnetreward.NewTestNetReward(ctx, authIDs, s, w, cm)
+
 	return &BotEngine{
-		ctx:       ctx,
-		cancel:    cnl,
-		clientMgr: cm,
-		rootCmd:   rootCmd,
+		ctx:              ctx,
+		cancel:           cnl,
+		clientMgr:        cm,
+		rootCmd:          rootCmd,
+		networkCmd:       netCmd,
+		blockchainCmd:    bcCmd,
+		p2pmarketCmd:     p2pCmd,
+		testnetrewardCmd: tnrCmd,
 	}
 }
 
@@ -127,8 +127,10 @@ func (be *BotEngine) Commands() []*command.Command {
 }
 
 func (be *BotEngine) RegisterAllCommands() {
-	be.rootCmd.AddSubCommand(be.boosterCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.p2pmarketCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.testnetrewardCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
@@ -184,7 +186,7 @@ func (be *BotEngine) getCommand(tokens []string) (*command.Command, int) {
 	return targetCmd, index
 }
 
-func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
+func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
 	netInfo, err := be.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return nil, err
@@ -200,7 +202,7 @@ func (be *BotEngine) NetworkStatus() (*NetStatus, error) {
 		cs = 0
 	}
 
-	return &NetStatus{
+	return &network.NetStatus{
 		ConnectedPeersCount: netInfo.ConnectedPeersCount,
 		ValidatorsCount:     chainInfo.TotalValidators,
 		TotalBytesSent:      netInfo.TotalSentBytes,
