@@ -84,7 +84,7 @@ func (bc *Blockchain) calcRewardHandler(cmd *command.Command, _ command.AppID, _
 
 	if stake < 1 || stake > 1_000 {
 		return &command.CommandResult{
-			Error:      "minimum of stake is 1 PAC and maximum is 1,000 PAC",
+			Error:      "minimum stake amount is 1 PAC and maximum is 1,000 PAC",
 			Successful: false,
 		}
 	}

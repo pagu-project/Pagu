@@ -67,8 +67,8 @@ type NetStatus struct {
 func (n *Network) GetCommand() *command.Command {
 	subCmdNodeInfo := command.Command{
 		Name: NodeInfoCommandName,
-		Desc: "Check the information of a node",
-		Help: "Provide your validator address on the specific node to get the validator info and the node info",
+		Desc: "View the information of a node",
+		Help: "Provide your validator address on the specific node to get the validator and node info",
 		Args: []command.Args{
 			{
 				Name:     "validator-address",

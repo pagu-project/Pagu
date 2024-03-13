@@ -169,7 +169,7 @@ func (tr *TestNetReward) claimHandler(cmd *command.Command, _ command.AppID, cal
 	}
 
 	if claimer.DiscordID != callerID {
-		log.Warn("try to claim other's reward", "claimer", claimer.DiscordID, "discordID", callerID)
+		log.Warn("trying to claim other's reward", "claimer", claimer.DiscordID, "discordID", callerID)
 		return &command.CommandResult{
 			Error:      "invalid claimer",
 			Successful: false,

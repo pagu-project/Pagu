@@ -90,7 +90,7 @@ func (be *P2PMarket) GetCommand() *command.Command {
 
 	cmdP2PMarket := command.Command{
 		Name:        P2PCommandName,
-		Desc:        "Person to Person market for Pactus trading",
+		Desc:        "Peer to Peer market for Pactus trading",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
@@ -138,7 +138,7 @@ func (bpm *P2PMarket) depositAddressHandler(cmd *command.Command, _ command.AppI
 
 	return &command.CommandResult{
 		Successful: true,
-		Message:    fmt.Sprintf("Deposit address crated for you successfully: %s", addr),
+		Message:    fmt.Sprintf("Deposit address created for you successfully: %s", addr),
 	}
 }
 
