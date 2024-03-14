@@ -1,9 +1,12 @@
-package engine
+package network
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/kehiy/RoboPac/client"
+	"github.com/kehiy/RoboPac/engine/command"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/util"
@@ -11,18 +14,62 @@ import (
 
 const (
 	NetworkCommandName       = "network"
-	NodeInfoCommandName      = "node-info" // rename to validator-info
+	NodeInfoCommandName      = "node-info"
 	NetworkStatusCommandName = "status"
 	NetworkHealthCommandName = "health"
 	NetworkHelpCommandName   = "help"
 )
 
-func (be *BotEngine) RegisterNetworkCommands() {
-	subCmdNodeInfo := Command{
+type Network struct {
+	ctx       context.Context
+	clientMgr *client.Mgr
+}
+
+func NewNetwork(ctx context.Context,
+	clientMgr *client.Mgr,
+) *Network {
+	return &Network{
+		ctx:       ctx,
+		clientMgr: clientMgr,
+	}
+}
+
+type NodeInfo struct {
+	PeerID              string
+	IPAddress           string
+	Agent               string
+	Moniker             string
+	Country             string
+	City                string
+	RegionName          string
+	TimeZone            string
+	ISP                 string
+	ValidatorNum        int32
+	AvailabilityScore   float64
+	StakeAmount         int64
+	LastBondingHeight   uint32
+	LastSortitionHeight uint32
+}
+
+type NetStatus struct {
+	NetworkName         string
+	ConnectedPeersCount uint32
+	ValidatorsCount     int32
+	TotalBytesSent      uint32
+	TotalBytesReceived  uint32
+	CurrentBlockHeight  uint32
+	TotalNetworkPower   int64
+	TotalCommitteePower int64
+	TotalAccounts       int32
+	CirculatingSupply   int64
+}
+
+func (n *Network) GetCommand() *command.Command {
+	subCmdNodeInfo := command.Command{
 		Name: NodeInfoCommandName,
-		Desc: "Check the information of a node",
-		Help: "Provide your validator address on the specific node to get the validator info and the node info",
-		Args: []Args{
+		Desc: "View the information of a node",
+		Help: "Provide your validator address on the specific node to get the validator and node info",
+		Args: []command.Args{
 			{
 				Name:     "validator-address",
 				Desc:     "Your validator address",
@@ -30,61 +77,51 @@ func (be *BotEngine) RegisterNetworkCommands() {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		Handler:     be.nodeInfoHandler,
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		Handler:     n.nodeInfoHandler,
 	}
 
-	subCmdHealth := Command{
+	subCmdHealth := command.Command{
 		Name:        NetworkHealthCommandName,
 		Desc:        "Checking network health status",
 		Help:        "",
-		Args:        []Args{},
+		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		Handler:     be.networkHealthHandler,
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		Handler:     n.networkHealthHandler,
 	}
 
-	subCmdStatus := Command{
+	subCmdStatus := command.Command{
 		Name:        NetworkStatusCommandName,
 		Desc:        "Network statistics",
 		Help:        "",
-		Args:        []Args{},
+		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		Handler:     be.networkStatusHandler,
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		Handler:     n.networkStatusHandler,
 	}
 
-	subCmdHelp := Command{
-		Name: NetworkHelpCommandName,
-		Desc: "Network help commands",
-		Help: "",
-		Args: []Args{
-			{
-				Name:     "sub-command",
-				Desc:     "The subcommand you want to see the related help of it",
-				Optional: true,
-			},
-		},
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: nil,
-		Handler:     be.networkHelpHandler,
-	}
-
-	cmdNetwork := Command{
+	cmdNetwork := command.Command{
 		Name:        NetworkCommandName,
 		Desc:        "Network related commands",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&subCmdHealth, &subCmdStatus, &subCmdNodeInfo, &subCmdHelp},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		SubCommands: []*command.Command{&subCmdHealth, &subCmdStatus, &subCmdNodeInfo},
 		Handler:     nil,
 	}
 
-	be.Cmds = append(be.Cmds, cmdNetwork)
+	cmdNetwork.AddSubCommand(&subCmdHealth)
+	cmdNetwork.AddSubCommand(&subCmdNodeInfo)
+	cmdNetwork.AddSubCommand(&subCmdStatus)
+
+	cmdNetwork.AddHelpSubCommand()
+
+	return &cmdNetwork
 }
 
-func (be *BotEngine) networkHealthHandler(_ AppID, _ string, _ ...string) (*CommandResult, error) {
-	lastBlockTime, lastBlockHeight := be.clientMgr.GetLastBlockTime()
+func (n *Network) networkHealthHandler(cmd *command.Command, _ command.AppID, _ string, _ ...string) *command.CommandResult {
+	lastBlockTime, lastBlockHeight := n.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0).Format("02/01/2006, 15:04:05")
 	currentTime := time.Now()
 
@@ -102,22 +139,28 @@ func (be *BotEngine) networkHealthHandler(_ AppID, _ string, _ ...string) (*Comm
 		status = "UnHealthy❌"
 	}
 
-	return &CommandResult{
+	return &command.CommandResult{
 		Successful: true,
 		Message: fmt.Sprintf("Network is %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
 			status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils.FormatNumber(int64(lastBlockHeight))),
-	}, nil
+	}
 }
 
-func (be *BotEngine) networkStatusHandler(_ AppID, _ string, _ ...string) (*CommandResult, error) {
+func (be *Network) networkStatusHandler(cmd *command.Command, _ command.AppID, _ string, _ ...string) *command.CommandResult {
 	netInfo, err := be.clientMgr.GetNetworkInfo()
 	if err != nil {
-		return nil, err
+		return &command.CommandResult{
+			Successful: false,
+			Error:      err.Error(),
+		}
 	}
 
 	chainInfo, err := be.clientMgr.GetBlockchainInfo()
 	if err != nil {
-		return nil, err
+		return &command.CommandResult{
+			Error:      err.Error(),
+			Successful: false,
+		}
 	}
 
 	cs, err := be.clientMgr.GetCirculatingSupply()
@@ -147,23 +190,29 @@ func (be *BotEngine) networkStatusHandler(_ AppID, _ string, _ ...string) (*Comm
 		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalCommitteePower))),
 		utils.FormatNumber(int64(util.ChangeToCoin(net.CirculatingSupply))))
 
-	return &CommandResult{
+	return &command.CommandResult{
 		Successful: true,
 		Message:    result,
-	}, nil
+	}
 }
 
-func (be *BotEngine) nodeInfoHandler(_ AppID, _ string, args ...string) (*CommandResult, error) {
+func (n *Network) nodeInfoHandler(cmd *command.Command, _ command.AppID, _ string, args ...string) *command.CommandResult {
 	valAddress := args[0]
 
-	peerInfo, err := be.clientMgr.GetPeerInfo(valAddress)
+	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)
 	if err != nil {
-		return nil, err
+		return &command.CommandResult{
+			Error:      err.Error(),
+			Successful: false,
+		}
 	}
 
 	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
 	if err != nil {
-		return nil, err
+		return &command.CommandResult{
+			Error:      err.Error(),
+			Successful: false,
+		}
 	}
 
 	ip := utils.ExtractIPFromMultiAddr(peerInfo.Address)
@@ -184,7 +233,7 @@ func (be *BotEngine) nodeInfoHandler(_ AppID, _ string, args ...string) (*Comman
 	// here we check if the node is also a validator.
 	// if its a validator , then we populate the validator data.
 	// if not validator then we set everything to 0/empty .
-	val, err := be.clientMgr.GetValidatorInfo(valAddress)
+	val, err := n.clientMgr.GetValidatorInfo(valAddress)
 	if err == nil && val != nil {
 		nodeInfo.ValidatorNum = val.Validator.Number
 		nodeInfo.AvailabilityScore = val.Validator.AvailabilityScore
@@ -213,15 +262,8 @@ func (be *BotEngine) nodeInfoHandler(_ AppID, _ string, args ...string) (*Comman
 		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils.FormatNumber(int64(nodeInfo.ValidatorNum)),
 		pip19Score, utils.FormatNumber(int64(util.ChangeToCoin(nodeInfo.StakeAmount))))
 
-	return &CommandResult{
+	return &command.CommandResult{
 		Successful: true,
 		Message:    result,
-	}, nil
-}
-
-func (be *BotEngine) networkHelpHandler(source AppID, callerID string, args ...string) (*CommandResult, error) {
-	if len(args) == 0 {
-		return be.help(source, callerID, NetworkHelpCommandName)
 	}
-	return be.help(source, callerID, NetworkHelpCommandName, args[0])
 }

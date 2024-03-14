@@ -1,10 +1,11 @@
-package engine
+package blockchain
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"strconv"
 
+	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/engine/command"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/pactus-project/pactus/util"
@@ -17,12 +18,26 @@ const (
 	BlockChainHelpCommandName = "help"
 )
 
-func (be *BotEngine) RegisterBlockchainCommands() {
-	subCmdCalcReward := Command{
+type Blockchain struct {
+	ctx       context.Context
+	clientMgr *client.Mgr
+}
+
+func NewBlockchain(ctx context.Context,
+	clientMgr *client.Mgr,
+) *Blockchain {
+	return &Blockchain{
+		ctx:       ctx,
+		clientMgr: clientMgr,
+	}
+}
+
+func (bc *Blockchain) GetCommand() *command.Command {
+	subCmdCalcReward := &command.Command{
 		Name: CalcRewardCommandName,
 		Desc: "Calculate how many PAC coins you will earn with your validator stake",
 		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC prefix",
-		Args: []Args{
+		Args: []command.Args{
 			{
 				Name:     "stake-amount",
 				Desc:     "Amount of stake in your validator (1-1000)",
@@ -35,49 +50,43 @@ func (be *BotEngine) RegisterBlockchainCommands() {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		Handler:     be.calcRewardHandler,
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		Handler:     bc.calcRewardHandler,
 	}
 
-	subCmdHelp := Command{
-		Name: BlockChainHelpCommandName,
-		Desc: "Help for Blockchain commands",
-		Help: "Provide the sub command name as parameter",
-		Args: []Args{
-			{
-				Name:     "sub-command",
-				Desc:     "The subcommand you want to see the related help of it. (optional)",
-				Optional: true,
-			},
-		},
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: nil,
-		Handler:     be.blockchainHelpHandler,
-	}
-
-	cmdBlockchain := Command{
+	cmdBlockchain := command.Command{
 		Name:        BlockChainCommandName,
 		Desc:        "Blockchain information and tools",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []AppID{AppIdCLI, AppIdDiscord},
-		SubCommands: []*Command{&subCmdCalcReward, &subCmdHelp},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		SubCommands: []*command.Command{subCmdCalcReward},
 		Handler:     nil,
 	}
 
-	be.Cmds = append(be.Cmds, cmdBlockchain)
+	cmdBlockchain.AddSubCommand(subCmdCalcReward)
+
+	cmdBlockchain.AddHelpSubCommand()
+
+	return &cmdBlockchain
 }
 
-func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*command.CommandResult, error) {
+func (bc *Blockchain) calcRewardHandler(cmd *command.Command, _ command.AppID, _ string, args ...string) *command.CommandResult {
 	stake, err := strconv.Atoi(args[0])
 	if err != nil {
-		return nil, err
+		return &command.CommandResult{
+			Error:      err.Error(),
+			Successful: false,
+		}
 	}
 
 	time := args[1]
 
 	if stake < 1 || stake > 1_000 {
-		return nil, errors.New("minimum of stake is 1 PAC and maximum is 1,000 PAC")
+		return &command.CommandResult{
+			Error:      "minimum stake amount is 1 PAC and maximum is 1,000 PAC",
+			Successful: false,
+		}
 	}
 
 	var blocks int
@@ -93,9 +102,12 @@ func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*comm
 		time = "day"
 	}
 
-	bi, err := be.clientMgr.GetBlockchainInfo()
+	bi, err := bc.clientMgr.GetBlockchainInfo()
 	if err != nil {
-		return nil, err
+		return &command.CommandResult{
+			Error:      err.Error(),
+			Successful: false,
+		}
 	}
 
 	reward := int64(stake*blocks) / int64(util.ChangeToCoin(bi.TotalPower))
@@ -107,12 +119,5 @@ func (be *BotEngine) calcRewardHandler(_ AppID, _ string, args ...string) (*comm
 	return &command.CommandResult{
 		Successful: true,
 		Message:    result,
-	}, nil
-}
-
-func (be *BotEngine) blockchainHelpHandler(source command.AppID, callerID string, args ...string) (*command.CommandResult, error) {
-	if len(args) == 0 {
-		return be.help(source, callerID, BlockChainCommandName)
 	}
-	return be.help(source, callerID, BlockChainCommandName, args[0])
 }
