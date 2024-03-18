@@ -139,28 +139,19 @@ func (n *Network) networkHealthHandler(cmd *command.Command, _ command.AppID, _ 
 		status = "UnHealthy❌"
 	}
 
-	return &command.CommandResult{
-		Successful: true,
-		Message: fmt.Sprintf("Network is %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
-			status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils.FormatNumber(int64(lastBlockHeight))),
-	}
+	return cmd.SuccessfulResult("Network is %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
+		status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils.FormatNumber(int64(lastBlockHeight)))
 }
 
 func (be *Network) networkStatusHandler(cmd *command.Command, _ command.AppID, _ string, _ ...string) *command.CommandResult {
 	netInfo, err := be.clientMgr.GetNetworkInfo()
 	if err != nil {
-		return &command.CommandResult{
-			Successful: false,
-			Error:      err.Error(),
-		}
+		return cmd.ErrorResult(err)
 	}
 
 	chainInfo, err := be.clientMgr.GetBlockchainInfo()
 	if err != nil {
-		return &command.CommandResult{
-			Error:      err.Error(),
-			Successful: false,
-		}
+		return cmd.ErrorResult(err)
 	}
 
 	cs, err := be.clientMgr.GetCirculatingSupply()
@@ -178,7 +169,7 @@ func (be *Network) networkStatusHandler(cmd *command.Command, _ command.AppID, _
 		CirculatingSupply:   cs,
 	}
 
-	result := fmt.Sprintf("Network Name: %s\nConnected Peers: %v\n"+
+	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
 		"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC\nTotal Committee Power: %v PAC\nCirculating Supply: %v PAC\n"+
 		"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 		net.NetworkName,
@@ -189,11 +180,6 @@ func (be *Network) networkStatusHandler(cmd *command.Command, _ command.AppID, _
 		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalNetworkPower))),
 		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalCommitteePower))),
 		utils.FormatNumber(int64(util.ChangeToCoin(net.CirculatingSupply))))
-
-	return &command.CommandResult{
-		Successful: true,
-		Message:    result,
-	}
 }
 
 func (n *Network) nodeInfoHandler(cmd *command.Command, _ command.AppID, _ string, args ...string) *command.CommandResult {
@@ -201,18 +187,12 @@ func (n *Network) nodeInfoHandler(cmd *command.Command, _ command.AppID, _ strin
 
 	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)
 	if err != nil {
-		return &command.CommandResult{
-			Error:      err.Error(),
-			Successful: false,
-		}
+		return cmd.ErrorResult(err)
 	}
 
 	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
 	if err != nil {
-		return &command.CommandResult{
-			Error:      err.Error(),
-			Successful: false,
-		}
+		return cmd.ErrorResult(err)
 	}
 
 	ip := utils.ExtractIPFromMultiAddr(peerInfo.Address)
@@ -255,15 +235,10 @@ func (n *Network) nodeInfoHandler(cmd *command.Command, _ command.AppID, _ strin
 		pip19Score = fmt.Sprintf("%v⚠️", nodeInfo.AvailabilityScore)
 	}
 
-	result := fmt.Sprintf("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
+	return cmd.SuccessfulResult("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
 		"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
 		"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 		nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
 		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils.FormatNumber(int64(nodeInfo.ValidatorNum)),
 		pip19Score, utils.FormatNumber(int64(util.ChangeToCoin(nodeInfo.StakeAmount))))
-
-	return &command.CommandResult{
-		Successful: true,
-		Message:    result,
-	}
 }

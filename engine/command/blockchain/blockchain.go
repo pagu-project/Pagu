@@ -74,19 +74,13 @@ func (bc *Blockchain) GetCommand() *command.Command {
 func (bc *Blockchain) calcRewardHandler(cmd *command.Command, _ command.AppID, _ string, args ...string) *command.CommandResult {
 	stake, err := strconv.Atoi(args[0])
 	if err != nil {
-		return &command.CommandResult{
-			Error:      err.Error(),
-			Successful: false,
-		}
+		return cmd.ErrorResult(err)
 	}
 
 	time := args[1]
 
 	if stake < 1 || stake > 1_000 {
-		return &command.CommandResult{
-			Error:      "minimum stake amount is 1 PAC and maximum is 1,000 PAC",
-			Successful: false,
-		}
+		return cmd.ErrorResult(fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
 	}
 
 	var blocks int
@@ -104,20 +98,12 @@ func (bc *Blockchain) calcRewardHandler(cmd *command.Command, _ command.AppID, _
 
 	bi, err := bc.clientMgr.GetBlockchainInfo()
 	if err != nil {
-		return &command.CommandResult{
-			Error:      err.Error(),
-			Successful: false,
-		}
+		return cmd.ErrorResult(err)
 	}
 
 	reward := int64(stake*blocks) / int64(util.ChangeToCoin(bi.TotalPower))
 
-	result := fmt.Sprintf("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
 		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
-
-	return &command.CommandResult{
-		Successful: true,
-		Message:    result,
-	}
 }
