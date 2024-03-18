@@ -102,7 +102,7 @@ func (cmd *Command) HasAppId(appID AppID) bool {
 }
 
 func (cmd *Command) HasSubCommand() bool {
-	return len(cmd.SubCommands) > 0
+	return len(cmd.SubCommands) > 0 && cmd.SubCommands != nil
 }
 
 func (cmd *Command) HelpMessage() string {
