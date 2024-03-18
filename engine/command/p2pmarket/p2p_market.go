@@ -8,8 +8,8 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/database"
 	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
+	"github.com/pactus-project/pactus/util"
 )
 
 const (
@@ -174,7 +174,7 @@ func (pm *P2PMarket) createOfferHandler(cmd *command.Command, source command.App
 		}
 	}
 
-	if float64(totalAmount) != utils.ChangeToCoin(uBalance) {
+	if float64(totalAmount) != util.ChangeToCoin(uBalance) {
 		return &command.CommandResult{
 			Successful: false,
 			Error: fmt.Sprintf("the deposit balance: %d is not equal to offered amount: %d",

@@ -8,6 +8,7 @@ import (
 	"github.com/kehiy/RoboPac/engine/command"
 	"github.com/kehiy/RoboPac/log"
 	"github.com/kehiy/RoboPac/utils"
+	"github.com/pactus-project/pactus/util"
 )
 
 type DiscordBot struct {
@@ -186,7 +187,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("circ supply",
-			utils.FormatNumber(int64(utils.ChangeToCoin(ns.CirculatingSupply)))+" PAC"))
+			utils.FormatNumber(int64(util.ChangeToCoin(ns.CirculatingSupply)))+" PAC"))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -195,7 +196,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 		time.Sleep(time.Second * 5)
 
 		err = db.Session.UpdateStatusComplex(newStatus("total power",
-			utils.FormatNumber(int64(utils.ChangeToCoin(ns.TotalNetworkPower)))+" PAC"))
+			utils.FormatNumber(int64(util.ChangeToCoin(ns.TotalNetworkPower)))+" PAC"))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
