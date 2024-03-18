@@ -18,7 +18,7 @@ const PROMPT = "\n>> "
 func run(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		cmd.Println("Provide your Discord ID as the first argument.")
-		cmd.Println("Usage: js-cli <Discord-ID>")
+		cmd.Println("Usage: robopac-cli <Discord-ID>")
 		return
 	}
 	log.InitGlobalLogger()
@@ -62,7 +62,7 @@ func run(cmd *cobra.Command, args []string) {
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac-cmd",
+		Use:     "robopac-cli",
 		Version: "0.0.1", //! should come from version.go file.
 		Run:     run,
 	}

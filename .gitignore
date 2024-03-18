@@ -16,4 +16,4 @@ dev_wallet
 /build
 .env
 *.log
-
+/local
