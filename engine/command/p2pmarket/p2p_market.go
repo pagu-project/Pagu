@@ -8,7 +8,6 @@ import (
 	"github.com/kehiy/RoboPac/client"
 	"github.com/kehiy/RoboPac/database"
 	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/nowpayments"
 	"github.com/kehiy/RoboPac/utils"
 	"github.com/kehiy/RoboPac/wallet"
 )
@@ -21,28 +20,25 @@ const (
 )
 
 type P2PMarket struct {
-	ctx         context.Context
-	AdminIDs    []string
-	db          *database.DB
-	wallet      wallet.IWallet
-	nowpayments nowpayments.INowpayment
-	clientMgr   *client.Mgr
+	ctx       context.Context
+	AdminIDs  []string
+	db        *database.DB
+	wallet    wallet.IWallet
+	clientMgr *client.Mgr
 }
 
 func NewP2PMarket(ctx context.Context,
 	adminIDs []string,
 	db database.DB,
 	wallet wallet.IWallet,
-	nowpayments nowpayments.INowpayment,
 	clientMgr *client.Mgr,
 ) *P2PMarket {
 	return &P2PMarket{
-		ctx:         ctx,
-		AdminIDs:    adminIDs,
-		db:          &db,
-		wallet:      wallet,
-		nowpayments: nowpayments,
-		clientMgr:   clientMgr,
+		ctx:       ctx,
+		AdminIDs:  adminIDs,
+		db:        &db,
+		wallet:    wallet,
+		clientMgr: clientMgr,
 	}
 }
 
