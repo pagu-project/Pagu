@@ -16,16 +16,9 @@ type Config struct {
 	WalletPassword string
 	NetworkNodes   []string
 	LocalNode      string
-	StorePath      string
 	DataBasePath   string
 	AuthIDs        []string
 	DiscordBotCfg  DiscordBotConfig
-	TwitterAPICfg  TwitterAPIConfig
-}
-
-type TwitterAPIConfig struct {
-	BearerToken string
-	TwitterID   string
 }
 
 type DiscordBotConfig struct {
@@ -47,16 +40,11 @@ func Load(filePaths ...string) (*Config, error) {
 		WalletPassword: os.Getenv("WALLET_PASSWORD"),
 		LocalNode:      os.Getenv("LOCAL_NODE"),
 		NetworkNodes:   strings.Split(os.Getenv("NETWORK_NODES"), ","),
-		StorePath:      os.Getenv("STORE_PATH"),
 		DataBasePath:   os.Getenv("DATABASE_PATH"),
 		AuthIDs:        strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
 			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),
-		},
-		TwitterAPICfg: TwitterAPIConfig{
-			BearerToken: os.Getenv("TWITTER_BEARER_TOKEN"),
-			TwitterID:   os.Getenv("TWITTER_ID"),
 		},
 	}
 
@@ -81,10 +69,6 @@ func (cfg *Config) BasicCheck() error {
 
 	if len(cfg.NetworkNodes) == 0 {
 		return fmt.Errorf("RPCNODES is not set or incorrect")
-	}
-
-	if cfg.StorePath == "" {
-		return fmt.Errorf("STORE_PATH is not set or incorrect")
 	}
 
 	return nil

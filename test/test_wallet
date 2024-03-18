@@ -1,0 +1,34 @@
+{
+    "version": 1,
+    "uuid": "58768337-b5c4-45cd-9775-f9894ad5d786",
+    "created_at": "2024-03-18T20:19:03Z",
+    "network": 1,
+    "crc": 3648777279,
+    "vault": {
+      "type": 1,
+      "coin_type": 21777,
+      "addresses": {
+        "tpc1zzgvtgd8p6mlwey5e4ajpg5ugn8zltwk2eawfpm": {
+          "address": "tpc1zzgvtgd8p6mlwey5e4ajpg5ugn8zltwk2eawfpm",
+          "public_key": "",
+          "label": "",
+          "path": "m/12381'/21777'/2'/0"
+        }
+      },
+      "encrypter": {},
+      "key_store": "{\"master_node\":{\"seed\":\"balcony squeeze resource industry dynamic hunt service soccer basic chaos method team\"},\"imported_keys\":[]}",
+      "purposes": {
+        "purpose_bls": {
+          "xpub_account": "txpublic1pqdwnqqyqz92spqqpqqqgqgyk4zhfsmlj7xwf307n87uc06k036vlqrssj887wgus0d39wxzcnsqxpdvtux9l9np8922xxehknxtd97udck068wvphuvjnadrne4awzdf3nl0wnhjylcrcmdvfh3xln6shcr663vrqp6aj9t80mde6ecnt65psw80cly3sq9argvq7sy2ye77z6td0w6ap9v6k3lhxev8h2eg2es9efunu",
+          "xpub_validator": "txpublic1pqdwnqqyqz92spqqzqqqgqgqauwplnq3ee6zr2h5wll33avjk8y2udxjtn84uk5jukf7suz4myyqxppz44elvndqct8v0ls9jc3ejxgknxk0g0jhjafej97hwv5g6tshq55ytgkhajynfyq4cdjxgzh363vtjpdl336nlrhvm0j9hz27fnh30aq3q8xnzn8nrx2f7jyc9z7kt90qrupdhqh5easrvj5d77fd82dsmkfuyj",
+          "next_account_index": 1,
+          "next_validator_index": 0
+        }
+      }
+    },
+    "history": {
+      "transactions": null,
+      "activities": null,
+      "pendings": null
+    }
+  }

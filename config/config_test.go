@@ -10,7 +10,6 @@ import (
 func TestBasicCheck(t *testing.T) {
 	// Create a temporary directory for the WalletPath
 	tempWalletPath := t.TempDir()
-	tempStorePath := t.TempDir()
 
 	// Define test cases
 	tests := []struct {
@@ -25,7 +24,6 @@ func TestBasicCheck(t *testing.T) {
 				WalletPath:     tempWalletPath, // Use the temporary directory
 				WalletPassword: "test_password",
 				NetworkNodes:   []string{"http://127.0.0.1:8545"},
-				StorePath:      tempStorePath, // Use the temporary directory
 				DiscordBotCfg: DiscordBotConfig{
 					DiscordToken:   "MTEabc123",
 					DiscordGuildID: "123456789",
@@ -40,7 +38,6 @@ func TestBasicCheck(t *testing.T) {
 				WalletPath:     "/valid/path",
 				WalletPassword: "test_password",
 				NetworkNodes:   []string{},
-				StorePath:      "/valid/storepath",
 				DiscordBotCfg: DiscordBotConfig{
 					DiscordToken:   "MTEabc123",
 					DiscordGuildID: "123456789",
