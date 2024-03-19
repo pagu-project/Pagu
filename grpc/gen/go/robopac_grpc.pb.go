@@ -44,7 +44,7 @@ func (c *roboPacClient) Execute(ctx context.Context, in *ExecuteRequest, opts ..
 
 // RoboPacServer is the server API for RoboPac service.
 // All implementations should embed UnimplementedRoboPacServer
-// for forward compatibility
+// for forward compatibility.
 type RoboPacServer interface {
 	Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error)
 }
@@ -88,7 +88,7 @@ func _RoboPac_Execute_Handler(srv interface{}, ctx context.Context, dec func(int
 
 // RoboPac_ServiceDesc is the grpc.ServiceDesc for RoboPac service.
 // It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
+// and not to be introspected or modified (even as a copy).
 var RoboPac_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "robopac.RoboPac",
 	HandlerType: (*RoboPacServer)(nil),

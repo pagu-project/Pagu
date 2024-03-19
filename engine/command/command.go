@@ -19,6 +19,8 @@ func (appID AppID) String() string {
 		return "CLI"
 	case AppIdDiscord:
 		return "Discord"
+	case AppIdgRPC:
+		return "gRPC"
 	}
 
 	return ""

@@ -32,13 +32,14 @@ func NewServer(be *engine.BotEngine, cfg config.GRPCConfig) *Server {
 	}
 }
 
-func (s *Server) StartServer() {
+func (s *Server) Start() error {
 	listener, err := net.Listen("tcp", "")
 	if err != nil {
-		log.Panic("can't start gRPC server", "err", err)
+		return err
 	}
 
 	s.startListening(listener)
+	return nil
 }
 
 func (s *Server) startListening(listener net.Listener) {
@@ -62,7 +63,7 @@ func (s *Server) startListening(listener net.Listener) {
 	}()
 }
 
-func (s *Server) StopServer() {
+func (s *Server) Stop() {
 	s.cancel()
 
 	if s.grpc != nil {
