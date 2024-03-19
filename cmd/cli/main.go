@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	robopac "github.com/robopac-project/RoboPac"
 	"github.com/pactus-project/pactus/crypto"
+	robopac "github.com/robopac-project/RoboPac"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
 	"github.com/robopac-project/RoboPac/engine/command"
