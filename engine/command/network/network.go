@@ -77,7 +77,7 @@ func (n *Network) GetCommand() *command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
 		Handler:     n.nodeInfoHandler,
 	}
 
@@ -87,7 +87,7 @@ func (n *Network) GetCommand() *command.Command {
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
 		Handler:     n.networkHealthHandler,
 	}
 
@@ -97,7 +97,7 @@ func (n *Network) GetCommand() *command.Command {
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
 		Handler:     n.networkStatusHandler,
 	}
 
@@ -106,7 +106,7 @@ func (n *Network) GetCommand() *command.Command {
 		Desc:        "Network related commands",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
 		SubCommands: []*command.Command{&subCmdHealth, &subCmdStatus, &subCmdNodeInfo},
 		Handler:     nil,
 	}

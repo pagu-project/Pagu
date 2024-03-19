@@ -10,6 +10,7 @@ type AppID int
 const (
 	AppIdCLI     AppID = 1
 	AppIdDiscord AppID = 2
+	AppIdgRPC    AppID = 3
 )
 
 func (appID AppID) String() string {
