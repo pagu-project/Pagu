@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	robopac "github.com/kehiy/RoboPac"
 	"github.com/kehiy/RoboPac/config"
 	"github.com/kehiy/RoboPac/engine"
 	"github.com/kehiy/RoboPac/engine/command"
@@ -63,7 +64,7 @@ func run(cmd *cobra.Command, args []string) {
 func main() {
 	rootCmd := &cobra.Command{
 		Use:     "robopac-cli",
-		Version: "0.0.1", //! should come from version.go file.
+		Version: robopac.StringVersion(),
 		Run:     run,
 	}
 
