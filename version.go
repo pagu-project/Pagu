@@ -3,10 +3,10 @@ package robopac
 import "fmt"
 
 type Version struct {
-	Meta  string `json:"meta"  xml:"meta"`
-	Major uint8  `json:"major" xml:"major"`
-	Minor uint8  `json:"minor" xml:"minor"`
-	Patch uint8  `json:"patch" xml:"patch"`
+	Meta  string
+	Major uint8
+	Minor uint8
+	Patch uint8
 }
 
 var version = Version{
