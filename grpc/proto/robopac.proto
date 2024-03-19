@@ -1,0 +1,17 @@
+syntax = 'proto3';
+
+package robopac;
+
+option go_package = "github.com/robopac-project/robopac/grpc/robopac";
+
+service RoboPac {
+  rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+}
+
+message ExecuteRequest {
+    string command = 1;
+}
+
+message ExecuteResponse {
+    string response = 1;
+}

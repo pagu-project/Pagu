@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/kehiy/RoboPac/log"
+	"github.com/robopac-project/RoboPac/log"
 	"github.com/spf13/cobra"
 )
 

@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kehiy/RoboPac/config"
-	"github.com/kehiy/RoboPac/engine"
-	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
+	"github.com/robopac-project/RoboPac/config"
+	"github.com/robopac-project/RoboPac/engine"
+	"github.com/robopac-project/RoboPac/engine/command"
+	"github.com/robopac-project/RoboPac/log"
 	cobra "github.com/spf13/cobra"
 )
 

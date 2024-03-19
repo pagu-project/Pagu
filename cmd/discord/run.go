@@ -5,10 +5,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/kehiy/RoboPac/config"
-	"github.com/kehiy/RoboPac/discord"
-	"github.com/kehiy/RoboPac/engine"
-	"github.com/kehiy/RoboPac/log"
+	"github.com/robopac-project/RoboPac/config"
+	"github.com/robopac-project/RoboPac/discord"
+	"github.com/robopac-project/RoboPac/engine"
+	"github.com/robopac-project/RoboPac/log"
 	"github.com/spf13/cobra"
 )
 

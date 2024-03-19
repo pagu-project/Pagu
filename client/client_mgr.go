@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/util/logger"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+	"github.com/robopac-project/RoboPac/log"
 )
 
 type Mgr struct {

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/kehiy/RoboPac/client"
-	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/utils"
 	"github.com/pactus-project/pactus/util"
+	"github.com/robopac-project/RoboPac/client"
+	"github.com/robopac-project/RoboPac/engine/command"
+	"github.com/robopac-project/RoboPac/utils"
 )
 
 const (

@@ -19,11 +19,16 @@ type Config struct {
 	DataBasePath   string
 	AuthIDs        []string
 	DiscordBotCfg  DiscordBotConfig
+	GRPCConfig     GRPCConfig
 }
 
 type DiscordBotConfig struct {
 	DiscordToken   string
 	DiscordGuildID string
+}
+
+type GRPCConfig struct {
+	Listen string
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -45,6 +50,9 @@ func Load(filePaths ...string) (*Config, error) {
 		DiscordBotCfg: DiscordBotConfig{
 			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
 			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),
+		},
+		GRPCConfig: GRPCConfig{
+			Listen: os.Getenv("GRPC_LISTEN"),
 		},
 	}
 

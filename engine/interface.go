@@ -3,7 +3,7 @@ package engine
 import (
 	"time"
 
-	"github.com/kehiy/RoboPac/engine/command"
+	"github.com/robopac-project/RoboPac/engine/command"
 )
 
 type IEngine interface {
