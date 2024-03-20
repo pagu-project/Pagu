@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/kehiy/RoboPac/log"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+	"github.com/robopac-project/RoboPac/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
