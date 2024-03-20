@@ -2,9 +2,12 @@
     <img alt="RoboPac" src="./assets/robopac.png" width="150" height="150" />
 </p>
 
-# Pactus Bot Engine (RoboPac)
+<h3 align="center">
+RoboPac is a Robot that provides support and information about the Pactus Blockchain.
+</h3>
 
-The Pactus Bot Engine is a Robot that provides support and information about the Pactus Blockchain.
+### Pactus Bot Engine (RoboPac)
+
 
 # Run
 
