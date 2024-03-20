@@ -33,7 +33,7 @@ func NewServer(be *engine.BotEngine, cfg config.GRPCConfig) *Server {
 }
 
 func (s *Server) Start() error {
-	listener, err := net.Listen("tcp", "")
+	listener, err := net.Listen("tcp", s.cfg.Listen)
 	if err != nil {
 		return err
 	}

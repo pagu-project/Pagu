@@ -38,12 +38,15 @@ check:
 	golangci-lint run --timeout=20m0s
 
 ### building
-build: build-cli build-dc
+build: build-cli build-dc build-grpc
 
 build-cli:
 	go build -o build/robopac-cli     ./cmd/cli
 
 build-dc:
 	go build -o build/robopac-discord ./cmd/discord
+
+build-grpc:
+	go build -o build/robopac-grpc ./cmd/grpc
 
 .PHONY: build
