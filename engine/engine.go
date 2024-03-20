@@ -19,7 +19,7 @@ type BotEngine struct {
 	cancel context.CancelFunc
 
 	clientMgr *client.Mgr
-	rootCmd   *command.Command
+	rootCmd   command.Command
 
 	blockchainCmd *blockchain.Blockchain
 	networkCmd    *network.Network
@@ -73,13 +73,13 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
-	rootCmd := &command.Command{
+	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "robopac",
 		Desc:        "RoboPAC",
 		Help:        "RoboPAC Help",
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
-		SubCommands: []*command.Command{},
+		SubCommands: []command.Command{},
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
@@ -95,7 +95,7 @@ func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
 	}
 }
 
-func (be *BotEngine) Commands() []*command.Command {
+func (be *BotEngine) Commands() []command.Command {
 	return be.rootCmd.SubCommands
 }
 
@@ -106,7 +106,7 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddHelpSubCommand()
 }
 
-func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) *command.CommandResult {
+func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) command.CommandResult {
 	log.Debug("run command", "callerID", callerID, "inputs", tokens)
 
 	cmd, argsIndex := be.getCommand(tokens)
@@ -127,7 +127,7 @@ func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) 
 	return cmd.Handler(cmd, appID, callerID, args...)
 }
 
-func (be *BotEngine) getCommand(tokens []string) (*command.Command, int) {
+func (be *BotEngine) getCommand(tokens []string) (command.Command, int) {
 	index := 0
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands

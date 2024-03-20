@@ -32,8 +32,8 @@ func NewBlockchain(ctx context.Context,
 	}
 }
 
-func (bc *Blockchain) GetCommand() *command.Command {
-	subCmdCalcReward := &command.Command{
+func (bc *Blockchain) GetCommand() command.Command {
+	subCmdCalcReward := command.Command{
 		Name: CalcRewardCommandName,
 		Desc: "Calculate how many PAC coins you will earn with your validator stake",
 		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC prefix",
@@ -60,7 +60,7 @@ func (bc *Blockchain) GetCommand() *command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
-		SubCommands: []*command.Command{subCmdCalcReward},
+		SubCommands: []command.Command{subCmdCalcReward},
 		Handler:     nil,
 	}
 
@@ -68,10 +68,10 @@ func (bc *Blockchain) GetCommand() *command.Command {
 
 	cmdBlockchain.AddHelpSubCommand()
 
-	return &cmdBlockchain
+	return cmdBlockchain
 }
 
-func (bc *Blockchain) calcRewardHandler(cmd *command.Command, _ command.AppID, _ string, args ...string) *command.CommandResult {
+func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
 	stake, err := strconv.Atoi(args[0])
 	if err != nil {
 		return cmd.ErrorResult(err)
