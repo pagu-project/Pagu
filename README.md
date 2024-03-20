@@ -2,13 +2,13 @@
     <img alt="RoboPac" src="./assets/robopac.png" width="150" height="150" />
 </p>
 
-# Pactus Bot Engine (RoboPac)
-
-The Pactus Bot Engine is a Robot that provides support and information about the Pactus Blockchain.
+<h3 align="center">
+RoboPac is a Robot that provides support and information about the Pactus Blockchain.
+</h3>
 
 # Run
 
-The RoboPac is require golang installed to be run. make sure you installed The Pactus daemon CLI from here:
+The RoboPac is require golang installed to be run. make sure you installed The Pactus daemon CLI (and wallet CLI) from here:
 https://pactus.org/download/#cli
 
 You need to run 2 local pactus node (local-net) and add them to a file called local (it's on .gitignore) and run them. 

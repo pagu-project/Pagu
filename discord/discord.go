@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/kehiy/RoboPac/engine"
-	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/log"
-	"github.com/kehiy/RoboPac/utils"
 	"github.com/pactus-project/pactus/util"
+	"github.com/robopac-project/RoboPac/engine"
+	"github.com/robopac-project/RoboPac/engine/command"
+	"github.com/robopac-project/RoboPac/log"
+	"github.com/robopac-project/RoboPac/utils"
 )
 
 type DiscordBot struct {

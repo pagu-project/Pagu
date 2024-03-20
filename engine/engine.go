@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 
-	"github.com/kehiy/RoboPac/client"
-	"github.com/kehiy/RoboPac/config"
-	"github.com/kehiy/RoboPac/database"
-	"github.com/kehiy/RoboPac/engine/command"
-	"github.com/kehiy/RoboPac/engine/command/blockchain"
-	"github.com/kehiy/RoboPac/engine/command/network"
-	"github.com/kehiy/RoboPac/log"
-	"github.com/kehiy/RoboPac/wallet"
+	"github.com/robopac-project/RoboPac/client"
+	"github.com/robopac-project/RoboPac/config"
+	"github.com/robopac-project/RoboPac/database"
+	"github.com/robopac-project/RoboPac/engine/command"
+	"github.com/robopac-project/RoboPac/engine/command/blockchain"
+	"github.com/robopac-project/RoboPac/engine/command/network"
+	"github.com/robopac-project/RoboPac/log"
+	"github.com/robopac-project/RoboPac/wallet"
 )
 
 type BotEngine struct {

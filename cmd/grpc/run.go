@@ -6,8 +6,8 @@ import (
 	"syscall"
 
 	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/discord"
 	"github.com/robopac-project/RoboPac/engine"
+	"github.com/robopac-project/RoboPac/grpc"
 	"github.com/robopac-project/RoboPac/log"
 	"github.com/spf13/cobra"
 )
@@ -33,11 +33,9 @@ func RunCommand(parentCmd *cobra.Command) {
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.DiscordToken,
-			config.DiscordBotCfg.DiscordGuildID)
-		ExitOnError(cmd, err)
+		grpcServer := grpc.NewServer(botEngine, config.GRPCConfig)
 
-		err = discordBot.Start()
+		err = grpcServer.Start()
 		ExitOnError(cmd, err)
 
 		sigChan := make(chan os.Signal, 1)
@@ -45,7 +43,7 @@ func RunCommand(parentCmd *cobra.Command) {
 		<-sigChan
 
 		// gracefully shutdown the bot.
-		discordBot.Stop()
+		grpcServer.Stop()
 		botEngine.Stop()
 	}
 }

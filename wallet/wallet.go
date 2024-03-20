@@ -3,13 +3,13 @@ package wallet
 import (
 	"os"
 
-	"github.com/kehiy/RoboPac/config"
-	"github.com/kehiy/RoboPac/log"
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
 	"github.com/pactus-project/pactus/types/tx/payload"
 	"github.com/pactus-project/pactus/util"
 	pwallet "github.com/pactus-project/pactus/wallet"
+	"github.com/robopac-project/RoboPac/config"
+	"github.com/robopac-project/RoboPac/log"
 )
 
 type Balance struct {
