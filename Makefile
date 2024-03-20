@@ -49,4 +49,8 @@ build-dc:
 build-grpc:
 	go build -o build/robopac-grpc ./cmd/grpc
 
+### pre commit
+pre-commit: mock proto fmt check unit_test
+	@echo pre commit commands...
+
 .PHONY: build

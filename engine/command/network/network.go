@@ -27,8 +27,8 @@ type Network struct {
 
 func NewNetwork(ctx context.Context,
 	clientMgr *client.Mgr,
-) *Network {
-	return &Network{
+) Network {
+	return Network{
 		ctx:       ctx,
 		clientMgr: clientMgr,
 	}

@@ -21,8 +21,8 @@ type BotEngine struct {
 	clientMgr *client.Mgr
 	rootCmd   command.Command
 
-	blockchainCmd *blockchain.Blockchain
-	networkCmd    *network.Network
+	blockchainCmd blockchain.Blockchain
+	networkCmd    network.Network
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {

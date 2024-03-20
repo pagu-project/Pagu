@@ -25,8 +25,8 @@ type Blockchain struct {
 
 func NewBlockchain(ctx context.Context,
 	clientMgr *client.Mgr,
-) *Blockchain {
-	return &Blockchain{
+) Blockchain {
+	return Blockchain{
 		ctx:       ctx,
 		clientMgr: clientMgr,
 	}
