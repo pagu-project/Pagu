@@ -82,13 +82,15 @@ func Load(filePaths ...string) (*Config, error) {
 
 // Validate checks for the presence of required environment variables.
 func (cfg *Config) BasicCheck() error {
-	if cfg.WalletConfig.Address == "" {
-		return fmt.Errorf("WALLET_ADDRESS is not set")
-	}
+	if cfg.WalletConfig.Enable {
+		if cfg.WalletConfig.Address == "" {
+			return fmt.Errorf("WALLET_ADDRESS is not set")
+		}
 
-	// Check if the WalletPath exists.
-	if !util.PathExists(cfg.WalletConfig.Path) {
-		return fmt.Errorf("WALLET_PATH does not exist")
+		// Check if the WalletPath exists.
+		if !util.PathExists(cfg.WalletConfig.Path) {
+			return fmt.Errorf("WALLET_PATH does not exist")
+		}
 	}
 
 	if len(cfg.NetworkNodes) == 0 {
