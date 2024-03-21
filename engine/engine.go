@@ -47,17 +47,18 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	cm.Start()
 
-	// new subLogger for store.
-	wSl := log.NewSubLogger("wallet")
+	var wal wallet.IWallet
 
-	// load or create wallet.
-	wallet := wallet.Open(cfg, wSl)
-	if wallet == nil {
-		cancel()
-		return nil, errors.New("can't open the wallet")
+	if cfg.WalletConfig.Enable {
+		// load or create wallet.
+		wal = wallet.Open(&cfg.WalletConfig)
+		if wal == nil {
+			cancel()
+			return nil, errors.New("can't open the wallet")
+		}
+
+		log.Info("wallet opened successfully", "address", wal.Address())
 	}
-
-	log.Info("wallet opened successfully", "address", wallet.Address())
 
 	// load database
 	db, err := database.NewDB(cfg.DataBasePath)
@@ -67,7 +68,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	return newBotEngine(cm, wallet, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, wal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
 func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,

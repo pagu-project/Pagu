@@ -20,13 +20,15 @@ func TestBasicCheck(t *testing.T) {
 		{
 			name: "Valid config",
 			cfg: Config{
-				WalletAddress:  "test_wallet_address",
-				WalletPath:     tempWalletPath, // Use the temporary directory
-				WalletPassword: "test_password",
-				NetworkNodes:   []string{"http://127.0.0.1:8545"},
+				WalletConfig: WalletConfig{
+					Address:  "test_wallet_address",
+					Path:     tempWalletPath, // Use the temporary directory
+					Password: "test_password",
+				},
+				NetworkNodes: []string{"http://127.0.0.1:8545"},
 				DiscordBotCfg: DiscordBotConfig{
-					DiscordToken:   "MTEabc123",
-					DiscordGuildID: "123456789",
+					Token:   "MTEabc123",
+					GuildID: "123456789",
 				},
 			},
 			wantErr: false,
@@ -34,13 +36,15 @@ func TestBasicCheck(t *testing.T) {
 		{
 			name: "Invalid RPCNodes",
 			cfg: Config{
-				WalletAddress:  "test_wallet_address",
-				WalletPath:     "/valid/path",
-				WalletPassword: "test_password",
-				NetworkNodes:   []string{},
+				WalletConfig: WalletConfig{
+					Address:  "test_wallet_address",
+					Path:     "/valid/path",
+					Password: "test_password",
+				},
+				NetworkNodes: []string{},
 				DiscordBotCfg: DiscordBotConfig{
-					DiscordToken:   "MTEabc123",
-					DiscordGuildID: "123456789",
+					Token:   "MTEabc123",
+					GuildID: "123456789",
 				},
 			},
 			wantErr: true,

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -10,21 +11,27 @@ import (
 )
 
 type Config struct {
-	Network        string
-	WalletAddress  string
-	WalletPath     string
-	WalletPassword string
-	NetworkNodes   []string
-	LocalNode      string
-	DataBasePath   string
-	AuthIDs        []string
-	DiscordBotCfg  DiscordBotConfig
-	GRPCConfig     GRPCConfig
+	Network       string
+	NetworkNodes  []string
+	LocalNode     string
+	DataBasePath  string
+	AuthIDs       []string
+	DiscordBotCfg DiscordBotConfig
+	GRPCConfig    GRPCConfig
+	WalletConfig  WalletConfig
+}
+
+type WalletConfig struct {
+	Enable   bool
+	Address  string
+	Path     string
+	Password string
+	RPCUrl   string
 }
 
 type DiscordBotConfig struct {
-	DiscordToken   string
-	DiscordGuildID string
+	Token   string
+	GuildID string
 }
 
 type GRPCConfig struct {
@@ -37,19 +44,28 @@ func Load(filePaths ...string) (*Config, error) {
 		return nil, err
 	}
 
+	enableWallet, err := strconv.ParseBool(os.Getenv("ENABLE_WALLET"))
+	if err != nil {
+		return nil, err
+	}
+
 	// Fetch config values from environment variables.
 	cfg := &Config{
-		Network:        os.Getenv("NETWORK"),
-		WalletAddress:  os.Getenv("WALLET_ADDRESS"),
-		WalletPath:     os.Getenv("WALLET_PATH"),
-		WalletPassword: os.Getenv("WALLET_PASSWORD"),
-		LocalNode:      os.Getenv("LOCAL_NODE"),
-		NetworkNodes:   strings.Split(os.Getenv("NETWORK_NODES"), ","),
-		DataBasePath:   os.Getenv("DATABASE_PATH"),
-		AuthIDs:        strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
+		Network: os.Getenv("NETWORK"),
+		WalletConfig: WalletConfig{
+			Address:  os.Getenv("WALLET_ADDRESS"),
+			Path:     os.Getenv("WALLET_PATH"),
+			Password: os.Getenv("WALLET_PASSWORD"),
+			RPCUrl:   os.Getenv("WALLET_PRC"),
+			Enable:   enableWallet,
+		},
+		LocalNode:    os.Getenv("LOCAL_NODE"),
+		NetworkNodes: strings.Split(os.Getenv("NETWORK_NODES"), ","),
+		DataBasePath: os.Getenv("DATABASE_PATH"),
+		AuthIDs:      strings.Split(os.Getenv("AUTHORIZED_DISCORD_IDS"), ","),
 		DiscordBotCfg: DiscordBotConfig{
-			DiscordToken:   os.Getenv("DISCORD_TOKEN"),
-			DiscordGuildID: os.Getenv("DISCORD_GUILD_ID"),
+			Token:   os.Getenv("DISCORD_TOKEN"),
+			GuildID: os.Getenv("DISCORD_GUILD_ID"),
 		},
 		GRPCConfig: GRPCConfig{
 			Listen: os.Getenv("GRPC_LISTEN"),
@@ -66,12 +82,12 @@ func Load(filePaths ...string) (*Config, error) {
 
 // Validate checks for the presence of required environment variables.
 func (cfg *Config) BasicCheck() error {
-	if cfg.WalletAddress == "" {
+	if cfg.WalletConfig.Address == "" {
 		return fmt.Errorf("WALLET_ADDRESS is not set")
 	}
 
 	// Check if the WalletPath exists.
-	if !util.PathExists(cfg.WalletPath) {
+	if !util.PathExists(cfg.WalletConfig.Path) {
 		return fmt.Errorf("WALLET_PATH does not exist")
 	}
 
