@@ -40,8 +40,8 @@ type Command struct {
 	Help        string
 	Args        []Args //! should be nil for commands.
 	AppIDs      []AppID
-	SubCommands []*Command
-	Handler     func(cmd *Command, source AppID, callerID string, args ...string) *CommandResult
+	SubCommands []Command
+	Handler     func(cmd Command, source AppID, callerID string, args ...string) CommandResult
 }
 
 type CommandResult struct {
@@ -52,8 +52,8 @@ type CommandResult struct {
 	Successful bool
 }
 
-func (cmd *Command) SuccessfulResult(message string, a ...interface{}) *CommandResult {
-	return &CommandResult{
+func (cmd *Command) SuccessfulResult(message string, a ...interface{}) CommandResult {
+	return CommandResult{
 		Color:      cmd.Color,
 		Title:      fmt.Sprintf("%v %v", cmd.Desc, cmd.Emoji),
 		Message:    fmt.Sprintf(message, a...),
@@ -61,8 +61,8 @@ func (cmd *Command) SuccessfulResult(message string, a ...interface{}) *CommandR
 	}
 }
 
-func (cmd *Command) FailedResult(message string, a ...interface{}) *CommandResult {
-	return &CommandResult{
+func (cmd *Command) FailedResult(message string, a ...interface{}) CommandResult {
+	return CommandResult{
 		Color:      cmd.Color,
 		Title:      fmt.Sprintf("%v %v", cmd.Desc, cmd.Emoji),
 		Message:    fmt.Sprintf(message, a...),
@@ -70,12 +70,12 @@ func (cmd *Command) FailedResult(message string, a ...interface{}) *CommandResul
 	}
 }
 
-func (cmd *Command) ErrorResult(err error) *CommandResult {
+func (cmd *Command) ErrorResult(err error) CommandResult {
 	return cmd.FailedResult("An error occurred: %v", err.Error())
 }
 
-func (cmd *Command) HelpResult() *CommandResult {
-	return &CommandResult{
+func (cmd *Command) HelpResult() CommandResult {
+	return CommandResult{
 		Color:      cmd.Color,
 		Title:      fmt.Sprintf("%v %v", cmd.Desc, cmd.Emoji),
 		Message:    cmd.HelpMessage(),
@@ -118,7 +118,7 @@ func (cmd *Command) HelpMessage() string {
 	return help
 }
 
-func (cmd *Command) AddSubCommand(subCmd *Command) {
+func (cmd *Command) AddSubCommand(subCmd Command) {
 	if subCmd.HasSubCommand() {
 		subCmd.AddHelpSubCommand()
 	}
@@ -127,11 +127,11 @@ func (cmd *Command) AddSubCommand(subCmd *Command) {
 }
 
 func (cmd *Command) AddHelpSubCommand() {
-	helpCmd := &Command{
+	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
-		Handler: func(_ *Command, _ AppID, _ string, _ ...string) *CommandResult {
+		Handler: func(_ Command, _ AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
 	}

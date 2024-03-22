@@ -27,8 +27,8 @@ type Network struct {
 
 func NewNetwork(ctx context.Context,
 	clientMgr *client.Mgr,
-) *Network {
-	return &Network{
+) Network {
+	return Network{
 		ctx:       ctx,
 		clientMgr: clientMgr,
 	}
@@ -64,7 +64,7 @@ type NetStatus struct {
 	CirculatingSupply   int64
 }
 
-func (n *Network) GetCommand() *command.Command {
+func (n *Network) GetCommand() command.Command {
 	subCmdNodeInfo := command.Command{
 		Name: NodeInfoCommandName,
 		Desc: "View the information of a node",
@@ -107,20 +107,20 @@ func (n *Network) GetCommand() *command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
-		SubCommands: []*command.Command{&subCmdHealth, &subCmdStatus, &subCmdNodeInfo},
+		SubCommands: []command.Command{subCmdHealth, subCmdStatus, subCmdNodeInfo},
 		Handler:     nil,
 	}
 
-	cmdNetwork.AddSubCommand(&subCmdHealth)
-	cmdNetwork.AddSubCommand(&subCmdNodeInfo)
-	cmdNetwork.AddSubCommand(&subCmdStatus)
+	cmdNetwork.AddSubCommand(subCmdHealth)
+	cmdNetwork.AddSubCommand(subCmdNodeInfo)
+	cmdNetwork.AddSubCommand(subCmdStatus)
 
 	cmdNetwork.AddHelpSubCommand()
 
-	return &cmdNetwork
+	return cmdNetwork
 }
 
-func (n *Network) networkHealthHandler(cmd *command.Command, _ command.AppID, _ string, _ ...string) *command.CommandResult {
+func (n *Network) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
 	lastBlockTime, lastBlockHeight := n.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0).Format("02/01/2006, 15:04:05")
 	currentTime := time.Now()
@@ -143,7 +143,7 @@ func (n *Network) networkHealthHandler(cmd *command.Command, _ command.AppID, _ 
 		status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils.FormatNumber(int64(lastBlockHeight)))
 }
 
-func (be *Network) networkStatusHandler(cmd *command.Command, _ command.AppID, _ string, _ ...string) *command.CommandResult {
+func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
 	netInfo, err := be.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
@@ -182,7 +182,7 @@ func (be *Network) networkStatusHandler(cmd *command.Command, _ command.AppID, _
 		utils.FormatNumber(int64(util.ChangeToCoin(net.CirculatingSupply))))
 }
 
-func (n *Network) nodeInfoHandler(cmd *command.Command, _ command.AppID, _ string, args ...string) *command.CommandResult {
+func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)

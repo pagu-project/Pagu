@@ -121,7 +121,7 @@ func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *dis
 	bot.respondEmbed(errorEmbed, s, i)
 }
 
-func (bot *DiscordBot) respondResultMsg(res *command.CommandResult, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *DiscordBot) respondResultMsg(res command.CommandResult, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	var resEmbed *discordgo.MessageEmbed
 	if res.Successful {
 		resEmbed = &discordgo.MessageEmbed{

@@ -90,22 +90,22 @@ func (be *P2PMarket) GetCommand() *command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
-		SubCommands: []*command.Command{&subCmdCreateOffer, &subCmdDepositAddress},
+		SubCommands: []command.Command{subCmdCreateOffer, subCmdDepositAddress},
 		Handler:     nil,
 	}
 
-	cmdP2PMarket.AddSubCommand(&subCmdDepositAddress)
-	cmdP2PMarket.AddSubCommand(&subCmdCreateOffer)
+	cmdP2PMarket.AddSubCommand(subCmdDepositAddress)
+	cmdP2PMarket.AddSubCommand(subCmdCreateOffer)
 
 	cmdP2PMarket.AddHelpSubCommand()
 
 	return &cmdP2PMarket
 }
 
-func (bpm *P2PMarket) depositAddressHandler(cmd *command.Command, _ command.AppID, callerID string, _ ...string) *command.CommandResult {
+func (bpm *P2PMarket) depositAddressHandler(cmd command.Command, _ command.AppID, callerID string, _ ...string) command.CommandResult {
 	u, err := bpm.db.GetUser(callerID)
 	if err == nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: true,
 			Message:    fmt.Sprintf("You already have a deposit address: %s", u.DepositAddress),
 		}
@@ -113,7 +113,7 @@ func (bpm *P2PMarket) depositAddressHandler(cmd *command.Command, _ command.AppI
 
 	addr, err := bpm.wallet.NewAddress(fmt.Sprintf("deposit address for %s", callerID))
 	if err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Message:    fmt.Sprintf("Can't make a new address: %v", err),
 		}
@@ -126,22 +126,22 @@ func (bpm *P2PMarket) depositAddressHandler(cmd *command.Command, _ command.AppI
 		},
 	)
 	if err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Message:    fmt.Sprintf("Can't add discord user to database: %v", err),
 		}
 	}
 
-	return &command.CommandResult{
+	return command.CommandResult{
 		Successful: true,
 		Message:    fmt.Sprintf("Deposit address created for you successfully: %s", addr),
 	}
 }
 
-func (pm *P2PMarket) createOfferHandler(cmd *command.Command, source command.AppID, callerID string, args ...string) *command.CommandResult {
+func (pm *P2PMarket) createOfferHandler(cmd command.Command, source command.AppID, callerID string, args ...string) command.CommandResult {
 	u, err := pm.db.GetUser(callerID)
 	if err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Error:      err.Error(),
 		}
@@ -149,7 +149,7 @@ func (pm *P2PMarket) createOfferHandler(cmd *command.Command, source command.App
 
 	totalAmount, err := strconv.Atoi(args[0])
 	if err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Error:      err.Error(),
 		}
@@ -157,7 +157,7 @@ func (pm *P2PMarket) createOfferHandler(cmd *command.Command, source command.App
 
 	totalPrice, err := strconv.Atoi(args[1])
 	if err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Error:      err.Error(),
 		}
@@ -168,14 +168,14 @@ func (pm *P2PMarket) createOfferHandler(cmd *command.Command, source command.App
 
 	uBalance, err := pm.clientMgr.GetBalance(u.DepositAddress)
 	if err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Error:      err.Error(),
 		}
 	}
 
 	if float64(totalAmount) != util.ChangeToCoin(uBalance) {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Error: fmt.Sprintf("the deposit balance: %d is not equal to offered amount: %d",
 				uBalance, totalAmount),
@@ -194,13 +194,13 @@ func (pm *P2PMarket) createOfferHandler(cmd *command.Command, source command.App
 	}
 
 	if err = pm.db.CreateOffer(offer); err != nil {
-		return &command.CommandResult{
+		return command.CommandResult{
 			Successful: false,
 			Error:      err.Error(),
 		}
 	}
 
-	return &command.CommandResult{
+	return command.CommandResult{
 		Successful: true,
 		Message:    fmt.Sprintf("Offer successfully created, your offer ID: %s", "TODO!!!!!!!"),
 	}
