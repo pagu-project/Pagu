@@ -49,7 +49,7 @@ func (be *P2PMarket) GetCommand() *command.Command {
 		Help:        "It will show your address if you already have an deposit address",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
 		Handler:     be.depositAddressHandler,
 	}
 
@@ -80,7 +80,7 @@ func (be *P2PMarket) GetCommand() *command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
 		Handler:     be.createOfferHandler,
 	}
 
@@ -89,7 +89,7 @@ func (be *P2PMarket) GetCommand() *command.Command {
 		Desc:        "Peer to Peer market for Pactus trading",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
 		SubCommands: []command.Command{subCmdCreateOffer, subCmdDepositAddress},
 		Handler:     nil,
 	}

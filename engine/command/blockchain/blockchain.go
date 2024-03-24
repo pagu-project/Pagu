@@ -50,7 +50,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
 		Handler:     bc.calcRewardHandler,
 	}
 
@@ -59,7 +59,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 		Desc:        "Blockchain information and tools",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
 		SubCommands: []command.Command{subCmdCalcReward},
 		Handler:     nil,
 	}

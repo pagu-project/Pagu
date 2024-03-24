@@ -11,14 +11,15 @@ import (
 )
 
 type Config struct {
-	Network       string
-	NetworkNodes  []string
-	LocalNode     string
-	DataBasePath  string
-	AuthIDs       []string
-	DiscordBotCfg DiscordBotConfig
-	GRPCConfig    GRPCConfig
-	WalletConfig  WalletConfig
+	Network        string
+	NetworkNodes   []string
+	LocalNode      string
+	DataBasePath   string
+	AuthIDs        []string
+	DiscordBotCfg  DiscordBotConfig
+	GRPCConfig     GRPCConfig
+	WalletConfig   WalletConfig
+	TelegramBotCfg TelegramBotConfig
 }
 
 type WalletConfig struct {
@@ -36,6 +37,11 @@ type DiscordBotConfig struct {
 
 type GRPCConfig struct {
 	Listen string
+}
+
+type TelegramBotConfig struct {
+	Token  string
+	ChatId string
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -69,6 +75,10 @@ func Load(filePaths ...string) (*Config, error) {
 		},
 		GRPCConfig: GRPCConfig{
 			Listen: os.Getenv("GRPC_LISTEN"),
+		},
+		TelegramBotCfg: TelegramBotConfig{
+			Token:  os.Getenv("TGBOT_TOKEN"),
+			ChatId: os.Getenv("TGCHAT_ID"),
 		},
 	}
 

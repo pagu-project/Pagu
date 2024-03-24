@@ -9,6 +9,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.58.3
+	gopkg.in/telebot.v3 v3.2.1
 	gorm.io/gorm v1.25.5
 )
 
@@ -49,7 +50,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kilic/bls12-381 v0.1.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/libp2p/go-libp2p v0.32.2
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

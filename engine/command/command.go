@@ -8,9 +8,10 @@ import (
 type AppID int
 
 const (
-	AppIdCLI     AppID = 1
-	AppIdDiscord AppID = 2
-	AppIdgRPC    AppID = 3
+	AppIdCLI      AppID = 1
+	AppIdDiscord  AppID = 2
+	AppIdgRPC     AppID = 3
+	AppIdTelegram AppID = 4
 )
 
 func (appID AppID) String() string {
@@ -21,6 +22,8 @@ func (appID AppID) String() string {
 		return "Discord"
 	case AppIdgRPC:
 		return "gRPC"
+	case AppIdTelegram:
+		return "Telegram"
 	}
 
 	return ""
@@ -130,7 +133,7 @@ func (cmd *Command) AddHelpSubCommand() {
 	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram},
 		Handler: func(_ Command, _ AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
