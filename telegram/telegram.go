@@ -1,12 +1,7 @@
 package telegram
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/pactus-project/pactus/util"
@@ -52,104 +47,56 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 func (bot *TelegramBot) Start() error {
 	log.Info("starting Telegram Bot...")
 
-	// Set up command handler
+	// Set up command handler for /start
 	bot.Bot.Handle("/start", func(c tele.Context) error {
 		return c.Send("RoboPac has been started. Use the /help command to view all commands.")
 	})
 
-	return bot.registerCommands()
-}
+	// Set up command handler for /help
+	bot.Bot.Handle("/help", func(c tele.Context) error {
+		// Fetch commands from bot engine
+		beCmds := bot.BotEngine.Commands()
+		var helpText string
+		for _, beCmd := range beCmds {
+			if beCmd.HasAppId(command.AppIdTelegram) {
+				helpText += "/" + beCmd.Name + ": " + beCmd.Desc + "\n"
+			}
+		}
+		return c.Send(helpText)
+	})
 
-func (bot *TelegramBot) registerCommands() error {
-	token := bot.Config.TelegramBotCfg.Token
-
-	var commands []map[string]string
+	// Register command handlers dynamically
 	beCmds := bot.BotEngine.Commands()
 	for _, beCmd := range beCmds {
-		if !beCmd.HasAppId(command.AppIdTelegram) {
-			continue
+		log.Info("Fetched command from bot engine:", "Name", beCmd.Name, "Description", beCmd.Desc)
+		if beCmd.HasAppId(command.AppIdTelegram) {
+			cmd := beCmd // Create a local copy of beCmd to avoid closure issues
+			bot.Bot.Handle("/"+cmd.Name, func(c tele.Context) error {
+				// Execute the command in the bot engine
+				res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), []string{cmd.Name})
+				// Send the response back to the user
+				if err := c.Send(res.Message); err != nil {
+					log.Error("Failed to send response:", err)
+					return err
+				}
+				return nil
+			})
 		}
-		commands = append(commands, map[string]string{
-			"command":     "/" + beCmd.Name,
-			"description": beCmd.Desc,
-		})
-		log.Info("Command registered for Telegram:", "name", beCmd.Name, "description", beCmd.Desc)
 	}
 
-	// Convert the commands to JSON so we can register them with telegram.
-	jsonCommands, err := json.Marshal(commands)
-	if err != nil {
-		log.Info("Error marshalling commands:", err)
-		return err
-	}
+	// Middleware for error handling
+	bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			err := next(c)
+			if err != nil {
+				log.Error("Unhandled error:", err)
+				c.Send("An error occurred while processing your request.")
+			}
+			return err
+		}
+	})
 
-	// Register the commands with Telegram.
-	url := "https://api.telegram.org/bot" + token + "/setMyCommands"
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonCommands))
-	if err != nil {
-		log.Info("Error registering commands:", err)
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Check the response
-	if resp.StatusCode != http.StatusOK {
-		log.Info("Failed to register commands:", resp.Status)
-		return errors.New("failed to register commands")
-	}
-
-	log.Info("Commands registered successfully")
 	return nil
-}
-
-// func (bot *TelegramBot) respondErrMsg(errStr string, c tele.Context) {
-// 	// Prepare the error message
-// 	errorMsg := "Error: " + errStr
-
-// 	// Send the error message back to the user
-// 	chatID := tele.ChatID(c.Chat().ID)
-// 	_, err := bot.Bot.Send(chatID, errorMsg)
-// 	if err != nil {
-// 		log.Error("Failed to send error message", "error", err)
-// 	}
-// }
-
-func (bot *TelegramBot) respondResultMsg(res command.CommandResult, chatID int64) {
-	// Prepare the result message
-	var resultMsg string
-	if res.Successful {
-		resultMsg = "Successful: " + res.Message
-	} else {
-		resultMsg = "Failed: " + res.Message
-	}
-
-	// Send the result message back to the user
-	_, err := bot.Bot.Send(tele.ChatID(chatID), resultMsg)
-	if err != nil {
-		log.Error("Failed to send result message", "error", err)
-	}
-}
-
-func (bot *TelegramBot) commandHandler(b *tele.Bot, m *tele.Message) {
-	if m.Chat.ID != bot.ChatID {
-		b.Send(m.Chat, "Please only send messages in the pactus group chat.")
-		return
-	}
-
-	beInput := []string{}
-
-	commandParts := strings.Split(m.Text, " ")
-	cmd := commandParts[0]
-	args := commandParts[1:]
-
-	beInput = append(beInput, cmd)
-	beInput = append(beInput, args...)
-
-	// Convert m.Sender.ID from int64 to string
-	callerID := strconv.FormatInt(m.Sender.ID, 10)
-
-	res := bot.BotEngine.Run(command.AppIdTelegram, callerID, beInput)
-	bot.respondResultMsg(res, m.Chat.ID)
 }
 
 func (bot *TelegramBot) UpdateStatusInfo(cfg *config.Config) {
