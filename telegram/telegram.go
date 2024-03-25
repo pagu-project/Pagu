@@ -49,12 +49,16 @@ func (bot *TelegramBot) Start() error {
 
 	// Set up command handler for /start
 	bot.Bot.Handle("/start", func(c tele.Context) error {
-		return c.Send("RoboPac has been started. Use the /help command to view all commands.")
+		log.Info("Received /start command from user:", "User ID", c.Sender().ID)
+		if err := c.Send("RoboPac has been started. Use the /help command to view all commands."); err != nil {
+			log.Error("Failed to send /start response:", err)
+		}
+		return nil
 	})
 
 	// Set up command handler for /help
 	bot.Bot.Handle("/help", func(c tele.Context) error {
-		// Fetch commands from bot engine
+		log.Info("Received /help command from user:", "User ID", c.Sender().ID)
 		beCmds := bot.BotEngine.Commands()
 		var helpText string
 		for _, beCmd := range beCmds {
@@ -62,23 +66,38 @@ func (bot *TelegramBot) Start() error {
 				helpText += "/" + beCmd.Name + ": " + beCmd.Desc + "\n"
 			}
 		}
-		return c.Send(helpText)
+		if err := c.Send(helpText); err != nil {
+			log.Error("Failed to send /help response:", err)
+		}
+		return nil
 	})
 
-	// Register command handlers dynamically
 	beCmds := bot.BotEngine.Commands()
 	for _, beCmd := range beCmds {
 		log.Info("Fetched command from bot engine:", "Name", beCmd.Name, "Description", beCmd.Desc)
 		if beCmd.HasAppId(command.AppIdTelegram) {
-			cmd := beCmd // Create a local copy of beCmd to avoid closure issues
+			cmd := beCmd
 			bot.Bot.Handle("/"+cmd.Name, func(c tele.Context) error {
-				// Execute the command in the bot engine
-				res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), []string{cmd.Name})
-				// Send the response back to the user
+				log.Info("Received command "+cmd.Name+" from user:", "User ID", c.Sender().ID)
+				if c.Chat().ID != bot.ChatID {
+					if err := c.Send("Commands are only allowed in the Pactus group chat!"); err != nil {
+						log.Error("Failed to send message:", err)
+					}
+					return nil
+				}
+
+				// Extract the entire command, including arguments
+				fullCommand := c.Message().Text
+
+				// Pass the full command to the bot engine
+				res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), []string{fullCommand})
 				if err := c.Send(res.Message); err != nil {
 					log.Error("Failed to send response:", err)
-					return err
 				}
+
+				// Print the result of the Run method
+				log.Info("Result of executing command "+cmd.Name+":", "Message", res.Message)
+
 				return nil
 			})
 		}
@@ -90,11 +109,21 @@ func (bot *TelegramBot) Start() error {
 			err := next(c)
 			if err != nil {
 				log.Error("Unhandled error:", err)
-				c.Send("An error occurred while processing your request.")
+				if err := c.Send("An error occurred while processing your request."); err != nil {
+					log.Error("Failed to send error response:", err)
+				}
 			}
 			return err
 		}
 	})
+
+	// Check if the bot started successfully, if successful then it sends a message to the chat group/channel
+	msg, err := bot.Bot.Send(tele.ChatID(bot.ChatID), "Telegram Bot started successfully!")
+	if err != nil {
+		log.Error("Failed to send startup confirmation message:", err)
+		return err
+	}
+	log.Info("Telegram Bot started successfully. Message ID:", msg.ID)
 
 	return nil
 }
