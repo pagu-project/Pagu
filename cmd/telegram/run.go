@@ -40,7 +40,7 @@ func RunCommand(parentCmd *cobra.Command) {
 			return
 		}
 
-		telegramBot, err := telegram.NewTelegramBot(botEngine, config.TelegramBotCfg.Token, chatID)
+		telegramBot, err := telegram.NewTelegramBot(botEngine, config.TelegramBotCfg.Token, chatID, config) //
 		ExitOnError(cmd, err)
 
 		err = telegramBot.Start()

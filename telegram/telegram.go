@@ -1,6 +1,10 @@
 package telegram
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -19,10 +23,11 @@ type TelegramBot struct {
 	BotEngine       *engine.BotEngine
 	ChatID          int64
 	Bot             *tele.Bot
+	Config          *config.Config //config
 	commandHandlers map[string]tele.HandlerFunc
 }
 
-func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64) (*TelegramBot, error) {
+func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, config *config.Config) (*TelegramBot, error) {
 	pref := tele.Settings{
 		Token:  token,
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
@@ -33,17 +38,21 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64) (*T
 		return nil, err
 	}
 
+	commandHandlers := make(map[string]tele.HandlerFunc)
+
 	return &TelegramBot{
-		BotEngine: botEngine,
-		ChatID:    chatID,
-		Bot:       bot,
+		BotEngine:       botEngine,
+		ChatID:          chatID,
+		Bot:             bot,
+		Config:          config, //config
+		commandHandlers: commandHandlers,
 	}, nil
 }
 
 func (bot *TelegramBot) Start() error {
 	log.Info("starting Telegram Bot...")
 
-	// Set up command handlers
+	// Set up command handler
 	bot.Bot.Handle("/start", func(c tele.Context) error {
 		return c.Send("RoboPac has been started. Use the /help command to view all commands.")
 	})
@@ -52,27 +61,44 @@ func (bot *TelegramBot) Start() error {
 }
 
 func (bot *TelegramBot) registerCommands() error {
-	beCmds := bot.BotEngine.Commands()
+	token := bot.Config.TelegramBotCfg.Token
 
+	var commands []map[string]string
+	beCmds := bot.BotEngine.Commands()
 	for _, beCmd := range beCmds {
 		if !beCmd.HasAppId(command.AppIdTelegram) {
 			continue
 		}
-
-		// Define a handler for the command
-		handler := func(c tele.Context) error {
-			return c.Send("Command received: " + beCmd.Name)
-		}
-
-		// Register the handler
-		bot.Bot.Handle(beCmd.Name, handler)
-
-		// Keep track of the handler
-		bot.commandHandlers[beCmd.Name] = handler
-
-		log.Info("Telegram command registered", "name", beCmd.Name)
+		commands = append(commands, map[string]string{
+			"command":     "/" + beCmd.Name,
+			"description": beCmd.Desc,
+		})
+		log.Info("Command registered for Telegram:", "name", beCmd.Name, "description", beCmd.Desc)
 	}
 
+	// Convert the commands to JSON so we can register them with telegram.
+	jsonCommands, err := json.Marshal(commands)
+	if err != nil {
+		log.Info("Error marshalling commands:", err)
+		return err
+	}
+
+	// Register the commands with Telegram.
+	url := "https://api.telegram.org/bot" + token + "/setMyCommands"
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonCommands))
+	if err != nil {
+		log.Info("Error registering commands:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Check the response
+	if resp.StatusCode != http.StatusOK {
+		log.Info("Failed to register commands:", resp.Status)
+		return errors.New("failed to register commands")
+	}
+
+	log.Info("Commands registered successfully")
 	return nil
 }
 
@@ -113,13 +139,11 @@ func (bot *TelegramBot) commandHandler(b *tele.Bot, m *tele.Message) {
 	beInput := []string{}
 
 	commandParts := strings.Split(m.Text, " ")
-	command := commandParts[0]
+	cmd := commandParts[0]
 	args := commandParts[1:]
 
-	beInput = append(beInput, command)
-	for _, arg := range args {
-		beInput = append(beInput, arg)
-	}
+	beInput = append(beInput, cmd)
+	beInput = append(beInput, args...)
 
 	// Convert m.Sender.ID from int64 to string
 	callerID := strconv.FormatInt(m.Sender.ID, 10)
