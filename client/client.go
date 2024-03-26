@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"github.com/robopac-project/RoboPac/log"
@@ -72,7 +71,10 @@ func (c *Client) GetPeerInfo(ctx context.Context, address string) (*pactus.PeerI
 			}
 		}
 	}
-	return nil, errors.New("peer does not exist")
+	return nil, NotFoundError{
+		Search:  "peer",
+		Address: address,
+	}
 }
 
 func (c *Client) GetValidatorInfo(ctx context.Context, address string) (*pactus.GetValidatorResponse, error) {

@@ -1,8 +1,6 @@
 package database
 
 import (
-	"errors"
-
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 )
@@ -14,7 +12,9 @@ type DB struct {
 func NewDB(path string) (*DB, error) {
 	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
-		return nil, errors.New("can't open database")
+		return nil, MigrationError{
+			Reason: err.Error(),
+		}
 	}
 
 	if !db.Migrator().HasTable(&DiscordUser{}) ||
@@ -23,7 +23,9 @@ func NewDB(path string) (*DB, error) {
 			&DiscordUser{},
 			&Offer{},
 		); err != nil {
-			return nil, errors.New("can't auto migrate tables")
+			return nil, MigrationError{
+				Reason: err.Error(),
+			}
 		}
 	}
 
