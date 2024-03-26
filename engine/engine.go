@@ -80,7 +80,7 @@ func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
 		Desc:        "RoboPAC",
 		Help:        "RoboPAC Help",
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
-		SubCommands: []command.Command{},
+		SubCommands: make([]command.Command, 2),
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
@@ -153,6 +153,10 @@ func (be *BotEngine) getCommand(tokens []string) (command.Command, int) {
 		if !found {
 			break
 		}
+	}
+
+	if len(targetCmd.Args) != 0 && index != 0 {
+		return targetCmd, index - 1
 	}
 
 	return targetCmd, index
