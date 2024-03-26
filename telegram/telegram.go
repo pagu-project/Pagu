@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pactus-project/pactus/util"
@@ -47,61 +48,16 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 func (bot *TelegramBot) Start() error {
 	log.Info("starting Telegram Bot...")
 
-	// Set up command handler for /start
-	bot.Bot.Handle("/start", func(c tele.Context) error {
-		log.Info("Received /start command from user:", "User ID", c.Sender().ID)
-		if err := c.Send("RoboPac has been started. Use the /help command to view all commands."); err != nil {
-			log.Error("Failed to send /start response:", err)
-		}
-		return nil
-	})
-
-	// Set up command handler for /help
-	bot.Bot.Handle("/help", func(c tele.Context) error {
-		log.Info("Received /help command from user:", "User ID", c.Sender().ID)
-		beCmds := bot.BotEngine.Commands()
-		var helpText string
-		for _, beCmd := range beCmds {
-			if beCmd.HasAppId(command.AppIdTelegram) {
-				helpText += "/" + beCmd.Name + ": " + beCmd.Desc + "\n"
+	// Middleware for restricting users to using the bot in only one chat group
+	bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			if c.Chat().ID != bot.ChatID {
+				log.Info("Unauthorized access attempt from chat ID:", c.Chat().ID)
+				return nil // Ignore messages from unauthorized chats
 			}
+			return next(c) // Proceed to the next handler if it's the right chat group.
 		}
-		if err := c.Send(helpText); err != nil {
-			log.Error("Failed to send /help response:", err)
-		}
-		return nil
 	})
-
-	beCmds := bot.BotEngine.Commands()
-	for _, beCmd := range beCmds {
-		log.Info("Fetched command from bot engine:", "Name", beCmd.Name, "Description", beCmd.Desc)
-		if beCmd.HasAppId(command.AppIdTelegram) {
-			cmd := beCmd
-			bot.Bot.Handle("/"+cmd.Name, func(c tele.Context) error {
-				log.Info("Received command "+cmd.Name+" from user:", "User ID", c.Sender().ID)
-				if c.Chat().ID != bot.ChatID {
-					if err := c.Send("Commands are only allowed in the Pactus group chat!"); err != nil {
-						log.Error("Failed to send message:", err)
-					}
-					return nil
-				}
-
-				// Extract the entire command, including arguments
-				fullCommand := c.Message().Text
-
-				// Pass the full command to the bot engine
-				res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), []string{fullCommand})
-				if err := c.Send(res.Message); err != nil {
-					log.Error("Failed to send response:", err)
-				}
-
-				// Print the result of the Run method
-				log.Info("Result of executing command "+cmd.Name+":", "Message", res.Message)
-
-				return nil
-			})
-		}
-	}
 
 	// Middleware for error handling
 	bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
@@ -115,6 +71,40 @@ func (bot *TelegramBot) Start() error {
 			}
 			return err
 		}
+	})
+
+	// Set up a message handler for text messages in the group
+	bot.Bot.Handle(tele.OnText, func(c tele.Context) error {
+		// Extract the entire command, including arguments
+		fullCommand := c.Message().Text
+
+		// Remove the '/' prefix if present
+		fullCommand = strings.TrimPrefix(fullCommand, "/")
+		log.Info("Received command from user:", "User ID", c.Sender().ID, "Command", fullCommand)
+
+		// Split the command into an array
+		commandParts := strings.Split(fullCommand, " ")
+		log.Info("Command parts:", commandParts)
+
+		// Pass the array to the bot engine
+		res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), commandParts)
+		if res.Error != "" {
+			log.Error("Failed to execute command:", res.Error)
+			if err := c.Send("An error occurred while processing your request."); err != nil {
+				log.Error("Failed to send error response:", err)
+			}
+			return nil
+		}
+
+		// Send the response back to the user
+		if err := c.Send(res.Message); err != nil {
+			log.Error("Failed to send response:", err)
+		}
+
+		// Print the result of the Run method
+		log.Info("Result of executing command:", "Message", res.Message)
+
+		return nil
 	})
 
 	// Check if the bot started successfully, if successful then it sends a message to the chat group/channel
