@@ -31,6 +31,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 
 	bot, err := tele.NewBot(pref)
 	if err != nil {
+		log.Error("Failed to create Telegram bot:", err)
 		return nil, err
 	}
 
@@ -40,13 +41,13 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 		BotEngine:       botEngine,
 		ChatID:          chatID,
 		Bot:             bot,
-		Config:          config, //config
+		Config:          config,
 		commandHandlers: commandHandlers,
 	}, nil
 }
 
 func (bot *TelegramBot) Start() error {
-	log.Info("starting Telegram Bot...")
+	log.Info("Starting Telegram Bot...")
 
 	// Middleware for restricting users to using the bot in only one chat group
 	bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
@@ -107,7 +108,7 @@ func (bot *TelegramBot) Start() error {
 		return nil
 	})
 
-	// Check if the bot started successfully, if successful then it sends a message to the chat group/channel
+	// Attempt to send a startup confirmation message
 	msg, err := bot.Bot.Send(tele.ChatID(bot.ChatID), "Telegram Bot started successfully!")
 	if err != nil {
 		log.Error("Failed to send startup confirmation message:", err)
