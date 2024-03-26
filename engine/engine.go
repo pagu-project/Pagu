@@ -156,7 +156,7 @@ func (be *BotEngine) getCommand(tokens []string) (command.Command, int) {
 	}
 
 	if len(targetCmd.Args) != 0 && index != 0 {
-		return targetCmd, index - 1
+		return targetCmd, index - 1 //! TODO: FIX ME IN THE MAIN LOGIC
 	}
 
 	return targetCmd, index
