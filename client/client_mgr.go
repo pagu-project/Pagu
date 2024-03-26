@@ -211,6 +211,10 @@ func (cm *Mgr) GetBalance(addr string) (int64, error) {
 	return cm.getLocalClient().GetBalance(cm.ctx, addr)
 }
 
+func (cm *Mgr) GetFee(amt int64) (int64, error) {
+	return cm.getLocalClient().GetFee(cm.ctx, amt)
+}
+
 func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	localClient := cm.getLocalClient()
 
