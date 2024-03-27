@@ -117,15 +117,6 @@ func (bot *TelegramBot) Start() error {
 		}
 	}()
 
-	// Attempt to send a startup confirmation message,
-	// this block of code should be commented or removed after testing!!!
-	msg, err := bot.Bot.Send(tele.ChatID(bot.ChatID), "Telegram Bot started successfully!")
-	if err != nil {
-		log.Error("Failed to send startup confirmation message:", err)
-		return err
-	}
-	log.Info("Telegram Bot started successfully. Message ID:", msg.ID)
-
 	return nil
 }
 

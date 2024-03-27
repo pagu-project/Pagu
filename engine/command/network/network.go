@@ -115,8 +115,6 @@ func (n *Network) GetCommand() command.Command {
 	cmdNetwork.AddSubCommand(subCmdNodeInfo)
 	cmdNetwork.AddSubCommand(subCmdStatus)
 
-	cmdNetwork.AddHelpSubCommand()
-
 	return cmdNetwork
 }
 
