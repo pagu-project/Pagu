@@ -107,15 +107,13 @@ func (n *Network) GetCommand() command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
-		SubCommands: []command.Command{subCmdHealth, subCmdStatus, subCmdNodeInfo},
+		SubCommands: make([]command.Command, 3),
 		Handler:     nil,
 	}
 
 	cmdNetwork.AddSubCommand(subCmdHealth)
 	cmdNetwork.AddSubCommand(subCmdNodeInfo)
 	cmdNetwork.AddSubCommand(subCmdStatus)
-
-	cmdNetwork.AddHelpSubCommand()
 
 	return cmdNetwork
 }

@@ -17,11 +17,6 @@ import (
 const PROMPT = "\n>> "
 
 func run(cmd *cobra.Command, args []string) {
-	if len(args) != 1 {
-		cmd.Println("Provide your Discord ID as the first argument.")
-		cmd.Println("Usage: robopac-cli <Discord-ID>")
-		return
-	}
 	log.InitGlobalLogger()
 
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
@@ -52,10 +47,9 @@ func run(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		callerID := args[0]
 		inputs := strings.Split(input, " ")
 
-		response := botEngine.Run(command.AppIdCLI, callerID, inputs)
+		response := botEngine.Run(command.AppIdCLI, "0", inputs)
 
 		cmd.Printf("%v\n%v", response.Title, response.Message)
 	}

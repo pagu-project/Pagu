@@ -2,7 +2,6 @@ package engine
 
 import (
 	"context"
-	"errors"
 
 	"github.com/robopac-project/RoboPac/client"
 	"github.com/robopac-project/RoboPac/config"
@@ -54,7 +53,9 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		wal = wallet.Open(&cfg.WalletConfig)
 		if wal == nil {
 			cancel()
-			return nil, errors.New("can't open the wallet")
+			return nil, WalletError{
+				Reason: "can't open wallet",
+			}
 		}
 
 		log.Info("wallet opened successfully", "address", wal.Address())
@@ -80,7 +81,7 @@ func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
 		Desc:        "RoboPAC",
 		Help:        "RoboPAC Help",
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
-		SubCommands: []command.Command{},
+		SubCommands: make([]command.Command, 2),
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
@@ -153,6 +154,10 @@ func (be *BotEngine) getCommand(tokens []string) (command.Command, int) {
 		if !found {
 			break
 		}
+	}
+
+	if len(targetCmd.Args) != 0 && index != 0 {
+		return targetCmd, index - 1 //! TODO: FIX ME IN THE MAIN LOGIC
 	}
 
 	return targetCmd, index
