@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"github.com/robopac-project/RoboPac/log"
@@ -72,7 +71,10 @@ func (c *Client) GetPeerInfo(ctx context.Context, address string) (*pactus.PeerI
 			}
 		}
 	}
-	return nil, errors.New("peer does not exist")
+	return nil, NotFoundError{
+		Search:  "peer",
+		Address: address,
+	}
 }
 
 func (c *Client) GetValidatorInfo(ctx context.Context, address string) (*pactus.GetValidatorResponse, error) {
@@ -147,6 +149,18 @@ func (c *Client) GetBalance(ctx context.Context, address string) (int64, error) 
 	}
 
 	return account.Account.Balance, nil
+}
+
+func (c *Client) GetFee(ctx context.Context, amt int64) (int64, error) {
+	res, err := c.transactionClient.CalculateFee(ctx, &pactus.CalculateFeeRequest{
+		Amount:      amt,
+		PayloadType: pactus.PayloadType_TRANSFER_PAYLOAD,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return res.Fee, nil
 }
 
 func (c *Client) Close() error {
