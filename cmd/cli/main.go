@@ -77,7 +77,7 @@ func determinePlatform(callerID string) string {
 	if strings.HasPrefix(callerID, "@") {
 		return "telegram"
 	}
-	//return discord as default .
+	// return discord as default .
 	return "discord"
 }
 

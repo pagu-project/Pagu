@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ type TelegramBot struct {
 	BotEngine       *engine.BotEngine
 	ChatID          int64
 	Bot             *tele.Bot
-	Config          *config.Config //config
+	Config          *config.Config // config
 	commandHandlers map[string]tele.HandlerFunc
 }
 
@@ -81,11 +82,11 @@ func (bot *TelegramBot) Start() error {
 
 		// Remove the '/' prefix if present
 		fullCommand = strings.TrimPrefix(fullCommand, "/")
-		log.Info("Received command from user:", "User ID", c.Sender().ID, "Command", fullCommand)
+		log.Info(fmt.Sprintf("Received command from UserID %d: '%s'", c.Sender().ID, fullCommand))
 
 		// Split the command into an array
 		commandParts := strings.Split(fullCommand, " ")
-		log.Info("Command parts:", commandParts)
+		log.Info(fmt.Sprintf("Processing command parts: %v", commandParts))
 
 		// Pass the array to the bot engine
 		res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), commandParts)
@@ -108,7 +109,16 @@ func (bot *TelegramBot) Start() error {
 		return nil
 	})
 
-	// Attempt to send a startup confirmation message
+	// Use ticker to periodically send status updates
+	ticker := time.NewTicker(30 * time.Second)
+	go func() {
+		for range ticker.C {
+			bot.UpdateStatusInfo(bot.Config) // Call UpdateStatusInfo to send status messages
+		}
+	}()
+
+	// Attempt to send a startup confirmation message,
+	// this block of code should be commented or removed after testing!!!
 	msg, err := bot.Bot.Send(tele.ChatID(bot.ChatID), "Telegram Bot started successfully!")
 	if err != nil {
 		log.Error("Failed to send startup confirmation message:", err)
