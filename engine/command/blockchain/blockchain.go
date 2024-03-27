@@ -76,14 +76,12 @@ func (bc *Blockchain) GetCommand() command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
-		SubCommands: []command.Command{subCmdCalcReward, subCmdCalcFee},
+		SubCommands: make([]command.Command, 2),
 		Handler:     nil,
 	}
 
 	cmdBlockchain.AddSubCommand(subCmdCalcReward)
 	cmdBlockchain.AddSubCommand(subCmdCalcFee)
-
-	cmdBlockchain.AddHelpSubCommand()
 
 	return cmdBlockchain
 }
