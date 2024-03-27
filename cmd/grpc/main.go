@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	log.SetLoggerLevel()
+
 	rootCmd := &cobra.Command{
 		Use:     "robopac-grpc",
 		Version: robopac.StringVersion(),

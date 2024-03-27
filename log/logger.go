@@ -6,13 +6,17 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var globalInst *logger
+var (
+	globalInst *logger
+	logLevel   zerolog.Level
+)
 
 type logger struct {
 	subs   map[string]*SubLogger
@@ -22,18 +26,6 @@ type logger struct {
 type SubLogger struct {
 	logger zerolog.Logger
 	name   string
-}
-
-func getLoggersInst() *logger {
-	if globalInst == nil {
-		globalInst = &logger{
-			subs:   make(map[string]*SubLogger),
-			writer: zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"},
-		}
-		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
-	}
-
-	return globalInst
 }
 
 func InitGlobalLogger() {
@@ -51,8 +43,46 @@ func InitGlobalLogger() {
 			subs:   make(map[string]*SubLogger),
 			writer: io.MultiWriter(writers...),
 		}
+
+		// Set the global log level from the environment variable
+		level, err := zerolog.ParseLevel(strings.ToLower(os.Getenv("LOG_LEVEL")))
+		if err != nil {
+			level = zerolog.InfoLevel // Default to info level if parsing fails
+		}
+		zerolog.SetGlobalLevel(level)
+
 		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
 	}
+}
+
+// NewLoggerLevel initializes the logger level.
+func NewLoggerLevel(level zerolog.Level) {
+	logLevel = level
+}
+
+func getLoggersInst() *logger {
+	if globalInst == nil {
+		globalInst = &logger{
+			subs:   make(map[string]*SubLogger),
+			writer: zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"},
+		}
+		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
+	}
+
+	return globalInst
+}
+
+// function to set logger level based on env.
+func SetLoggerLevel() {
+	level, err := zerolog.ParseLevel(strings.ToLower(os.Getenv("LOG_LEVEL")))
+	if err != nil {
+		level = zerolog.InfoLevel // Default to info level if parsing fails
+	}
+	logLevel = level
+}
+
+func GetCurrentLogLevel() zerolog.Level {
+	return logLevel
 }
 
 func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
