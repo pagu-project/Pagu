@@ -28,14 +28,14 @@ type SubLogger struct {
 	name   string
 }
 
-func InitGlobalLogger() {
+func InitGlobalLogger(levelString string) {
 	if globalInst == nil {
 		writers := []io.Writer{}
 		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 
 		fw := &lumberjack.Logger{
 			Filename: "RoboPac.log",
-			MaxSize:  15,
+			MaxSize:  15, // Max log size in MB
 		}
 		writers = append(writers, fw)
 
@@ -44,8 +44,8 @@ func InitGlobalLogger() {
 			writer: io.MultiWriter(writers...),
 		}
 
-		// Set the global log level from the environment variable
-		level, err := zerolog.ParseLevel(strings.ToLower(os.Getenv("LOG_LEVEL")))
+		// Set the global log level from the input parameter
+		level, err := zerolog.ParseLevel(strings.ToLower(levelString))
 		if err != nil {
 			level = zerolog.InfoLevel // Default to info level if parsing fails
 		}
@@ -73,12 +73,12 @@ func getLoggersInst() *logger {
 }
 
 // function to set logger level based on env.
-func SetLoggerLevel() {
-	level, err := zerolog.ParseLevel(strings.ToLower(os.Getenv("LOG_LEVEL")))
+func SetLoggerLevel(level string) {
+	parsedLevel, err := zerolog.ParseLevel(strings.ToLower(level))
 	if err != nil {
-		level = zerolog.InfoLevel // Default to info level if parsing fails
+		parsedLevel = zerolog.InfoLevel // Default to info level if parsing fails
 	}
-	logLevel = level
+	logLevel = parsedLevel
 }
 
 func GetCurrentLogLevel() zerolog.Level {

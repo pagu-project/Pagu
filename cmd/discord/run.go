@@ -13,7 +13,6 @@ import (
 )
 
 func RunCommand(parentCmd *cobra.Command) {
-	log.SetLoggerLevel()
 
 	run := &cobra.Command{
 		Use:   "run",
@@ -28,8 +27,7 @@ func RunCommand(parentCmd *cobra.Command) {
 		ExitOnError(cmd, err)
 
 		// Initialize global logger.
-		log.InitGlobalLogger()
-
+		log.InitGlobalLogger(config.LogLevel)
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
 		ExitOnError(cmd, err)

@@ -17,11 +17,12 @@ import (
 const PROMPT = "\n>> "
 
 func run(cmd *cobra.Command, args []string) {
-	log.SetLoggerLevel()
 
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
 	config, err := config.Load(*envOpt)
 	ExitOnError(cmd, err)
+
+	log.InitGlobalLogger(config.LogLevel)
 
 	if config.Network == "Localnet" {
 		crypto.AddressHRP = "tpc"
