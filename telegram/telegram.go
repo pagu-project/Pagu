@@ -1,15 +1,12 @@
 package telegram
 
 import (
-	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/pactus-project/pactus/util"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
-	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/log"
 	"github.com/robopac-project/RoboPac/utils"
 	tele "gopkg.in/telebot.v3"
@@ -50,15 +47,15 @@ func (bot *TelegramBot) Start() error {
 	log.Info("Starting Telegram Bot...")
 
 	// Middleware for restricting users to using the bot in only one chat group
-	bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
-		return func(c tele.Context) error {
-			if c.Chat().ID != bot.ChatID {
-				log.Info("Unauthorized access attempt from chat ID:", c.Chat().ID)
-				return nil // Ignore messages from unauthorized chats
-			}
-			return next(c) // Proceed to the next handler if it's the right chat group.
-		}
-	})
+	// bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
+	// 	return func(c tele.Context) error {
+	// 		if c.Chat().ID != bot.ChatID {
+	// 			log.Info("Unauthorized access attempt from chat ID:", c.Chat().ID)
+	// 			return nil // Ignore messages from unauthorized chats
+	// 		}
+	// 		return next(c) // Proceed to the next handler if it's the right chat group.
+	// 	}
+	// })
 
 	// Middleware for error handling
 	bot.Bot.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
@@ -74,47 +71,8 @@ func (bot *TelegramBot) Start() error {
 		}
 	})
 
-	// Set up a message handler for text messages in the group
-	bot.Bot.Handle(tele.OnText, func(c tele.Context) error {
-		// Extract the entire command, including arguments
-		fullCommand := c.Message().Text
-
-		// Remove the '/' prefix if present
-		fullCommand = strings.TrimPrefix(fullCommand, "/")
-		log.Info(fmt.Sprintf("Received command from UserID %d: '%s'", c.Sender().ID, fullCommand))
-
-		// Split the command into an array
-		commandParts := strings.Split(fullCommand, " ")
-		log.Info(fmt.Sprintf("Processing command parts: %v", commandParts))
-
-		// Pass the array to the bot engine
-		res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), commandParts)
-		if res.Error != "" {
-			log.Error("Failed to execute command:", res.Error)
-			if err := c.Send("An error occurred while processing your request."); err != nil {
-				log.Error("Failed to send error response:", err)
-			}
-			return nil
-		}
-
-		// Send the response back to the user
-		if err := c.Send(res.Message); err != nil {
-			log.Error("Failed to send response:", err)
-		}
-
-		// Print the result of the Run method
-		log.Info("Result of executing command:", "Message", res.Message)
-
-		return nil
-	})
-
-	// Use ticker to periodically send status updates
-	ticker := time.NewTicker(30 * time.Second)
-	go func() {
-		for range ticker.C {
-			bot.UpdateStatusInfo(bot.Config) // Call UpdateStatusInfo to send status messages
-		}
-	}()
+	// Set up a message handler for text messages in the group.
+	bot.Bot.Handle(tele.OnText, bot.commandHandler)
 
 	return nil
 }

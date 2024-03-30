@@ -46,6 +46,9 @@ func RunCommand(parentCmd *cobra.Command) {
 		err = telegramBot.Start()
 		ExitOnError(cmd, err)
 
+		//start command handler
+		telegramBot.Bot.Handle("/start", telegram.StartCommandHandler)
+
 		// Set up signal handling.
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
