@@ -13,7 +13,6 @@ import (
 )
 
 func RunCommand(parentCmd *cobra.Command) {
-
 	run := &cobra.Command{
 		Use:   "run",
 		Short: "Runs a mainnet instance of RoboPac",

@@ -17,7 +17,6 @@ import (
 const PROMPT = "\n>> "
 
 func run(cmd *cobra.Command, args []string) {
-
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
 	config, err := config.Load(*envOpt)
 	ExitOnError(cmd, err)
