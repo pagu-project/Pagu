@@ -6,13 +6,19 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"slices"
+	"strings"
 
+	"github.com/robopac-project/RoboPac/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var globalInst *logger
+var (
+	globalInst *logger
+	logLevel   zerolog.Level
+)
 
 type logger struct {
 	subs   map[string]*SubLogger
@@ -22,6 +28,47 @@ type logger struct {
 type SubLogger struct {
 	logger zerolog.Logger
 	name   string
+}
+
+func InitGlobalLogger(config config.LoggerConfig) {
+	if globalInst == nil {
+		writers := []io.Writer{}
+
+		if slices.Contains(config.Targets, "file") {
+			// File writer.
+			fw := &lumberjack.Logger{
+				Filename:   config.Filename,
+				MaxSize:    config.MaxSize,
+				MaxBackups: config.MaxBackups,
+				Compress:   config.Compress,
+			}
+			writers = append(writers, fw)
+		}
+
+		if slices.Contains(config.Targets, "console") {
+			// Console writer.
+			writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
+		}
+
+		globalInst = &logger{
+			subs:   make(map[string]*SubLogger),
+			writer: io.MultiWriter(writers...),
+		}
+
+		// Set the global log level from the configuration.
+		level, err := zerolog.ParseLevel(strings.ToLower(config.LogLevel))
+		if err != nil {
+			level = zerolog.InfoLevel // Default to info level if parsing fails.
+		}
+		zerolog.SetGlobalLevel(level)
+
+		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
+	}
+}
+
+// NewLoggerLevel initializes the logger level.
+func NewLoggerLevel(level zerolog.Level) {
+	logLevel = level
 }
 
 func getLoggersInst() *logger {
@@ -36,23 +83,17 @@ func getLoggersInst() *logger {
 	return globalInst
 }
 
-func InitGlobalLogger() {
-	if globalInst == nil {
-		writers := []io.Writer{}
-		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
-
-		fw := &lumberjack.Logger{
-			Filename: "RoboPac.log",
-			MaxSize:  15,
-		}
-		writers = append(writers, fw)
-
-		globalInst = &logger{
-			subs:   make(map[string]*SubLogger),
-			writer: io.MultiWriter(writers...),
-		}
-		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
+// function to set logger level based on env.
+func SetLoggerLevel(level string) {
+	parsedLevel, err := zerolog.ParseLevel(strings.ToLower(level))
+	if err != nil {
+		parsedLevel = zerolog.InfoLevel // Default to info level if parsing fails
 	}
+	logLevel = parsedLevel
+}
+
+func GetCurrentLogLevel() zerolog.Level {
+	return logLevel
 }
 
 func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
