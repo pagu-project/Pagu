@@ -4,7 +4,6 @@ import (
 	"os"
 
 	robopac "github.com/robopac-project/RoboPac"
-	"github.com/robopac-project/RoboPac/log"
 	"github.com/spf13/cobra"
 )
 
@@ -13,8 +12,6 @@ func main() {
 		Use:     "robopac-discord",
 		Version: robopac.StringVersion(),
 	}
-
-	log.InitGlobalLogger()
 
 	RunCommand(rootCmd)
 
