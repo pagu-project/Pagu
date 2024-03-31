@@ -21,7 +21,7 @@ func run(cmd *cobra.Command, args []string) {
 	config, err := config.Load(*envOpt)
 	ExitOnError(cmd, err)
 
-	log.InitGlobalLogger(config.LogLevel)
+	log.InitGlobalLogger(config.LoggerConfig)
 
 	if config.Network == "Localnet" {
 		crypto.AddressHRP = "tpc"

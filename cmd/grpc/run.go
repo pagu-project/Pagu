@@ -26,7 +26,7 @@ func RunCommand(parentCmd *cobra.Command) {
 		ExitOnError(cmd, err)
 
 		// Initialize global logger.
-		log.InitGlobalLogger(config.LogLevel)
+		log.InitGlobalLogger(config.LoggerConfig)
 
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)

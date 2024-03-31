@@ -19,7 +19,7 @@ type Config struct {
 	DiscordBotCfg DiscordBotConfig
 	GRPCConfig    GRPCConfig
 	WalletConfig  WalletConfig
-	LogLevel      string
+	LoggerConfig  LoggerConfig
 }
 
 type WalletConfig struct {
@@ -37,6 +37,14 @@ type DiscordBotConfig struct {
 
 type GRPCConfig struct {
 	Listen string
+}
+
+type LoggerConfig struct {
+	LogLevel   string
+	Targets    []string
+	MaxSize    int
+	MaxBackups int
+	Compress   bool
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -71,7 +79,9 @@ func Load(filePaths ...string) (*Config, error) {
 		GRPCConfig: GRPCConfig{
 			Listen: os.Getenv("GRPC_LISTEN"),
 		},
-		LogLevel: os.Getenv("LOG_LEVEL"),
+		LoggerConfig: LoggerConfig{
+			LogLevel: os.Getenv("LOG_LEVEL"),
+		},
 	}
 
 	// Check if the required configurations are set.

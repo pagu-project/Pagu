@@ -6,8 +6,10 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 
+	"github.com/robopac-project/RoboPac/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -28,26 +30,35 @@ type SubLogger struct {
 	name   string
 }
 
-func InitGlobalLogger(levelString string) {
+func InitGlobalLogger(config config.LoggerConfig) {
 	if globalInst == nil {
 		writers := []io.Writer{}
-		writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 
-		fw := &lumberjack.Logger{
-			Filename: "RoboPac.log",
-			MaxSize:  15, // Max log size in MB
+		if slices.Contains(config.Targets, "file") {
+			// File writer.
+			fw := &lumberjack.Logger{
+				Filename:   "RoboPac.log",
+				MaxSize:    config.MaxSize,
+				MaxBackups: config.MaxBackups,
+				Compress:   config.Compress,
+			}
+			writers = append(writers, fw)
 		}
-		writers = append(writers, fw)
+
+		if slices.Contains(config.Targets, "console") {
+			// Console writer.
+			writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
+		}
 
 		globalInst = &logger{
 			subs:   make(map[string]*SubLogger),
 			writer: io.MultiWriter(writers...),
 		}
 
-		// Set the global log level from the input parameter
-		level, err := zerolog.ParseLevel(strings.ToLower(levelString))
+		// Set the global log level from the configuration.
+		level, err := zerolog.ParseLevel(strings.ToLower(config.LogLevel))
 		if err != nil {
-			level = zerolog.InfoLevel // Default to info level if parsing fails
+			level = zerolog.InfoLevel // Default to info level if parsing fails.
 		}
 		zerolog.SetGlobalLevel(level)
 
