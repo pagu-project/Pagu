@@ -59,6 +59,26 @@ func Load(filePaths ...string) (*Config, error) {
 		return nil, err
 	}
 
+	maxSizeStr := os.Getenv("LOG_MAX_SIZE")
+	maxSize, err := strconv.Atoi(maxSizeStr)
+	if err != nil {
+		return nil, err
+	}
+
+	maxBackupsStr := os.Getenv("LOG_MAX_BACKUPS")
+	maxBackups, err := strconv.Atoi(maxBackupsStr)
+	if err != nil {
+		return nil, err
+	}
+
+	compressStr := os.Getenv("LOG_COMPRESS")
+	compress, err := strconv.ParseBool(compressStr)
+	if err != nil {
+		return nil, err
+	}
+
+	targets := strings.Split(os.Getenv("LOG_TARGETS"), ",")
+
 	// Fetch config values from environment variables.
 	cfg := &Config{
 		Network: os.Getenv("NETWORK"),
@@ -81,8 +101,12 @@ func Load(filePaths ...string) (*Config, error) {
 			Listen: os.Getenv("GRPC_LISTEN"),
 		},
 		LoggerConfig: LoggerConfig{
-			LogLevel: os.Getenv("LOG_LEVEL"),
-			Filename: os.Getenv("LOG_FILENAME"),
+			LogLevel:   os.Getenv("LOG_LEVEL"),
+			Filename:   os.Getenv("LOG_FILENAME"),
+			Targets:    targets,
+			MaxSize:    maxSize,
+			MaxBackups: maxBackups,
+			Compress:   compress,
 		},
 	}
 
