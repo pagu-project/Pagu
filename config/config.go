@@ -40,6 +40,7 @@ type GRPCConfig struct {
 }
 
 type LoggerConfig struct {
+	Filename   string
 	LogLevel   string
 	Targets    []string
 	MaxSize    int
@@ -81,6 +82,7 @@ func Load(filePaths ...string) (*Config, error) {
 		},
 		LoggerConfig: LoggerConfig{
 			LogLevel: os.Getenv("LOG_LEVEL"),
+			Filename: os.Getenv("LOG_FILENAME"),
 		},
 	}
 
