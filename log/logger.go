@@ -37,7 +37,7 @@ func InitGlobalLogger(config config.LoggerConfig) {
 		if slices.Contains(config.Targets, "file") {
 			// File writer.
 			fw := &lumberjack.Logger{
-				Filename:   "RoboPac.log",
+				Filename:   config.Filename,
 				MaxSize:    config.MaxSize,
 				MaxBackups: config.MaxBackups,
 				Compress:   config.Compress,
