@@ -29,6 +29,15 @@ func (appID AppID) String() string {
 	return ""
 }
 
+func AllAppIDs() []AppID {
+	return []AppID{
+		AppIdCLI,
+		AppIdDiscord,
+		AppIdgRPC,
+		AppIdHTTP,
+	}
+}
+
 type Args struct {
 	Name     string
 	Desc     string

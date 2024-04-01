@@ -194,12 +194,12 @@ func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
 }
 
 func (be *BotEngine) Stop() {
-	log.Info("shutting bot engine down...")
+	log.Info("Stopping the Bot Engine")
 
 	be.cancel()
 	be.clientMgr.Stop()
 }
 
 func (be *BotEngine) Start() {
-	log.Info("starting the bot engine...")
+	log.Info("Starting the Bot Engine")
 }
