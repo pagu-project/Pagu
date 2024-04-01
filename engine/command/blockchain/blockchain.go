@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -19,15 +18,13 @@ const (
 )
 
 type Blockchain struct {
-	ctx       context.Context
 	clientMgr *client.Mgr
 }
 
-func NewBlockchain(ctx context.Context,
+func NewBlockchain(
 	clientMgr *client.Mgr,
 ) Blockchain {
 	return Blockchain{
-		ctx:       ctx,
 		clientMgr: clientMgr,
 	}
 }
