@@ -18,7 +18,6 @@ func RunCommand(parentCmd *cobra.Command) {
 		Use:   "run",
 		Short: "Runs a mainnet instance of RoboPac",
 	}
-	log.InitGlobalLogger()
 
 	parentCmd.AddCommand(run)
 
@@ -30,6 +29,8 @@ func RunCommand(parentCmd *cobra.Command) {
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
 		ExitOnError(cmd, err)
+
+		log.InitGlobalLogger(config.LoggerConfig)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()

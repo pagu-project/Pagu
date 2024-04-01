@@ -11,15 +11,15 @@ import (
 )
 
 type Config struct {
-	Network        string
-	NetworkNodes   []string
-	LocalNode      string
-	DataBasePath   string
-	AuthIDs        []string
-	DiscordBotCfg  DiscordBotConfig
-	GRPCConfig     GRPCConfig
-	WalletConfig   WalletConfig
-	TelegramBotCfg TelegramBotConfig
+	Network       string
+	NetworkNodes  []string
+	LocalNode     string
+	DataBasePath  string
+	AuthIDs       []string
+	DiscordBotCfg DiscordBotConfig
+	GRPCConfig    GRPCConfig
+	WalletConfig  WalletConfig
+	LoggerConfig  LoggerConfig
 }
 
 type WalletConfig struct {
@@ -39,9 +39,13 @@ type GRPCConfig struct {
 	Listen string
 }
 
-type TelegramBotConfig struct {
-	Token  string
-	ChatId string
+type LoggerConfig struct {
+	Filename   string
+	LogLevel   string
+	Targets    []string
+	MaxSize    int
+	MaxBackups int
+	Compress   bool
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -54,6 +58,26 @@ func Load(filePaths ...string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	maxSizeStr := os.Getenv("LOG_MAX_SIZE")
+	maxSize, err := strconv.Atoi(maxSizeStr)
+	if err != nil {
+		return nil, err
+	}
+
+	maxBackupsStr := os.Getenv("LOG_MAX_BACKUPS")
+	maxBackups, err := strconv.Atoi(maxBackupsStr)
+	if err != nil {
+		return nil, err
+	}
+
+	compressStr := os.Getenv("LOG_COMPRESS")
+	compress, err := strconv.ParseBool(compressStr)
+	if err != nil {
+		return nil, err
+	}
+
+	targets := strings.Split(os.Getenv("LOG_TARGETS"), ",")
 
 	// Fetch config values from environment variables.
 	cfg := &Config{
@@ -76,9 +100,13 @@ func Load(filePaths ...string) (*Config, error) {
 		GRPCConfig: GRPCConfig{
 			Listen: os.Getenv("GRPC_LISTEN"),
 		},
-		TelegramBotCfg: TelegramBotConfig{
-			Token:  os.Getenv("TGBOT_TOKEN"),
-			ChatId: os.Getenv("TGCHAT_ID"),
+		LoggerConfig: LoggerConfig{
+			LogLevel:   os.Getenv("LOG_LEVEL"),
+			Filename:   os.Getenv("LOG_FILENAME"),
+			Targets:    targets,
+			MaxSize:    maxSize,
+			MaxBackups: maxBackups,
+			Compress:   compress,
 		},
 	}
 

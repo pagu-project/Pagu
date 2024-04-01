@@ -17,7 +17,6 @@ func RunCommand(parentCmd *cobra.Command) {
 		Use:   "run",
 		Short: "Runs a mainnet instance of RoboPac",
 	}
-	log.InitGlobalLogger()
 
 	parentCmd.AddCommand(run)
 
@@ -26,6 +25,8 @@ func RunCommand(parentCmd *cobra.Command) {
 		config, err := config.Load()
 		ExitOnError(cmd, err)
 
+		// Initialize global logger.
+		log.InitGlobalLogger(config.LoggerConfig)
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
 		ExitOnError(cmd, err)
