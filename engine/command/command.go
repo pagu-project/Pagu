@@ -11,6 +11,7 @@ const (
 	AppIdCLI     AppID = 1
 	AppIdDiscord AppID = 2
 	AppIdgRPC    AppID = 3
+	AppIdHTTP    AppID = 4
 )
 
 func (appID AppID) String() string {
@@ -21,6 +22,8 @@ func (appID AppID) String() string {
 		return "Discord"
 	case AppIdgRPC:
 		return "gRPC"
+	case AppIdHTTP:
+		return "HTTP"
 	}
 
 	return ""

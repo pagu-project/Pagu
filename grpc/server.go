@@ -63,11 +63,14 @@ func (s *Server) startListening(listener net.Listener) {
 	}()
 }
 
-func (s *Server) Stop() {
+func (s *Server) Stop() error {
+	log.Info("Stopping gRPC Server", "addr", s.address)
+
 	s.cancel()
 
 	if s.grpc != nil {
 		s.grpc.Stop()
-		s.listener.Close()
 	}
+
+	return s.listener.Close()
 }

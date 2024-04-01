@@ -38,7 +38,7 @@ check:
 	golangci-lint run --timeout=20m0s
 
 ### building
-build: build-cli build-dc build-grpc
+build: build-cli build-dc build-grpc build-http
 
 build-cli:
 	go build -o build/robopac-cli     ./cmd/cli
@@ -48,6 +48,9 @@ build-dc:
 
 build-grpc:
 	go build -o build/robopac-grpc ./cmd/grpc
+
+build-http:
+	go build -o build/robopac-http ./cmd/http
 
 ### pre commit
 pre-commit: mock proto fmt check unit_test

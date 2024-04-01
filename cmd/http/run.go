@@ -8,7 +8,7 @@ import (
 	rpCmd "github.com/robopac-project/RoboPac/cmd"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
-	"github.com/robopac-project/RoboPac/grpc"
+	"github.com/robopac-project/RoboPac/http"
 	"github.com/robopac-project/RoboPac/log"
 	"github.com/spf13/cobra"
 )
@@ -36,9 +36,9 @@ func runCommand(parentCmd *cobra.Command) {
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		grpcServer := grpc.NewServer(botEngine, config.GRPCConfig)
+		httpServer := http.NewHTTPServer(botEngine, config.HTTPConfig)
 
-		err = grpcServer.Start()
+		err = httpServer.Start()
 		rpCmd.ExitOnError(cmd, err)
 
 		sigChan := make(chan os.Signal, 1)
@@ -46,7 +46,7 @@ func runCommand(parentCmd *cobra.Command) {
 		<-sigChan
 
 		// gracefully shutdown the bot.
-		if err := grpcServer.Stop(); err != nil {
+		if err := httpServer.Stop(); err != nil {
 			rpCmd.ExitOnError(cmd, err)
 		}
 

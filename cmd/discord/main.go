@@ -1,9 +1,8 @@
 package main
 
 import (
-	"os"
-
 	robopac "github.com/robopac-project/RoboPac"
+	"github.com/robopac-project/RoboPac/cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -13,15 +12,8 @@ func main() {
 		Version: robopac.StringVersion(),
 	}
 
-	RunCommand(rootCmd)
+	runCommand(rootCmd)
 
 	err := rootCmd.Execute()
-	ExitOnError(rootCmd, err)
-}
-
-func ExitOnError(cmd *cobra.Command, err error) {
-	if err != nil {
-		cmd.PrintErr(err.Error())
-		os.Exit(1)
-	}
+	cmd.ExitOnError(rootCmd, err)
 }
