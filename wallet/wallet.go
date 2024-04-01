@@ -23,7 +23,7 @@ type Wallet struct {
 	wallet   *pwallet.Wallet
 }
 
-func Open(cfg *config.WalletConfig) IWallet {
+func Open(cfg *config.PhoenixTestNetWallet) IWallet {
 	if doesWalletExist(cfg.Path) {
 
 		wt, err := pwallet.Open(cfg.Path, true)

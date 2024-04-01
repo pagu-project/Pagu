@@ -18,10 +18,10 @@ type Server struct {
 	address  string
 	engine   *engine.BotEngine
 	grpc     *grpc.Server
-	cfg      config.GRPCConfig
+	cfg      config.GRPC
 }
 
-func NewServer(be *engine.BotEngine, cfg config.GRPCConfig) *Server {
+func NewServer(be *engine.BotEngine, cfg config.GRPC) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &Server{

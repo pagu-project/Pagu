@@ -27,7 +27,7 @@ func runCommand(parentCmd *cobra.Command) {
 		rpCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
-		log.InitGlobalLogger(config.LoggerConfig)
+		log.InitGlobalLogger(config.Logger)
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
 		rpCmd.ExitOnError(cmd, err)
@@ -35,8 +35,8 @@ func runCommand(parentCmd *cobra.Command) {
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBotCfg.Token,
-			config.DiscordBotCfg)
+		discordBot, err := discord.NewDiscordBot(botEngine, config.DiscordBot.Token,
+			config.DiscordBot)
 		rpCmd.ExitOnError(cmd, err)
 
 		err = discordBot.Start()

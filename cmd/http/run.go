@@ -27,7 +27,7 @@ func runCommand(parentCmd *cobra.Command) {
 		rpCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
-		log.InitGlobalLogger(config.LoggerConfig)
+		log.InitGlobalLogger(config.Logger)
 
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
@@ -36,7 +36,7 @@ func runCommand(parentCmd *cobra.Command) {
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		httpServer := http.NewHTTPServer(botEngine, config.HTTPConfig)
+		httpServer := http.NewHTTPServer(botEngine, config.HTTP)
 
 		err = httpServer.Start()
 		rpCmd.ExitOnError(cmd, err)
