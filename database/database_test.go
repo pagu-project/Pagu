@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -18,76 +19,32 @@ func setup(t *testing.T) *DB {
 	return db
 }
 
-func TestMember(t *testing.T) {
+func TestUserAndFaucet(t *testing.T) {
 	db := setup(t)
 
-	discordID := "123456789"
-	user := &DiscordUser{
-		DiscordID:      discordID,
-		DepositAddress: "pc1zrandomaddr",
-	}
-
-	t.Run("test add user", func(t *testing.T) {
-		err := db.AddUser(user)
-		require.NoError(t, err)
-	})
-
-	t.Run("test get not existing user", func(t *testing.T) {
-		u, err := db.GetUser("non-existing-member-id")
-		require.Error(t, err)
-		require.Nil(t, u)
-	})
-
-	t.Run("test get user", func(t *testing.T) {
-		u, err := db.GetUser(discordID)
-		require.NoError(t, err)
-
-		assert.Equal(t, user.DepositAddress, u.DepositAddress)
-		assert.Equal(t, user.DiscordID, u.DiscordID)
-	})
-}
-
-func TestHasUser(t *testing.T) {
-	db := setup(t)
-
-	err := db.AddUser(&DiscordUser{
-		DiscordID: "123456",
+	err := db.AddUser(&User{
+		ID: "123456789",
 	})
 	assert.NoError(t, err)
 
-	assert.True(t, db.HasUser("123456"))
-	assert.False(t, db.HasUser("654321"))
-}
+	u, err := db.GetUser("123456789")
+	assert.NoError(t, err)
+	assert.Equal(t, "123456789", u.ID)
 
-func TestDB_CreateOffer(t *testing.T) {
-	db := setup(t)
+	r := db.CanGetFaucet("123456789")
+	assert.True(t, r)
 
-	someDiscordId := "123456"
-	someAddr := "some-addr"
-	_ = db.AddUser(&DiscordUser{
-		DiscordID:      someDiscordId,
-		DepositAddress: someAddr,
+	err = db.AddFaucet(&Faucet{
+		Address: "tpc1zlymfcuxlgvvuud2q4zw0scllqn74d2f90hld6w",
+		Amount:  5,
+		UserID:  "123456789",
 	})
-
-	u, _ := db.GetUser(someDiscordId)
-
-	offer := &Offer{
-		TotalAmount: 10,
-		TotalPrice:  10,
-		UnitPrice:   1,
-		ChainType:   "mainnet",
-		Address:     "addr1",
-		DiscordUser: *u,
-	}
-	err := db.CreateOffer(offer)
-
 	assert.NoError(t, err)
 
-	var actual Offer
-	err = db.Preload("DiscordUser").First(&actual, 1).Error
-	assert.NoError(t, err)
+	r = db.CanGetFaucet("123456789")
+	assert.False(t, r)
 
-	assert.Equal(t, offer.ChainType, actual.ChainType)
-	assert.Equal(t, offer.Address, actual.Address)
-	assert.Equal(t, u.DepositAddress, offer.DiscordUser.DepositAddress)
+	u, err = db.GetUser("not-exist")
+	fmt.Println(u.ID)
+	assert.Error(t, err)
 }

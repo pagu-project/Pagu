@@ -9,6 +9,7 @@ import (
 	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/engine/command/blockchain"
 	"github.com/robopac-project/RoboPac/engine/command/network"
+	phoenixtestnet "github.com/robopac-project/RoboPac/engine/command/phoenix_testnet"
 	"github.com/robopac-project/RoboPac/log"
 	"github.com/robopac-project/RoboPac/wallet"
 )
@@ -20,8 +21,9 @@ type BotEngine struct {
 	clientMgr *client.Mgr
 	rootCmd   command.Command
 
-	blockchainCmd blockchain.Blockchain
-	networkCmd    network.Network
+	blockchainCmd     blockchain.Blockchain
+	networkCmd        network.Network
+	phoenixTestnetCmd phoenixtestnet.PhoenixTestnet
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -72,7 +74,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(cm, wal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
+func newBotEngine(cm *client.Mgr, w wallet.IWallet, db *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{
@@ -85,15 +87,17 @@ func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
-	bcCmd := blockchain.NewBlockchain(ctx, cm)
+	bcCmd := blockchain.NewBlockchain(cm)
+	ptCmd := phoenixtestnet.NewPhoenixTestnet(w, cm, *db)
 
 	return &BotEngine{
-		ctx:           ctx,
-		cancel:        cnl,
-		clientMgr:     cm,
-		rootCmd:       rootCmd,
-		networkCmd:    netCmd,
-		blockchainCmd: bcCmd,
+		ctx:               ctx,
+		cancel:            cnl,
+		clientMgr:         cm,
+		rootCmd:           rootCmd,
+		networkCmd:        netCmd,
+		blockchainCmd:     bcCmd,
+		phoenixTestnetCmd: ptCmd,
 	}
 }
 
@@ -104,6 +108,7 @@ func (be *BotEngine) Commands() []command.Command {
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.phoenixTestnetCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }

@@ -82,7 +82,7 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 	return res, nil // return transaction hash
 }
 
-func (w *Wallet) TransferTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
+func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (string, error) {
 	fee, err := w.wallet.CalculateFee(int64(amount), payload.TypeTransfer)
 	if err != nil {
 		return "", err
