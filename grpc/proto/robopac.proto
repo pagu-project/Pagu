@@ -10,6 +10,7 @@ service RoboPac {
 
 message ExecuteRequest {
     string command = 1;
+    string id = 2;
 }
 
 message ExecuteResponse {
