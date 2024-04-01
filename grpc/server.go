@@ -33,6 +33,7 @@ func NewServer(be *engine.BotEngine, cfg config.GRPCConfig) *Server {
 }
 
 func (s *Server) Start() error {
+	log.Info("Starting gRPC Server")
 	listener, err := net.Listen("tcp", s.cfg.Listen)
 	if err != nil {
 		return err
@@ -55,7 +56,7 @@ func (s *Server) startListening(listener net.Listener) {
 	s.address = listener.Addr().String()
 	s.grpc = grpcServer
 
-	log.Info("grpc started listening", "address", listener.Addr().String())
+	log.Info("gRPC Server Started Listening", "address", listener.Addr().String())
 	go func() {
 		if err := s.grpc.Serve(listener); err != nil {
 			log.Error("error on grpc serve", "error", err)
@@ -63,11 +64,14 @@ func (s *Server) startListening(listener net.Listener) {
 	}()
 }
 
-func (s *Server) Stop() {
+func (s *Server) Stop() error {
+	log.Info("Stopping gRPC Server", "addr", s.address)
+
 	s.cancel()
 
 	if s.grpc != nil {
 		s.grpc.Stop()
-		s.listener.Close()
 	}
+
+	return s.listener.Close()
 }

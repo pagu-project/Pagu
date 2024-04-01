@@ -20,6 +20,7 @@ type Config struct {
 	GRPCConfig    GRPCConfig
 	WalletConfig  WalletConfig
 	LoggerConfig  LoggerConfig
+	HTTPConfig    HTTPConfig
 }
 
 type WalletConfig struct {
@@ -36,6 +37,10 @@ type DiscordBotConfig struct {
 }
 
 type GRPCConfig struct {
+	Listen string
+}
+
+type HTTPConfig struct {
 	Listen string
 }
 
@@ -107,6 +112,9 @@ func Load(filePaths ...string) (*Config, error) {
 			MaxSize:    maxSize,
 			MaxBackups: maxBackups,
 			Compress:   compress,
+		},
+		HTTPConfig: HTTPConfig{
+			Listen: os.Getenv("HTTP_LISTEN"),
 		},
 	}
 

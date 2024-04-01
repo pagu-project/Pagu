@@ -7,6 +7,7 @@ import (
 
 	"github.com/pactus-project/pactus/crypto"
 	robopac "github.com/robopac-project/RoboPac"
+	rpCmd "github.com/robopac-project/RoboPac/cmd"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
 	"github.com/robopac-project/RoboPac/engine/command"
@@ -19,7 +20,7 @@ const PROMPT = "\n>> "
 func run(cmd *cobra.Command, args []string) {
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
 	config, err := config.Load(*envOpt)
-	ExitOnError(cmd, err)
+	rpCmd.ExitOnError(cmd, err)
 
 	log.InitGlobalLogger(config.LoggerConfig)
 
@@ -28,7 +29,7 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	botEngine, err := engine.NewBotEngine(config)
-	ExitOnError(cmd, err)
+	rpCmd.ExitOnError(cmd, err)
 
 	botEngine.RegisterAllCommands()
 	botEngine.Start()
@@ -63,12 +64,5 @@ func main() {
 	}
 
 	err := rootCmd.Execute()
-	ExitOnError(rootCmd, err)
-}
-
-func ExitOnError(cmd *cobra.Command, err error) {
-	if err != nil {
-		cmd.PrintErr(err.Error())
-		os.Exit(1)
-	}
+	rpCmd.ExitOnError(rootCmd, err)
 }
