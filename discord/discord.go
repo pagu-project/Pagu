@@ -15,10 +15,10 @@ import (
 type DiscordBot struct {
 	Session *discordgo.Session
 	engine  *engine.BotEngine
-	cfg     config.DiscordBotConfig
+	cfg     config.DiscordBot
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.DiscordBotConfig) (*DiscordBot, error) {
+func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.DiscordBot) (*DiscordBot, error) {
 	s, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err

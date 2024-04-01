@@ -30,7 +30,7 @@ type SubLogger struct {
 	name   string
 }
 
-func InitGlobalLogger(config config.LoggerConfig) {
+func InitGlobalLogger(config config.Logger) {
 	if globalInst == nil {
 		writers := []io.Writer{}
 

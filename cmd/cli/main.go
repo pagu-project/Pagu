@@ -22,7 +22,7 @@ func run(cmd *cobra.Command, args []string) {
 	config, err := config.Load(*envOpt)
 	rpCmd.ExitOnError(cmd, err)
 
-	log.InitGlobalLogger(config.LoggerConfig)
+	log.InitGlobalLogger(config.Logger)
 
 	if config.Network == "Localnet" {
 		crypto.AddressHRP = "tpc"

@@ -14,14 +14,14 @@ import (
 type HTTPServer struct {
 	handler HTTPHandler
 	eServer *echo.Echo
-	cfg     config.HTTPConfig
+	cfg     config.HTTP
 }
 
 type HTTPHandler struct {
 	engine *engine.BotEngine
 }
 
-func NewHTTPServer(be *engine.BotEngine, cfg config.HTTPConfig) HTTPServer {
+func NewHTTPServer(be *engine.BotEngine, cfg config.HTTP) HTTPServer {
 	return HTTPServer{
 		handler: HTTPHandler{
 			engine: be,
