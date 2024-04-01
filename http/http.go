@@ -32,6 +32,7 @@ func NewHTTPServer(be *engine.BotEngine, cfg config.HTTPConfig) HTTPServer {
 }
 
 func (hs *HTTPServer) Start() error {
+	log.Info("Starting HTTP Server", "listen", hs.cfg.Listen)
 	hs.eServer.POST("/run", hs.handler.Run)
 	return hs.eServer.Start(hs.cfg.Listen)
 }

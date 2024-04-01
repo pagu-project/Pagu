@@ -142,7 +142,7 @@ func (cmd *Command) AddHelpSubCommand() {
 	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord},
+		AppIDs: AllAppIDs(),
 		Handler: func(_ Command, _ AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
