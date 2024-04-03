@@ -11,15 +11,16 @@ import (
 )
 
 type Config struct {
-	Network       string
-	NetworkNodes  []string
-	LocalNode     string
-	DataBasePath  string
-	AuthIDs       []string
-	DiscordBotCfg DiscordBotConfig
-	GRPCConfig    GRPCConfig
-	WalletConfig  WalletConfig
-	LoggerConfig  LoggerConfig
+	Network        string
+	NetworkNodes   []string
+	LocalNode      string
+	DataBasePath   string
+	AuthIDs        []string
+	DiscordBotCfg  DiscordBotConfig
+	GRPCConfig     GRPCConfig
+	WalletConfig   WalletConfig
+	LoggerConfig   LoggerConfig
+	TelegramConfig TelegramConfig
 }
 
 type WalletConfig struct {
@@ -46,6 +47,11 @@ type LoggerConfig struct {
 	MaxSize    int
 	MaxBackups int
 	Compress   bool
+}
+
+type TelegramConfig struct {
+	BotToken string
+	ChatID   string
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -107,6 +113,10 @@ func Load(filePaths ...string) (*Config, error) {
 			MaxSize:    maxSize,
 			MaxBackups: maxBackups,
 			Compress:   compress,
+		},
+		TelegramConfig: TelegramConfig{
+			BotToken: os.Getenv("TGBOT_TOKEN"),
+			ChatID:   os.Getenv("TGCHAT_ID"),
 		},
 	}
 

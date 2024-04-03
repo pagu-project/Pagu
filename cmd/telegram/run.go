@@ -22,11 +22,11 @@ func RunCommand(parentCmd *cobra.Command) {
 	parentCmd.AddCommand(run)
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
-		// load configuration.
+		// Load configuration.
 		config, err := config.Load()
 		ExitOnError(cmd, err)
 
-		// starting botEngine.
+		// Starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
 		ExitOnError(cmd, err)
 
@@ -35,20 +35,26 @@ func RunCommand(parentCmd *cobra.Command) {
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		chatID, err := strconv.ParseInt(config.TelegramBotCfg.ChatId, 10, 64)
+		chatID, err := strconv.ParseInt(config.TelegramConfig.ChatID, 10, 64)
 		if err != nil {
 			log.Error("Failed to parse ChatId:", err)
 			return
 		}
 
-		telegramBot, err := telegram.NewTelegramBot(botEngine, config.TelegramBotCfg.Token, chatID, config) //
+		telegramBot, err := telegram.NewTelegramBot(botEngine, config.TelegramConfig.BotToken, chatID, config)
 		ExitOnError(cmd, err)
+
+		// register command handlers.
+		telegramBot.RegisterStartCommandHandler()
+		telegramBot.RegisterBotEngineCommandHandler()
 
 		err = telegramBot.Start()
 		ExitOnError(cmd, err)
 
-		//start command handler
-		telegramBot.Bot.Handle("/start", telegram.StartCommandHandler)
+		log.Info("Telegram Bot started successfully")
+
+		// Start sending periodic status updates in a separate goroutine
+		// go telegramBot.UpdateStatusInfo()
 
 		// Set up signal handling.
 		c := make(chan os.Signal, 1)

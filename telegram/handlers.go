@@ -5,48 +5,68 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/PaulSonOfLars/gotgbot/v2"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/log"
-	tele "gopkg.in/telebot.v3"
 )
 
-func (bot *TelegramBot) commandHandler(c tele.Context) error {
-	// Ensure commands are only processed in the specified group chat
-	if c.Chat().ID != bot.ChatID {
-		log.Info("Unauthorized access attempt from chat ID:", c.Chat().ID)
-		return nil // Ignore commands from unauthorized chats
-	}
+func (bot *TelegramBot) RegisterStartCommandHandler() {
+	bot.RegisterCommandHandler("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+		// log.Info("Start command received")
 
-	// Extract the command text
-	fullCommand := c.Message().Text
-	log.Info(fmt.Sprintf("Received command from UserID %d in ChatID %d: '%s'", c.Sender().ID, c.Chat().ID, fullCommand))
+		chat := ctx.Update.Message.GetChat()
+		chatID := chat.Id
 
-	// Process the command
-	commandParts := strings.Split(strings.TrimPrefix(fullCommand, "/"), " ")
-	if len(commandParts) == 0 {
-		return c.Send("Invalid command format.")
-	}
+		tg_link := "https://t.me/pactuschat"
+		welcomeMessage := fmt.Sprintf("Hello @%s, this is RoboPac. Kindly use /help command to learn how to interact with the bot. Join our telegram chat %s", chat.Username, tg_link)
+		_, err := b.SendMessage(chatID, welcomeMessage, nil)
+		if err != nil {
+			// Log any error encountered during message sending
+			// log.Info("Failed to send start message: %v", err)
+			return err
+		}
 
-	// Send command to the bot engine and get the response
-	res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(c.Sender().ID, 10), commandParts)
-	if res.Error != "" {
-		log.Error("Failed to execute command:", "error", res.Error)
-		return c.Send("An error occurred while processing your request.")
-	}
-
-	// Send the response back to the user
-	if err := c.Send(res.Message); err != nil {
-		log.Error("Failed to send response:", "error", err)
-		return err
-	}
-
-	log.Info("Successfully processed command:", "response", res.Message)
-	return nil
+		// log.Info("Start message sent successfully")
+		return nil
+	})
 }
 
-func StartCommandHandler(c tele.Context) error {
-	tg_link := "https://t.me/pactuschat"
-	chat := c.Chat()
-	welcomeMessage := fmt.Sprintf("Hello @%s, you're interacting with robopac, Pactus's helper bot. Please join the Pactus group chat at %s and use commands there.", chat.Username, tg_link)
-	return c.Send(welcomeMessage)
+func (bot *TelegramBot) RegisterBotEngineCommandHandler() {
+	// Iterate over each command provided by the bot engine
+	for _, cmd := range bot.BotEngine.Commands() {
+		// Register a handler for each command
+		bot.RegisterCommandHandler(cmd.Name, func(b *gotgbot.Bot, ctx *ext.Context) error {
+			// Extract the entire command, including arguments
+			fullCommand := ctx.Message.Text
+
+			// Remove the '/' prefix if present
+			fullCommand = strings.TrimPrefix(fullCommand, "/")
+			log.Info(fmt.Sprintf("Received command from UserID %d: '%s'", ctx.EffectiveSender.User.Id, fullCommand))
+
+			// Split the command into an array
+			commandParts := strings.Split(fullCommand, " ")
+			log.Info(fmt.Sprintf("Processing command parts: %v", commandParts))
+
+			// Pass the array to the bot engine
+			res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), commandParts)
+			var err error // Declare err variable
+			if res.Error != "" {
+				log.Error("Failed to execute command:", res.Error)
+				_, err = b.SendMessage(ctx.EffectiveChat.Id, "An error occurred while processing your request.", nil)
+				if err != nil {
+					log.Error("Failed to send error response:", err)
+				}
+				return nil
+			}
+
+			// Send the response back to the user
+			_, err = b.SendMessage(ctx.EffectiveChat.Id, res.Message, nil)
+			if err != nil {
+				log.Error("Failed to send response:", err)
+			}
+
+			return nil
+		})
+	}
 }
