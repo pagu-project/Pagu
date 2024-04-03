@@ -8,7 +8,7 @@ import (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac-grpc",
+		Use:     "robopac-http",
 		Version: robopac.StringVersion(),
 	}
 

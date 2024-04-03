@@ -5,6 +5,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pactus-project/pactus/util"
+	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
 	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/log"
@@ -12,21 +13,21 @@ import (
 )
 
 type DiscordBot struct {
-	Session   *discordgo.Session
-	BotEngine *engine.BotEngine
-	GuildID   string
+	Session *discordgo.Session
+	engine  *engine.BotEngine
+	cfg     config.DiscordBot
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, token, guildID string) (*DiscordBot, error) {
+func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.DiscordBot) (*DiscordBot, error) {
 	s, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err
 	}
 
 	return &DiscordBot{
-		Session:   s,
-		BotEngine: botEngine,
-		GuildID:   guildID,
+		Session: s,
+		engine:  botEngine,
+		cfg:     cfg,
 	}, nil
 }
 
@@ -43,7 +44,7 @@ func (bot *DiscordBot) Start() error {
 }
 
 func (bot *DiscordBot) deleteAllCommands() {
-	cmdsServer, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, bot.GuildID)
+	cmdsServer, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, bot.cfg.GuildID)
 	cmdsGlobal, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, "")
 	cmds := append(cmdsServer, cmdsGlobal...) //nolint
 
@@ -62,7 +63,7 @@ func (bot *DiscordBot) registerCommands() error {
 		bot.commandHandler(bot, s, i)
 	})
 
-	beCmds := bot.BotEngine.Commands()
+	beCmds := bot.engine.Commands()
 	for _, beCmd := range beCmds {
 		if !beCmd.HasAppId(command.AppIdDiscord) {
 			continue
@@ -93,7 +94,7 @@ func (bot *DiscordBot) registerCommands() error {
 }
 
 func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	if i.GuildID != bot.GuildID {
+	if i.GuildID != bot.cfg.GuildID {
 		bot.respondErrMsg("Please send messages on server chat", s, i)
 		return
 	}
@@ -107,7 +108,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		beInput = append(beInput, opt.StringValue())
 	}
 
-	res := db.BotEngine.Run(command.AppIdDiscord, i.User.ID, beInput)
+	res := db.engine.Run(command.AppIdDiscord, i.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
 }
@@ -157,7 +158,7 @@ func (db *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.S
 func (db *DiscordBot) UpdateStatusInfo() {
 	log.Info("info status started")
 	for {
-		ns, err := db.BotEngine.NetworkStatus()
+		ns, err := db.engine.NetworkStatus()
 		if err != nil {
 			continue
 		}
@@ -206,8 +207,8 @@ func (db *DiscordBot) UpdateStatusInfo() {
 	}
 }
 
-func (db *DiscordBot) Stop() {
-	log.Info("shutting down Discord Bot...")
+func (db *DiscordBot) Stop() error {
+	log.Info("Stopping Discord Bot")
 
-	_ = db.Session.Close()
+	return db.Session.Close()
 }

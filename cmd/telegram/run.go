@@ -30,18 +30,18 @@ func RunCommand(parentCmd *cobra.Command) {
 		botEngine, err := engine.NewBotEngine(config)
 		ExitOnError(cmd, err)
 
-		log.InitGlobalLogger(config.LoggerConfig)
+		log.InitGlobalLogger(config.Logger)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		chatID, err := strconv.ParseInt(config.TelegramConfig.ChatID, 10, 64)
+		chatID, err := strconv.ParseInt(config.Telegram.ChatID, 10, 64)
 		if err != nil {
 			log.Error("Failed to parse ChatId:", err)
 			return
 		}
 
-		telegramBot, err := telegram.NewTelegramBot(botEngine, config.TelegramConfig.BotToken, chatID, config)
+		telegramBot, err := telegram.NewTelegramBot(botEngine, config.Telegram.BotToken, chatID, config)
 		ExitOnError(cmd, err)
 
 		// register command handlers.

@@ -42,11 +42,11 @@ func (bot *TelegramBot) RegisterBotEngineCommandHandler() {
 
 			// Remove the '/' prefix if present
 			fullCommand = strings.TrimPrefix(fullCommand, "/")
-			log.Info(fmt.Sprintf("Received command from UserID %d: '%s'", ctx.EffectiveSender.User.Id, fullCommand))
+			// log.Info(fmt.Sprintf("Received command from UserID %d: '%s'", ctx.EffectiveSender.User.Id, fullCommand))
 
 			// Split the command into an array
 			commandParts := strings.Split(fullCommand, " ")
-			log.Info(fmt.Sprintf("Processing command parts: %v", commandParts))
+			// log.Info(fmt.Sprintf("Processing command parts: %v", commandParts))
 
 			// Pass the array to the bot engine
 			res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), commandParts)

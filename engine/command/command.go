@@ -12,6 +12,7 @@ const (
 	AppIdDiscord  AppID = 2
 	AppIdgRPC     AppID = 3
 	AppIdTelegram AppID = 4
+	AppIdHTTP     AppID = 5
 )
 
 func (appID AppID) String() string {
@@ -27,6 +28,16 @@ func (appID AppID) String() string {
 	}
 
 	return ""
+}
+
+func AllAppIDs() []AppID {
+	return []AppID{
+		AppIdCLI,
+		AppIdDiscord,
+		AppIdgRPC,
+		AppIdHTTP,
+		AppIdTelegram,
+	}
 }
 
 type Args struct {

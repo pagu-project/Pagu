@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	NetworkCommandName       = "network"
-	NodeInfoCommandName      = "node-info"
-	NetworkStatusCommandName = "status"
-	NetworkHealthCommandName = "health"
-	NetworkHelpCommandName   = "help"
+	NetworkCommandName         = "network"
+	NetworkNodeInfoCommandName = "node-info"
+	NetworkStatusCommandName   = "status"
+	NetworkHealthCommandName   = "health"
+	NetworkHelpCommandName     = "help"
 )
 
 type Network struct {
@@ -66,7 +66,7 @@ type NetStatus struct {
 
 func (n *Network) GetCommand() command.Command {
 	subCmdNodeInfo := command.Command{
-		Name: NodeInfoCommandName,
+		Name: NetworkNodeInfoCommandName,
 		Desc: "View the information of a node",
 		Help: "Provide your validator address on the specific node to get the validator and node info",
 		Args: []command.Args{
@@ -77,7 +77,7 @@ func (n *Network) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
+		AppIDs:      command.AllAppIDs(),
 		Handler:     n.nodeInfoHandler,
 	}
 
@@ -97,7 +97,7 @@ func (n *Network) GetCommand() command.Command {
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
+		AppIDs:      command.AllAppIDs(),
 		Handler:     n.networkStatusHandler,
 	}
 
@@ -106,8 +106,8 @@ func (n *Network) GetCommand() command.Command {
 		Desc:        "Network related commands",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
-		SubCommands: []command.Command{subCmdHealth, subCmdStatus, subCmdNodeInfo},
+		AppIDs:      command.AllAppIDs(),
+		SubCommands: make([]command.Command, 3),
 		Handler:     nil,
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/engine/command/blockchain"
 	"github.com/robopac-project/RoboPac/engine/command/network"
+	phoenixtestnet "github.com/robopac-project/RoboPac/engine/command/phoenix_testnet"
 	"github.com/robopac-project/RoboPac/log"
 	"github.com/robopac-project/RoboPac/wallet"
 )
@@ -17,16 +18,19 @@ type BotEngine struct {
 	ctx    context.Context //nolint
 	cancel context.CancelFunc
 
-	clientMgr *client.Mgr
-	rootCmd   command.Command
+	clientMgr        *client.Mgr
+	phoenixClientMgr *client.Mgr
+	rootCmd          command.Command
 
-	blockchainCmd blockchain.Blockchain
-	networkCmd    network.Network
+	blockchainCmd     blockchain.Blockchain
+	networkCmd        network.Network
+	phoenixTestnetCmd phoenixtestnet.PhoenixTestnet
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
+	// ? adding main network client manager.
 	cm := client.NewClientMgr(ctx)
 
 	localClient, err := client.NewClient(cfg.LocalNode)
@@ -44,13 +48,23 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		}
 		cm.AddClient(c)
 	}
-	cm.Start()
 
+	// ? adding phoenix test network client manager.
+	phoenixTestnetCm := client.NewClientMgr(ctx)
+	for _, tnn := range cfg.Phoenix.NetworkNodes {
+		c, err := client.NewClient(tnn)
+		if err != nil {
+			log.Error("can't add new network node client", "err", err, "addr", tnn)
+		}
+
+		phoenixTestnetCm.AddClient(c)
+	}
+
+	// ? opening wallet if it's enabled.
 	var wal wallet.IWallet
-
-	if cfg.WalletConfig.Enable {
+	if cfg.PTWallet.Enable {
 		// load or create wallet.
-		wal = wallet.Open(&cfg.WalletConfig)
+		wal = wallet.Open(&cfg.PTWallet)
 		if wal == nil {
 			cancel()
 			return nil, WalletError{
@@ -61,7 +75,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		log.Info("wallet opened successfully", "address", wal.Address())
 	}
 
-	// load database
+	// ? loading database.
 	db, err := database.NewDB(cfg.DataBasePath)
 	if err != nil {
 		cancel()
@@ -69,10 +83,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	return newBotEngine(cm, wal, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, phoenixTestnetCm, wal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
+func newBotEngine(cm, ptcm *client.Mgr, w wallet.IWallet, db *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{
@@ -80,20 +94,23 @@ func newBotEngine(cm *client.Mgr, _ wallet.IWallet, _ *database.DB, _ []string,
 		Name:        "robopac",
 		Desc:        "RoboPAC",
 		Help:        "RoboPAC Help",
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
-		SubCommands: []command.Command{},
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord},
+		SubCommands: make([]command.Command, 2),
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
-	bcCmd := blockchain.NewBlockchain(ctx, cm)
+	bcCmd := blockchain.NewBlockchain(cm)
+	ptCmd := phoenixtestnet.NewPhoenixTestnet(w, ptcm, *db)
 
 	return &BotEngine{
-		ctx:           ctx,
-		cancel:        cnl,
-		clientMgr:     cm,
-		rootCmd:       rootCmd,
-		networkCmd:    netCmd,
-		blockchainCmd: bcCmd,
+		ctx:               ctx,
+		cancel:            cnl,
+		clientMgr:         cm,
+		rootCmd:           rootCmd,
+		networkCmd:        netCmd,
+		blockchainCmd:     bcCmd,
+		phoenixTestnetCmd: ptCmd,
+		phoenixClientMgr:  ptcm,
 	}
 }
 
@@ -104,6 +121,7 @@ func (be *BotEngine) Commands() []command.Command {
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.phoenixTestnetCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
@@ -194,12 +212,16 @@ func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
 }
 
 func (be *BotEngine) Stop() {
-	log.Info("shutting bot engine down...")
+	log.Info("Stopping the Bot Engine")
 
 	be.cancel()
 	be.clientMgr.Stop()
+	be.phoenixClientMgr.Stop()
 }
 
 func (be *BotEngine) Start() {
-	log.Info("starting the bot engine...")
+	log.Info("Starting the Bot Engine")
+
+	be.clientMgr.Start()
+	be.phoenixClientMgr.Start()
 }

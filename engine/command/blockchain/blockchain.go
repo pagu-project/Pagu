@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -19,15 +18,13 @@ const (
 )
 
 type Blockchain struct {
-	ctx       context.Context
 	clientMgr *client.Mgr
 }
 
-func NewBlockchain(ctx context.Context,
+func NewBlockchain(
 	clientMgr *client.Mgr,
 ) Blockchain {
 	return Blockchain{
-		ctx:       ctx,
 		clientMgr: clientMgr,
 	}
 }
@@ -50,7 +47,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
+		AppIDs:      command.AllAppIDs(),
 		Handler:     bc.calcRewardHandler,
 	}
 
@@ -66,7 +63,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
+		AppIDs:      command.AllAppIDs(),
 		Handler:     bc.calcFeeHandler,
 	}
 
@@ -75,8 +72,8 @@ func (bc *Blockchain) GetCommand() command.Command {
 		Desc:        "Blockchain information and tools",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC, command.AppIdTelegram},
-		SubCommands: []command.Command{subCmdCalcReward},
+		AppIDs:      command.AllAppIDs(),
+		SubCommands: make([]command.Command, 2),
 		Handler:     nil,
 	}
 

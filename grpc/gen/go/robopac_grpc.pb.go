@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RoboPacClient interface {
-	Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error)
+	Run(ctx context.Context, in *RunRequest, opts ...grpc.CallOption) (*RunResponse, error)
 }
 
 type roboPacClient struct {
@@ -33,9 +33,9 @@ func NewRoboPacClient(cc grpc.ClientConnInterface) RoboPacClient {
 	return &roboPacClient{cc}
 }
 
-func (c *roboPacClient) Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error) {
-	out := new(ExecuteResponse)
-	err := c.cc.Invoke(ctx, "/robopac.RoboPac/Execute", in, out, opts...)
+func (c *roboPacClient) Run(ctx context.Context, in *RunRequest, opts ...grpc.CallOption) (*RunResponse, error) {
+	out := new(RunResponse)
+	err := c.cc.Invoke(ctx, "/robopac.RoboPac/Run", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,15 +46,15 @@ func (c *roboPacClient) Execute(ctx context.Context, in *ExecuteRequest, opts ..
 // All implementations should embed UnimplementedRoboPacServer
 // for forward compatibility
 type RoboPacServer interface {
-	Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error)
+	Run(context.Context, *RunRequest) (*RunResponse, error)
 }
 
 // UnimplementedRoboPacServer should be embedded to have forward compatible implementations.
 type UnimplementedRoboPacServer struct {
 }
 
-func (UnimplementedRoboPacServer) Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
+func (UnimplementedRoboPacServer) Run(context.Context, *RunRequest) (*RunResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
 }
 
 // UnsafeRoboPacServer may be embedded to opt out of forward compatibility for this service.
@@ -68,20 +68,20 @@ func RegisterRoboPacServer(s grpc.ServiceRegistrar, srv RoboPacServer) {
 	s.RegisterService(&RoboPac_ServiceDesc, srv)
 }
 
-func _RoboPac_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ExecuteRequest)
+func _RoboPac_Run_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RunRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RoboPacServer).Execute(ctx, in)
+		return srv.(RoboPacServer).Run(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/robopac.RoboPac/Execute",
+		FullMethod: "/robopac.RoboPac/Run",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoboPacServer).Execute(ctx, req.(*ExecuteRequest))
+		return srv.(RoboPacServer).Run(ctx, req.(*RunRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -94,8 +94,8 @@ var RoboPac_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RoboPacServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Execute",
-			Handler:    _RoboPac_Execute_Handler,
+			MethodName: "Run",
+			Handler:    _RoboPac_Run_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -5,13 +5,14 @@ package robopac;
 option go_package = "github.com/robopac-project/robopac/grpc/robopac";
 
 service RoboPac {
-  rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+  rpc Run(RunRequest) returns (RunResponse);
 }
 
-message ExecuteRequest {
+message RunRequest {
     string command = 1;
+    string id = 2;
 }
 
-message ExecuteResponse {
+message RunResponse {
     string response = 1;
 }
