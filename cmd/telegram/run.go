@@ -46,15 +46,11 @@ func RunCommand(parentCmd *cobra.Command) {
 
 		// register command handlers.
 		telegramBot.RegisterStartCommandHandler()
-		telegramBot.RegisterBotEngineCommandHandler()
 
 		err = telegramBot.Start()
 		ExitOnError(cmd, err)
 
 		log.Info("Telegram Bot started successfully")
-
-		// Start sending periodic status updates in a separate goroutine
-		// go telegramBot.UpdateStatusInfo()
 
 		// Set up signal handling.
 		c := make(chan os.Signal, 1)
