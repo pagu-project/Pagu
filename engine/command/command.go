@@ -25,6 +25,8 @@ func (appID AppID) String() string {
 		return "gRPC"
 	case AppIdTelegram:
 		return "Telegram"
+	case AppIdHTTP:
+		return "HTTP"
 	}
 
 	return ""
