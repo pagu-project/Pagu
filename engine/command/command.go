@@ -143,12 +143,11 @@ func (cmd *Command) AddSubCommand(subCmd Command) {
 }
 
 func (cmd *Command) AddHelpSubCommand() {
-	allAppIDs := AllAppIDs()
 
 	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
-		AppIDs: allAppIDs,
+		AppIDs: AllAppIDs(),
 		Handler: func(_ Command, _ AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},

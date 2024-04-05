@@ -36,13 +36,13 @@ func RunCommand(parentCmd *cobra.Command) {
 		botEngine.Start()
 
 		chatID := config.Telegram.ChatID
-		tgLink := config.Telegram.TgLink
+		groupLink := config.Telegram.GroupLink
 
 		telegramBot, err := telegram.NewTelegramBot(botEngine, config.Telegram.BotToken, chatID, config)
 		rpCmd.ExitOnError(cmd, err)
 
 		// register command handlers.
-		telegramBot.RegisterStartCommandHandler(tgLink)
+		telegramBot.RegisterStartCommandHandler(groupLink)
 
 		err = telegramBot.Start()
 		rpCmd.ExitOnError(cmd, err)

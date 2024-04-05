@@ -61,9 +61,9 @@ type Logger struct {
 }
 
 type Telegram struct {
-	BotToken string
-	ChatID   int64
-	TgLink   string
+	BotToken  string
+	ChatID    int64
+	GroupLink string
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -103,9 +103,9 @@ func Load(filePaths ...string) (*Config, error) {
 
 	targets := strings.Split(os.Getenv("LOG_TARGETS"), ",")
 
-	chatID, err := strconv.ParseInt(os.Getenv("ChatID"), 10, 64)
+	chatID, err := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse ChatID: %w", err)
+		return nil, fmt.Errorf("failed to parse GroupLink: %w", err)
 	}
 
 	// Fetch config values from environment variables.
@@ -145,9 +145,9 @@ func Load(filePaths ...string) (*Config, error) {
 			FaucetAmount: uint(faucetAmount),
 		},
 		Telegram: Telegram{
-			BotToken: os.Getenv("BotToken"),
-			ChatID:   chatID,
-			TgLink:   os.Getenv("tg_link"),
+			BotToken:  os.Getenv("TELEGRAM_BOT_TOKEN"),
+			ChatID:    chatID,
+			GroupLink: os.Getenv("TELEGRAM_GROUP_LINK"),
 		},
 	}
 
