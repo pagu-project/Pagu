@@ -48,6 +48,7 @@ build-dc:
 
 build-grpc:
 	go build -o build/robopac-grpc ./cmd/grpc
+	
 build-tg:
 	go build -o build/robopac-telegram ./cmd/telegram
 

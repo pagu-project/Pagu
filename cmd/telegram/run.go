@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
+	rpCmd "github.com/robopac-project/RoboPac/cmd"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
 	"github.com/robopac-project/RoboPac/log"
@@ -24,33 +24,28 @@ func RunCommand(parentCmd *cobra.Command) {
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// Load configuration.
 		config, err := config.Load()
-		ExitOnError(cmd, err)
+		rpCmd.ExitOnError(cmd, err)
 
 		// Starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
-		ExitOnError(cmd, err)
+		rpCmd.ExitOnError(cmd, err)
 
 		log.InitGlobalLogger(config.Logger)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		chatID, err := strconv.ParseInt(config.Telegram.ChatID, 10, 64)
-		if err != nil {
-			log.Error("Failed to parse ChatId:", err)
-			return
-		}
+		chatID := config.Telegram.ChatID
+		tgLink := config.Telegram.TgLink
 
 		telegramBot, err := telegram.NewTelegramBot(botEngine, config.Telegram.BotToken, chatID, config)
-		ExitOnError(cmd, err)
+		rpCmd.ExitOnError(cmd, err)
 
 		// register command handlers.
-		telegramBot.RegisterStartCommandHandler()
+		telegramBot.RegisterStartCommandHandler(tgLink)
 
 		err = telegramBot.Start()
-		ExitOnError(cmd, err)
-
-		log.Info("Telegram Bot started successfully")
+		rpCmd.ExitOnError(cmd, err)
 
 		// Set up signal handling.
 		c := make(chan os.Signal, 1)

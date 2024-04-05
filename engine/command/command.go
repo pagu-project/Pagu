@@ -11,8 +11,8 @@ const (
 	AppIdCLI      AppID = 1
 	AppIdDiscord  AppID = 2
 	AppIdgRPC     AppID = 3
-	AppIdTelegram AppID = 4
-	AppIdHTTP     AppID = 5
+	AppIdHTTP     AppID = 4
+	AppIdTelegram AppID = 5
 )
 
 func (appID AppID) String() string {
@@ -23,10 +23,10 @@ func (appID AppID) String() string {
 		return "Discord"
 	case AppIdgRPC:
 		return "gRPC"
-	case AppIdTelegram:
-		return "Telegram"
 	case AppIdHTTP:
 		return "HTTP"
+	case AppIdTelegram:
+		return "Telegram"
 	}
 
 	return ""
@@ -143,10 +143,12 @@ func (cmd *Command) AddSubCommand(subCmd Command) {
 }
 
 func (cmd *Command) AddHelpSubCommand() {
+	allAppIDs := AllAppIDs()
+
 	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
-		AppIDs: []AppID{AppIdCLI, AppIdDiscord, AppIdTelegram},
+		AppIDs: allAppIDs,
 		Handler: func(_ Command, _ AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},

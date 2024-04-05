@@ -14,13 +14,14 @@ import (
 )
 
 type TelegramBot struct {
-	BotEngine       *engine.BotEngine
-	ChatID          int64
-	BotInstance     *gotgbot.Bot
-	Config          *config.Config
+	botEngine       *engine.BotEngine
+	chatID          int64
+	botInstance     *gotgbot.Bot
+	config          *config.Config
 	commandHandlers map[string]ext.Handler
 	ctx             context.Context
 	cancel          context.CancelFunc
+	updater         *ext.Updater
 }
 
 func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, config *config.Config) (*TelegramBot, error) {
@@ -35,10 +36,10 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 	commandHandlers := make(map[string]ext.Handler)
 
 	return &TelegramBot{
-		BotEngine:       botEngine,
-		ChatID:          chatID,
-		BotInstance:     bot,
-		Config:          config,
+		botEngine:       botEngine,
+		chatID:          chatID,
+		botInstance:     bot,
+		config:          config,
 		commandHandlers: commandHandlers,
 		ctx:             ctx,
 		cancel:          cancel,
@@ -64,13 +65,17 @@ func (bot *TelegramBot) Start() error {
 
 	updater := ext.NewUpdater(dispatcher, nil)
 
+	bot.updater = updater
+
 	go func() {
 		log.Info("Starting polling for updates...")
-		if err := updater.StartPolling(bot.BotInstance, nil); err != nil {
+		if err := updater.StartPolling(bot.botInstance, nil); err != nil {
 			log.Error("Failed to start polling:", err)
 			bot.cancel()
 		}
 	}()
+
+	log.Info("Telegram Bot started successfully")
 
 	return nil
 }
@@ -93,7 +98,7 @@ func (bot *TelegramBot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		messageParts := strings.Split(fullMessage, " ")
 
 		// Pass the array to the bot engine.
-		res := bot.BotEngine.Run(command.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
+		res := bot.botEngine.Run(command.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
 
 		// Check if the command execution resulted in an error.
 		if res.Error != "" {
@@ -129,4 +134,11 @@ func (bot *TelegramBot) GetName() string {
 func (bot *TelegramBot) Stop() {
 	log.Info("Shutting down Telegram Bot")
 	bot.cancel()
+
+	if bot.updater != nil {
+		log.Info("Stopping polling for updates...")
+		if err := bot.updater.Stop(); err != nil {
+			log.Error("Failed to stop polling:", err)
+		}
+	}
 }
