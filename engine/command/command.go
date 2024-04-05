@@ -143,7 +143,6 @@ func (cmd *Command) AddSubCommand(subCmd Command) {
 }
 
 func (cmd *Command) AddHelpSubCommand() {
-
 	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
