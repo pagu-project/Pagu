@@ -22,6 +22,7 @@ type Config struct {
 	Logger       Logger
 	HTTP         HTTP
 	Phoenix      PhoenixNetwork
+	Telegram     Telegram
 }
 
 type PhoenixTestNetWallet struct {
@@ -57,6 +58,12 @@ type Logger struct {
 	MaxSize    int
 	MaxBackups int
 	Compress   bool
+}
+
+type Telegram struct {
+	BotToken  string
+	ChatID    int64
+	GroupLink string
 }
 
 func Load(filePaths ...string) (*Config, error) {
@@ -96,6 +103,11 @@ func Load(filePaths ...string) (*Config, error) {
 
 	targets := strings.Split(os.Getenv("LOG_TARGETS"), ",")
 
+	chatID, err := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse GroupLink: %w", err)
+	}
+
 	// Fetch config values from environment variables.
 	cfg := &Config{
 		Network: os.Getenv("NETWORK"),
@@ -131,6 +143,11 @@ func Load(filePaths ...string) (*Config, error) {
 		Phoenix: PhoenixNetwork{
 			NetworkNodes: strings.Split(os.Getenv("PHOENIX_NETWORK_NODES"), ","),
 			FaucetAmount: uint(faucetAmount),
+		},
+		Telegram: Telegram{
+			BotToken:  os.Getenv("TELEGRAM_BOT_TOKEN"),
+			ChatID:    chatID,
+			GroupLink: os.Getenv("TELEGRAM_GROUP_LINK"),
 		},
 	}
 

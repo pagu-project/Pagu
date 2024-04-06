@@ -3,8 +3,10 @@ module github.com/robopac-project/RoboPac
 go 1.21.1
 
 require (
+	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.25
 	github.com/glebarez/sqlite v1.10.0
 	github.com/joho/godotenv v1.5.1
+	github.com/labstack/echo/v4 v4.11.4
 	github.com/pactus-project/pactus v0.20.1-0.20240123172127-c5fe20fc3942
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
@@ -53,7 +55,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kilic/bls12-381 v0.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/labstack/echo/v4 v4.11.4
 	github.com/libp2p/go-libp2p v0.32.2
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

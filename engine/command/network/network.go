@@ -87,7 +87,7 @@ func (n *Network) GetCommand() command.Command {
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdgRPC},
+		AppIDs:      command.AllAppIDs(),
 		Handler:     n.networkHealthHandler,
 	}
 

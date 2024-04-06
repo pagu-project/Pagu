@@ -94,7 +94,7 @@ func newBotEngine(cm, ptcm *client.Mgr, w wallet.IWallet, db *database.DB, _ []s
 		Name:        "robopac",
 		Desc:        "RoboPAC",
 		Help:        "RoboPAC Help",
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
 		SubCommands: make([]command.Command, 2),
 	}
 
