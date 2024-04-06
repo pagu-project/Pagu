@@ -8,11 +8,11 @@ import (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac-grpc",
+		Use:     "robopac-telegram",
 		Version: robopac.StringVersion(),
 	}
 
-	runCommand(rootCmd)
+	RunCommand(rootCmd)
 
 	err := rootCmd.Execute()
 	cmd.ExitOnError(rootCmd, err)

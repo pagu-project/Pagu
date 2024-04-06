@@ -18,15 +18,15 @@ func newRoboPacServer(server *Server) *robopacServer {
 	}
 }
 
-func (rs *robopacServer) Execute(_ context.Context, er *robopac.ExecuteRequest) (*robopac.ExecuteResponse, error) {
+func (rs *robopacServer) Run(_ context.Context, er *robopac.RunRequest) (*robopac.RunResponse, error) {
 	beInput := []string{}
 
 	tokens := strings.Split(er.Command, " ")
 	beInput = append(beInput, tokens...)
 
-	res := rs.engine.Run(command.AppIdgRPC, "0", beInput)
+	res := rs.engine.Run(command.AppIdgRPC, er.Id, beInput)
 
-	return &robopac.ExecuteResponse{
+	return &robopac.RunResponse{
 		Response: res.Message,
 	}, nil
 }
