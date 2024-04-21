@@ -162,19 +162,14 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 	totalCommitteePower := amount.Amount(chainInfo.CommitteePower).ToUnit(amount.UnitPAC)
 	circulatingSupply := amount.Amount(cs).ToUnit(amount.UnitPAC)
 
-	// Convert float64 to int64 for the struct fields.
-	totalNetworkPowerInt64 := int64(totalNetworkPower)
-	totalCommitteePowerInt64 := int64(totalCommitteePower)
-	circulatingSupplyInt64 := int64(circulatingSupply)
-
 	net := NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
-		TotalNetworkPower:   totalNetworkPowerInt64,
-		TotalCommitteePower: totalCommitteePowerInt64,
+		TotalNetworkPower:   int64(totalNetworkPower),
+		TotalCommitteePower: int64(totalCommitteePower),
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
-		CirculatingSupply:   circulatingSupplyInt64,
+		CirculatingSupply:   int64(circulatingSupply),
 	}
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
@@ -185,9 +180,9 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 		utils.FormatNumber(int64(net.ValidatorsCount)),
 		utils.FormatNumber(int64(net.TotalAccounts)),
 		utils.FormatNumber(int64(net.CurrentBlockHeight)),
-		totalNetworkPowerInt64,
-		totalCommitteePowerInt64,
-		circulatingSupplyInt64)
+		net.TotalNetworkPower,
+		net.TotalCommitteePower,
+		net.CirculatingSupply)
 }
 
 func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {

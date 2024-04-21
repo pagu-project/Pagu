@@ -237,9 +237,9 @@ func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.Ap
 		utils.FormatNumber(int64(net.ValidatorsCount)),
 		utils.FormatNumber(int64(net.TotalAccounts)),
 		utils.FormatNumber(int64(net.CurrentBlockHeight)),
-		totalNetworkPower.String(),
-		totalCommitteePower.String(),
-		circulatingSupply.String())
+		net.TotalNetworkPower,
+		net.TotalCommitteePower,
+		net.CirculatingSupply)
 }
 
 func (pt *PhoenixTestnet) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
