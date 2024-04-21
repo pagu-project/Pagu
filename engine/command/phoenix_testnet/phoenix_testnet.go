@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/robopac-project/RoboPac/client"
 	"github.com/robopac-project/RoboPac/database"
 	"github.com/robopac-project/RoboPac/engine/command"
@@ -202,27 +202,44 @@ func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.Ap
 		cs = 0
 	}
 
+	// Convert int64 to float64.
+	totalNetworkPower, err := amount.NewAmount(float64(chainInfo.TotalPower))
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
+	totalCommitteePower, err := amount.NewAmount(float64(chainInfo.CommitteePower))
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
+	circulatingSupply, err := amount.NewAmount(float64(cs))
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
+	// Convert Amount back to int64 for struct literal.
 	net := network.NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
-		TotalNetworkPower:   chainInfo.TotalPower,
-		TotalCommitteePower: chainInfo.CommitteePower,
+		TotalNetworkPower:   totalNetworkPower.ToNanoPAC(),
+		TotalCommitteePower: totalCommitteePower.ToNanoPAC(),
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
-		CirculatingSupply:   cs,
+		CirculatingSupply:   circulatingSupply.ToNanoPAC(),
 	}
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
-		"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC\nTotal Committee Power: %v PAC\nCirculating Supply: %v PAC\n"+
+		"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v\nTotal Committee Power: %v\nCirculating Supply: %v\n"+
 		"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
 		net.NetworkName,
 		utils.FormatNumber(int64(net.ConnectedPeersCount)),
 		utils.FormatNumber(int64(net.ValidatorsCount)),
 		utils.FormatNumber(int64(net.TotalAccounts)),
 		utils.FormatNumber(int64(net.CurrentBlockHeight)),
-		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalNetworkPower))),
-		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalCommitteePower))),
-		utils.FormatNumber(int64(util.ChangeToCoin(net.CirculatingSupply))))
+		totalNetworkPower.String(),
+		totalCommitteePower.String(),
+		circulatingSupply.String())
 }
 
 func (pt *PhoenixTestnet) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -278,10 +295,16 @@ func (pt *PhoenixTestnet) nodeInfoHandler(cmd command.Command, _ command.AppID, 
 		pip19Score = fmt.Sprintf("%v⚠️", nodeInfo.AvailabilityScore)
 	}
 
+	stakeAmountInNanoPAC := int64(nodeInfo.StakeAmount)
+	stakeAmount := amount.Amount(stakeAmountInNanoPAC)
+
+	// Format the stake amount for display.
+	formattedStakeAmount := stakeAmount.Format(amount.UnitPAC)
+
 	return cmd.SuccessfulResult("PeerID: %s\nIP Address: %s\nAgent: %s\n"+
 		"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
 		"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 		nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
 		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils.FormatNumber(int64(nodeInfo.ValidatorNum)),
-		pip19Score, utils.FormatNumber(int64(util.ChangeToCoin(nodeInfo.StakeAmount))))
+		pip19Score, formattedStakeAmount)
 }

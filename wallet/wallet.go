@@ -5,8 +5,8 @@ import (
 
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
+	amt "github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx/payload"
-	"github.com/pactus-project/pactus/util"
 	pwallet "github.com/pactus-project/pactus/wallet"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/log"
@@ -31,11 +31,6 @@ func Open(cfg *config.PhoenixTestNetWallet) IWallet {
 			log.Fatal("error opening existing wallet", "err", err)
 		}
 
-		err = wt.Connect(cfg.RPCUrl)
-		if err != nil {
-			log.Fatal("error establishing connection", "err", err)
-		}
-
 		return &Wallet{
 			wallet:   wt,
 			address:  cfg.Address,
@@ -48,21 +43,24 @@ func Open(cfg *config.PhoenixTestNetWallet) IWallet {
 }
 
 func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
+	// Convert int64 to amount.Amount
+	amountInNanoPAC := amt.Amount(amount)
+
 	opts := []pwallet.TxOption{
 		pwallet.OptionMemo(memo),
 	}
 	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
-		amount, opts...)
+		amountInNanoPAC, opts...)
 	if err != nil {
 		log.Error("error creating bond transaction", "err", err, "to",
-			toAddress, "amount", util.ChangeToCoin(amount))
+			toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Error("error signing bond transaction", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 
@@ -70,20 +68,24 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Error("error broadcasting bond transaction", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		log.Error("error saving wallet transaction history", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 	}
 	return res, nil // return transaction hash
 }
 
 func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (string, error) {
-	fee, err := w.wallet.CalculateFee(int64(amount), payload.TypeTransfer)
+	// Convert int64 to amt.Amount.
+	amountInNanoPAC := amt.Amount(amount)
+
+	// claculate fee using amount struct.
+	fee, err := w.wallet.CalculateFee(amountInNanoPAC, payload.TypeTransfer)
 	if err != nil {
 		return "", err
 	}
@@ -93,35 +95,36 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 		pwallet.OptionMemo(memo),
 	}
 
-	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, int64(amount), opts...)
+	// Use amt.Amount for transaction amount.
+	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amountInNanoPAC, opts...)
 	if err != nil {
 		log.Error("error creating transfer transaction", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 
-	// sign transaction
+	// sign transaction.
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Error("error signing transfer transaction", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 
-	// broadcast transaction
+	// broadcast transaction.
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Error("error broadcasting transfer transaction", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		log.Error("error saving wallet transaction history", "err", err,
-			"to", toAddress, "amount", util.ChangeToCoin(amount))
+			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 	}
-	return res, nil // return transaction hash
+	return res, nil // return transaction hash.
 }
 
 func (w *Wallet) Address() string {
@@ -130,11 +133,15 @@ func (w *Wallet) Address() string {
 
 func (w *Wallet) Balance() int64 {
 	balance, _ := w.wallet.Balance(w.address)
-	return balance
+	return int64(balance)
 }
 
 func (w *Wallet) NewAddress(lb string) (string, error) {
-	return w.wallet.NewBLSAccountAddress(lb)
+	addressInfo, err := w.wallet.NewBLSAccountAddress(lb)
+	if err != nil {
+		return "", err
+	}
+	return addressInfo.Address, nil
 }
 
 func IsValidData(address, pubKey string) bool {

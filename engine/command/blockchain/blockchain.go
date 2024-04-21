@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/robopac-project/RoboPac/client"
 	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/utils"
 )
 
 const (
@@ -113,11 +112,19 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	reward := int64(stake*blocks) / int64(util.ChangeToCoin(bi.TotalPower))
+	// Convert stake and total power to Amount type.
+	stakeAmount := amount.Amount(stake * blocks)
+	totalPowerAmount := amount.Amount(bi.TotalPower)
 
-	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+	// Calculate reward using Amount type.
+	rewardAmount := stakeAmount.MulF64(float64(totalPowerAmount.ToNanoPAC()) / float64(amount.MaxNanoPAC))
+
+	// Format the reward for display.
+	formattedReward := rewardAmount.Format(amount.UnitPAC) + " PAC"
+
+	return cmd.SuccessfulResult("Approximately you earn %s reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
+		formattedReward, stake, time, bi.TotalPower)
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -126,11 +133,20 @@ func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ str
 		return cmd.ErrorResult(err)
 	}
 
-	fee, err := bc.clientMgr.GetFee(util.CoinToChange(float64(amt)))
+	// Convert amt to Amount type.
+	amtAmount := amount.Amount(amt)
+
+	fee, err := bc.clientMgr.GetFee(amtAmount.ToNanoPAC())
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	return cmd.SuccessfulResult("Sending %v PAC will cost %v PAC with current fee percentage."+
-		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, util.ChangeToString(fee))
+	// Convert fee to Amount type for formatting.
+	feeAmount := amount.Amount(fee)
+
+	// Format the fee for display
+	formattedFee := feeAmount.Format(amount.UnitPAC) + " PAC"
+
+	return cmd.SuccessfulResult("Sending %v PAC will cost %s PAC with current fee percentage."+
+		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, formattedFee)
 }
