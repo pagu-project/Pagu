@@ -187,7 +187,6 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		// Convert circulating supply to Amount and format.
 		circulatingSupplyAmount := amount.Amount(ns.CirculatingSupply)
 		formattedCirculatingSupply := circulatingSupplyAmount.Format(amount.UnitPAC) + " PAC"
 
@@ -199,7 +198,6 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		// Convert total network power to Amount and format.
 		totalNetworkPowerAmount := amount.Amount(ns.TotalNetworkPower)
 		formattedTotalNetworkPower := totalNetworkPowerAmount.Format(amount.UnitPAC) + " PAC"
 

@@ -7,6 +7,7 @@ import (
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/robopac-project/RoboPac/client"
 	"github.com/robopac-project/RoboPac/engine/command"
+	"github.com/robopac-project/RoboPac/utils"
 )
 
 const (
@@ -112,19 +113,16 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	// Convert stake and total power to Amount type.
-	stakeAmount := amount.Amount(stake * blocks)
-	totalPowerAmount := amount.Amount(bi.TotalPower)
+	totalPower, err := amount.NewAmount(float64(bi.TotalPower))
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
 
-	// Calculate reward using Amount type.
-	rewardAmount := stakeAmount.MulF64(float64(totalPowerAmount.ToNanoPAC()) / float64(amount.MaxNanoPAC))
+	reward := int64(stake*blocks) / int64(totalPower.ToUnit(amount.UnitPAC))
 
-	// Format the reward for display.
-	formattedReward := rewardAmount.Format(amount.UnitPAC) + " PAC"
-
-	return cmd.SuccessfulResult("Approximately you earn %s reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		formattedReward, stake, time, bi.TotalPower)
+		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -133,7 +131,6 @@ func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ str
 		return cmd.ErrorResult(err)
 	}
 
-	// Convert amt to Amount type.
 	amtAmount := amount.Amount(amt)
 
 	fee, err := bc.clientMgr.GetFee(amtAmount.ToNanoPAC())
@@ -141,10 +138,8 @@ func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ str
 		return cmd.ErrorResult(err)
 	}
 
-	// Convert fee to Amount type for formatting.
 	feeAmount := amount.Amount(fee)
 
-	// Format the fee for display
 	formattedFee := feeAmount.Format(amount.UnitPAC) + " PAC"
 
 	return cmd.SuccessfulResult("Sending %v PAC will cost %s PAC with current fee percentage."+

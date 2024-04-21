@@ -43,7 +43,6 @@ func Open(cfg *config.PhoenixTestNetWallet) IWallet {
 }
 
 func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
-	// Convert int64 to amount.Amount
 	amountInNanoPAC := amt.Amount(amount)
 
 	opts := []pwallet.TxOption{
@@ -60,7 +59,7 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Error("error signing bond transaction", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"to", toAddress, "amount", amountInNanoPAC.String())
 		return "", err
 	}
 
