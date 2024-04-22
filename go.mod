@@ -50,7 +50,7 @@ require (
 )
 
 require (
-	github.com/bwmarrin/discordgo v0.27.1
+	github.com/bwmarrin/discordgo v0.28.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
