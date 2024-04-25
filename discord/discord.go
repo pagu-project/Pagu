@@ -60,8 +60,6 @@ func (bot *DiscordBot) deleteAllCommands() {
 
 func (bot *DiscordBot) registerCommands() error {
 	bot.Session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		// add debug statement.
-		log.Info("Handling command", "Command", i.ApplicationCommandData().Name, "User", i.User.ID)
 		bot.commandHandler(bot, s, i)
 	})
 
@@ -111,7 +109,11 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	}
 
 	// add debug statement.
-	log.Info("Running command", "AppIdDiscord", command.AppIdDiscord, "UserID", i.User.ID, "Input", beInput)
+	log.Info("Running command")
+	log.Info("AppIdDiscord", command.AppIdDiscord.String())
+	log.Info("UserID", i.User.ID)
+	log.Info("Input", beInput)
+
 	res := db.engine.Run(command.AppIdDiscord, i.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
