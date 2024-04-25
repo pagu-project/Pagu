@@ -111,11 +111,12 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	// add debug statement.
 	log.Info("Running command")
 	log.Info("AppIdDiscord", command.AppIdDiscord.String())
-	log.Info("UserID", i.User.ID)
+	// log.Info("UserID", i.User.ID)
 	log.Info("Input", beInput)
-	log.Info("Executing command with beInput: %v", beInput)
 
 	res := db.engine.Run(command.AppIdDiscord, i.User.ID, beInput)
+
+	log.Info("Executing command with beInput: %v", beInput)
 
 	bot.respondResultMsg(res, s, i)
 }
