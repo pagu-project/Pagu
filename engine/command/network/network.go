@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/robopac-project/RoboPac/client"
 	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/utils"
@@ -157,14 +157,19 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 		cs = 0
 	}
 
+	// Convert NanoPAC to PAC using the Amount type.
+	totalNetworkPower := amount.Amount(chainInfo.TotalPower).ToUnit(amount.UnitPAC)
+	totalCommitteePower := amount.Amount(chainInfo.CommitteePower).ToUnit(amount.UnitPAC)
+	circulatingSupply := amount.Amount(cs).ToUnit(amount.UnitPAC)
+
 	net := NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
-		TotalNetworkPower:   chainInfo.TotalPower,
-		TotalCommitteePower: chainInfo.CommitteePower,
+		TotalNetworkPower:   int64(totalNetworkPower),
+		TotalCommitteePower: int64(totalCommitteePower),
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
-		CirculatingSupply:   cs,
+		CirculatingSupply:   int64(circulatingSupply),
 	}
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
@@ -175,9 +180,9 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 		utils.FormatNumber(int64(net.ValidatorsCount)),
 		utils.FormatNumber(int64(net.TotalAccounts)),
 		utils.FormatNumber(int64(net.CurrentBlockHeight)),
-		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalNetworkPower))),
-		utils.FormatNumber(int64(util.ChangeToCoin(net.TotalCommitteePower))),
-		utils.FormatNumber(int64(util.ChangeToCoin(net.CirculatingSupply))))
+		net.TotalNetworkPower,
+		net.TotalCommitteePower,
+		net.CirculatingSupply)
 }
 
 func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -215,7 +220,9 @@ func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string
 	if err == nil && val != nil {
 		nodeInfo.ValidatorNum = val.Validator.Number
 		nodeInfo.AvailabilityScore = val.Validator.AvailabilityScore
-		nodeInfo.StakeAmount = val.Validator.Stake
+		// Convert NanoPAC to PAC using the Amount type and then to int64.
+		stakeAmount := amount.Amount(val.Validator.Stake).ToUnit(amount.UnitPAC)
+		nodeInfo.StakeAmount = int64(stakeAmount) // Convert float64 to int64.
 		nodeInfo.LastBondingHeight = val.Validator.LastBondingHeight
 		nodeInfo.LastSortitionHeight = val.Validator.LastSortitionHeight
 	} else {
@@ -238,5 +245,5 @@ func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string
 		"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 		nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
 		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils.FormatNumber(int64(nodeInfo.ValidatorNum)),
-		pip19Score, utils.FormatNumber(int64(util.ChangeToCoin(nodeInfo.StakeAmount))))
+		pip19Score, utils.FormatNumber(nodeInfo.StakeAmount))
 }
