@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/robopac-project/RoboPac/config"
 	"github.com/robopac-project/RoboPac/engine"
 	"github.com/robopac-project/RoboPac/engine/command"
@@ -108,7 +108,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		beInput = append(beInput, opt.StringValue())
 	}
 
-	res := db.engine.Run(command.AppIdDiscord, i.User.ID, beInput)
+	res := db.engine.Run(command.AppIdDiscord, i.Member.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
 }
@@ -187,8 +187,10 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("circ supply",
-			utils.FormatNumber(int64(util.ChangeToCoin(ns.CirculatingSupply)))+" PAC"))
+		circulatingSupplyAmount := amount.Amount(ns.CirculatingSupply)
+		formattedCirculatingSupply := circulatingSupplyAmount.Format(amount.UnitPAC) + " PAC"
+
+		err = db.Session.UpdateStatusComplex(newStatus("circ supply", formattedCirculatingSupply))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -196,8 +198,10 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("total power",
-			utils.FormatNumber(int64(util.ChangeToCoin(ns.TotalNetworkPower)))+" PAC"))
+		totalNetworkPowerAmount := amount.Amount(ns.TotalNetworkPower)
+		formattedTotalNetworkPower := totalNetworkPowerAmount.Format(amount.UnitPAC) + " PAC"
+
+		err = db.Session.UpdateStatusComplex(newStatus("total power", formattedTotalNetworkPower))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue

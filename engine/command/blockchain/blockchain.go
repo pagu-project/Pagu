@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/pactus-project/pactus/util"
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/robopac-project/RoboPac/client"
 	"github.com/robopac-project/RoboPac/engine/command"
 	"github.com/robopac-project/RoboPac/utils"
@@ -113,7 +113,12 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	reward := int64(stake*blocks) / int64(util.ChangeToCoin(bi.TotalPower))
+	totalPower, err := amount.NewAmount(float64(bi.TotalPower))
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
+	reward := int64(stake*blocks) / int64(totalPower.ToUnit(amount.UnitPAC))
 
 	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
@@ -126,11 +131,17 @@ func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ str
 		return cmd.ErrorResult(err)
 	}
 
-	fee, err := bc.clientMgr.GetFee(util.CoinToChange(float64(amt)))
+	amtAmount := amount.Amount(amt)
+
+	fee, err := bc.clientMgr.GetFee(amtAmount.ToNanoPAC())
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	return cmd.SuccessfulResult("Sending %v PAC will cost %v PAC with current fee percentage."+
-		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, util.ChangeToString(fee))
+	feeAmount := amount.Amount(fee)
+
+	formattedFee := feeAmount.Format(amount.UnitPAC) + " PAC"
+
+	return cmd.SuccessfulResult("Sending %v PAC will cost %s PAC with current fee percentage."+
+		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, formattedFee)
 }
