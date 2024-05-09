@@ -9,7 +9,7 @@ import (
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/engine/command/blockchain"
 	"github.com/pagu-project/Pagu/engine/command/network"
-	phoenixtestnet "github.com/pagu-project/Pagu/engine/command/phoenix_testnet"
+	phoenixtestnet "github.com/pagu-project/Pagu/engine/command/phoenix"
 	"github.com/pagu-project/Pagu/log"
 	"github.com/pagu-project/Pagu/wallet"
 )
@@ -22,9 +22,9 @@ type BotEngine struct {
 	phoenixClientMgr *client.Mgr
 	rootCmd          command.Command
 
-	blockchainCmd     blockchain.Blockchain
-	networkCmd        network.Network
-	phoenixTestnetCmd phoenixtestnet.PhoenixTestnet
+	blockchainCmd blockchain.Blockchain
+	networkCmd    network.Network
+	phoenixCmd    phoenixtestnet.Phoenix
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -50,14 +50,14 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	// ? adding phoenix test network client manager.
-	phoenixTestnetCm := client.NewClientMgr(ctx)
+	phoenixCm := client.NewClientMgr(ctx)
 	for _, tnn := range cfg.Phoenix.NetworkNodes {
 		c, err := client.NewClient(tnn)
 		if err != nil {
 			log.Error("can't add new network node client", "err", err, "addr", tnn)
 		}
 
-		phoenixTestnetCm.AddClient(c)
+		phoenixCm.AddClient(c)
 	}
 
 	// ? opening wallet if it's enabled.
@@ -98,7 +98,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	return newBotEngine(cm, phoenixTestnetCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, phoenixCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
 func newBotEngine(cm, ptcm *client.Mgr, _ wallet.IWallet, phoenixWal wallet.IWallet, db *database.DB, _ []string,
@@ -106,26 +106,26 @@ func newBotEngine(cm, ptcm *client.Mgr, _ wallet.IWallet, phoenixWal wallet.IWal
 ) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
-		Name:        "robopac",
-		Desc:        "RoboPAC",
-		Help:        "RoboPAC Help",
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
-		SubCommands: make([]command.Command, 2),
+		Name:        "pagu",
+		Desc:        "Root Command",
+		Help:        "Pagu Help Command",
+		AppIDs:      command.AllAppIDs(),
+		SubCommands: make([]command.Command, 3),
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := blockchain.NewBlockchain(cm)
-	ptCmd := phoenixtestnet.NewPhoenixTestnet(phoenixWal, ptcm, *db)
+	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, ptcm, *db)
 
 	return &BotEngine{
-		ctx:               ctx,
-		cancel:            cnl,
-		clientMgr:         cm,
-		rootCmd:           rootCmd,
-		networkCmd:        netCmd,
-		blockchainCmd:     bcCmd,
-		phoenixTestnetCmd: ptCmd,
-		phoenixClientMgr:  ptcm,
+		ctx:              ctx,
+		cancel:           cnl,
+		clientMgr:        cm,
+		rootCmd:          rootCmd,
+		networkCmd:       netCmd,
+		blockchainCmd:    bcCmd,
+		phoenixCmd:       ptCmd,
+		phoenixClientMgr: ptcm,
 	}
 }
 
@@ -136,7 +136,7 @@ func (be *BotEngine) Commands() []command.Command {
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
-	be.rootCmd.AddSubCommand(be.phoenixTestnetCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
