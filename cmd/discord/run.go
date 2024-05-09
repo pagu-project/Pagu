@@ -46,7 +46,6 @@ func runCommand(parentCmd *cobra.Command) {
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 		<-sigChan
 
-		// gracefully shutdown the bot.
 		if err := discordBot.Stop(); err != nil {
 			rpCmd.ExitOnError(cmd, err)
 		}

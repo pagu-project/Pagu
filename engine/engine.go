@@ -62,17 +62,32 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 
 	// ? opening wallet if it's enabled.
 	var wal wallet.IWallet
-	if cfg.PTWallet.Enable {
+	if cfg.Wallet.Enable {
 		// load or create wallet.
-		wal = wallet.Open(&cfg.PTWallet)
+		wal = wallet.Open(&cfg.Wallet)
 		if wal == nil {
 			cancel()
 			return nil, WalletError{
-				Reason: "can't open wallet",
+				Reason: "can't open mainnet wallet",
 			}
 		}
 
 		log.Info("wallet opened successfully", "address", wal.Address())
+	}
+
+	// ? opening testnet (Phoenix) wallet if it's enabled.
+	var phoenixWal wallet.IWallet
+	if cfg.TestNetWallet.Enable {
+		// load or create wallet.
+		wal = wallet.Open(&cfg.TestNetWallet)
+		if wal == nil {
+			cancel()
+			return nil, WalletError{
+				Reason: "can't open testnet wallet",
+			}
+		}
+
+		log.Info("testnet wallet opened successfully", "address", wal.Address())
 	}
 
 	// ? loading database.
@@ -83,10 +98,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	return newBotEngine(cm, phoenixTestnetCm, wal, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, phoenixTestnetCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm, ptcm *client.Mgr, w wallet.IWallet, db *database.DB, _ []string,
+func newBotEngine(cm, ptcm *client.Mgr, _ wallet.IWallet, phoenixWal wallet.IWallet, db *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{
@@ -100,7 +115,7 @@ func newBotEngine(cm, ptcm *client.Mgr, w wallet.IWallet, db *database.DB, _ []s
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := blockchain.NewBlockchain(cm)
-	ptCmd := phoenixtestnet.NewPhoenixTestnet(w, ptcm, *db)
+	ptCmd := phoenixtestnet.NewPhoenixTestnet(phoenixWal, ptcm, *db)
 
 	return &BotEngine{
 		ctx:               ctx,

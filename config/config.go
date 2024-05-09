@@ -11,21 +11,22 @@ import (
 )
 
 type Config struct {
-	Network      string
-	NetworkNodes []string
-	LocalNode    string
-	DataBasePath string
-	AuthIDs      []string
-	DiscordBot   DiscordBot
-	GRPC         GRPC
-	PTWallet     PhoenixTestNetWallet
-	Logger       Logger
-	HTTP         HTTP
-	Phoenix      PhoenixNetwork
-	Telegram     Telegram
+	Network       string
+	NetworkNodes  []string
+	LocalNode     string
+	DataBasePath  string
+	AuthIDs       []string
+	DiscordBot    DiscordBot
+	GRPC          GRPC
+	Wallet        Wallet
+	TestNetWallet Wallet
+	Logger        Logger
+	HTTP          HTTP
+	Phoenix       PhoenixNetwork
+	Telegram      Telegram
 }
 
-type PhoenixTestNetWallet struct {
+type Wallet struct {
 	Enable   bool
 	Address  string
 	Path     string
@@ -77,6 +78,11 @@ func Load(filePaths ...string) (*Config, error) {
 		return nil, err
 	}
 
+	enableTestNetWallet, err := strconv.ParseBool(os.Getenv("ENABLE_TESTNET_WALLET"))
+	if err != nil {
+		return nil, err
+	}
+
 	maxSizeStr := os.Getenv("LOG_MAX_SIZE")
 	maxSize, err := strconv.Atoi(maxSizeStr)
 	if err != nil {
@@ -111,12 +117,19 @@ func Load(filePaths ...string) (*Config, error) {
 	// Fetch config values from environment variables.
 	cfg := &Config{
 		Network: os.Getenv("NETWORK"),
-		PTWallet: PhoenixTestNetWallet{
+		Wallet: Wallet{
 			Address:  os.Getenv("WALLET_ADDRESS"),
 			Path:     os.Getenv("WALLET_PATH"),
 			Password: os.Getenv("WALLET_PASSWORD"),
 			RPCUrl:   os.Getenv("WALLET_PRC"),
 			Enable:   enableWallet,
+		},
+		TestNetWallet: Wallet{
+			Address:  os.Getenv("TESTNET_WALLET_ADDRESS"),
+			Path:     os.Getenv("TESTNET_WALLET_PATH"),
+			Password: os.Getenv("TESTNET_WALLET_PASSWORD"),
+			RPCUrl:   os.Getenv("TESTNET_WALLET_PRC"),
+			Enable:   enableTestNetWallet,
 		},
 		LocalNode:    os.Getenv("LOCAL_NODE"),
 		NetworkNodes: strings.Split(os.Getenv("NETWORK_NODES"), ","),
@@ -161,13 +174,13 @@ func Load(filePaths ...string) (*Config, error) {
 
 // Validate checks for the presence of required environment variables.
 func (cfg *Config) BasicCheck() error {
-	if cfg.PTWallet.Enable {
-		if cfg.PTWallet.Address == "" {
+	if cfg.Wallet.Enable {
+		if cfg.Wallet.Address == "" {
 			return fmt.Errorf("WALLET_ADDRESS is not set")
 		}
 
 		// Check if the WalletPath exists.
-		if !util.PathExists(cfg.PTWallet.Address) {
+		if !util.PathExists(cfg.Wallet.Address) {
 			return fmt.Errorf("WALLET_PATH does not exist")
 		}
 	}
