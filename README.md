@@ -3,7 +3,7 @@
 </p>
 
 <h3 align="center">
-RoboPac is a Robot that provides support and information about the Pactus Blockchain.
+The PAGU is a Robot that provides support and information about the Pactus Blockchain.
 </h3>
 
 # Run
