@@ -6,12 +6,12 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/robopac-project/RoboPac/client"
-	"github.com/robopac-project/RoboPac/database"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/engine/command/network"
-	"github.com/robopac-project/RoboPac/utils"
-	"github.com/robopac-project/RoboPac/wallet"
+	"github.com/pagu-project/Pagu/client"
+	"github.com/pagu-project/Pagu/database"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/engine/command/network"
+	"github.com/pagu-project/Pagu/utils"
+	"github.com/pagu-project/Pagu/wallet"
 )
 
 const (

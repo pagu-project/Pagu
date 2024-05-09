@@ -7,9 +7,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/robopac-project/RoboPac/client"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/utils"
+	"github.com/pagu-project/Pagu/client"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/utils"
 )
 
 const (

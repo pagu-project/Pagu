@@ -41,19 +41,19 @@ check:
 build: build-cli build-dc build-grpc build-tg build-http
 
 build-cli:
-	go build -o build/robopac-cli     ./cmd/cli
+	go build -o build/pagu-cli     ./cmd/cli
 
 build-dc:
-	go build -o build/robopac-discord ./cmd/discord
+	go build -o build/pagu-discord ./cmd/discord
 
 build-grpc:
-	go build -o build/robopac-grpc ./cmd/grpc
+	go build -o build/pagu-grpc ./cmd/grpc
 	
 build-tg:
-	go build -o build/robopac-telegram ./cmd/telegram
+	go build -o build/pagu-telegram ./cmd/telegram
 
 build-http:
-	go build -o build/robopac-http ./cmd/http
+	go build -o build/pagu-http ./cmd/http
 
 ### pre commit
 pre-commit: mock proto fmt check unit_test

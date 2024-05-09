@@ -8,7 +8,7 @@ import (
 
 	"github.com/pactus-project/pactus/util/logger"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
-	"github.com/robopac-project/RoboPac/log"
+	"github.com/pagu-project/Pagu/log"
 )
 
 type Mgr struct {

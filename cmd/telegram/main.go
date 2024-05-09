@@ -1,15 +1,15 @@
 package main
 
 import (
-	robopac "github.com/robopac-project/RoboPac"
-	"github.com/robopac-project/RoboPac/cmd"
+	pagu "github.com/pagu-project/Pagu"
+	"github.com/pagu-project/Pagu/cmd"
 	"github.com/spf13/cobra"
 )
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac-telegram",
-		Version: robopac.StringVersion(),
+		Use:     "pagu-telegram",
+		Version: pagu.StringVersion(),
 	}
 
 	RunCommand(rootCmd)

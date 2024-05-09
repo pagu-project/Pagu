@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"github.com/robopac-project/RoboPac/engine/command"
+	"github.com/pagu-project/Pagu/engine/command"
 )
 
 type IEngine interface {

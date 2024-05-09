@@ -4,10 +4,10 @@ import (
 	"context"
 	"net"
 
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/engine"
-	robopac "github.com/robopac-project/RoboPac/grpc/gen/go"
-	"github.com/robopac-project/RoboPac/log"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/engine"
+	pagu "github.com/pagu-project/Pagu/grpc/gen/go"
+	"github.com/pagu-project/Pagu/log"
 	"google.golang.org/grpc"
 )
 
@@ -50,7 +50,7 @@ func (s *Server) startListening(listener net.Listener) {
 
 	robopacServer := newRoboPacServer(s)
 
-	robopac.RegisterRoboPacServer(grpcServer, robopacServer)
+	pagu.RegisterRoboPacServer(grpcServer, robopacServer)
 
 	s.listener = listener
 	s.address = listener.Addr().String()

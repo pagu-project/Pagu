@@ -5,7 +5,7 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
-	"github.com/robopac-project/RoboPac/log"
+	"github.com/pagu-project/Pagu/log"
 )
 
 // CommandFunc is a function type that matches the signature of command handlers.

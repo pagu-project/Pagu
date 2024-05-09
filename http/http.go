@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/engine"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/log"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/engine"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/log"
 )
 
 type HTTPServer struct {

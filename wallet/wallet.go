@@ -8,8 +8,8 @@ import (
 	amt "github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx/payload"
 	pwallet "github.com/pactus-project/pactus/wallet"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/log"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/log"
 )
 
 type Balance struct {
