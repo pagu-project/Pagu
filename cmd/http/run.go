@@ -5,11 +5,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	rpCmd "github.com/robopac-project/RoboPac/cmd"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/engine"
-	"github.com/robopac-project/RoboPac/http"
-	"github.com/robopac-project/RoboPac/log"
+	pCmd "github.com/pagu-project/Pagu/cmd"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/engine"
+	"github.com/pagu-project/Pagu/http"
+	"github.com/pagu-project/Pagu/log"
 	"github.com/spf13/cobra"
 )
 
@@ -24,14 +24,14 @@ func runCommand(parentCmd *cobra.Command) {
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
 		config, err := config.Load()
-		rpCmd.ExitOnError(cmd, err)
+		pCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
 		log.InitGlobalLogger(config.Logger)
 
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(config)
-		rpCmd.ExitOnError(cmd, err)
+		pCmd.ExitOnError(cmd, err)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
@@ -39,15 +39,14 @@ func runCommand(parentCmd *cobra.Command) {
 		httpServer := http.NewHTTPServer(botEngine, config.HTTP)
 
 		err = httpServer.Start()
-		rpCmd.ExitOnError(cmd, err)
+		pCmd.ExitOnError(cmd, err)
 
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 		<-sigChan
 
-		// gracefully shutdown the bot.
 		if err := httpServer.Stop(); err != nil {
-			rpCmd.ExitOnError(cmd, err)
+			pCmd.ExitOnError(cmd, err)
 		}
 
 		botEngine.Stop()

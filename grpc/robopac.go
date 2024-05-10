@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/robopac-project/RoboPac/engine/command"
-	robopac "github.com/robopac-project/RoboPac/grpc/gen/go"
+	"github.com/pagu-project/Pagu/engine/command"
+	robopac "github.com/pagu-project/Pagu/grpc/gen/go"
 )
 
 type robopacServer struct {

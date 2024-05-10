@@ -1,4 +1,4 @@
-package phoenixtestnet
+package phoenix
 
 import (
 	"fmt"
@@ -6,49 +6,49 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/robopac-project/RoboPac/client"
-	"github.com/robopac-project/RoboPac/database"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/engine/command/network"
-	"github.com/robopac-project/RoboPac/utils"
-	"github.com/robopac-project/RoboPac/wallet"
+	"github.com/pagu-project/Pagu/client"
+	"github.com/pagu-project/Pagu/database"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/engine/command/network"
+	"github.com/pagu-project/Pagu/utils"
+	"github.com/pagu-project/Pagu/wallet"
 )
 
 const (
-	PhoenixTestnetCommandName  = "phoenix"
-	PhoenixFaucetCommandName   = "faucet"
-	PhoenixWalletCommandName   = "wallet"
-	PhoenixStatusCommandName   = "status"
-	PhoenixHealthCommandName   = "health"
-	PhoenixNodeInfoCommandName = "node-info"
-	PhoenixHelpCommandName     = "help"
+	CommandName         = "phoenix"
+	FaucetCommandName   = "faucet"
+	WalletCommandName   = "wallet"
+	StatusCommandName   = "status"
+	HealthCommandName   = "health"
+	NodeInfoCommandName = "node-info"
+	HelpCommandName     = "help"
 )
 
-type PhoenixTestnet struct {
-	wallet    wallet.IWallet
+type Phoenix struct {
+	wallet    *wallet.Wallet
 	db        database.DB
 	clientMgr *client.Mgr
 }
 
-func NewPhoenixTestnet(wallet wallet.IWallet,
+func NewPhoenix(wallet *wallet.Wallet,
 	clientMgr *client.Mgr, db database.DB,
-) PhoenixTestnet {
-	return PhoenixTestnet{
+) Phoenix {
+	return Phoenix{
 		wallet:    wallet,
 		clientMgr: clientMgr,
 		db:        db,
 	}
 }
 
-func (pt *PhoenixTestnet) GetCommand() command.Command {
+func (pt *Phoenix) GetCommand() command.Command {
 	subCmdFaucet := command.Command{
-		Name: PhoenixFaucetCommandName,
+		Name: FaucetCommandName,
 		Desc: "Get 5 tPAC Coins on Phoenix Testnet for Testing your code or project",
 		Help: "There is a limit that you can only get faucets 1 time per day with each user ID and address",
 		Args: []command.Args{
 			{
 				Name:     "address",
-				Desc:     "your testnet address, example: tpc1z....",
+				Desc:     "your testnet address [example: tpc1z...]",
 				Optional: false,
 			},
 		},
@@ -58,7 +58,7 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 	}
 
 	subCmdWallet := command.Command{
-		Name:        PhoenixWalletCommandName,
+		Name:        WalletCommandName,
 		Desc:        "Check the status of RoboPac faucet address wallet on Phoenix network",
 		Help:        "",
 		Args:        nil,
@@ -68,7 +68,7 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 	}
 
 	subCmdHealth := command.Command{
-		Name:        PhoenixHealthCommandName,
+		Name:        HealthCommandName,
 		Desc:        "Checking Phoenix test-network health status",
 		Help:        "",
 		Args:        []command.Args{},
@@ -78,7 +78,7 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 	}
 
 	subCmdStatus := command.Command{
-		Name:        PhoenixStatusCommandName,
+		Name:        StatusCommandName,
 		Desc:        "Phoenix test-network statistics",
 		Help:        "",
 		Args:        []command.Args{},
@@ -88,12 +88,12 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 	}
 
 	subCmdNodeInfo := command.Command{
-		Name: PhoenixNodeInfoCommandName,
+		Name: NodeInfoCommandName,
 		Desc: "View the information of a node running on Phoenix test-network",
 		Help: "Provide your validator address on the specific node to get the validator and node info (Phoenix network)",
 		Args: []command.Args{
 			{
-				Name:     "validator-address",
+				Name:     "validator_address",
 				Desc:     "Your validator address start with tpc1p...",
 				Optional: false,
 			},
@@ -103,26 +103,26 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 		Handler:     pt.nodeInfoHandler,
 	}
 
-	cmdPhoenixTestnet := command.Command{
-		Name:        PhoenixTestnetCommandName,
+	cmdPhoenix := command.Command{
+		Name:        CommandName,
 		Desc:        "Phoenix Testnet tools and utils for developers",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      command.AllAppIDs(),
-		SubCommands: make([]command.Command, 2),
+		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}
 
-	cmdPhoenixTestnet.AddSubCommand(subCmdFaucet)
-	cmdPhoenixTestnet.AddSubCommand(subCmdWallet)
-	cmdPhoenixTestnet.AddSubCommand(subCmdHealth)
-	cmdPhoenixTestnet.AddSubCommand(subCmdStatus)
-	cmdPhoenixTestnet.AddSubCommand(subCmdNodeInfo)
+	cmdPhoenix.AddSubCommand(subCmdFaucet)
+	cmdPhoenix.AddSubCommand(subCmdWallet)
+	cmdPhoenix.AddSubCommand(subCmdHealth)
+	cmdPhoenix.AddSubCommand(subCmdStatus)
+	cmdPhoenix.AddSubCommand(subCmdNodeInfo)
 
-	return cmdPhoenixTestnet
+	return cmdPhoenix
 }
 
-func (pt *PhoenixTestnet) faucetHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
+func (pt *Phoenix) faucetHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
 	if !pt.db.HasUser(callerID) {
 		if err := pt.db.AddUser(
 			&database.User{
@@ -142,7 +142,7 @@ func (pt *PhoenixTestnet) faucetHandler(cmd command.Command, _ command.AppID, ca
 	}
 
 	toAddr := args[0]
-	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet RoboPac Faucet", 5) //! define me on config?
+	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu Faucet", 5) //! define me on config?
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
@@ -159,11 +159,11 @@ func (pt *PhoenixTestnet) faucetHandler(cmd command.Command, _ command.AppID, ca
 	return cmd.SuccessfulResult("You got %d tPAC in %s address on Phoenix Testnet!", 5, toAddr)
 }
 
-func (pt *PhoenixTestnet) walletHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
-	return cmd.SuccessfulResult("RoboPac Phoenix Address: %s\nBalance: %d", pt.wallet.Address(), pt.wallet.Balance())
+func (pt *Phoenix) walletHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+	return cmd.SuccessfulResult("Pagu Phoenix Address: %s\nBalance: %d", pt.wallet.Address(), pt.wallet.Balance())
 }
 
-func (pt *PhoenixTestnet) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+func (pt *Phoenix) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
 	lastBlockTime, lastBlockHeight := pt.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0).Format("02/01/2006, 15:04:05")
 	currentTime := time.Now()
@@ -186,7 +186,7 @@ func (pt *PhoenixTestnet) networkHealthHandler(cmd command.Command, _ command.Ap
 		status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils.FormatNumber(int64(lastBlockHeight)))
 }
 
-func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+func (pt *Phoenix) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
 	netInfo, err := pt.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
@@ -222,11 +222,11 @@ func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.Ap
 	net := network.NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
-		TotalNetworkPower:   totalNetworkPower.ToNanoPAC(),
-		TotalCommitteePower: totalCommitteePower.ToNanoPAC(),
+		TotalNetworkPower:   int64(totalNetworkPower.ToPAC()),
+		TotalCommitteePower: int64(totalCommitteePower.ToPAC()),
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
-		CirculatingSupply:   circulatingSupply.ToNanoPAC(),
+		CirculatingSupply:   int64(circulatingSupply.ToPAC()),
 	}
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
@@ -242,7 +242,7 @@ func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.Ap
 		net.CirculatingSupply)
 }
 
-func (pt *PhoenixTestnet) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := pt.clientMgr.GetPeerInfo(valAddress)

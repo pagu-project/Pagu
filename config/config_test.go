@@ -20,7 +20,7 @@ func TestBasicCheck(t *testing.T) {
 		{
 			name: "Valid config",
 			cfg: Config{
-				PTWallet: PhoenixTestNetWallet{
+				Wallet: Wallet{
 					Address:  "test_wallet_address",
 					Path:     tempWalletPath, // Use the temporary directory
 					Password: "test_password",
@@ -39,7 +39,7 @@ func TestBasicCheck(t *testing.T) {
 		{
 			name: "Invalid RPCNodes",
 			cfg: Config{
-				PTWallet: PhoenixTestNetWallet{
+				Wallet: Wallet{
 					Address:  "test_wallet_address",
 					Path:     "/valid/path",
 					Password: "test_password",

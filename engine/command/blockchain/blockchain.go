@@ -5,16 +5,16 @@ import (
 	"strconv"
 
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/robopac-project/RoboPac/client"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/utils"
+	"github.com/pagu-project/Pagu/client"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/utils"
 )
 
 const (
-	BlockChainCommandName     = "blockchain"
-	CalcRewardCommandName     = "calc-reward"
-	CalcFeeCommandName        = "calc-fee"
-	BlockChainHelpCommandName = "help"
+	CommandName           = "blockchain"
+	CalcRewardCommandName = "reward-calc"
+	CalcFeeCommandName    = "fee-calc"
+	HelpCommandName       = "help"
 )
 
 type Blockchain struct {
@@ -36,13 +36,13 @@ func (bc *Blockchain) GetCommand() command.Command {
 		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC suffix",
 		Args: []command.Args{
 			{
-				Name:     "stake-amount",
+				Name:     "stake",
 				Desc:     "Amount of stake in your validator (1-1000)",
 				Optional: false,
 			},
 			{
-				Name:     "time-interval",
-				Desc:     "After one: day | month | year",
+				Name:     "time",
+				Desc:     "After one: day/month/year",
 				Optional: false,
 			},
 		},
@@ -68,12 +68,12 @@ func (bc *Blockchain) GetCommand() command.Command {
 	}
 
 	cmdBlockchain := command.Command{
-		Name:        BlockChainCommandName,
+		Name:        CommandName,
 		Desc:        "Blockchain information and tools",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      command.AllAppIDs(),
-		SubCommands: make([]command.Command, 2),
+		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}
 
@@ -113,35 +113,26 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	totalPower, err := amount.NewAmount(float64(bi.TotalPower))
-	if err != nil {
-		return cmd.ErrorResult(err)
-	}
+	reward := int64(stake*blocks) / int64(amount.Amount(bi.TotalPower).ToPAC())
 
-	reward := int64(stake*blocks) / int64(totalPower.ToUnit(amount.UnitPAC))
-
-	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
+		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
-	amt, err := strconv.ParseInt(args[0], 10, 64)
+	amt, err := amount.FromString(args[0])
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	amtAmount := amount.Amount(amt)
-
-	fee, err := bc.clientMgr.GetFee(amtAmount.ToNanoPAC())
+	fee, err := bc.clientMgr.GetFee(int64(amt))
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	feeAmount := amount.Amount(fee)
+	calcedFee := amount.Amount(fee)
 
-	formattedFee := feeAmount.Format(amount.UnitPAC) + " PAC"
-
-	return cmd.SuccessfulResult("Sending %v PAC will cost %s PAC with current fee percentage."+
-		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, formattedFee)
+	return cmd.SuccessfulResult("Sending %s will cost %s with current fee percentage."+
+		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, calcedFee.String())
 }

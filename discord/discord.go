@@ -5,11 +5,11 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/engine"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/log"
-	"github.com/robopac-project/RoboPac/utils"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/engine"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/log"
+	"github.com/pagu-project/Pagu/utils"
 )
 
 type DiscordBot struct {
@@ -64,25 +64,71 @@ func (bot *DiscordBot) registerCommands() error {
 	})
 
 	beCmds := bot.engine.Commands()
-	for _, beCmd := range beCmds {
+	for i, beCmd := range beCmds {
 		if !beCmd.HasAppId(command.AppIdDiscord) {
 			continue
 		}
+
+		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Desc, "index", i, "object", beCmd)
+
 		discordCmd := discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
 			Name:        beCmd.Name,
 			Description: beCmd.Desc,
-			Options:     make([]*discordgo.ApplicationCommandOption, len(beCmd.Args)),
 		}
-		for index, arg := range beCmd.Args {
-			discordCmd.Options[index] = &discordgo.ApplicationCommandOption{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        arg.Name,
-				Description: arg.Desc,
-				Required:    !arg.Optional,
+
+		if beCmd.HasSubCommand() {
+			for _, sCmd := range beCmd.SubCommands {
+				if sCmd.Name == "" || sCmd.Desc == "" {
+					continue
+				}
+
+				log.Info("adding command sub-command", "command", beCmd.Name,
+					"sub-command", sCmd.Name, "desc", sCmd.Desc)
+
+				subCmd := &discordgo.ApplicationCommandOption{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        sCmd.Name,
+					Description: sCmd.Desc,
+				}
+
+				for _, arg := range sCmd.Args {
+					if arg.Desc == "" || arg.Name == "" {
+						continue
+					}
+
+					log.Info("adding sub command argument", "command", beCmd.Name,
+						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
+
+					subCmd.Options = append(subCmd.Options, &discordgo.ApplicationCommandOption{
+						Type:        discordgo.ApplicationCommandOptionString,
+						Name:        arg.Name,
+						Description: arg.Desc,
+						Required:    !arg.Optional,
+					})
+				}
+
+				discordCmd.Options = append(discordCmd.Options, subCmd)
+			}
+		} else {
+			for _, arg := range beCmd.Args {
+				if arg.Desc == "" || arg.Name == "" {
+					continue
+				}
+
+				log.Info("adding command argument", "command", beCmd.Name,
+					"argument", arg.Name, "desc", arg.Desc)
+
+				discordCmd.Options = append(discordCmd.Options, &discordgo.ApplicationCommandOption{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        arg.Name,
+					Description: arg.Desc,
+					Required:    !arg.Optional,
+				})
 			}
 		}
 
-		cmd, err := bot.Session.ApplicationCommandCreate(bot.Session.State.User.ID, "", &discordCmd)
+		cmd, err := bot.Session.ApplicationCommandCreate(bot.Session.State.User.ID, bot.cfg.GuildID, &discordCmd)
 		if err != nil {
 			log.Error("can not register discord command", "name", discordCmd.Name, "error", err)
 			return err
@@ -105,7 +151,12 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	discordCmd := i.ApplicationCommandData()
 	beInput = append(beInput, discordCmd.Name)
 	for _, opt := range discordCmd.Options {
-		beInput = append(beInput, opt.StringValue())
+		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
+			beInput = append(beInput, opt.Name)
+			for _, args := range opt.Options {
+				beInput = append(beInput, args.StringValue())
+			}
+		}
 	}
 
 	res := db.engine.Run(command.AppIdDiscord, i.Member.User.ID, beInput)

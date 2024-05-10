@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/pactus-project/pactus/crypto"
-	robopac "github.com/robopac-project/RoboPac"
-	rpCmd "github.com/robopac-project/RoboPac/cmd"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/engine"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/log"
+	pagu "github.com/pagu-project/Pagu"
+	pCmd "github.com/pagu-project/Pagu/cmd"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/engine"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/log"
 	cobra "github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ const PROMPT = "\n>> "
 func run(cmd *cobra.Command, args []string) {
 	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
 	config, err := config.Load(*envOpt)
-	rpCmd.ExitOnError(cmd, err)
+	pCmd.ExitOnError(cmd, err)
 
 	log.InitGlobalLogger(config.Logger)
 
@@ -29,7 +29,7 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	botEngine, err := engine.NewBotEngine(config)
-	rpCmd.ExitOnError(cmd, err)
+	pCmd.ExitOnError(cmd, err)
 
 	botEngine.RegisterAllCommands()
 	botEngine.Start()
@@ -58,11 +58,11 @@ func run(cmd *cobra.Command, args []string) {
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:     "robopac-cli",
-		Version: robopac.StringVersion(),
+		Use:     "pagu-cli",
+		Version: pagu.StringVersion(),
 		Run:     run,
 	}
 
 	err := rootCmd.Execute()
-	rpCmd.ExitOnError(rootCmd, err)
+	pCmd.ExitOnError(rootCmd, err)
 }

@@ -75,7 +75,7 @@ func (db *DB) HasUser(id string) bool {
 
 	_ = db.Model(&User{}).
 		Select("count(*) > 0").
-		Where("discord_id = ?", id).
+		Where("id = ?", id).
 		Find(&exists).
 		Error
 

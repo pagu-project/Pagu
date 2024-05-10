@@ -8,8 +8,8 @@ import (
 	amt "github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx/payload"
 	pwallet "github.com/pactus-project/pactus/wallet"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/log"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/log"
 )
 
 type Balance struct {
@@ -23,10 +23,10 @@ type Wallet struct {
 	wallet   *pwallet.Wallet
 }
 
-func Open(cfg *config.PhoenixTestNetWallet) IWallet {
+func Open(cfg *config.Wallet) *Wallet {
 	if doesWalletExist(cfg.Path) {
 
-		wt, err := pwallet.Open(cfg.Path, true)
+		wt, err := pwallet.Open(cfg.Path, false)
 		if err != nil {
 			log.Fatal("error opening existing wallet", "err", err)
 		}

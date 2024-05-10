@@ -7,17 +7,17 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/robopac-project/RoboPac/client"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/utils"
+	"github.com/pagu-project/Pagu/client"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/utils"
 )
 
 const (
-	NetworkCommandName         = "network"
-	NetworkNodeInfoCommandName = "node-info"
-	NetworkStatusCommandName   = "status"
-	NetworkHealthCommandName   = "health"
-	NetworkHelpCommandName     = "help"
+	CommandName         = "network"
+	NodeInfoCommandName = "node-info"
+	StatusCommandName   = "status"
+	HealthCommandName   = "health"
+	HelpCommandName     = "help"
 )
 
 type Network struct {
@@ -66,12 +66,12 @@ type NetStatus struct {
 
 func (n *Network) GetCommand() command.Command {
 	subCmdNodeInfo := command.Command{
-		Name: NetworkNodeInfoCommandName,
+		Name: NodeInfoCommandName,
 		Desc: "View the information of a node",
 		Help: "Provide your validator address on the specific node to get the validator and node info",
 		Args: []command.Args{
 			{
-				Name:     "validator-address",
+				Name:     "validator_address",
 				Desc:     "Your validator address",
 				Optional: false,
 			},
@@ -82,7 +82,7 @@ func (n *Network) GetCommand() command.Command {
 	}
 
 	subCmdHealth := command.Command{
-		Name:        NetworkHealthCommandName,
+		Name:        HealthCommandName,
 		Desc:        "Checking network health status",
 		Help:        "",
 		Args:        []command.Args{},
@@ -92,7 +92,7 @@ func (n *Network) GetCommand() command.Command {
 	}
 
 	subCmdStatus := command.Command{
-		Name:        NetworkStatusCommandName,
+		Name:        StatusCommandName,
 		Desc:        "Network statistics",
 		Help:        "",
 		Args:        []command.Args{},
@@ -102,12 +102,12 @@ func (n *Network) GetCommand() command.Command {
 	}
 
 	cmdNetwork := command.Command{
-		Name:        NetworkCommandName,
+		Name:        CommandName,
 		Desc:        "Network related commands",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      command.AllAppIDs(),
-		SubCommands: make([]command.Command, 3),
+		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}
 
@@ -158,9 +158,9 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 	}
 
 	// Convert NanoPAC to PAC using the Amount type.
-	totalNetworkPower := amount.Amount(chainInfo.TotalPower).ToUnit(amount.UnitPAC)
-	totalCommitteePower := amount.Amount(chainInfo.CommitteePower).ToUnit(amount.UnitPAC)
-	circulatingSupply := amount.Amount(cs).ToUnit(amount.UnitPAC)
+	totalNetworkPower := amount.Amount(chainInfo.TotalPower).ToPAC()
+	totalCommitteePower := amount.Amount(chainInfo.CommitteePower).ToPAC()
+	circulatingSupply := amount.Amount(cs).ToPAC()
 
 	net := NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
@@ -180,9 +180,10 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 		utils.FormatNumber(int64(net.ValidatorsCount)),
 		utils.FormatNumber(int64(net.TotalAccounts)),
 		utils.FormatNumber(int64(net.CurrentBlockHeight)),
-		net.TotalNetworkPower,
-		net.TotalCommitteePower,
-		net.CirculatingSupply)
+		utils.FormatNumber(net.TotalNetworkPower),
+		utils.FormatNumber(net.TotalCommitteePower),
+		utils.FormatNumber(net.CirculatingSupply),
+	)
 }
 
 func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -221,7 +222,7 @@ func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string
 		nodeInfo.ValidatorNum = val.Validator.Number
 		nodeInfo.AvailabilityScore = val.Validator.AvailabilityScore
 		// Convert NanoPAC to PAC using the Amount type and then to int64.
-		stakeAmount := amount.Amount(val.Validator.Stake).ToUnit(amount.UnitPAC)
+		stakeAmount := amount.Amount(val.Validator.Stake).ToPAC()
 		nodeInfo.StakeAmount = int64(stakeAmount) // Convert float64 to int64.
 		nodeInfo.LastBondingHeight = val.Validator.LastBondingHeight
 		nodeInfo.LastSortitionHeight = val.Validator.LastSortitionHeight

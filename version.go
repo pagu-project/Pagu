@@ -1,4 +1,4 @@
-package robopac
+package pagu
 
 import "fmt"
 

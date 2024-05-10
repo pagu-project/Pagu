@@ -3,15 +3,15 @@ package engine
 import (
 	"context"
 
-	"github.com/robopac-project/RoboPac/client"
-	"github.com/robopac-project/RoboPac/config"
-	"github.com/robopac-project/RoboPac/database"
-	"github.com/robopac-project/RoboPac/engine/command"
-	"github.com/robopac-project/RoboPac/engine/command/blockchain"
-	"github.com/robopac-project/RoboPac/engine/command/network"
-	phoenixtestnet "github.com/robopac-project/RoboPac/engine/command/phoenix_testnet"
-	"github.com/robopac-project/RoboPac/log"
-	"github.com/robopac-project/RoboPac/wallet"
+	"github.com/pagu-project/Pagu/client"
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/database"
+	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/engine/command/blockchain"
+	"github.com/pagu-project/Pagu/engine/command/network"
+	phoenixtestnet "github.com/pagu-project/Pagu/engine/command/phoenix"
+	"github.com/pagu-project/Pagu/log"
+	"github.com/pagu-project/Pagu/wallet"
 )
 
 type BotEngine struct {
@@ -22,9 +22,9 @@ type BotEngine struct {
 	phoenixClientMgr *client.Mgr
 	rootCmd          command.Command
 
-	blockchainCmd     blockchain.Blockchain
-	networkCmd        network.Network
-	phoenixTestnetCmd phoenixtestnet.PhoenixTestnet
+	blockchainCmd blockchain.Blockchain
+	networkCmd    network.Network
+	phoenixCmd    phoenixtestnet.Phoenix
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -50,29 +50,44 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	// ? adding phoenix test network client manager.
-	phoenixTestnetCm := client.NewClientMgr(ctx)
+	phoenixCm := client.NewClientMgr(ctx)
 	for _, tnn := range cfg.Phoenix.NetworkNodes {
 		c, err := client.NewClient(tnn)
 		if err != nil {
 			log.Error("can't add new network node client", "err", err, "addr", tnn)
 		}
 
-		phoenixTestnetCm.AddClient(c)
+		phoenixCm.AddClient(c)
 	}
 
 	// ? opening wallet if it's enabled.
-	var wal wallet.IWallet
-	if cfg.PTWallet.Enable {
+	var wal *wallet.Wallet
+	if cfg.Wallet.Enable {
 		// load or create wallet.
-		wal = wallet.Open(&cfg.PTWallet)
+		wal = wallet.Open(&cfg.Wallet)
 		if wal == nil {
 			cancel()
 			return nil, WalletError{
-				Reason: "can't open wallet",
+				Reason: "can't open mainnet wallet",
 			}
 		}
 
 		log.Info("wallet opened successfully", "address", wal.Address())
+	}
+
+	// ? opening testnet (Phoenix) wallet if it's enabled.
+	var phoenixWal *wallet.Wallet
+	if cfg.TestNetWallet.Enable {
+		// load or create wallet.
+		wal = wallet.Open(&cfg.TestNetWallet)
+		if wal == nil {
+			cancel()
+			return nil, WalletError{
+				Reason: "can't open testnet wallet",
+			}
+		}
+
+		log.Info("testnet wallet opened successfully", "address", wal.Address())
 	}
 
 	// ? loading database.
@@ -83,34 +98,34 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	return newBotEngine(cm, phoenixTestnetCm, wal, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, phoenixCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm, ptcm *client.Mgr, w wallet.IWallet, db *database.DB, _ []string,
+func newBotEngine(cm, ptcm *client.Mgr, _ *wallet.Wallet, phoenixWal *wallet.Wallet, db *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
-		Name:        "robopac",
-		Desc:        "RoboPAC",
-		Help:        "RoboPAC Help",
-		AppIDs:      []command.AppID{command.AppIdCLI, command.AppIdDiscord, command.AppIdTelegram},
-		SubCommands: make([]command.Command, 2),
+		Name:        "pagu",
+		Desc:        "Root Command",
+		Help:        "Pagu Help Command",
+		AppIDs:      command.AllAppIDs(),
+		SubCommands: make([]command.Command, 3),
 	}
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := blockchain.NewBlockchain(cm)
-	ptCmd := phoenixtestnet.NewPhoenixTestnet(w, ptcm, *db)
+	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, ptcm, *db)
 
 	return &BotEngine{
-		ctx:               ctx,
-		cancel:            cnl,
-		clientMgr:         cm,
-		rootCmd:           rootCmd,
-		networkCmd:        netCmd,
-		blockchainCmd:     bcCmd,
-		phoenixTestnetCmd: ptCmd,
-		phoenixClientMgr:  ptcm,
+		ctx:              ctx,
+		cancel:           cnl,
+		clientMgr:        cm,
+		rootCmd:          rootCmd,
+		networkCmd:       netCmd,
+		blockchainCmd:    bcCmd,
+		phoenixCmd:       ptCmd,
+		phoenixClientMgr: ptcm,
 	}
 }
 
@@ -121,7 +136,7 @@ func (be *BotEngine) Commands() []command.Command {
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
-	be.rootCmd.AddSubCommand(be.phoenixTestnetCmd.GetCommand())
+	// be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand()) // TODO: FIX WALLET ISSUE
 
 	be.rootCmd.AddHelpSubCommand()
 }
