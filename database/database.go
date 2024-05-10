@@ -20,10 +20,12 @@ func NewDB(path string) (*DB, error) {
 	}
 
 	if !db.Migrator().HasTable(&User{}) ||
-		!db.Migrator().HasTable(&Faucet{}) {
+		!db.Migrator().HasTable(&Faucet{}) ||
+		!db.Migrator().HasTable(&ZealyUser{}) {
 		if err := db.AutoMigrate(
 			&User{},
 			&Faucet{},
+			&ZealyUser{},
 		); err != nil {
 			return nil, MigrationError{
 				Reason: err.Error(),
@@ -100,4 +102,54 @@ func (db *DB) CanGetFaucet(id string) bool {
 	}
 
 	return true
+}
+
+//! Zealy Database
+
+func (db *DB) GetZealyUser(id string) (*ZealyUser, error) {
+	var u *ZealyUser
+	tx := db.Model(&ZealyUser{}).First(&u, "discord_id = ?", id)
+	if tx.Error != nil {
+		return &ZealyUser{}, ReadError{
+			Reason: tx.Error.Error(),
+		}
+	}
+
+	return u, nil
+}
+
+func (db *DB) AddZealyUser(u *ZealyUser) error {
+	tx := db.Create(u)
+	if tx.Error != nil {
+		return WriteError{
+			Reason: tx.Error.Error(),
+		}
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateZealyUser(id string, txHash string) error {
+	tx := db.Model(&ZealyUser{
+		DiscordID: id,
+	}).Where("discord_id = ?", id).Update("tx_hash", txHash).Update("is_claimed", true)
+	if tx.Error != nil {
+		return WriteError{
+			Reason: tx.Error.Error(),
+		}
+	}
+
+	return nil
+}
+
+func (db *DB) GetAllZealyUser() ([]*ZealyUser, error) {
+	var u []*ZealyUser
+	tx := db.Find(&u)
+	if tx.Error != nil {
+		return nil, ReadError{
+			Reason: tx.Error.Error(),
+		}
+	}
+
+	return u, nil
 }

@@ -81,7 +81,10 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 
 func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (string, error) {
 	// Convert int64 to amt.Amount.
-	amountInNanoPAC := amt.Amount(amount)
+	amountInNanoPAC, err := amt.NewAmount(float64(amount))
+	if err != nil {
+		return "", err
+	}
 
 	// claculate fee using amount struct.
 	fee, err := w.wallet.CalculateFee(amountInNanoPAC, payload.TypeTransfer)

@@ -22,3 +22,12 @@ type Faucet struct {
 
 	gorm.Model
 }
+
+type ZealyUser struct {
+	Amount    int64
+	DiscordID string `gorm:"column:discord_id"`
+	IsClaimed bool
+	TxHash    string
+
+	gorm.Model
+}
