@@ -93,7 +93,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 		Help: "Provide your validator address on the specific node to get the validator and node info (Phoenix network)",
 		Args: []command.Args{
 			{
-				Name:     "validator-address",
+				Name:     "validator_address",
 				Desc:     "Your validator address start with tpc1p...",
 				Optional: false,
 			},

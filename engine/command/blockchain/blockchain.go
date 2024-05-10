@@ -36,13 +36,13 @@ func (bc *Blockchain) GetCommand() command.Command {
 		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC suffix",
 		Args: []command.Args{
 			{
-				Name:     "stake-amount",
+				Name:     "stake",
 				Desc:     "Amount of stake in your validator (1-1000)",
 				Optional: false,
 			},
 			{
-				Name:     "time-interval",
-				Desc:     "After one: day | month | year",
+				Name:     "time",
+				Desc:     "After one: day/month/year",
 				Optional: false,
 			},
 		},

@@ -71,7 +71,7 @@ func (n *Network) GetCommand() command.Command {
 		Help: "Provide your validator address on the specific node to get the validator and node info",
 		Args: []command.Args{
 			{
-				Name:     "validator-address",
+				Name:     "validator_address",
 				Desc:     "Your validator address",
 				Optional: false,
 			},
