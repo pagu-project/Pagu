@@ -174,17 +174,28 @@ func Load(filePaths ...string) (*Config, error) {
 func (cfg *Config) BasicCheck() error {
 	if cfg.Wallet.Enable {
 		if cfg.Wallet.Address == "" {
-			return fmt.Errorf("WALLET_ADDRESS is not set")
+			return fmt.Errorf("config: basic check error: WALLET_ADDRESS dose not set")
 		}
 
 		// Check if the WalletPath exists.
-		if !util.PathExists(cfg.Wallet.Address) {
-			return fmt.Errorf("WALLET_PATH does not exist")
+		if !util.PathExists(cfg.Wallet.Path) {
+			return fmt.Errorf("config: basic check error: WALLET_PATH does not exist")
+		}
+	}
+
+	if cfg.TestNetWallet.Enable {
+		if cfg.TestNetWallet.Address == "" {
+			return fmt.Errorf("config: basic check error: TESTNET_WALLET_ADDRESS dose not set")
+		}
+
+		// Check if the WalletPath exists.
+		if !util.PathExists(cfg.TestNetWallet.Path) {
+			return fmt.Errorf("config: basic check error: TESTNET_WALLET_PATH does not exist")
 		}
 	}
 
 	if len(cfg.NetworkNodes) == 0 || len(cfg.Phoenix.NetworkNodes) == 0 {
-		return fmt.Errorf("NETWORK_NODES is not set or incorrect")
+		return fmt.Errorf("config: basic check error: NETWORK_NODES is not set or incorrect")
 	}
 
 	return nil
