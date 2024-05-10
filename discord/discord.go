@@ -81,6 +81,7 @@ func (bot *DiscordBot) registerCommands() error {
 					Type:        discordgo.ApplicationCommandOptionSubCommand,
 					Name:        sCmd.Name,
 					Description: sCmd.Desc,
+					Options:     make([]*discordgo.ApplicationCommandOption, len(sCmd.Args)),
 				}
 
 				for i, arg := range sCmd.Args {
