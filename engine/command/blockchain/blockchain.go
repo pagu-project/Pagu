@@ -89,14 +89,14 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	time := args[1]
+	duration := args[1]
 
 	if stake < 1 || stake > 1_000 {
 		return cmd.ErrorResult(fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
 	}
 
 	var blocks int
-	switch time {
+	switch duration {
 	case "day":
 		blocks = 8640
 	case "month":
@@ -104,8 +104,7 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 	case "year":
 		blocks = 3110400
 	default:
-		blocks = 8640
-		time = "day"
+		return cmd.ErrorResult(fmt.Errorf("Invalid duration '%s'; expected 'day', 'month', or 'year'", duration))
 	}
 
 	bi, err := bc.clientMgr.GetBlockchainInfo()
@@ -117,7 +116,7 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 
 	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
+		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), duration, utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
