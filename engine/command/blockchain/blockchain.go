@@ -118,11 +118,11 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	reward := int64(stake*blocks) / int64(totalPower.ToUnit(amount.UnitPAC))
+	reward := int64(stake*blocks) / int64(totalPower.ToPAC())
 
 	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(bi.TotalPower))
+		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(int64(totalPower.ToPAC())))
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {

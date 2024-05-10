@@ -23,10 +23,10 @@ type Wallet struct {
 	wallet   *pwallet.Wallet
 }
 
-func Open(cfg *config.Wallet) IWallet {
+func Open(cfg *config.Wallet) *Wallet {
 	if doesWalletExist(cfg.Path) {
 
-		wt, err := pwallet.Open(cfg.Path, true)
+		wt, err := pwallet.Open(cfg.Path, false)
 		if err != nil {
 			log.Fatal("error opening existing wallet", "err", err)
 		}

@@ -61,7 +61,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	// ? opening wallet if it's enabled.
-	var wal wallet.IWallet
+	var wal *wallet.Wallet
 	if cfg.Wallet.Enable {
 		// load or create wallet.
 		wal = wallet.Open(&cfg.Wallet)
@@ -76,7 +76,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	// ? opening testnet (Phoenix) wallet if it's enabled.
-	var phoenixWal wallet.IWallet
+	var phoenixWal *wallet.Wallet
 	if cfg.TestNetWallet.Enable {
 		// load or create wallet.
 		wal = wallet.Open(&cfg.TestNetWallet)
@@ -101,7 +101,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(cm, phoenixCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm, ptcm *client.Mgr, _ wallet.IWallet, phoenixWal wallet.IWallet, db *database.DB, _ []string,
+func newBotEngine(cm, ptcm *client.Mgr, _ *wallet.Wallet, phoenixWal *wallet.Wallet, db *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{

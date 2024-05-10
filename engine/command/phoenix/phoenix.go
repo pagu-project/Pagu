@@ -25,12 +25,12 @@ const (
 )
 
 type Phoenix struct {
-	wallet    wallet.IWallet
+	wallet    *wallet.Wallet
 	db        database.DB
 	clientMgr *client.Mgr
 }
 
-func NewPhoenix(wallet wallet.IWallet,
+func NewPhoenix(wallet *wallet.Wallet,
 	clientMgr *client.Mgr, db database.DB,
 ) Phoenix {
 	return Phoenix{
@@ -222,11 +222,11 @@ func (pt *Phoenix) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 	net := network.NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
-		TotalNetworkPower:   totalNetworkPower.ToNanoPAC(),
-		TotalCommitteePower: totalCommitteePower.ToNanoPAC(),
+		TotalNetworkPower:   int64(totalNetworkPower.ToPAC()),
+		TotalCommitteePower: int64(totalCommitteePower.ToPAC()),
 		NetworkName:         netInfo.NetworkName,
 		TotalAccounts:       chainInfo.TotalAccounts,
-		CirculatingSupply:   circulatingSupply.ToNanoPAC(),
+		CirculatingSupply:   int64(circulatingSupply.ToPAC()),
 	}
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
