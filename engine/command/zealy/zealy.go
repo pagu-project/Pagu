@@ -18,7 +18,7 @@ type Zealy struct {
 	wallet *wallet.Wallet
 }
 
-func NewBlockchain(
+func NewZealy(
 	db *database.DB, wallet *wallet.Wallet,
 ) Zealy {
 	return Zealy{
