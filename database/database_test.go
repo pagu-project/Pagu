@@ -48,3 +48,37 @@ func TestUserAndFaucet(t *testing.T) {
 	fmt.Println(u.ID)
 	assert.Error(t, err)
 }
+
+func TestZealyDB(t *testing.T) {
+	db := setup(t)
+
+	err := db.AddZealyUser(&ZealyUser{
+		Amount:    100,
+		DiscordID: "12345678",
+		IsClaimed: false,
+		TxHash:    "",
+	})
+	assert.NoError(t, err)
+
+	uz, err := db.GetZealyUser("12345678")
+	assert.NoError(t, err)
+	assert.Equal(t, false, uz.IsClaimed)
+	assert.Equal(t, "", uz.TxHash)
+	assert.Equal(t, int64(100), uz.Amount)
+
+	err = db.UpdateZealyUser("12345678", "0x123456789")
+	assert.NoError(t, err)
+
+	uz, err = db.GetZealyUser("12345678")
+	assert.NoError(t, err)
+	assert.Equal(t, true, uz.IsClaimed)
+	assert.Equal(t, "0x123456789", uz.TxHash)
+	assert.Equal(t, int64(100), uz.Amount)
+
+	_, err = db.GetZealyUser("87654321")
+	assert.Error(t, err)
+
+	azu, err := db.GetAllZealyUser()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(azu))
+}

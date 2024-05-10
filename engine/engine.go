@@ -10,6 +10,7 @@ import (
 	"github.com/pagu-project/Pagu/engine/command/blockchain"
 	"github.com/pagu-project/Pagu/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/engine/command/phoenix"
+	"github.com/pagu-project/Pagu/engine/command/zealy"
 	"github.com/pagu-project/Pagu/log"
 	"github.com/pagu-project/Pagu/wallet"
 )
@@ -25,6 +26,7 @@ type BotEngine struct {
 	blockchainCmd blockchain.Blockchain
 	networkCmd    network.Network
 	phoenixCmd    phoenixtestnet.Phoenix
+	zealyCmd      zealy.Zealy
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -101,7 +103,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(cm, phoenixCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm, ptcm *client.Mgr, _ *wallet.Wallet, phoenixWal *wallet.Wallet, db *database.DB, _ []string,
+func newBotEngine(cm, ptcm *client.Mgr, wallet *wallet.Wallet, phoenixWal *wallet.Wallet, db *database.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{
@@ -116,6 +118,7 @@ func newBotEngine(cm, ptcm *client.Mgr, _ *wallet.Wallet, phoenixWal *wallet.Wal
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := blockchain.NewBlockchain(cm)
 	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, ptcm, *db)
+	zCmd := zealy.NewZealy(db, wallet)
 
 	return &BotEngine{
 		ctx:              ctx,
@@ -126,6 +129,7 @@ func newBotEngine(cm, ptcm *client.Mgr, _ *wallet.Wallet, phoenixWal *wallet.Wal
 		blockchainCmd:    bcCmd,
 		phoenixCmd:       ptCmd,
 		phoenixClientMgr: ptcm,
+		zealyCmd:         zCmd,
 	}
 }
 
@@ -136,6 +140,7 @@ func (be *BotEngine) Commands() []command.Command {
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.zealyCmd.GetCommand())
 	// be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand()) // TODO: FIX WALLET ISSUE
 
 	be.rootCmd.AddHelpSubCommand()
