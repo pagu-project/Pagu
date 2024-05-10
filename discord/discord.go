@@ -72,7 +72,7 @@ func (bot *DiscordBot) registerCommands() error {
 		discordCmd := discordgo.ApplicationCommand{
 			Name:        beCmd.Name,
 			Description: beCmd.Desc,
-			Options:     make([]*discordgo.ApplicationCommandOption, 3),
+			Options:     make([]*discordgo.ApplicationCommandOption, len(beCmd.SubCommands)),
 		}
 
 		if beCmd.HasSubCommand() {
