@@ -118,11 +118,11 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	reward := int64(stake*blocks) / int64(totalPower.ToPAC())
+	reward := float64(stake*blocks) / totalPower.ToPAC()
 
 	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(int64(totalPower.ToPAC())))
+		utils.FormatNumber(int64(reward)), utils.FormatNumber(int64(stake)), time, totalPower.String())
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -140,8 +140,8 @@ func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ str
 
 	feeAmount := amount.Amount(fee)
 
-	formattedFee := feeAmount.Format(amount.UnitPAC) + " PAC"
+	formattedFee := feeAmount.Format(amount.UnitPAC)
 
-	return cmd.SuccessfulResult("Sending %v PAC will cost %s PAC with current fee percentage."+
+	return cmd.SuccessfulResult("Sending %v PAC will cost %s with current fee percentage."+
 		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, formattedFee)
 }

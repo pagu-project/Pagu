@@ -136,7 +136,7 @@ func (be *BotEngine) Commands() []command.Command {
 func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
-	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
+	// be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand()) // TODO: FIX WALLET ISSUE
 
 	be.rootCmd.AddHelpSubCommand()
 }
