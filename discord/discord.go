@@ -151,6 +151,10 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	discordCmd := i.ApplicationCommandData()
 	beInput = append(beInput, discordCmd.Name)
 	for _, opt := range discordCmd.Options {
+		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
+			continue
+		}
+
 		beInput = append(beInput, opt.StringValue())
 	}
 
