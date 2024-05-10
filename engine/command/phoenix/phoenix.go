@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	PhoenixCommandName         = "phoenix"
-	PhoenixFaucetCommandName   = "faucet"
-	PhoenixWalletCommandName   = "wallet"
-	PhoenixStatusCommandName   = "status"
-	PhoenixHealthCommandName   = "health"
-	PhoenixNodeInfoCommandName = "node-info"
-	PhoenixHelpCommandName     = "help"
+	CommandName         = "phoenix"
+	FaucetCommandName   = "faucet"
+	WalletCommandName   = "wallet"
+	StatusCommandName   = "status"
+	HealthCommandName   = "health"
+	NodeInfoCommandName = "node-info"
+	HelpCommandName     = "help"
 )
 
 type Phoenix struct {
@@ -42,13 +42,13 @@ func NewPhoenix(wallet wallet.IWallet,
 
 func (pt *Phoenix) GetCommand() command.Command {
 	subCmdFaucet := command.Command{
-		Name: PhoenixFaucetCommandName,
+		Name: FaucetCommandName,
 		Desc: "Get 5 tPAC Coins on Phoenix Testnet for Testing your code or project",
 		Help: "There is a limit that you can only get faucets 1 time per day with each user ID and address",
 		Args: []command.Args{
 			{
 				Name:     "address",
-				Desc:     "your testnet address, example: tpc1z....",
+				Desc:     "your testnet address [example: tpc1z...]",
 				Optional: false,
 			},
 		},
@@ -58,7 +58,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 	}
 
 	subCmdWallet := command.Command{
-		Name:        PhoenixWalletCommandName,
+		Name:        WalletCommandName,
 		Desc:        "Check the status of RoboPac faucet address wallet on Phoenix network",
 		Help:        "",
 		Args:        nil,
@@ -68,7 +68,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 	}
 
 	subCmdHealth := command.Command{
-		Name:        PhoenixHealthCommandName,
+		Name:        HealthCommandName,
 		Desc:        "Checking Phoenix test-network health status",
 		Help:        "",
 		Args:        []command.Args{},
@@ -78,7 +78,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 	}
 
 	subCmdStatus := command.Command{
-		Name:        PhoenixStatusCommandName,
+		Name:        StatusCommandName,
 		Desc:        "Phoenix test-network statistics",
 		Help:        "",
 		Args:        []command.Args{},
@@ -88,7 +88,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 	}
 
 	subCmdNodeInfo := command.Command{
-		Name: PhoenixNodeInfoCommandName,
+		Name: NodeInfoCommandName,
 		Desc: "View the information of a node running on Phoenix test-network",
 		Help: "Provide your validator address on the specific node to get the validator and node info (Phoenix network)",
 		Args: []command.Args{
@@ -104,7 +104,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 	}
 
 	cmdPhoenix := command.Command{
-		Name:        PhoenixCommandName,
+		Name:        CommandName,
 		Desc:        "Phoenix Testnet tools and utils for developers",
 		Help:        "",
 		Args:        nil,

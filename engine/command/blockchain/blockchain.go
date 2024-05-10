@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	BlockChainCommandName     = "blockchain"
-	CalcRewardCommandName     = "calc-reward"
-	CalcFeeCommandName        = "calc-fee"
-	BlockChainHelpCommandName = "help"
+	CommandName           = "blockchain"
+	CalcRewardCommandName = "reward-calc"
+	CalcFeeCommandName    = "fee-calc"
+	HelpCommandName       = "help"
 )
 
 type Blockchain struct {
@@ -68,7 +68,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 	}
 
 	cmdBlockchain := command.Command{
-		Name:        BlockChainCommandName,
+		Name:        CommandName,
 		Desc:        "Blockchain information and tools",
 		Help:        "",
 		Args:        nil,

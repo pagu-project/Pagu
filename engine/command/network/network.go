@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	NetworkCommandName         = "network"
-	NetworkNodeInfoCommandName = "node-info"
-	NetworkStatusCommandName   = "status"
-	NetworkHealthCommandName   = "health"
-	NetworkHelpCommandName     = "help"
+	CommandName         = "network"
+	NodeInfoCommandName = "node-info"
+	StatusCommandName   = "status"
+	HealthCommandName   = "health"
+	HelpCommandName     = "help"
 )
 
 type Network struct {
@@ -66,7 +66,7 @@ type NetStatus struct {
 
 func (n *Network) GetCommand() command.Command {
 	subCmdNodeInfo := command.Command{
-		Name: NetworkNodeInfoCommandName,
+		Name: NodeInfoCommandName,
 		Desc: "View the information of a node",
 		Help: "Provide your validator address on the specific node to get the validator and node info",
 		Args: []command.Args{
@@ -82,7 +82,7 @@ func (n *Network) GetCommand() command.Command {
 	}
 
 	subCmdHealth := command.Command{
-		Name:        NetworkHealthCommandName,
+		Name:        HealthCommandName,
 		Desc:        "Checking network health status",
 		Help:        "",
 		Args:        []command.Args{},
@@ -92,7 +92,7 @@ func (n *Network) GetCommand() command.Command {
 	}
 
 	subCmdStatus := command.Command{
-		Name:        NetworkStatusCommandName,
+		Name:        StatusCommandName,
 		Desc:        "Network statistics",
 		Help:        "",
 		Args:        []command.Args{},
@@ -102,7 +102,7 @@ func (n *Network) GetCommand() command.Command {
 	}
 
 	cmdNetwork := command.Command{
-		Name:        NetworkCommandName,
+		Name:        CommandName,
 		Desc:        "Network related commands",
 		Help:        "",
 		Args:        nil,

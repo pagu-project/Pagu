@@ -70,6 +70,7 @@ func (bot *DiscordBot) registerCommands() error {
 		}
 
 		discordCmd := discordgo.ApplicationCommand{
+			Type:        discordgo.ChatApplicationCommand,
 			Name:        beCmd.Name,
 			Description: beCmd.Desc,
 			Options:     make([]*discordgo.ApplicationCommandOption, len(beCmd.SubCommands)),
@@ -106,7 +107,7 @@ func (bot *DiscordBot) registerCommands() error {
 			}
 		}
 
-		cmd, err := bot.Session.ApplicationCommandCreate(bot.Session.State.User.ID, "", &discordCmd)
+		cmd, err := bot.Session.ApplicationCommandCreate(bot.Session.State.User.ID, bot.cfg.GuildID, &discordCmd)
 		if err != nil {
 			log.Error("can not register discord command", "name", discordCmd.Name, "error", err)
 			return err
