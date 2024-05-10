@@ -69,6 +69,8 @@ func (bot *DiscordBot) registerCommands() error {
 			continue
 		}
 
+		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Desc)
+
 		discordCmd := discordgo.ApplicationCommand{
 			Type:        discordgo.ChatApplicationCommand,
 			Name:        beCmd.Name,
@@ -78,15 +80,19 @@ func (bot *DiscordBot) registerCommands() error {
 
 		if beCmd.HasSubCommand() {
 			for index, sCmd := range beCmd.SubCommands {
+				log.Info("adding command sub-command", "command", beCmd.Name,
+					"sub-command", sCmd.Name, "desc", sCmd.Desc)
+
 				subCmd := &discordgo.ApplicationCommandOption{
 					Type:        discordgo.ApplicationCommandOptionSubCommand,
 					Name:        sCmd.Name,
 					Description: sCmd.Desc,
 					Options:     make([]*discordgo.ApplicationCommandOption, len(sCmd.Args)),
-					
 				}
 
 				for i, arg := range sCmd.Args {
+					log.Info("adding sub command argument", "command", beCmd.Name,
+						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
 					subCmd.Options[i] = &discordgo.ApplicationCommandOption{
 						Type:        discordgo.ApplicationCommandOptionString,
 						Name:        arg.Name,
@@ -99,6 +105,8 @@ func (bot *DiscordBot) registerCommands() error {
 			}
 		} else {
 			for index, arg := range beCmd.Args {
+				log.Info("adding command argument", "command", beCmd.Name,
+					"argument", arg.Name, "desc", arg.Desc)
 				discordCmd.Options[index] = &discordgo.ApplicationCommandOption{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        arg.Name,
