@@ -152,10 +152,10 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	beInput = append(beInput, discordCmd.Name)
 	for _, opt := range discordCmd.Options {
 		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
-			continue
+			beInput = append(beInput, opt.Name)
+		} else {
+			beInput = append(beInput, opt.StringValue())
 		}
-
-		beInput = append(beInput, opt.StringValue())
 	}
 
 	res := db.engine.Run(command.AppIdDiscord, i.Member.User.ID, beInput)
