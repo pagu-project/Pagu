@@ -126,13 +126,13 @@ func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ str
 		return cmd.ErrorResult(err)
 	}
 
-	fee, err := bc.clientMgr.GetFee(amt.ToNanoPAC())
+	fee, err := bc.clientMgr.GetFee(int64(amt))
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	calcedFee := amount.Amount(fee)
+	calcedFee := amount.Amount(fee).ToPAC()
 
-	return cmd.SuccessfulResult("Sending %s will cost %s with current fee percentage."+
-		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, calcedFee)
+	return cmd.SuccessfulResult("Sending %s will cost %s PAC with current fee percentage."+
+		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, utils.FormatNumber(int64(calcedFee)))
 }

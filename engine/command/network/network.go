@@ -158,9 +158,9 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 	}
 
 	// Convert NanoPAC to PAC using the Amount type.
-	totalNetworkPower := amount.Amount(chainInfo.TotalPower).ToUnit(amount.UnitPAC)
-	totalCommitteePower := amount.Amount(chainInfo.CommitteePower).ToUnit(amount.UnitPAC)
-	circulatingSupply := amount.Amount(cs).ToUnit(amount.UnitPAC)
+	totalNetworkPower := amount.Amount(chainInfo.TotalPower).ToPAC()
+	totalCommitteePower := amount.Amount(chainInfo.CommitteePower).ToPAC()
+	circulatingSupply := amount.Amount(cs).ToPAC()
 
 	net := NetStatus{
 		ValidatorsCount:     chainInfo.TotalValidators,
@@ -180,9 +180,10 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 		utils.FormatNumber(int64(net.ValidatorsCount)),
 		utils.FormatNumber(int64(net.TotalAccounts)),
 		utils.FormatNumber(int64(net.CurrentBlockHeight)),
-		net.TotalNetworkPower,
-		net.TotalCommitteePower,
-		net.CirculatingSupply)
+		utils.FormatNumber(net.TotalNetworkPower),
+		utils.FormatNumber(net.TotalCommitteePower),
+		utils.FormatNumber(net.CirculatingSupply),
+	)
 }
 
 func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
@@ -221,7 +222,7 @@ func (n *Network) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string
 		nodeInfo.ValidatorNum = val.Validator.Number
 		nodeInfo.AvailabilityScore = val.Validator.AvailabilityScore
 		// Convert NanoPAC to PAC using the Amount type and then to int64.
-		stakeAmount := amount.Amount(val.Validator.Stake).ToUnit(amount.UnitPAC)
+		stakeAmount := amount.Amount(val.Validator.Stake).ToPAC()
 		nodeInfo.StakeAmount = int64(stakeAmount) // Convert float64 to int64.
 		nodeInfo.LastBondingHeight = val.Validator.LastBondingHeight
 		nodeInfo.LastSortitionHeight = val.Validator.LastSortitionHeight
