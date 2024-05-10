@@ -137,8 +137,6 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
-
-	be.rootCmd.AddHelpSubCommand()
 }
 
 func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) command.CommandResult {

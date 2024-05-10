@@ -109,7 +109,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      command.AllAppIDs(),
-		SubCommands: make([]command.Command, 2),
+		SubCommands: make([]command.Command, 5),
 		Handler:     nil,
 	}
 
