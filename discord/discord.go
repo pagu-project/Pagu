@@ -64,12 +64,12 @@ func (bot *DiscordBot) registerCommands() error {
 	})
 
 	beCmds := bot.engine.Commands()
-	for _, beCmd := range beCmds {
+	for i, beCmd := range beCmds {
 		if !beCmd.HasAppId(command.AppIdDiscord) {
 			continue
 		}
 
-		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Desc)
+		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Desc, "index", i, "object", beCmd)
 
 		discordCmd := discordgo.ApplicationCommand{
 			Type:        discordgo.ChatApplicationCommand,
@@ -80,6 +80,10 @@ func (bot *DiscordBot) registerCommands() error {
 
 		if beCmd.HasSubCommand() {
 			for index, sCmd := range beCmd.SubCommands {
+				if sCmd.Name == "" || sCmd.Desc == "" {
+					continue
+				}
+
 				log.Info("adding command sub-command", "command", beCmd.Name,
 					"sub-command", sCmd.Name, "desc", sCmd.Desc)
 
@@ -91,6 +95,10 @@ func (bot *DiscordBot) registerCommands() error {
 				}
 
 				for i, arg := range sCmd.Args {
+					if arg.Desc == "" || arg.Name == "" {
+						continue
+					}
+
 					log.Info("adding sub command argument", "command", beCmd.Name,
 						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
 					subCmd.Options[i] = &discordgo.ApplicationCommandOption{
@@ -105,6 +113,10 @@ func (bot *DiscordBot) registerCommands() error {
 			}
 		} else {
 			for index, arg := range beCmd.Args {
+				if arg.Desc == "" || arg.Name == "" {
+					continue
+				}
+
 				log.Info("adding command argument", "command", beCmd.Name,
 					"argument", arg.Name, "desc", arg.Desc)
 				discordCmd.Options[index] = &discordgo.ApplicationCommandOption{
