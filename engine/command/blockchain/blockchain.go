@@ -113,33 +113,26 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	totalPower, err := amount.NewAmount(float64(bi.TotalPower))
-	if err != nil {
-		return cmd.ErrorResult(err)
-	}
+	reward := int64(stake*blocks) / int64(amount.Amount(bi.TotalPower).ToPAC())
 
-	reward := int64(stake*blocks) / int64(totalPower.ToPAC())
-
-	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %v PAC total power ⚡ of committee."+
+	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, totalPower.ToPAC())
+		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), time, utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
-	amt, err := strconv.ParseInt(args[0], 10, 64)
+	amt, err := amount.FromString(args[0])
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	amtAmount := amount.Amount(amt)
-
-	fee, err := bc.clientMgr.GetFee(amtAmount.ToNanoPAC())
+	fee, err := bc.clientMgr.GetFee(amt.ToNanoPAC())
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	feeAmount := amount.Amount(fee).ToPAC()
+	calcedFee := amount.Amount(fee)
 
-	return cmd.SuccessfulResult("Sending %v PAC will cost %v PAC with current fee percentage."+
-		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, feeAmount)
+	return cmd.SuccessfulResult("Sending %s will cost %s with current fee percentage."+
+		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, calcedFee)
 }
