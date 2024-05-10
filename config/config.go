@@ -107,11 +107,9 @@ func Load(filePaths ...string) (*Config, error) {
 		return nil, err
 	}
 
-	targets := strings.Split(os.Getenv("LOG_TARGETS"), ",")
-
 	chatID, err := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse GroupLink: %w", err)
+		return nil, err
 	}
 
 	// Fetch config values from environment variables.
@@ -145,7 +143,7 @@ func Load(filePaths ...string) (*Config, error) {
 		Logger: Logger{
 			LogLevel:   os.Getenv("LOG_LEVEL"),
 			Filename:   os.Getenv("LOG_FILENAME"),
-			Targets:    targets,
+			Targets:    strings.Split(os.Getenv("LOG_TARGETS"), ","),
 			MaxSize:    maxSize,
 			MaxBackups: maxBackups,
 			Compress:   compress,

@@ -1,4 +1,4 @@
-package phoenixtestnet
+package phoenix
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	PhoenixTestnetCommandName  = "phoenix"
+	PhoenixCommandName         = "phoenix"
 	PhoenixFaucetCommandName   = "faucet"
 	PhoenixWalletCommandName   = "wallet"
 	PhoenixStatusCommandName   = "status"
@@ -24,23 +24,23 @@ const (
 	PhoenixHelpCommandName     = "help"
 )
 
-type PhoenixTestnet struct {
+type Phoenix struct {
 	wallet    wallet.IWallet
 	db        database.DB
 	clientMgr *client.Mgr
 }
 
-func NewPhoenixTestnet(wallet wallet.IWallet,
+func NewPhoenix(wallet wallet.IWallet,
 	clientMgr *client.Mgr, db database.DB,
-) PhoenixTestnet {
-	return PhoenixTestnet{
+) Phoenix {
+	return Phoenix{
 		wallet:    wallet,
 		clientMgr: clientMgr,
 		db:        db,
 	}
 }
 
-func (pt *PhoenixTestnet) GetCommand() command.Command {
+func (pt *Phoenix) GetCommand() command.Command {
 	subCmdFaucet := command.Command{
 		Name: PhoenixFaucetCommandName,
 		Desc: "Get 5 tPAC Coins on Phoenix Testnet for Testing your code or project",
@@ -103,8 +103,8 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 		Handler:     pt.nodeInfoHandler,
 	}
 
-	cmdPhoenixTestnet := command.Command{
-		Name:        PhoenixTestnetCommandName,
+	cmdPhoenix := command.Command{
+		Name:        PhoenixCommandName,
 		Desc:        "Phoenix Testnet tools and utils for developers",
 		Help:        "",
 		Args:        nil,
@@ -113,16 +113,16 @@ func (pt *PhoenixTestnet) GetCommand() command.Command {
 		Handler:     nil,
 	}
 
-	cmdPhoenixTestnet.AddSubCommand(subCmdFaucet)
-	cmdPhoenixTestnet.AddSubCommand(subCmdWallet)
-	cmdPhoenixTestnet.AddSubCommand(subCmdHealth)
-	cmdPhoenixTestnet.AddSubCommand(subCmdStatus)
-	cmdPhoenixTestnet.AddSubCommand(subCmdNodeInfo)
+	cmdPhoenix.AddSubCommand(subCmdFaucet)
+	cmdPhoenix.AddSubCommand(subCmdWallet)
+	cmdPhoenix.AddSubCommand(subCmdHealth)
+	cmdPhoenix.AddSubCommand(subCmdStatus)
+	cmdPhoenix.AddSubCommand(subCmdNodeInfo)
 
-	return cmdPhoenixTestnet
+	return cmdPhoenix
 }
 
-func (pt *PhoenixTestnet) faucetHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
+func (pt *Phoenix) faucetHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
 	if !pt.db.HasUser(callerID) {
 		if err := pt.db.AddUser(
 			&database.User{
@@ -142,7 +142,7 @@ func (pt *PhoenixTestnet) faucetHandler(cmd command.Command, _ command.AppID, ca
 	}
 
 	toAddr := args[0]
-	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet RoboPac Faucet", 5) //! define me on config?
+	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu Faucet", 5) //! define me on config?
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
@@ -159,11 +159,11 @@ func (pt *PhoenixTestnet) faucetHandler(cmd command.Command, _ command.AppID, ca
 	return cmd.SuccessfulResult("You got %d tPAC in %s address on Phoenix Testnet!", 5, toAddr)
 }
 
-func (pt *PhoenixTestnet) walletHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
-	return cmd.SuccessfulResult("RoboPac Phoenix Address: %s\nBalance: %d", pt.wallet.Address(), pt.wallet.Balance())
+func (pt *Phoenix) walletHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+	return cmd.SuccessfulResult("Pagu Phoenix Address: %s\nBalance: %d", pt.wallet.Address(), pt.wallet.Balance())
 }
 
-func (pt *PhoenixTestnet) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+func (pt *Phoenix) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
 	lastBlockTime, lastBlockHeight := pt.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0).Format("02/01/2006, 15:04:05")
 	currentTime := time.Now()
@@ -186,7 +186,7 @@ func (pt *PhoenixTestnet) networkHealthHandler(cmd command.Command, _ command.Ap
 		status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils.FormatNumber(int64(lastBlockHeight)))
 }
 
-func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+func (pt *Phoenix) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
 	netInfo, err := pt.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
@@ -242,7 +242,7 @@ func (pt *PhoenixTestnet) networkStatusHandler(cmd command.Command, _ command.Ap
 		net.CirculatingSupply)
 }
 
-func (pt *PhoenixTestnet) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := pt.clientMgr.GetPeerInfo(valAddress)

@@ -68,17 +68,40 @@ func (bot *DiscordBot) registerCommands() error {
 		if !beCmd.HasAppId(command.AppIdDiscord) {
 			continue
 		}
+
 		discordCmd := discordgo.ApplicationCommand{
 			Name:        beCmd.Name,
 			Description: beCmd.Desc,
-			Options:     make([]*discordgo.ApplicationCommandOption, len(beCmd.Args)),
+			Options:     make([]*discordgo.ApplicationCommandOption, 3),
 		}
-		for index, arg := range beCmd.Args {
-			discordCmd.Options[index] = &discordgo.ApplicationCommandOption{
-				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        arg.Name,
-				Description: arg.Desc,
-				Required:    !arg.Optional,
+
+		if beCmd.HasSubCommand() {
+			for index, sCmd := range beCmd.SubCommands {
+				subCmd := &discordgo.ApplicationCommandOption{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        sCmd.Name,
+					Description: sCmd.Desc,
+				}
+
+				for i, arg := range sCmd.Args {
+					subCmd.Options[i] = &discordgo.ApplicationCommandOption{
+						Type:        discordgo.ApplicationCommandOptionString,
+						Name:        arg.Name,
+						Description: arg.Desc,
+						Required:    !arg.Optional,
+					}
+				}
+
+				discordCmd.Options[index] = subCmd
+			}
+		} else {
+			for index, arg := range beCmd.Args {
+				discordCmd.Options[index] = &discordgo.ApplicationCommandOption{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        arg.Name,
+					Description: arg.Desc,
+					Required:    !arg.Optional,
+				}
 			}
 		}
 
