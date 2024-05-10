@@ -75,11 +75,10 @@ func (bot *DiscordBot) registerCommands() error {
 			Type:        discordgo.ChatApplicationCommand,
 			Name:        beCmd.Name,
 			Description: beCmd.Desc,
-			Options:     make([]*discordgo.ApplicationCommandOption, len(beCmd.SubCommands)),
 		}
 
 		if beCmd.HasSubCommand() {
-			for index, sCmd := range beCmd.SubCommands {
+			for _, sCmd := range beCmd.SubCommands {
 				if sCmd.Name == "" || sCmd.Desc == "" {
 					continue
 				}
@@ -91,41 +90,41 @@ func (bot *DiscordBot) registerCommands() error {
 					Type:        discordgo.ApplicationCommandOptionSubCommand,
 					Name:        sCmd.Name,
 					Description: sCmd.Desc,
-					Options:     make([]*discordgo.ApplicationCommandOption, len(sCmd.Args)),
-					Required:    true,
 				}
 
-				for i, arg := range sCmd.Args {
+				for _, arg := range sCmd.Args {
 					if arg.Desc == "" || arg.Name == "" {
 						continue
 					}
 
 					log.Info("adding sub command argument", "command", beCmd.Name,
 						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
-					subCmd.Options[i] = &discordgo.ApplicationCommandOption{
+
+					subCmd.Options = append(subCmd.Options, &discordgo.ApplicationCommandOption{
 						Type:        discordgo.ApplicationCommandOptionString,
 						Name:        arg.Name,
 						Description: arg.Desc,
 						Required:    !arg.Optional,
-					}
+					})
 				}
 
-				discordCmd.Options[index] = subCmd
+				discordCmd.Options = append(discordCmd.Options, subCmd)
 			}
 		} else {
-			for index, arg := range beCmd.Args {
+			for _, arg := range beCmd.Args {
 				if arg.Desc == "" || arg.Name == "" {
 					continue
 				}
 
 				log.Info("adding command argument", "command", beCmd.Name,
 					"argument", arg.Name, "desc", arg.Desc)
-				discordCmd.Options[index] = &discordgo.ApplicationCommandOption{
+
+				discordCmd.Options = append(discordCmd.Options, &discordgo.ApplicationCommandOption{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        arg.Name,
 					Description: arg.Desc,
 					Required:    !arg.Optional,
-				}
+				})
 			}
 		}
 

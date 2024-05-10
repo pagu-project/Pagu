@@ -107,7 +107,7 @@ func (n *Network) GetCommand() command.Command {
 		Help:        "",
 		Args:        nil,
 		AppIDs:      command.AllAppIDs(),
-		SubCommands: make([]command.Command, 3),
+		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}
 

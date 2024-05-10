@@ -135,6 +135,10 @@ func (cmd *Command) HelpMessage() string {
 }
 
 func (cmd *Command) AddSubCommand(subCmd Command) {
+	if subCmd.HasSubCommand() {
+		subCmd.AddHelpSubCommand()
+	}
+
 	cmd.SubCommands = append(cmd.SubCommands, subCmd)
 }
 
