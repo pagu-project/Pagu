@@ -8,6 +8,7 @@ import (
 	"github.com/pagu-project/Pagu/client"
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/utils"
+	// "github.com/pagu-project/Pagu/utils"
 )
 
 const (
@@ -114,11 +115,12 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 
 	rewardInt := stake * blocks / int(amount.Amount(bi.TotalPower).ToPAC())
 
-	reward := amount.Amount(rewardInt)
+	// convert from nanoPac to PAC.
+	totalPowerInPAC := bi.TotalPower / 1_000_000_000
 
 	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(int64(reward)), utils.FormatNumber(int64(stake)), duration, utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
+		rewardInt, strconv.Itoa(stake), duration, utils.FormatNumber(totalPowerInPAC))
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
