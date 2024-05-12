@@ -8,7 +8,6 @@ import (
 	"github.com/pagu-project/Pagu/client"
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/utils"
-	// "github.com/pagu-project/Pagu/utils"
 )
 
 const (
