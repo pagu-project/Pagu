@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/client"
@@ -42,7 +41,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 			{
 				Name:     "duration",
-				Desc:     "After one: day/month/year",
+				Desc:     "After one: day",
 				Optional: false,
 			},
 		},
@@ -84,42 +83,33 @@ func (bc *Blockchain) GetCommand() command.Command {
 }
 
 func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
-	stake, err := strconv.Atoi(args[0])
+	stakeAmt, err := amount.FromString(args[0])
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	duration := args[1]
+	minStake, _ := amount.NewAmount(1)
+	maxStake, _ := amount.NewAmount(1000)
 
-	if stake < 1 || stake > 1_000 {
-		return cmd.ErrorResult(fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
+	if stakeAmt < minStake || stakeAmt > maxStake {
+		return cmd.ErrorResult(fmt.Errorf("%s is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stakeAmt))
 	}
 
-	var blocks int
-	switch duration {
-	case "day":
-		blocks = 8640
-	case "month":
-		blocks = 259200
-	case "year":
-		blocks = 3110400
-	default:
-		return cmd.ErrorResult(fmt.Errorf("Invalid duration '%s'; expected 'day', 'month', or 'year'", duration))
-	}
+	blocks := 8640
 
 	bi, err := bc.clientMgr.GetBlockchainInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	rewardInt := stake * blocks / int(amount.Amount(bi.TotalPower).ToPAC())
+	totalPowerAmt := amount.Amount(bi.TotalPower)
 
-	// convert from nanoPac to PAC.
-	totalPowerInPAC := bi.TotalPower / 1_000_000_000
+	rewardAmt := stakeAmt.MulF64(float64(blocks)) / totalPowerAmt
+	convertedRewardAmt := amount.Amount(rewardAmt)
 
-	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator in one %s ⏰ with %s total power ⚡ of committee."+
-		"\n\n> Note📝: This number is just an estimation. It will vary depending on your stake amount and total network power.",
-		rewardInt, strconv.Itoa(stake), duration, utils.FormatNumber(totalPowerInPAC))
+	return cmd.SuccessfulResult("Approximately you earn %s reward, with %s stake 🔒 on your validator in one day with %s total power⚡of committee."+
+		"\n\n> Note📝: This number is just an estimation.",
+		utils.FormatNumber(int64(convertedRewardAmt)), stakeAmt, totalPowerAmt)
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
