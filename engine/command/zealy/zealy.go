@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	CommandName       = "zealy"
-	ClaimCommandName  = "claim"
-	StatusCommandName = "status"
-	HelpCommandName   = "help"
+	CommandName              = "zealy"
+	ClaimCommandName         = "claim"
+	StatusCommandName        = "status"
+	ImportWinnersCommandName = "import-winners"
+	HelpCommandName          = "help"
 )
 
 type Zealy struct {
@@ -67,6 +68,24 @@ func (z *Zealy) GetCommand() command.Command {
 	cmdZealy.AddSubCommand(subCmdClaim)
 	cmdZealy.AddSubCommand(subCmdStatus)
 
+	// only accessible from cli
+	subCmdImportWinners := command.Command{
+		Name: ImportWinnersCommandName,
+		Desc: "Import Zealy winners using csv file",
+		Help: "",
+		Args: []command.Args{
+			{
+				Name:     "path",
+				Desc:     "CSV file path",
+				Optional: false,
+			},
+		},
+		SubCommands: nil,
+		AppIDs:      []command.AppID{command.AppIdCLI},
+		Handler:     z.importWinnersHandler,
+	}
+
+	cmdZealy.AddSubCommand(subCmdImportWinners)
 	return cmdZealy
 }
 
