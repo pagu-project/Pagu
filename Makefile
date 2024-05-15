@@ -37,6 +37,10 @@ fmt:
 check:
 	golangci-lint run --timeout=20m0s
 
+### vendor
+vendor:
+	go mod vendor
+
 ### building
 build: build-cli build-dc build-grpc build-tg build-http
 

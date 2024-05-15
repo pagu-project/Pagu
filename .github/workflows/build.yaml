@@ -23,5 +23,8 @@ jobs:
         with:
           go-version: 1.21.1
 
+      - name: Vendor dependencies
+        run:  make vendor
+
       - name: Build the binary
         run:  make build
