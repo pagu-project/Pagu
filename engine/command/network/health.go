@@ -1,9 +1,10 @@
 package network
 
 import (
+	"time"
+
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/utils"
-	"time"
 )
 
 func (n *Network) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {

@@ -1,14 +1,15 @@
 package zealy
 
 import (
+	"os"
+	"testing"
+
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/database"
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/wallet"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 func setupClaimTest(t *testing.T) *Zealy {

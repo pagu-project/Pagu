@@ -2,10 +2,11 @@ package blockchain
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/utils"
-	"strconv"
 )
 
 func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {

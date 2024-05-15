@@ -1,12 +1,13 @@
 package zealy
 
 import (
+	"os"
+	"testing"
+
 	"github.com/pagu-project/Pagu/database"
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 func setupStatusTest(t *testing.T) *Zealy {
@@ -25,7 +26,7 @@ func TestStatus(t *testing.T) {
 	t.Run("everything normal and good", func(t *testing.T) {
 		zealy := setupStatusTest(t)
 
-		//claimed
+		// claimed
 		_ = zealy.db.AddZealyUser(&database.ZealyUser{
 			Amount:    100,
 			DiscordID: "userID1",
@@ -33,7 +34,7 @@ func TestStatus(t *testing.T) {
 			TxHash:    "txHash1",
 		})
 
-		//claimed
+		// claimed
 		_ = zealy.db.AddZealyUser(&database.ZealyUser{
 			Amount:    100,
 			DiscordID: "userID2",
@@ -41,7 +42,7 @@ func TestStatus(t *testing.T) {
 			TxHash:    "txHash2",
 		})
 
-		//claimed
+		// claimed
 		_ = zealy.db.AddZealyUser(&database.ZealyUser{
 			Amount:    100,
 			DiscordID: "userID3",
@@ -49,7 +50,7 @@ func TestStatus(t *testing.T) {
 			TxHash:    "txHash3",
 		})
 
-		//not claimed
+		// not claimed
 		_ = zealy.db.AddZealyUser(&database.ZealyUser{
 			Amount:    100,
 			DiscordID: "userID4",

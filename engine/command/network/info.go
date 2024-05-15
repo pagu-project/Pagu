@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/engine/command"

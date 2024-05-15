@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+
 	"github.com/pagu-project/Pagu/client"
 	"github.com/pagu-project/Pagu/engine/command"
 )

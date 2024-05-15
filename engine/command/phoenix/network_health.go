@@ -1,11 +1,12 @@
 package phoenix
 
 import (
+	"time"
+
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/engine/command/network"
 	"github.com/pagu-project/Pagu/utils"
-	"time"
 )
 
 func (pt *Phoenix) networkHealthHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
