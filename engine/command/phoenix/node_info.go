@@ -5,10 +5,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
+	"github.com/pagu-project/Pagu/engine/command"
 	"github.com/pagu-project/Pagu/engine/command/network"
 	"github.com/pagu-project/Pagu/utils"
-
-	"github.com/pagu-project/Pagu/engine/command"
 )
 
 func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {

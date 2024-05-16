@@ -5,9 +5,8 @@ import (
 	"strconv"
 
 	"github.com/pactus-project/pactus/types/amount"
-	"github.com/pagu-project/Pagu/utils"
-
 	"github.com/pagu-project/Pagu/engine/command"
+	"github.com/pagu-project/Pagu/utils"
 )
 
 func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
