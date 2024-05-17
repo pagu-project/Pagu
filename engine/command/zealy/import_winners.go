@@ -39,7 +39,6 @@ func (z *Zealy) importWinnersHandler(cmd command.Command, appID command.AppID, _
 		if err := z.db.AddZealyUser(&database.ZealyUser{
 			Amount:    int64(prize),
 			DiscordID: discordID,
-			IsClaimed: false,
 			TxHash:    "",
 		}); err != nil {
 			return cmd.FailedResult("error in adding zealy user into db. discord ID: %s", discordID)

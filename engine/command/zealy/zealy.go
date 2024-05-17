@@ -95,13 +95,13 @@ func (z *Zealy) claimHandler(cmd command.Command, _ command.AppID, callerID stri
 		return cmd.ErrorResult(err)
 	}
 
-	if user.IsClaimed {
+	if len(user.TxHash) > 0 {
 		return cmd.FailedResult("You already claimed your reward: https://pacviewer.com/transaction/%s",
 			user.TxHash)
 	}
 
 	address := args[0]
-	txHash, err := z.wallet.TransferTransaction(address, "Pagu Zealy reward distribution", int64(user.Amount))
+	txHash, err := z.wallet.TransferTransaction(address, "PaGu Zealy reward distribution", int64(user.Amount))
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
@@ -132,7 +132,7 @@ func (z *Zealy) statusHandler(cmd command.Command, _ command.AppID, _ string, ar
 		total++
 		totalAmount += int(u.Amount)
 
-		if u.IsClaimed {
+		if len(u.TxHash) > 0 {
 			totalClaimed++
 			totalClaimedAmount += int(u.Amount)
 		} else {

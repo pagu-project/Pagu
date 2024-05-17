@@ -27,7 +27,7 @@ func TestImportWinnersHandler(t *testing.T) {
 		users, err := zealy.db.GetAllZealyUser()
 		assert.Equal(t, nil, err)
 		for i, u := range users {
-			assert.Equal(t, false, u.IsClaimed)
+			assert.Equal(t, "", u.TxHash)
 			assert.Equal(t, fmt.Sprintf("id%d", i+1), u.DiscordID)
 			assert.Equal(t, int64(i+1), u.Amount)
 		}
@@ -48,7 +48,7 @@ func TestImportWinnersHandler(t *testing.T) {
 		users, err := zealy.db.GetAllZealyUser()
 		assert.Equal(t, nil, err)
 		for i, u := range users {
-			assert.Equal(t, false, u.IsClaimed)
+			assert.Equal(t, "", u.TxHash)
 			assert.Equal(t, fmt.Sprintf("id%d", i+1), u.DiscordID)
 			assert.Equal(t, int64(i+1), u.Amount)
 		}
