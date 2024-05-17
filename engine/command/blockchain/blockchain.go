@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/client"
@@ -41,7 +42,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 			{
 				Name:     "duration",
-				Desc:     "After one: day",
+				Desc:     "Number of days to stake",
 				Optional: false,
 			},
 		},
@@ -88,6 +89,11 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
+	duration, err := strconv.Atoi(args[1])
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
 	minStake, _ := amount.NewAmount(1)
 	maxStake, _ := amount.NewAmount(1000)
 
@@ -95,7 +101,7 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(fmt.Errorf("%s is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stakeAmt))
 	}
 
-	blocks := 8640
+	blocksPerDay := 8640
 
 	bi, err := bc.clientMgr.GetBlockchainInfo()
 	if err != nil {
@@ -103,13 +109,12 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 	}
 
 	totalPowerAmt := amount.Amount(bi.TotalPower)
-
-	rewardAmt := stakeAmt.MulF64(float64(blocks)) / totalPowerAmt
+	rewardAmt := stakeAmt.MulF64(float64(duration)*float64(blocksPerDay)) / totalPowerAmt
 	convertedRewardAmt := amount.Amount(rewardAmt)
 
-	return cmd.SuccessfulResult("Approximately you earn %s reward, with %s stake 🔒 on your validator in one day with %s total power⚡of committee."+
+	return cmd.SuccessfulResult("Approximately, you will earn %s reward by staking %s  for %d days with %s total power⚡ of the committee."+
 		"\n\n> Note📝: This number is just an estimation.",
-		utils.FormatNumber(int64(convertedRewardAmt)), stakeAmt, totalPowerAmt)
+		utils.FormatNumber(int64(convertedRewardAmt)), stakeAmt, duration, totalPowerAmt)
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {

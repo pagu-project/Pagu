@@ -46,6 +46,7 @@ type Args struct {
 	Name     string
 	Desc     string
 	Optional bool
+	Choices  string
 }
 
 type Command struct {
