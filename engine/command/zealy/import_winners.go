@@ -11,10 +11,10 @@ import (
 )
 
 /*
-importWinnersHandler gives a csv file with below format and push the data into ZealyUser table
-Position| Discord User 	| 	Prize
-1st		|	user_id_1	|	amount
-2nd		|	user_id_2	|	amount
+importWinnersHandler gives a csv file with below format and push the data into ZealyUser table.
+Position| Discord User 	| 	Prize	.
+1st		|	user_id_1	|	amount	.
+2nd		|	user_id_2	|	amount	.
 */
 func (z *Zealy) importWinnersHandler(cmd command.Command, appID command.AppID, _ string, args ...string) command.CommandResult {
 	if appID != command.AppIdCLI {
