@@ -22,7 +22,7 @@ func TestImportWinnersHandler(t *testing.T) {
 		expectedRes := zealy.importWinnersHandler(cmd, command.AppIdCLI, "", tempFile.Name())
 
 		assert.Equal(t, true, expectedRes.Successful)
-		assert.Equal(t, "Imported successfully\nTotal inserted: 3\nTotal duplicate: 0", expectedRes.Message)
+		assert.Equal(t, "Imported successfully\nTotal inserted: 3", expectedRes.Message)
 
 		users, err := zealy.db.GetAllZealyUser()
 		assert.Equal(t, nil, err)
@@ -42,8 +42,8 @@ func TestImportWinnersHandler(t *testing.T) {
 		cmd := zealy.GetCommand()
 		expectedRes := zealy.importWinnersHandler(cmd, command.AppIdCLI, "", tempFile.Name())
 
-		assert.Equal(t, true, expectedRes.Successful)
-		assert.Equal(t, "Imported successfully\nTotal inserted: 3\nTotal duplicate: 1", expectedRes.Message)
+		assert.Equal(t, false, expectedRes.Successful)
+		assert.Equal(t, "An error occurred: duplicate zealy user with discord ID: id3", expectedRes.Message)
 
 		users, err := zealy.db.GetAllZealyUser()
 		assert.Equal(t, nil, err)
@@ -75,6 +75,16 @@ func TestImportWinnersHandler(t *testing.T) {
 
 		assert.Equal(t, false, expectedRes.Successful)
 		assert.Equal(t, "please specify a file path to import", expectedRes.Message)
+	})
+
+	t.Run("wrong csv file passed", func(t *testing.T) {
+		zealy := setup(t)
+
+		cmd := zealy.GetCommand()
+		expectedRes := zealy.importWinnersHandler(cmd, command.AppIdCLI, "", "fake_csv_file_address")
+
+		assert.Equal(t, false, expectedRes.Successful)
+		assert.Equal(t, "An error occurred: csv file is not valid", expectedRes.Message)
 	})
 }
 
