@@ -17,7 +17,6 @@ Position| Discord User 	| 	Prize	.
 2nd		|	user_id_2	|	amount	.
 */
 func (z *Zealy) importWinnersHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
-
 	if len(args) == 0 {
 		return cmd.FailedResult("please specify a file path to import")
 	}
