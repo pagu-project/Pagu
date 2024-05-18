@@ -30,3 +30,7 @@ type ZealyUser struct {
 
 	gorm.Model
 }
+
+func (z *ZealyUser) IsClaimed() bool {
+	return len(z.TxHash) > 0
+}

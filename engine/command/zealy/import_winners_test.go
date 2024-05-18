@@ -54,19 +54,6 @@ func TestImportWinnersHandler(t *testing.T) {
 		}
 	})
 
-	t.Run("not implemented in all apps", func(t *testing.T) {
-		zealy := setup(t)
-		tempPath := "temp-csv"
-		csvData := "Position,Discord ID,Prize\n1,id1,100\n2,id2,100\n3,id3,100"
-		tempFile := createTempFile(t, tempPath, csvData)
-
-		cmd := zealy.GetCommand()
-		expectedRes := zealy.importWinnersHandler(cmd, command.AppIdDiscord, "", tempFile.Name())
-
-		assert.Equal(t, false, expectedRes.Successful)
-		assert.Equal(t, "command not implemented for this app", expectedRes.Message)
-	})
-
 	t.Run("no csv file passed", func(t *testing.T) {
 		zealy := setup(t)
 

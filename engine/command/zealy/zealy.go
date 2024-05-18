@@ -95,7 +95,7 @@ func (z *Zealy) claimHandler(cmd command.Command, _ command.AppID, callerID stri
 		return cmd.ErrorResult(err)
 	}
 
-	if len(user.TxHash) > 0 {
+	if user.IsClaimed() {
 		return cmd.FailedResult("You already claimed your reward: https://pacviewer.com/transaction/%s",
 			user.TxHash)
 	}
@@ -132,7 +132,7 @@ func (z *Zealy) statusHandler(cmd command.Command, _ command.AppID, _ string, ar
 		total++
 		totalAmount += int(u.Amount)
 
-		if len(u.TxHash) > 0 {
+		if u.IsClaimed() {
 			totalClaimed++
 			totalClaimedAmount += int(u.Amount)
 		} else {
