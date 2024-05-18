@@ -42,8 +42,14 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 			{
 				Name:     "duration",
-				Desc:     "Number of days to stake",
+				Desc:     "Number of units to stake",
 				Optional: false,
+			},
+			{
+				Name:     "unit",
+				Desc:     "Unit of time for staking (days, weeks, months)",
+				Optional: false,
+				Choices:  "days, weeks, months",
 			},
 		},
 		SubCommands: nil,
@@ -89,9 +95,22 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 		return cmd.ErrorResult(err)
 	}
 
-	duration, err := strconv.Atoi(args[1])
+	durationInput := args[1]
+	duration, err := strconv.Atoi(durationInput)
 	if err != nil {
 		return cmd.ErrorResult(err)
+	}
+
+	unit := args[2]
+	switch unit {
+	case "weeks":
+		duration *= 7
+	case "months":
+		duration *= 30
+	case "days":
+		break
+	default:
+		return cmd.ErrorResult(fmt.Errorf("invalid time unit: %s; must be 'days', 'weeks', or 'months'", unit))
 	}
 
 	minStake, _ := amount.NewAmount(1)
@@ -102,7 +121,6 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 	}
 
 	blocksPerDay := 8640
-
 	bi, err := bc.clientMgr.GetBlockchainInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
@@ -112,9 +130,9 @@ func (bc *Blockchain) calcRewardHandler(cmd command.Command, _ command.AppID, _ 
 	rewardAmt := stakeAmt.MulF64(float64(duration)*float64(blocksPerDay)) / totalPowerAmt
 	convertedRewardAmt := amount.Amount(rewardAmt)
 
-	return cmd.SuccessfulResult("Approximately, you will earn %s reward by staking %s  for %d days with %s total power⚡ of the committee."+
+	return cmd.SuccessfulResult("Approximately, you will earn %s reward by staking %s for %s with %s total power⚡ of the committee."+
 		"\n\n> Note📝: This number is just an estimation.",
-		utils.FormatNumber(int64(convertedRewardAmt)), stakeAmt, duration, totalPowerAmt)
+		utils.FormatNumber(int64(convertedRewardAmt)), stakeAmt, durationInput+" "+unit, totalPowerAmt)
 }
 
 func (bc *Blockchain) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {

@@ -120,17 +120,15 @@ func (bot *DiscordBot) registerCommands() error {
 				log.Info("adding command argument", "command", beCmd.Name,
 					"argument", arg.Name, "desc", arg.Desc)
 
-				var choices []string
-				if arg.Choices != "" {
-					choices = strings.Split(arg.Choices, ", ")
-				}
-
 				var choiceOptions []*discordgo.ApplicationCommandOptionChoice
-				for _, choice := range choices {
-					choiceOptions = append(choiceOptions, &discordgo.ApplicationCommandOptionChoice{
-						Name:  choice,
-						Value: choice,
-					})
+				if arg.Choices != "" {
+					choices := strings.Split(arg.Choices, ", ")
+					for _, choice := range choices {
+						choiceOptions = append(choiceOptions, &discordgo.ApplicationCommandOptionChoice{
+							Name:  choice,
+							Value: choice,
+						})
+					}
 				}
 
 				discordCmd.Options = append(discordCmd.Options, &discordgo.ApplicationCommandOption{
