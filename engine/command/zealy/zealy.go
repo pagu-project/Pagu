@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	CommandName       = "zealy"
-	ClaimCommandName  = "claim"
-	StatusCommandName = "status"
-	HelpCommandName   = "help"
+	CommandName              = "zealy"
+	ClaimCommandName         = "claim"
+	StatusCommandName        = "status"
+	ImportWinnersCommandName = "import-winners"
+	HelpCommandName          = "help"
 )
 
 type Zealy struct {
@@ -67,6 +68,24 @@ func (z *Zealy) GetCommand() command.Command {
 	cmdZealy.AddSubCommand(subCmdClaim)
 	cmdZealy.AddSubCommand(subCmdStatus)
 
+	// only accessible from cli
+	subCmdImportWinners := command.Command{
+		Name: ImportWinnersCommandName,
+		Desc: "Import Zealy winners using csv file",
+		Help: "",
+		Args: []command.Args{
+			{
+				Name:     "path",
+				Desc:     "CSV file path",
+				Optional: false,
+			},
+		},
+		SubCommands: nil,
+		AppIDs:      []command.AppID{command.AppIdCLI},
+		Handler:     z.importWinnersHandler,
+	}
+
+	cmdZealy.AddSubCommand(subCmdImportWinners)
 	return cmdZealy
 }
 
@@ -76,13 +95,13 @@ func (z *Zealy) claimHandler(cmd command.Command, _ command.AppID, callerID stri
 		return cmd.ErrorResult(err)
 	}
 
-	if user.IsClaimed {
+	if user.IsClaimed() {
 		return cmd.FailedResult("You already claimed your reward: https://pacviewer.com/transaction/%s",
 			user.TxHash)
 	}
 
 	address := args[0]
-	txHash, err := z.wallet.TransferTransaction(address, "Pagu Zealy reward distribution", int64(user.Amount))
+	txHash, err := z.wallet.TransferTransaction(address, "PaGu Zealy reward distribution", int64(user.Amount))
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
@@ -113,7 +132,7 @@ func (z *Zealy) statusHandler(cmd command.Command, _ command.AppID, _ string, ar
 		total++
 		totalAmount += int(u.Amount)
 
-		if u.IsClaimed {
+		if u.IsClaimed() {
 			totalClaimed++
 			totalClaimedAmount += int(u.Amount)
 		} else {
