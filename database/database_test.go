@@ -55,14 +55,12 @@ func TestZealyDB(t *testing.T) {
 	err := db.AddZealyUser(&ZealyUser{
 		Amount:    100,
 		DiscordID: "12345678",
-		IsClaimed: false,
 		TxHash:    "",
 	})
 	assert.NoError(t, err)
 
 	uz, err := db.GetZealyUser("12345678")
 	assert.NoError(t, err)
-	assert.Equal(t, false, uz.IsClaimed)
 	assert.Equal(t, "", uz.TxHash)
 	assert.Equal(t, int64(100), uz.Amount)
 
@@ -71,7 +69,6 @@ func TestZealyDB(t *testing.T) {
 
 	uz, err = db.GetZealyUser("12345678")
 	assert.NoError(t, err)
-	assert.Equal(t, true, uz.IsClaimed)
 	assert.Equal(t, "0x123456789", uz.TxHash)
 	assert.Equal(t, int64(100), uz.Amount)
 
