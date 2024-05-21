@@ -1,7 +1,6 @@
 package discord
 
 import (
-	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -101,12 +100,7 @@ func (bot *DiscordBot) registerCommands() error {
 					log.Info("adding sub command argument", "command", beCmd.Name,
 						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
 
-					subCmd.Options = append(subCmd.Options, &discordgo.ApplicationCommandOption{
-						Type:        discordgo.ApplicationCommandOptionString,
-						Name:        arg.Name,
-						Description: arg.Desc,
-						Required:    !arg.Optional,
-					})
+					subCmd.Options = append(subCmd.Options, createCommandOption(arg))
 				}
 
 				discordCmd.Options = append(discordCmd.Options, subCmd)
@@ -120,24 +114,7 @@ func (bot *DiscordBot) registerCommands() error {
 				log.Info("adding command argument", "command", beCmd.Name,
 					"argument", arg.Name, "desc", arg.Desc)
 
-				var choiceOptions []*discordgo.ApplicationCommandOptionChoice
-				if arg.Choices != "" {
-					choices := strings.Split(arg.Choices, ", ")
-					for _, choice := range choices {
-						choiceOptions = append(choiceOptions, &discordgo.ApplicationCommandOptionChoice{
-							Name:  choice,
-							Value: choice,
-						})
-					}
-				}
-
-				discordCmd.Options = append(discordCmd.Options, &discordgo.ApplicationCommandOption{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        arg.Name,
-					Description: arg.Desc,
-					Required:    !arg.Optional,
-					Choices:     choiceOptions,
-				})
+				discordCmd.Options = append(discordCmd.Options, createCommandOption(arg))
 			}
 		}
 
@@ -175,6 +152,26 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	res := db.engine.Run(command.AppIdDiscord, i.Member.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
+}
+
+func createCommandOption(arg command.Args) *discordgo.ApplicationCommandOption {
+	option := &discordgo.ApplicationCommandOption{
+		Type:        discordgo.ApplicationCommandOptionString,
+		Name:        arg.Name,
+		Description: arg.Desc,
+		Required:    !arg.Optional,
+	}
+
+	if len(arg.Choices) > 0 {
+		for _, choice := range arg.Choices {
+			option.Choices = append(option.Choices, &discordgo.ApplicationCommandOptionChoice{
+				Name:  choice.Name,
+				Value: choice.Value,
+			})
+		}
+	}
+
+	return option
 }
 
 func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *discordgo.InteractionCreate) {

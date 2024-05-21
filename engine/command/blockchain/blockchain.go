@@ -33,7 +33,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 	subCmdCalcReward := command.Command{
 		Name: CalcRewardCommandName,
 		Desc: "Calculate how many PAC coins you will earn with your validator stake",
-		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC suffix",
+		Help: "Provide a stake amount between 1 to 1000, please avoid using float numbers like: 1.9 or PAC suffix",
 		Args: []command.Args{
 			{
 				Name:     "stake",
@@ -42,14 +42,18 @@ func (bc *Blockchain) GetCommand() command.Command {
 			},
 			{
 				Name:     "duration",
-				Desc:     "Number of units to stake",
+				Desc:     "Duration of staking (days, weeks, months)",
 				Optional: false,
 			},
 			{
 				Name:     "unit",
-				Desc:     "Unit of time for staking (days, weeks, months)",
+				Desc:     "Unit of time for staking",
 				Optional: false,
-				Choices:  "days, weeks, months",
+				Choices: []command.ArgChoice{
+					{Name: "Days", Value: "days"},
+					{Name: "Weeks", Value: "weeks"},
+					{Name: "Months", Value: "months"},
+				},
 			},
 		},
 		SubCommands: nil,

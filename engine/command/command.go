@@ -42,11 +42,16 @@ func AllAppIDs() []AppID {
 	}
 }
 
+type ArgChoice struct {
+	Name  string
+	Value string
+}
+
 type Args struct {
 	Name     string
 	Desc     string
 	Optional bool
-	Choices  string
+	Choices  []ArgChoice
 }
 
 type Command struct {
