@@ -3,6 +3,8 @@ package engine
 import (
 	"context"
 
+	"github.com/pagu-project/Pagu/internal/repository"
+
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/engine/command/blockchain"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
@@ -13,7 +15,6 @@ import (
 	"github.com/pagu-project/Pagu/pkg/wallet"
 
 	"github.com/pagu-project/Pagu/config"
-	"github.com/pagu-project/Pagu/database"
 )
 
 type BotEngine struct {
@@ -94,7 +95,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	// ? loading database.
-	db, err := database.NewDB(cfg.DataBasePath)
+	db, err := repository.NewDB(cfg.DataBasePath)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -104,7 +105,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(cm, phoenixCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wallet.Wallet, db *database.DB, _ []string,
+func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wallet.Wallet, db *repository.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{

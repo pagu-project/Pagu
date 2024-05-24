@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/repository/zealy"
 
-	"github.com/pagu-project/Pagu/database"
+	"github.com/pagu-project/Pagu/internal/engine/command"
 )
 
 /*
@@ -38,7 +38,7 @@ func (z *Zealy) importWinnersHandler(cmd command.Command, _ command.AppID, _ str
 
 		prizeStr := record[2]
 		prize, _ := strconv.Atoi(prizeStr)
-		if err := z.db.AddZealyUser(&database.ZealyUser{
+		if err := z.db.AddZealyUser(&zealy.ZealyUser{
 			Amount:    int64(prize),
 			DiscordID: discordID,
 			TxHash:    "",
