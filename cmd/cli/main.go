@@ -16,20 +16,21 @@ import (
 	cobra "github.com/spf13/cobra"
 )
 
+var configPath string
+
 const PROMPT = "\n>> "
 
 func run(cmd *cobra.Command, args []string) {
-	envOpt := cmd.Flags().StringP("env", "e", ".env", "the env file path")
-	config, err := config.Load(*envOpt)
+	configs, err := config.Load(configPath)
 	pCmd.ExitOnError(cmd, err)
 
-	log.InitGlobalLogger(config.Logger)
+	log.InitGlobalLogger(configs.Logger)
 
-	if config.Network == "Localnet" {
+	if configs.Network == "Localnet" {
 		crypto.AddressHRP = "tpc"
 	}
 
-	botEngine, err := engine.NewBotEngine(config)
+	botEngine, err := engine.NewBotEngine(configs)
 	pCmd.ExitOnError(cmd, err)
 
 	botEngine.RegisterAllCommands()
@@ -64,6 +65,7 @@ func main() {
 		Run:     run,
 	}
 
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config.yml", "config path ./config.yml")
 	err := rootCmd.Execute()
 	pCmd.ExitOnError(rootCmd, err)
 }

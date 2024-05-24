@@ -24,20 +24,20 @@ func runCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
-		config, err := config.Load()
+		configs, err := config.Load("")
 		pCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
-		log.InitGlobalLogger(config.Logger)
+		log.InitGlobalLogger(configs.Logger)
 
 		// starting botEngine.
-		botEngine, err := engine.NewBotEngine(config)
+		botEngine, err := engine.NewBotEngine(configs)
 		pCmd.ExitOnError(cmd, err)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		httpServer := http.NewHTTPServer(botEngine, config.HTTP)
+		httpServer := http.NewHTTPServer(botEngine, configs.HTTP)
 
 		err = httpServer.Start()
 		pCmd.ExitOnError(cmd, err)

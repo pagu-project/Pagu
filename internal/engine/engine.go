@@ -95,7 +95,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	// ? loading database.
-	db, err := repository.NewDB(cfg.DataBasePath)
+	db, err := repository.NewDB(cfg.Database.URL)
 	if err != nil {
 		cancel()
 		return nil, err

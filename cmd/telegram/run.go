@@ -24,22 +24,22 @@ func RunCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// Load configuration.
-		config, err := config.Load()
+		configs, err := config.Load("")
 		pCmd.ExitOnError(cmd, err)
 
 		// Starting botEngine.
-		botEngine, err := engine.NewBotEngine(config)
+		botEngine, err := engine.NewBotEngine(configs)
 		pCmd.ExitOnError(cmd, err)
 
-		log.InitGlobalLogger(config.Logger)
+		log.InitGlobalLogger(configs.Logger)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		chatID := config.Telegram.ChatID
-		groupLink := config.Telegram.GroupLink
+		chatID := configs.Telegram.ChatID
+		groupLink := configs.Telegram.GroupLink
 
-		telegramBot, err := telegram.NewTelegramBot(botEngine, config.Telegram.BotToken, chatID, config)
+		telegramBot, err := telegram.NewTelegramBot(botEngine, configs.Telegram.BotToken, chatID, configs)
 		pCmd.ExitOnError(cmd, err)
 
 		// register command handlers.
