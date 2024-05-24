@@ -132,7 +132,7 @@ func (db *DB) AddZealyUser(u *ZealyUser) error {
 func (db *DB) UpdateZealyUser(id string, txHash string) error {
 	tx := db.Model(&ZealyUser{
 		DiscordID: id,
-	}).Where("discord_id = ?", id).Update("tx_hash", txHash).Update("is_claimed", true)
+	}).Where("discord_id = ?", id).Update("tx_hash", txHash)
 	if tx.Error != nil {
 		return WriteError{
 			Reason: tx.Error.Error(),
