@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunCommand(parentCmd *cobra.Command) {
+func runCommand(parentCmd *cobra.Command) {
 	run := &cobra.Command{
 		Use:   "run",
 		Short: "Runs a mainnet instance of RoboPac",
@@ -24,7 +24,7 @@ func RunCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// Load configuration.
-		configs, err := config.Load("")
+		configs, err := config.Load(configPath)
 		pCmd.ExitOnError(cmd, err)
 
 		// Starting botEngine.
