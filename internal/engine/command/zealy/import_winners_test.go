@@ -5,7 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/pagu-project/Pagu/database"
+	"github.com/pagu-project/Pagu/internal/repository"
+
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,7 +81,7 @@ func setup(t *testing.T) *Zealy {
 
 	dbFile, err := os.CreateTemp("", "temp-db")
 	require.NoError(t, err)
-	db, err := database.NewDB(dbFile.Name())
+	db, err := repository.NewDB(dbFile.Name())
 	require.NoError(t, err)
 
 	zealy := NewZealy(db, nil)

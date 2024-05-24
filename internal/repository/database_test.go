@@ -1,9 +1,13 @@
-package database
+package repository
 
 import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/pagu-project/Pagu/internal/repository/faucet"
+	"github.com/pagu-project/Pagu/internal/repository/user"
+	"github.com/pagu-project/Pagu/internal/repository/zealy"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +26,7 @@ func setup(t *testing.T) *DB {
 func TestUserAndFaucet(t *testing.T) {
 	db := setup(t)
 
-	err := db.AddUser(&User{
+	err := db.AddUser(&user.User{
 		ID: "123456789",
 	})
 	assert.NoError(t, err)
@@ -34,7 +38,7 @@ func TestUserAndFaucet(t *testing.T) {
 	r := db.CanGetFaucet("123456789")
 	assert.True(t, r)
 
-	err = db.AddFaucet(&Faucet{
+	err = db.AddFaucet(&faucet.Faucet{
 		Address: "tpc1zlymfcuxlgvvuud2q4zw0scllqn74d2f90hld6w",
 		Amount:  5,
 		UserID:  "123456789",
@@ -52,7 +56,7 @@ func TestUserAndFaucet(t *testing.T) {
 func TestZealyDB(t *testing.T) {
 	db := setup(t)
 
-	err := db.AddZealyUser(&ZealyUser{
+	err := db.AddZealyUser(&zealy.ZealyUser{
 		Amount:    100,
 		DiscordID: "12345678",
 		TxHash:    "",

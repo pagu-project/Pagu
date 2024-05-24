@@ -1,8 +1,8 @@
 package phoenix
 
 import (
-	"github.com/pagu-project/Pagu/database"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/repository"
 	"github.com/pagu-project/Pagu/pkg/client"
 	"github.com/pagu-project/Pagu/pkg/wallet"
 )
@@ -19,12 +19,12 @@ const (
 
 type Phoenix struct {
 	wallet    *wallet.Wallet
-	db        database.DB
+	db        repository.DB
 	clientMgr *client.Mgr
 }
 
 func NewPhoenix(wallet *wallet.Wallet,
-	clientMgr *client.Mgr, db database.DB,
+	clientMgr *client.Mgr, db repository.DB,
 ) Phoenix {
 	return Phoenix{
 		wallet:    wallet,

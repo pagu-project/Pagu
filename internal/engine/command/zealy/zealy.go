@@ -1,8 +1,8 @@
 package zealy
 
 import (
-	"github.com/pagu-project/Pagu/database"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/repository"
 	"github.com/pagu-project/Pagu/pkg/wallet"
 )
 
@@ -15,12 +15,12 @@ const (
 )
 
 type Zealy struct {
-	db     *database.DB
+	db     *repository.DB
 	wallet *wallet.Wallet
 }
 
 func NewZealy(
-	db *database.DB, wallet *wallet.Wallet,
+	db *repository.DB, wallet *wallet.Wallet,
 ) Zealy {
 	return Zealy{
 		db:     db,
