@@ -24,7 +24,7 @@ func runCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
-		config, err := config.Load()
+		config, err := config.Load("")
 		pCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
