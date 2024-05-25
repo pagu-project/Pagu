@@ -19,3 +19,4 @@ dev_wallet
 /local
 config/config.yml
 config/config.yaml
+config/wallets
