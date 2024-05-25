@@ -6,7 +6,6 @@ require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.26
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/glebarez/sqlite v1.11.0
-	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/pactus-project/pactus v1.1.4
 	github.com/spf13/cobra v1.8.0
@@ -69,7 +68,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240506185236-b8a5c65736ae // indirect
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1
 	lukechampine.com/blake3 v1.3.0 // indirect
 	modernc.org/libc v1.50.5 // indirect
 	modernc.org/mathutil v1.6.0 // indirect

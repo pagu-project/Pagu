@@ -1,0 +1,31 @@
+version: '3'
+
+networks:
+  pagu-network:
+    external: true
+
+services:
+  pagu-cli:
+    build:
+      context: ../.
+      dockerfile: deployment/cli/Dockerfile
+    hostname: pagu-cli
+    container_name: pagu-cli
+    networks:
+      pagu-network:
+  pagu-telegram:
+    build:
+      context: ../.
+      dockerfile: deployment/telegram/Dockerfile
+    hostname: pagu-telegram
+    container_name: pagu-telegram
+    networks:
+      pagu-network:
+  pagu-discord:
+    build:
+      context: ../.
+      dockerfile: deployment/discord/Dockerfile
+    hostname: pagu-discord
+    container_name: pagu-discord
+    networks:
+      pagu-network:

@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/pactus-project/pactus/util"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 type Config struct {
