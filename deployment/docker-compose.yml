@@ -6,7 +6,8 @@ networks:
 
 services:
   pagu-db:
-    image: mysql:latest
+    image: mysql:5.7.42-debian
+    hostname: pagu-db
     environment:
       MYSQL_ROOT_PASSWORD: ${PAGU_DB_PASSWORD}
       MYSQL_DATABASE: pagu
