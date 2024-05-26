@@ -17,8 +17,8 @@ type DB struct {
 func NewDB(path string) (*DB, error) {
 	db, err := gorm.Open(mysql.Open(path), &gorm.Config{})
 	if err != nil {
-		return nil, MigrationError{
-			Reason: err.Error(),
+		return nil, ConnectionError{
+			Message: err.Error(),
 		}
 	}
 
@@ -31,7 +31,7 @@ func NewDB(path string) (*DB, error) {
 			&zealy.ZealyUser{},
 		); err != nil {
 			return nil, MigrationError{
-				Reason: err.Error(),
+				Message: err.Error(),
 			}
 		}
 	}
@@ -45,7 +45,7 @@ func (db *DB) AddUser(u *user.User) error {
 	tx := db.Create(u)
 	if tx.Error != nil {
 		return WriteError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
@@ -57,7 +57,7 @@ func (db *DB) GetUser(id string) (*user.User, error) {
 	tx := db.Model(&user.User{}).Preload("Faucets").First(&u, "id = ?", id)
 	if tx.Error != nil {
 		return &user.User{}, ReadError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
@@ -68,7 +68,7 @@ func (db *DB) AddFaucet(f *faucet.Faucet) error {
 	tx := db.Create(f)
 	if tx.Error != nil {
 		return WriteError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
@@ -114,7 +114,7 @@ func (db *DB) GetZealyUser(id string) (*zealy.ZealyUser, error) {
 	tx := db.Model(&zealy.ZealyUser{}).First(&u, "discord_id = ?", id)
 	if tx.Error != nil {
 		return &zealy.ZealyUser{}, ReadError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
@@ -125,7 +125,7 @@ func (db *DB) AddZealyUser(u *zealy.ZealyUser) error {
 	tx := db.Create(u)
 	if tx.Error != nil {
 		return WriteError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
@@ -138,7 +138,7 @@ func (db *DB) UpdateZealyUser(id string, txHash string) error {
 	}).Where("discord_id = ?", id).Update("tx_hash", txHash)
 	if tx.Error != nil {
 		return WriteError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
@@ -150,7 +150,7 @@ func (db *DB) GetAllZealyUser() ([]*zealy.ZealyUser, error) {
 	tx := db.Find(&u)
 	if tx.Error != nil {
 		return nil, ReadError{
-			Reason: tx.Error.Error(),
+			Message: tx.Error.Error(),
 		}
 	}
 
