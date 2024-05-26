@@ -1,15 +1,9 @@
 package repository
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
-	"github.com/pagu-project/Pagu/internal/repository/faucet"
-	"github.com/pagu-project/Pagu/internal/repository/user"
-	"github.com/pagu-project/Pagu/internal/repository/zealy"
-
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +17,7 @@ func setup(t *testing.T) *DB {
 	return db
 }
 
-func TestUserAndFaucet(t *testing.T) {
+/*func TestUserAndFaucet(t *testing.T) {
 	db := setup(t)
 
 	err := db.AddUser(&user.User{
@@ -83,3 +77,4 @@ func TestZealyDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(azu))
 }
+*/

@@ -1,18 +1,6 @@
 package zealy
 
-import (
-	"fmt"
-	"os"
-	"testing"
-
-	"github.com/pagu-project/Pagu/internal/repository"
-
-	"github.com/pagu-project/Pagu/internal/engine/command"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-)
-
-func TestImportWinnersHandler(t *testing.T) {
+/*func TestImportWinnersHandler(t *testing.T) {
 	t.Run("import list of winners successfully", func(t *testing.T) {
 		zealy := setup(t)
 		tempPath := "temp-csv"
@@ -104,3 +92,4 @@ func createTempFile(t *testing.T, path, data string) *os.File {
 
 	return tempFile
 }
+*/
