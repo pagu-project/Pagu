@@ -16,4 +16,4 @@ COPY --from=builder /pagu/build /pagu-cli
 
 RUN chmod +x /pagu-cli/pagu-cli
 
-CMD ["./pagu-cli/pagu-cli", "-c", "./pagu-cli/config/config.yml", "run"]
+CMD ["./pagu-cli/pagu-cli", "-c", "./config/config.yml", "run"]

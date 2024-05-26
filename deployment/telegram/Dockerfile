@@ -13,9 +13,7 @@ RUN apk --no-cache add ca-certificates tzdata git
 
 RUN mkdir /pagu-telegram
 COPY --from=builder /pagu/build /pagu-telegram
-COPY --from=builder /pagu/config/config.yml /pagu-telegram/config/config.yml
-COPY --from=builder /pagu/config/wallets /pagu-cli/config/wallets
 
 RUN chmod +x /pagu-telegram/pagu-telegram
 
-CMD ["./pagu-telegram/pagu-telegram", "-c", "./pagu-telegram/config/config.yml", "run"]
+CMD ["./pagu-telegram/pagu-telegram", "-c", "./config/config.yml", "run"]
