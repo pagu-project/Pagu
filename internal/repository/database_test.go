@@ -1,12 +1,6 @@
 package repository
 
-import (
-	"os"
-	"testing"
-
-	"github.com/stretchr/testify/require"
-)
-
+/*
 func setup(t *testing.T) *DB {
 	file, err := os.CreateTemp("", "temp-db")
 	require.NoError(t, err)
@@ -17,7 +11,7 @@ func setup(t *testing.T) *DB {
 	return db
 }
 
-/*func TestUserAndFaucet(t *testing.T) {
+func TestUserAndFaucet(t *testing.T) {
 	db := setup(t)
 
 	err := db.AddUser(&user.User{

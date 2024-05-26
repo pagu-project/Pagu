@@ -45,7 +45,7 @@ func run(cmd *cobra.Command, args []string) {
 		input = strings.TrimSuffix(input, "\n")
 
 		if strings.ToLower(input) == "exit" {
-			cmd.Println("exiting from repl")
+			cmd.Println("exiting from cli")
 
 			return
 		}
