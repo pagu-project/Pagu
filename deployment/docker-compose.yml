@@ -55,6 +55,10 @@ services:
       pagu-network:
     depends_on:
       - pagu-db
+    volumes:
+      - ../config/config.yml:/pagu-cli/config/config.yml
+      - ../config/wallets/main_wallet:/pagu-cli/wallets/main_wallet
+      - ../config/wallets/test_wallet:/pagu-cli/wallets/test_wallet
   pagu-discord:
     build:
       context: ../.
@@ -65,5 +69,9 @@ services:
       pagu-network:
     depends_on:
       - pagu-db
+    volumes:
+      - ../config/config.yml:/pagu-cli/config/config.yml
+      - ../config/wallets/main_wallet:/pagu-cli/wallets/main_wallet
+      - ../config/wallets/test_wallet:/pagu-cli/wallets/test_wallet
 volumes:
   pagu-db-data: { }
