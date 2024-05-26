@@ -97,7 +97,7 @@ func (cfg *Config) BasicCheck() error {
 
 		// Check if the WalletPath exists.
 		if !util.PathExists(cfg.Wallet.Path) {
-			return fmt.Errorf("config: basic check error: WALLET_PATH does not exist")
+			return fmt.Errorf("config: basic check error: WALLET_PATH does not exist: %s", cfg.Wallet.Path)
 		}
 	}
 
@@ -108,7 +108,7 @@ func (cfg *Config) BasicCheck() error {
 
 		// Check if the WalletPath exists.
 		if !util.PathExists(cfg.TestNetWallet.Path) {
-			return fmt.Errorf("config: basic check error: TESTNET_WALLET_PATH does not exist")
+			return fmt.Errorf("config: basic check error: TESTNET_WALLET_PATH does not exist: %s", cfg.TestNetWallet.Path)
 		}
 	}
 

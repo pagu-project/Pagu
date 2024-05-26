@@ -6,8 +6,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/repository/faucet"
 	"github.com/pagu-project/Pagu/internal/repository/user"
 	"github.com/pagu-project/Pagu/internal/repository/zealy"
-
-	"github.com/glebarez/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +15,7 @@ type DB struct {
 }
 
 func NewDB(path string) (*DB, error) {
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(path), &gorm.Config{})
 	if err != nil {
 		return nil, MigrationError{
 			Reason: err.Error(),

@@ -18,7 +18,7 @@ main_net_wallet:
   enable: true
   address: "wallet_address"
   rpc: "localhost:50051"
-  path: "./local/net1/wallets/default_wallet"
+  path: "./local/net1/wallets/main_wallet"
   password: "wallet_password"
 
   # Phoenix TestNet

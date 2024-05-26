@@ -14,6 +14,7 @@ RUN apk --no-cache add ca-certificates tzdata git
 RUN mkdir /pagu-discord
 COPY --from=builder /pagu/build /pagu-discord
 COPY --from=builder /pagu/config/config.yml /pagu-discord/config/config.yml
+COPY --from=builder /pagu/config/wallets /pagu-cli/config/wallets
 
 RUN chmod +x /pagu-discord/pagu-discord
 

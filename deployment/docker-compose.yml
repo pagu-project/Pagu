@@ -5,6 +5,32 @@ networks:
     external: true
 
 services:
+  pagu-db:
+    image: mysql:5.7.42-debian
+    hostname: pagu-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PAGU_DB_PASSWORD}
+      MYSQL_DATABASE: pagu
+    expose:
+      - 4417
+    ports:
+      - "4417:3306"
+    container_name: pagu-db
+    networks:
+      pagu-network:
+    volumes:
+      - pagu-db-data:/var/lib/mysql
+  pagu-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: pagu-db
+    container_name: pagu-phpmyadmin
+    ports:
+      - "4418:80"
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
   pagu-cli:
     build:
       context: ../.
@@ -13,6 +39,12 @@ services:
     container_name: pagu-cli
     networks:
       pagu-network:
+    depends_on:
+      - pagu-db
+    volumes:
+      - ../config/config.yml:/pagu-cli/config/config.yml
+      - ../config/wallets/main_wallet:/pagu-cli/wallets/main_wallet
+      - ../config/wallets/test_wallet:/pagu-cli/wallets/test_wallet
   pagu-telegram:
     build:
       context: ../.
@@ -21,6 +53,8 @@ services:
     container_name: pagu-telegram
     networks:
       pagu-network:
+    depends_on:
+      - pagu-db
   pagu-discord:
     build:
       context: ../.
@@ -29,3 +63,7 @@ services:
     container_name: pagu-discord
     networks:
       pagu-network:
+    depends_on:
+      - pagu-db
+volumes:
+  pagu-db-data: { }

@@ -13,7 +13,6 @@ RUN apk --no-cache add ca-certificates tzdata git
 
 RUN mkdir /pagu-cli
 COPY --from=builder /pagu/build /pagu-cli
-COPY --from=builder /pagu/config/config.yml /pagu-cli/config/config.yml
 
 RUN chmod +x /pagu-cli/pagu-cli
 
