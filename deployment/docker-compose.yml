@@ -73,5 +73,16 @@ services:
       - ../config/config.yml:/config/config.yml
       - ../config/wallets/main_wallet:/config/wallets/main_wallet
       - ../config/wallets/test_wallet:/config/wallets/test_wallet
+  pagu-node:
+    hostname: pagu-node
+    domainname: pagu-node
+    container_name: pagu-node
+    image: pactus/pactus:latest
+    command: pd start -w ../pactus
+    restart: always
+    volumes:
+      - ../pactus:/pactus
+    networks:
+      pagu-network:
 volumes:
   pagu-db-data: { }
