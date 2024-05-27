@@ -37,8 +37,8 @@ type Wallet struct {
 }
 
 type DiscordBot struct {
-	Token   string `json:"token"`
-	GuildID string `json:"guild_id"`
+	Token   string `yaml:"token"`
+	GuildID string `yaml:"guild_id"`
 }
 
 type GRPC struct {
