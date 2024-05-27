@@ -78,10 +78,12 @@ services:
     domainname: pagu-node
     container_name: pagu-node
     image: pactus/pactus:latest
-    command: pd start -w ../pactus
+    command: pactus-daemon start -w ./../../../pactus
     restart: always
+    ports:
+      - "50051:50051"
     volumes:
-      - ../pactus:/pactus
+      - ./../../../pactus:/pactus
     networks:
       pagu-network:
 volumes:
