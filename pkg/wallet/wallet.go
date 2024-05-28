@@ -83,12 +83,14 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	// Convert int64 to amt.Amount.
 	amountInNanoPAC, err := amt.NewAmount(float64(amount))
 	if err != nil {
+		log.Error("error converting amount to nanoPAC", "err", err)
 		return "", err
 	}
 
 	// claculate fee using amount struct.
 	fee, err := w.wallet.CalculateFee(amountInNanoPAC, payload.TypeTransfer)
 	if err != nil {
+		log.Error("error calculating fee", "err", err, "client")
 		return "", err
 	}
 
@@ -101,7 +103,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amountInNanoPAC, opts...)
 	if err != nil {
 		log.Error("error creating transfer transaction", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"from", w.address, "to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
 		return "", err
 	}
 
