@@ -29,7 +29,7 @@ func NewZealy(
 }
 
 func (z *Zealy) GetCommand() command.Command {
-	subCmdClaim := command.Command{
+	/*subCmdClaim := command.Command{
 		Name: ClaimCommandName,
 		Desc: "Claim your Zealy Reward",
 		Help: "",
@@ -43,7 +43,7 @@ func (z *Zealy) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      command.AllAppIDs(),
 		Handler:     z.claimHandler,
-	}
+	}*/
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
