@@ -65,7 +65,7 @@ func (z *Zealy) GetCommand() command.Command {
 		Handler:     nil,
 	}
 
-	cmdZealy.AddSubCommand(subCmdClaim)
+	//cmdZealy.AddSubCommand(subCmdClaim)
 	cmdZealy.AddSubCommand(subCmdStatus)
 
 	// only accessible from cli
