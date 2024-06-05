@@ -7,11 +7,10 @@ import (
 )
 
 const (
-	CommandName              = "zealy"
-	ClaimCommandName         = "claim"
-	StatusCommandName        = "status"
-	ImportWinnersCommandName = "import-winners"
-	HelpCommandName          = "help"
+	CommandName       = "zealy"
+	ClaimCommandName  = "claim"
+	StatusCommandName = "status"
+	HelpCommandName   = "help"
 )
 
 type Zealy struct {
@@ -29,7 +28,7 @@ func NewZealy(
 }
 
 func (z *Zealy) GetCommand() command.Command {
-	/*subCmdClaim := command.Command{
+	subCmdClaim := command.Command{
 		Name: ClaimCommandName,
 		Desc: "Claim your Zealy Reward",
 		Help: "",
@@ -43,7 +42,7 @@ func (z *Zealy) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      command.AllAppIDs(),
 		Handler:     z.claimHandler,
-	}*/
+	}
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
@@ -65,26 +64,7 @@ func (z *Zealy) GetCommand() command.Command {
 		Handler:     nil,
 	}
 
-	//cmdZealy.AddSubCommand(subCmdClaim)
+	cmdZealy.AddSubCommand(subCmdClaim)
 	cmdZealy.AddSubCommand(subCmdStatus)
-
-	// only accessible from cli
-	subCmdImportWinners := command.Command{
-		Name: ImportWinnersCommandName,
-		Desc: "Import Zealy winners using csv file",
-		Help: "",
-		Args: []command.Args{
-			{
-				Name:     "path",
-				Desc:     "CSV file path",
-				Optional: false,
-			},
-		},
-		SubCommands: nil,
-		AppIDs:      []command.AppID{command.AppIdCLI},
-		Handler:     z.importWinnersHandler,
-	}
-
-	cmdZealy.AddSubCommand(subCmdImportWinners)
 	return cmdZealy
 }
