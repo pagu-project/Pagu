@@ -2,14 +2,13 @@ package phoenix
 
 import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
-	"github.com/pagu-project/Pagu/internal/repository/faucet"
-	"github.com/pagu-project/Pagu/internal/repository/user"
+	"github.com/pagu-project/Pagu/internal/entity"
 )
 
 func (pt *Phoenix) faucetHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
 	if !pt.db.HasUser(callerID) {
 		if err := pt.db.AddUser(
-			&user.User{
+			&entity.User{
 				ID: callerID,
 			},
 		); err != nil {
@@ -31,7 +30,7 @@ func (pt *Phoenix) faucetHandler(cmd command.Command, _ command.AppID, callerID 
 		return cmd.ErrorResult(err)
 	}
 
-	if err = pt.db.AddFaucet(&faucet.Faucet{
+	if err = pt.db.AddFaucet(&entity.Faucet{
 		Address:         toAddr,
 		Amount:          5,
 		TransactionHash: txID,

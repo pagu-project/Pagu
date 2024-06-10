@@ -14,7 +14,7 @@ func setup(t *testing.T) *DB {
 func TestUserAndFaucet(t *testing.T) {
 	db := setup(t)
 
-	err := db.AddUser(&user.User{
+	err := db.AddUser(&entity.User{
 		ID: "123456789",
 	})
 	assert.NoError(t, err)
@@ -26,7 +26,7 @@ func TestUserAndFaucet(t *testing.T) {
 	r := db.CanGetFaucet("123456789")
 	assert.True(t, r)
 
-	err = db.AddFaucet(&faucet.Faucet{
+	err = db.AddFaucet(&entity.Faucet{
 		Address: "tpc1zlymfcuxlgvvuud2q4zw0scllqn74d2f90hld6w",
 		Amount:  5,
 		UserID:  "123456789",
@@ -44,7 +44,7 @@ func TestUserAndFaucet(t *testing.T) {
 func TestZealyDB(t *testing.T) {
 	db := setup(t)
 
-	err := db.AddZealyUser(&zealy.ZealyUser{
+	err := db.AddZealyUser(&entity.ZealyUser{
 		Amount:    100,
 		DiscordID: "12345678",
 		TxHash:    "",

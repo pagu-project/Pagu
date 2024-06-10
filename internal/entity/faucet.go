@@ -1,4 +1,4 @@
-package faucet
+package entity
 
 import "gorm.io/gorm"
 
