@@ -52,7 +52,7 @@ func (pt *Phoenix) networkStatusHandler(cmd command.Command, _ command.AppID, _ 
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
 		"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v\nTotal Committee Power: %v\nCirculating Supply: %v\n"+
-		"\n> Note📝: This info is from one random network node. Non-blockchain data may not be consistent.",
+		"\n> Note📝: This info is from one random network node. Non-calculator data may not be consistent.",
 		net.NetworkName,
 		utils2.FormatNumber(int64(net.ConnectedPeersCount)),
 		utils2.FormatNumber(int64(net.ValidatorsCount)),

@@ -1,4 +1,4 @@
-package blockchain
+package calculator
 
 import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
@@ -6,25 +6,25 @@ import (
 )
 
 const (
-	CommandName           = "blockchain"
-	CalcRewardCommandName = "reward-calc"
-	CalcFeeCommandName    = "fee-calc"
+	CommandName           = "calculate"
+	CalcRewardCommandName = "reward"
+	CalcFeeCommandName    = "fee"
 	HelpCommandName       = "help"
 )
 
-type Blockchain struct {
+type Calculator struct {
 	clientMgr *client.Mgr
 }
 
-func NewBlockchain(
+func NewCalculator(
 	clientMgr *client.Mgr,
-) Blockchain {
-	return Blockchain{
+) Calculator {
+	return Calculator{
 		clientMgr: clientMgr,
 	}
 }
 
-func (bc *Blockchain) GetCommand() command.Command {
+func (bc *Calculator) GetCommand() command.Command {
 	subCmdCalcReward := command.Command{
 		Name: CalcRewardCommandName,
 		Desc: "Calculate how many PAC coins you will earn with your validator stake",
@@ -36,8 +36,8 @@ func (bc *Blockchain) GetCommand() command.Command {
 				Optional: false,
 			},
 			{
-				Name:     "time",
-				Desc:     "After one: day/month/year",
+				Name:     "days",
+				Desc:     "Number of days (1-365)",
 				Optional: false,
 			},
 		},
@@ -64,7 +64,7 @@ func (bc *Blockchain) GetCommand() command.Command {
 
 	cmdBlockchain := command.Command{
 		Name:        CommandName,
-		Desc:        "Blockchain information and tools",
+		Desc:        "Calculator information and tools",
 		Help:        "",
 		Args:        nil,
 		AppIDs:      command.AllAppIDs(),
