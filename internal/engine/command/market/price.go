@@ -1,0 +1,24 @@
+package market
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/internal/engine/command"
+)
+
+func (m *Market) getPrice(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+	priceData, ok := m.priceCache.Get(config.PriceCacheKey)
+	if !ok {
+		return cmd.ErrorResult(fmt.Errorf("failed to get price from markets. please try again later"))
+	}
+
+	lastPrice, err := strconv.ParseFloat(priceData.XeggexPacToUSDT.LastPrice, 64)
+	if err != nil {
+		return cmd.ErrorResult(fmt.Errorf("pagu can not calculate the price. please try again later"))
+	}
+
+	return cmd.SuccessfulResult("PAC Price: %f"+
+		"\n\n\n See below markets link for more details: \n xeggex: https://xeggex.com/market/PACTUS_USDT \n exbitron: https://exbitron.com/trade?market=PAC-USDT", lastPrice)
+}

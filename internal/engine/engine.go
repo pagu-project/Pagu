@@ -2,6 +2,12 @@ package engine
 
 import (
 	"context"
+	"time"
+
+	"github.com/pagu-project/Pagu/internal/engine/command/market"
+	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/internal/job"
+	"github.com/pagu-project/Pagu/pkg/cache"
 
 	"github.com/pagu-project/Pagu/internal/repository"
 
@@ -29,6 +35,7 @@ type BotEngine struct {
 	networkCmd    network.Network
 	phoenixCmd    phoenixtestnet.Phoenix
 	zealyCmd      zealy.Zealy
+	marketCmd     market.Market
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -117,10 +124,18 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 		SubCommands: make([]command.Command, 3),
 	}
 
+	// price caching job
+	priceCache := cache.NewBasic[string, entity.Price](0 * time.Second)
+	priceJob := job.NewPrice(priceCache)
+	priceJobSched := job.NewScheduler()
+	priceJobSched.Submit(priceJob)
+	go priceJobSched.Run()
+
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := blockchain.NewBlockchain(cm)
 	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, ptcm, *db)
 	zCmd := zealy.NewZealy(db, wallet)
+	marketCmd := market.NewMarket(cm, priceCache)
 
 	return &BotEngine{
 		ctx:              ctx,
@@ -132,6 +147,7 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 		phoenixCmd:       ptCmd,
 		phoenixClientMgr: ptcm,
 		zealyCmd:         zCmd,
+		marketCmd:        marketCmd,
 	}
 }
 

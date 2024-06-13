@@ -29,6 +29,7 @@ func runCommand(parentCmd *cobra.Command) {
 
 		// Initialize global logger.
 		log.InitGlobalLogger(configs.Logger)
+
 		// starting botEngine.
 		botEngine, err := engine.NewBotEngine(configs)
 		pCmd.ExitOnError(cmd, err)
