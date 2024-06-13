@@ -19,6 +19,6 @@ func (m *Market) getPrice(cmd command.Command, _ command.AppID, _ string, _ ...s
 		return cmd.ErrorResult(fmt.Errorf("pagu can not calculate the price. please try again later"))
 	}
 
-	return cmd.SuccessfulResult("PAC Price: %f"+
+	return cmd.SuccessfulResult("PAC Price: %f	USDT"+
 		"\n\n\n See below markets link for more details: \n xeggex: https://xeggex.com/market/PACTUS_USDT \n exbitron: https://exbitron.com/trade?market=PAC-USDT", lastPrice)
 }
