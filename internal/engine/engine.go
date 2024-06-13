@@ -12,7 +12,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/repository"
 
 	"github.com/pagu-project/Pagu/internal/engine/command"
-	"github.com/pagu-project/Pagu/internal/engine/command/blockchain"
+	"github.com/pagu-project/Pagu/internal/engine/command/calculator"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
 	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
@@ -31,7 +31,7 @@ type BotEngine struct {
 	phoenixClientMgr *client2.Mgr
 	rootCmd          command.Command
 
-	blockchainCmd blockchain.Blockchain
+	blockchainCmd calculator.Calculator
 	networkCmd    network.Network
 	phoenixCmd    phoenixtestnet.Phoenix
 	zealyCmd      zealy.Zealy
@@ -132,7 +132,7 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 	go priceJobSched.Run()
 
 	netCmd := network.NewNetwork(ctx, cm)
-	bcCmd := blockchain.NewBlockchain(cm)
+	bcCmd := calculator.NewCalculator(cm)
 	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, ptcm, *db)
 	zCmd := zealy.NewZealy(db, wallet)
 	marketCmd := market.NewMarket(cm, priceCache)
