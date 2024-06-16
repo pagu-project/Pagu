@@ -13,6 +13,10 @@ func (pt *Phoenix) faucetHandler(cmd command.Command, _ entity.AppID, _ string, 
 	}
 
 	toAddr := args[0]
+	if len(toAddr) != 43 || toAddr[:3] != "tpc" {
+		return cmd.ErrorResult(errors.New("invalid wallet address"))
+	}
+
 	if !pt.db.CanGetFaucet(cmd.User) {
 		return cmd.FailedResult("Uh, you used your share of faucets today!")
 	}
