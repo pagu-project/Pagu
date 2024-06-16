@@ -19,11 +19,11 @@ func NewDB(path string) (*DB, error) {
 	}
 
 	if !db.Migrator().HasTable(&entity.User{}) ||
-		!db.Migrator().HasTable(&entity.Faucet{}) ||
+		!db.Migrator().HasTable(&entity.PhoenixFaucet{}) ||
 		!db.Migrator().HasTable(&entity.ZealyUser{}) {
 		if err := db.AutoMigrate(
 			&entity.User{},
-			&entity.Faucet{},
+			&entity.PhoenixFaucet{},
 			&entity.ZealyUser{},
 		); err != nil {
 			return nil, MigrationError{

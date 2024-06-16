@@ -25,13 +25,13 @@ func setup() (Market, command.Command) {
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 	}
 }
 
 func TestGetPrice(t *testing.T) {
 	market, cmd := setup()
 	time.Sleep(10 * time.Second)
-	result := market.getPrice(cmd, command.AppIdDiscord, "")
+	result := market.getPrice(cmd, entity.AppIdDiscord, "")
 	assert.Equal(t, result.Successful, true)
 }

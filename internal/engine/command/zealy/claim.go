@@ -1,8 +1,11 @@
 package zealy
 
-import "github.com/pagu-project/Pagu/internal/engine/command"
+import (
+	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
+)
 
-func (z *Zealy) claimHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
+func (z *Zealy) claimHandler(cmd command.Command, _ entity.AppID, callerID string, args ...string) command.CommandResult {
 	user, err := z.db.GetZealyUser(callerID)
 	if err != nil {
 		return cmd.ErrorResult(err)

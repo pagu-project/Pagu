@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pagu-project/Pagu/internal/entity"
+
 	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/pkg/log"
 
 	"github.com/labstack/echo/v4"
@@ -57,7 +58,7 @@ func (hh *HTTPHandler) Run(c echo.Context) error {
 	tokens := strings.Split(r.Command, " ")
 	beInput = append(beInput, tokens...)
 
-	cmdResult := hh.engine.Run(command.AppIdHTTP, c.RealIP(), beInput)
+	cmdResult := hh.engine.Run(entity.AppIdHTTP, c.RealIP(), beInput)
 
 	return c.JSON(http.StatusOK, RunResponse{
 		Result: cmdResult.Message,

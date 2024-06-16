@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/pagu-project/Pagu/internal/engine/command/market"
@@ -90,15 +91,15 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	var phoenixWal *wallet.Wallet
 	if cfg.TestNetWallet.Enable {
 		// load or create wallet.
-		wal = wallet.Open(&cfg.TestNetWallet)
-		if wal == nil {
+		phoenixWal = wallet.Open(&cfg.TestNetWallet)
+		if phoenixWal == nil {
 			cancel()
 			return nil, WalletError{
 				Reason: "can't open testnet wallet",
 			}
 		}
 
-		log.Info("testnet wallet opened successfully", "address", wal.Address())
+		log.Info("testnet wallet opened successfully", "address", phoenixWal.Address())
 	}
 
 	// ? loading database.
@@ -109,10 +110,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	return newBotEngine(cm, phoenixCm, wal, phoenixWal, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(cm, phoenixCm, wal, phoenixWal, cfg.Phoenix.FaucetAmount, db, cfg.AuthIDs, ctx, cancel), nil
 }
 
-func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wallet.Wallet, db *repository.DB, _ []string,
+func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wallet.Wallet, phoenixFaucetAmount uint, db *repository.DB, _ []string,
 	ctx context.Context, cnl context.CancelFunc,
 ) *BotEngine {
 	rootCmd := command.Command{
@@ -120,7 +121,7 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 		Name:        "pagu",
 		Desc:        "Root Command",
 		Help:        "Pagu Help Command",
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 3),
 	}
 
@@ -133,7 +134,7 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := calculator.NewCalculator(cm)
-	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, ptcm, *db)
+	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, phoenixFaucetAmount, ptcm, *db)
 	zCmd := zealy.NewZealy(db, wallet)
 	marketCmd := market.NewMarket(cm, priceCache)
 
@@ -160,12 +161,12 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.zealyCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
-	// be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand()) // TODO: FIX WALLET ISSUE
+	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
 
-func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) command.CommandResult {
+func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) command.CommandResult {
 	log.Debug("run command", "callerID", callerID, "inputs", tokens)
 
 	cmd, argsIndex := be.getCommand(tokens)
@@ -181,6 +182,13 @@ func (be *BotEngine) Run(appID command.AppID, callerID string, tokens []string) 
 	err := cmd.CheckArgs(args)
 	if err != nil {
 		return cmd.ErrorResult(err)
+	}
+
+	for _, middlewareFunc := range cmd.Middlewares {
+		if err = middlewareFunc(cmd, appID, callerID, args...); err != nil {
+			log.Error(err.Error())
+			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
+		}
 	}
 
 	return cmd.Handler(cmd, appID, callerID, args...)

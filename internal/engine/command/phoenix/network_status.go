@@ -4,10 +4,11 @@ import (
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (pt *Phoenix) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+func (pt *Phoenix) networkStatusHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
 	netInfo, err := pt.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)

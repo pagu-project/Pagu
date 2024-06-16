@@ -3,6 +3,8 @@ package phoenix
 import (
 	"fmt"
 
+	"github.com/pagu-project/Pagu/internal/entity"
+
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
@@ -10,7 +12,8 @@ import (
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+// nolint
+func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := pt.clientMgr.GetPeerInfo(valAddress)

@@ -3,10 +3,11 @@ package network
 import (
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (be *Network) networkStatusHandler(cmd command.Command, _ command.AppID, _ string, _ ...string) command.CommandResult {
+func (be *Network) networkStatusHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
 	netInfo, err := be.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)

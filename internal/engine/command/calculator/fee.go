@@ -3,9 +3,10 @@ package calculator
 import (
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (bc *Calculator) calcFeeHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+func (bc *Calculator) calcFeeHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	amt, err := amount.FromString(args[0])
 	if err != nil {
 		return cmd.ErrorResult(err)

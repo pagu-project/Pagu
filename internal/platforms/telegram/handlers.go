@@ -12,7 +12,7 @@ func (bot *TelegramBot) RegisterStartCommandHandler(tgLink string) {
 		chat := ctx.Update.Message.GetChat()
 		chatID := chat.Id
 
-		welcomeMessage := fmt.Sprintf("Hello @%s, this is RoboPac. Kindly use /help command to learn how to interact with the bot. Join our telegram chat %s", chat.Username, tgLink)
+		welcomeMessage := fmt.Sprintf("Hello @%s, this is Pagu. Kindly use /help command to learn how to interact with the bot. Join our telegram chat %s", chat.Username, tgLink)
 		_, err := b.SendMessage(chatID, welcomeMessage, nil)
 		if err != nil {
 			return err

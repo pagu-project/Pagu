@@ -6,7 +6,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (db *DB) AddFaucet(f *entity.Faucet) error {
+func (db *DB) AddFaucet(f *entity.PhoenixFaucet) error {
 	tx := db.Create(f)
 	if tx.Error != nil {
 		return WriteError{
@@ -17,22 +17,17 @@ func (db *DB) AddFaucet(f *entity.Faucet) error {
 	return nil
 }
 
-func (db *DB) CanGetFaucet(id string) bool {
-	var u entity.User
-	tx := db.Model(&entity.User{}).Preload("Faucets").First(&u, "id = ?", id)
+func (db *DB) CanGetFaucet(user *entity.User) bool {
+	var lastFaucet entity.PhoenixFaucet
+	tx := db.Model(&entity.PhoenixFaucet{}).
+		Last(&lastFaucet, "user_id = ?", user.ID)
 	if tx.Error != nil {
-		return false
+		return true
 	}
 
-	now := time.Now()
-
-	for _, f := range u.Faucets {
-		if f.CreatedAt.Year() == now.Year() &&
-			f.CreatedAt.Month() == now.Month() &&
-			f.CreatedAt.Day() == now.Day() {
-			return false
-		}
+	if lastFaucet.ElapsedTime() > 24*time.Hour {
+		return true
 	}
 
-	return true
+	return false
 }
