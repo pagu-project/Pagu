@@ -7,7 +7,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-// nolint
 func (pt *Phoenix) faucetHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	if len(args) == 0 {
 		return cmd.ErrorResult(errors.New("invalid wallet address"))
