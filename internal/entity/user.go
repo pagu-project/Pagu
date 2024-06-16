@@ -1,13 +1,20 @@
 package entity
 
 import (
+	"database/sql"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
-	ID      string `gorm:"primaryKey;unique"` // The ID that defined and assigned on Pagu.
-	Faucets []Faucet
+	ID            uint `gorm:"primaryKey;unique"`
+	ApplicationID AppID
+	CallerID      string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	DeletedAt sql.NullTime
+
+	gorm.Model
 }

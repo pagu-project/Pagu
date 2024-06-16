@@ -2,6 +2,7 @@ package zealy
 
 import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/repository"
 	"github.com/pagu-project/Pagu/pkg/wallet"
 )
@@ -40,7 +41,7 @@ func (z *Zealy) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		Handler:     z.claimHandler,
 	}
 
@@ -50,7 +51,7 @@ func (z *Zealy) GetCommand() command.Command {
 		Help:        "",
 		Args:        nil,
 		SubCommands: nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		Handler:     z.statusHandler,
 	}
 
@@ -59,7 +60,7 @@ func (z *Zealy) GetCommand() command.Command {
 		Desc:        "Zealy Commands",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}

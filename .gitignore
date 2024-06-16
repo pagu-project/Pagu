@@ -18,5 +18,5 @@ dev_wallet
 *.log
 /local
 config/config.yml
-config/config.yaml
+config/config.*.yml
 config/wallets

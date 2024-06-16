@@ -1,43 +1,36 @@
 package phoenix
 
 import (
+	"errors"
+
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (pt *Phoenix) faucetHandler(cmd command.Command, _ command.AppID, callerID string, args ...string) command.CommandResult {
-	if !pt.db.HasUser(callerID) {
-		if err := pt.db.AddUser(
-			&entity.User{
-				ID: callerID,
-			},
-		); err != nil {
-			return cmd.ErrorResult(err)
-		}
-	}
-
-	if !pt.db.CanGetFaucet(callerID) {
-		return cmd.FailedResult("Uh, you used your share of faucets today!")
-	}
-
-	if pt.wallet.Balance() < 5 {
-		return cmd.FailedResult("RoboPac Phoenix wallet is empty, please contact the team!")
+// nolint
+func (pt *Phoenix) faucetHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+	if len(args) == 0 {
+		return cmd.ErrorResult(errors.New("invalid wallet address"))
 	}
 
 	toAddr := args[0]
-	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu Faucet", 5) //! define me on config?
+	if !pt.db.CanGetFaucet(cmd.User) {
+		return cmd.FailedResult("Uh, you used your share of faucets today!")
+	}
+
+	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu PhoenixFaucet", int64(pt.faucetAmount)) //! define me on config?
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	if err = pt.db.AddFaucet(&entity.Faucet{
+	if err = pt.db.AddFaucet(&entity.PhoenixFaucet{
+		UserID:          cmd.User.ID,
 		Address:         toAddr,
-		Amount:          5,
+		Amount:          pt.faucetAmount,
 		TransactionHash: txID,
-		UserID:          callerID,
 	}); err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	return cmd.SuccessfulResult("You got %d tPAC in %s address on Phoenix Testnet!", 5, toAddr)
+	return cmd.SuccessfulResult("You got %d tPAC in %s address on Phoenix Testnet!", pt.faucetAmount, toAddr)
 }

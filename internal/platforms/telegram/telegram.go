@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pagu-project/Pagu/internal/entity"
+
 	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/pkg/log"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -99,7 +100,7 @@ func (bot *TelegramBot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		messageParts := strings.Split(fullMessage, " ")
 
 		// Pass the array to the bot engine.
-		res := bot.botEngine.Run(command.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
+		res := bot.botEngine.Run(entity.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
 
 		// Check if the command execution resulted in an error.
 		if res.Error != "" {

@@ -1,8 +1,11 @@
 package zealy
 
-import "github.com/pagu-project/Pagu/internal/engine/command"
+import (
+	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
+)
 
-func (z *Zealy) statusHandler(cmd command.Command, _ command.AppID, _ string, args ...string) command.CommandResult {
+func (z *Zealy) statusHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	allUsers, err := z.db.GetAllZealyUser()
 	if err != nil {
 		return cmd.ErrorResult(err)

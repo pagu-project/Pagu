@@ -2,6 +2,7 @@ package calculator
 
 import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/client"
 )
 
@@ -42,7 +43,7 @@ func (bc *Calculator) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		Handler:     bc.calcRewardHandler,
 	}
 
@@ -58,7 +59,7 @@ func (bc *Calculator) GetCommand() command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		Handler:     bc.calcFeeHandler,
 	}
 
@@ -67,7 +68,7 @@ func (bc *Calculator) GetCommand() command.Command {
 		Desc:        "Calculator information and tools",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}

@@ -5,8 +5,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pagu-project/Pagu/internal/entity"
+
 	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/pkg/log"
 
 	"github.com/pactus-project/pactus/crypto"
@@ -52,7 +53,7 @@ func run(cmd *cobra.Command, args []string) {
 
 		inputs := strings.Split(input, " ")
 
-		response := botEngine.Run(command.AppIdCLI, "0", inputs)
+		response := botEngine.Run(entity.AppIdCLI, "0", inputs)
 
 		cmd.Printf("%v\n%v", response.Title, response.Message)
 	}

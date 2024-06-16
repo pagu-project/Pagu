@@ -3,6 +3,8 @@ package discord
 import (
 	"time"
 
+	"github.com/pagu-project/Pagu/internal/entity"
+
 	"github.com/pagu-project/Pagu/internal/engine"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/pkg/log"
@@ -66,7 +68,7 @@ func (bot *DiscordBot) registerCommands() error {
 
 	beCmds := bot.engine.Commands()
 	for i, beCmd := range beCmds {
-		if !beCmd.HasAppId(command.AppIdDiscord) {
+		if !beCmd.HasAppId(entity.AppIdDiscord) {
 			continue
 		}
 
@@ -160,7 +162,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		}
 	}
 
-	res := db.engine.Run(command.AppIdDiscord, i.Member.User.ID, beInput)
+	res := db.engine.Run(entity.AppIdDiscord, i.Member.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
 }

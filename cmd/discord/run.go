@@ -17,7 +17,7 @@ import (
 func runCommand(parentCmd *cobra.Command) {
 	run := &cobra.Command{
 		Use:   "run",
-		Short: "Runs a mainnet instance of RoboPac",
+		Short: "Runs a mainnet instance of Pagu",
 	}
 
 	parentCmd.AddCommand(run)

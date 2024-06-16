@@ -32,7 +32,7 @@ func (m *Market) GetCommand() command.Command {
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		Handler:     m.getPrice,
 	}
 
@@ -41,7 +41,7 @@ func (m *Market) GetCommand() command.Command {
 		Desc:        "Blockchain data and information",
 		Help:        "",
 		Args:        nil,
-		AppIDs:      command.AllAppIDs(),
+		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
 	}

@@ -3,50 +3,17 @@ package command
 import (
 	"fmt"
 	"slices"
+
+	"github.com/pagu-project/Pagu/internal/entity"
 )
-
-type AppID int
-
-const (
-	AppIdCLI      AppID = 1
-	AppIdDiscord  AppID = 2
-	AppIdgRPC     AppID = 3
-	AppIdHTTP     AppID = 4
-	AppIdTelegram AppID = 5
-)
-
-func (appID AppID) String() string {
-	switch appID {
-	case AppIdCLI:
-		return "CLI"
-	case AppIdDiscord:
-		return "Discord"
-	case AppIdgRPC:
-		return "gRPC"
-	case AppIdHTTP:
-		return "HTTP"
-	case AppIdTelegram:
-		return "Telegram"
-	}
-
-	return ""
-}
-
-func AllAppIDs() []AppID {
-	return []AppID{
-		AppIdCLI,
-		AppIdDiscord,
-		AppIdgRPC,
-		AppIdHTTP,
-		AppIdTelegram,
-	}
-}
 
 type Args struct {
 	Name     string
 	Desc     string
 	Optional bool
 }
+
+type HandlerFunc func(cmd Command, appID entity.AppID, callerID string, args ...string) CommandResult
 
 type Command struct {
 	Emoji       string
@@ -55,9 +22,11 @@ type Command struct {
 	Desc        string
 	Help        string
 	Args        []Args //! should be nil for commands.
-	AppIDs      []AppID
+	AppIDs      []entity.AppID
 	SubCommands []Command
-	Handler     func(cmd Command, source AppID, callerID string, args ...string) CommandResult
+	Middlewares []MiddlewareFunc
+	Handler     HandlerFunc
+	User        *entity.User
 }
 
 type CommandResult struct {
@@ -116,7 +85,7 @@ func (cmd *Command) CheckArgs(input []string) error {
 	return nil
 }
 
-func (cmd *Command) HasAppId(appID AppID) bool {
+func (cmd *Command) HasAppId(appID entity.AppID) bool {
 	return slices.Contains(cmd.AppIDs, appID)
 }
 
@@ -146,8 +115,8 @@ func (cmd *Command) AddHelpSubCommand() {
 	helpCmd := Command{
 		Name:   "help",
 		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
-		AppIDs: AllAppIDs(),
-		Handler: func(_ Command, _ AppID, _ string, _ ...string) CommandResult {
+		AppIDs: entity.AllAppIDs(),
+		Handler: func(_ Command, _ entity.AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
 	}
