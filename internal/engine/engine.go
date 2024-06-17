@@ -185,7 +185,7 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) c
 	}
 
 	for _, middlewareFunc := range cmd.Middlewares {
-		if err = middlewareFunc(cmd, appID, callerID, args...); err != nil {
+		if err = middlewareFunc(&cmd, appID, callerID, args...); err != nil {
 			log.Error(err.Error())
 			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
 		}
