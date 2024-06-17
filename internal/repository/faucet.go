@@ -19,9 +19,8 @@ func (db *DB) AddFaucet(f *entity.PhoenixFaucet) error {
 
 func (db *DB) CanGetFaucet(user *entity.User) bool {
 	var lastFaucet entity.PhoenixFaucet
-	tx := db.Model(&entity.PhoenixFaucet{}).
-		Last(&lastFaucet, "user_id = ?", user.ID)
-	if tx.Error != nil {
+	err := db.Model(&entity.PhoenixFaucet{}).Where("user_id = ?", user.ID).Order("id DESC").First(&lastFaucet).Error
+	if err != nil {
 		return true
 	}
 
