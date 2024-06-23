@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
+
 	"github.com/pagu-project/Pagu/internal/engine/command/market"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/job"
@@ -36,6 +38,7 @@ type BotEngine struct {
 	networkCmd    network.Network
 	phoenixCmd    phoenixtestnet.Phoenix
 	zealyCmd      zealy.Zealy
+	voucherCmd    voucher.Voucher
 	marketCmd     market.Market
 }
 
@@ -140,7 +143,8 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := calculator.NewCalculator(cm)
 	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, phoenixFaucetAmount, ptcm, *db)
-	zCmd := zealy.NewZealy(db, wallet)
+	zealyCmd := zealy.NewZealy(db, wallet)
+	voucherCmd := voucher.NewVoucher(db, wallet, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
 
 	return &BotEngine{
@@ -152,7 +156,8 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 		blockchainCmd:    bcCmd,
 		phoenixCmd:       ptCmd,
 		phoenixClientMgr: ptcm,
-		zealyCmd:         zCmd,
+		zealyCmd:         zealyCmd,
+		voucherCmd:       voucherCmd,
 		marketCmd:        marketCmd,
 	}
 }
