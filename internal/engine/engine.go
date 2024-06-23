@@ -39,6 +39,11 @@ type BotEngine struct {
 	marketCmd     market.Market
 }
 
+type IEngine interface {
+	Run(appID entity.AppID, callerID string, tokens []string) (*command.CommandResult, error)
+	Commands() []command.Command
+}
+
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
