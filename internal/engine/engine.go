@@ -170,6 +170,7 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.zealyCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
 
