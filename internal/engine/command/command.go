@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/pkg/template"
+
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
@@ -96,10 +99,12 @@ func (cmd *Command) HasSubCommand() bool {
 func (cmd *Command) HelpMessage() string {
 	help := cmd.Help
 	help += "\n\nAvailable commands:\n"
-	for _, sc := range cmd.SubCommands {
-		help += fmt.Sprintf("  %-12s %s\n", sc.Name, sc.Desc)
+	message, err := template.ExecuteHtml(config.HelpCommandTemplate, cmd.SubCommands)
+	if err != nil {
+		return ""
 	}
 
+	help += message
 	return help
 }
 
