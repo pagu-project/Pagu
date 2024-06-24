@@ -29,7 +29,7 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, _ string, ar
 	}
 
 	pubKey := validatorInfo.GetValidator().GetPublicKey()
-	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim fro bond in validator", int64(voucher.Amount))
+	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim for bond in validator", int64(voucher.Amount))
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}

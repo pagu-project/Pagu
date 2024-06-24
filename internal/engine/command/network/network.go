@@ -52,8 +52,8 @@ type NetStatus struct {
 	NetworkName         string
 	ConnectedPeersCount uint32
 	ValidatorsCount     int32
-	TotalBytesSent      uint32
-	TotalBytesReceived  uint32
+	TotalBytesSent      int64
+	TotalBytesReceived  int64
 	CurrentBlockHeight  uint32
 	TotalNetworkPower   int64
 	TotalCommitteePower int64
