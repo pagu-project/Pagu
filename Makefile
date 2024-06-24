@@ -38,18 +38,18 @@ check:
 	golangci-lint run --timeout=20m0s
 
 ### building
-build: build-cli build-dc build-grpc build-tg build-http
+build: build-cli build-discord build-grpc build-telegram build-http
 
 build-cli:
 	go build -o build/pagu-cli     ./cmd/cli
 
-build-dc:
+build-discord:
 	go build -o build/pagu-discord ./cmd/discord
 
 build-grpc:
 	go build -o build/pagu-grpc ./cmd/grpc
 	
-build-tg:
+build-telegram:
 	go build -o build/pagu-telegram ./cmd/telegram
 
 build-http:

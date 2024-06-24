@@ -1,0 +1,90 @@
+version: '3'
+
+networks:
+  pagu-network:
+    external: true
+
+services:
+  pagu-db:
+    image: mysql:5.7.42-debian
+    hostname: pagu-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PAGU_DB_PASSWORD}
+      MYSQL_DATABASE: pagu
+    expose:
+      - 4417
+    ports:
+      - "4417:3306"
+    container_name: pagu-db
+    networks:
+      pagu-network:
+    volumes:
+      - pagu-db-data:/var/lib/mysql
+  pagu-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: pagu-db
+    container_name: pagu-phpmyadmin
+    ports:
+      - "4418:80"
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
+  pagu-cli:
+    build:
+      context: ../.
+      dockerfile: deployment/cli/Dockerfile
+    hostname: pagu-cli
+    container_name: pagu-cli
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
+    volumes:
+      - ../config/config.yml:/config/config.yml
+      - ../config/wallets/main_wallet:/config/wallets/main_wallet
+      - ../config/wallets/test_wallet:/config/wallets/test_wallet
+  pagu-telegram:
+    build:
+      context: ../.
+      dockerfile: deployment/telegram/Dockerfile
+    hostname: pagu-telegram
+    container_name: pagu-telegram
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
+    volumes:
+      - ../config/config.yml:/config/config.yml
+      - ../config/wallets/main_wallet:/config/wallets/main_wallet
+      - ../config/wallets/test_wallet:/config/wallets/test_wallet
+  pagu-discord:
+    build:
+      context: ../.
+      dockerfile: deployment/discord/Dockerfile
+    hostname: pagu-discord
+    container_name: pagu-discord
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
+    volumes:
+      - ../config/config.yml:/config/config.yml
+      - ../config/wallets/main_wallet:/config/wallets/main_wallet
+      - ../config/wallets/test_wallet:/config/wallets/test_wallet
+  pagu-node:
+    hostname: pagu-node
+    domainname: pagu-node
+    container_name: pagu-node
+    image: pactus/pactus:latest
+    command: pactus-daemon start -w ./../../../pactus
+    restart: always
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./../../../pactus:/pactus
+    networks:
+      pagu-network:
+volumes:
+  pagu-db-data: { }

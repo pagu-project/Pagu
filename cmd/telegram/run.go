@@ -5,15 +5,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/platforms/telegram"
+	"github.com/pagu-project/Pagu/pkg/log"
+
 	pCmd "github.com/pagu-project/Pagu/cmd"
 	"github.com/pagu-project/Pagu/config"
-	"github.com/pagu-project/Pagu/engine"
-	"github.com/pagu-project/Pagu/log"
-	"github.com/pagu-project/Pagu/telegram"
 	"github.com/spf13/cobra"
 )
 
-func RunCommand(parentCmd *cobra.Command) {
+func runCommand(parentCmd *cobra.Command) {
 	run := &cobra.Command{
 		Use:   "run",
 		Short: "Runs a mainnet instance of RoboPac",
@@ -23,22 +24,22 @@ func RunCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// Load configuration.
-		config, err := config.Load()
+		configs, err := config.Load(configPath)
 		pCmd.ExitOnError(cmd, err)
 
 		// Starting botEngine.
-		botEngine, err := engine.NewBotEngine(config)
+		botEngine, err := engine.NewBotEngine(configs)
 		pCmd.ExitOnError(cmd, err)
 
-		log.InitGlobalLogger(config.Logger)
+		log.InitGlobalLogger(configs.Logger)
 
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		chatID := config.Telegram.ChatID
-		groupLink := config.Telegram.GroupLink
+		chatID := configs.Telegram.ChatID
+		groupLink := configs.Telegram.GroupLink
 
-		telegramBot, err := telegram.NewTelegramBot(botEngine, config.Telegram.BotToken, chatID, config)
+		telegramBot, err := telegram.NewTelegramBot(botEngine, configs.Telegram.BotToken, chatID, configs)
 		pCmd.ExitOnError(cmd, err)
 
 		// register command handlers.

@@ -17,3 +17,6 @@ dev_wallet
 .env
 *.log
 /local
+config/config.yml
+config/config.*.yml
+config/wallets

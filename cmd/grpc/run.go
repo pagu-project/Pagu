@@ -5,11 +5,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/pagu-project/Pagu/internal/delivery/grpc"
+	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/pkg/log"
+
 	pCmd "github.com/pagu-project/Pagu/cmd"
 	"github.com/pagu-project/Pagu/config"
-	"github.com/pagu-project/Pagu/engine"
-	"github.com/pagu-project/Pagu/grpc"
-	"github.com/pagu-project/Pagu/log"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +24,7 @@ func runCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
-		config, err := config.Load()
+		config, err := config.Load("")
 		pCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
