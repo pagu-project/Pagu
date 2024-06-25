@@ -31,7 +31,7 @@ func NewVoucher(db *repository.DB, wallet *wallet.Wallet, cli *client.Mgr) Vouch
 func (v *Voucher) GetCommand() command.Command {
 	subCmdClaim := command.Command{
 		Name: ClaimCommandName,
-		Desc: "Claim your voucher coins adn bond to validator",
+		Desc: "Claim your voucher coins and bond to validator",
 		Help: "",
 		Args: []command.Args{
 			{
