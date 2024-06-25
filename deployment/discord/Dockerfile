@@ -6,6 +6,8 @@ RUN mkdir /pagu
 WORKDIR /pagu
 COPY ../.. .
 
+RUN go mod tidy
+RUN go mod ven
 RUN make build-discord
 
 FROM alpine:3.14
