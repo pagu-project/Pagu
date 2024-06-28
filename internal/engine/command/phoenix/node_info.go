@@ -5,7 +5,6 @@ import (
 
 	"github.com/pagu-project/Pagu/internal/entity"
 
-	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
@@ -21,16 +20,11 @@ func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string
 		return cmd.ErrorResult(err)
 	}
 
-	peerID, err := peer.IDFromBytes(peerInfo.PeerId)
-	if err != nil {
-		return cmd.ErrorResult(err)
-	}
-
 	ip := utils2.ExtractIPFromMultiAddr(peerInfo.Address)
 	geoData := utils2.GetGeoIP(ip)
 
 	nodeInfo := &network.NodeInfo{
-		PeerID:     peerID.String(),
+		PeerID:     peerInfo.PeerId,
 		IPAddress:  peerInfo.Address,
 		Agent:      peerInfo.Agent,
 		Moniker:    peerInfo.Moniker,
