@@ -33,7 +33,7 @@ func runCommand(parentCmd *cobra.Command) {
 
 		log.InitGlobalLogger(configs.Logger)
 
-		botEngine.RegisterAllCommands()
+		botEngine.RegisterCommands()
 		botEngine.Start()
 
 		chatID := configs.Telegram.ChatID

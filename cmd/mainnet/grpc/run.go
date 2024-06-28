@@ -5,8 +5,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/pagu-project/Pagu/internal/delivery/grpc"
 	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/internal/platforms/discord"
 	"github.com/pagu-project/Pagu/pkg/log"
 
 	pCmd "github.com/pagu-project/Pagu/cmd"
@@ -17,37 +17,36 @@ import (
 func runCommand(parentCmd *cobra.Command) {
 	run := &cobra.Command{
 		Use:   "run",
-		Short: "Runs a mainnet instance of Pagu",
+		Short: "Runs a mainnet instance of RoboPac",
 	}
 
 	parentCmd.AddCommand(run)
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
-		configs, err := config.Load(configPath)
+		config, err := config.Load("")
 		pCmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
-		log.InitGlobalLogger(configs.Logger)
+		log.InitGlobalLogger(config.Logger)
 
 		// starting botEngine.
-		botEngine, err := engine.NewBotEngine(configs)
+		botEngine, err := engine.NewBotEngine(config)
 		pCmd.ExitOnError(cmd, err)
 
-		botEngine.RegisterAllCommands()
+		botEngine.RegisterCommands()
 		botEngine.Start()
 
-		discordBot, err := discord.NewDiscordBot(botEngine, configs.DiscordBot.Token, configs.DiscordBot)
-		pCmd.ExitOnError(cmd, err)
+		grpcServer := grpc.NewServer(botEngine, config.GRPC)
 
-		err = discordBot.Start()
+		err = grpcServer.Start()
 		pCmd.ExitOnError(cmd, err)
 
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 		<-sigChan
 
-		if err := discordBot.Stop(); err != nil {
+		if err := grpcServer.Stop(); err != nil {
 			pCmd.ExitOnError(cmd, err)
 		}
 

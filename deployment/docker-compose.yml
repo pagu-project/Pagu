@@ -59,12 +59,12 @@ services:
       - ../config/config.yml:/config/config.yml
       - ../config/wallets/main_wallet:/config/wallets/main_wallet
       - ../config/wallets/test_wallet:/config/wallets/test_wallet
-  pagu-discord:
+  pagu-discord-mainnet:
     build:
       context: ../.
-      dockerfile: deployment/discord/Dockerfile
-    hostname: pagu-discord
-    container_name: pagu-discord
+      dockerfile: deployment/mainnet/discord/Dockerfile
+    hostname: pagu-discord-mainnet
+    container_name: pagu-discord-mainnet
     networks:
       pagu-network:
     depends_on:
@@ -72,6 +72,18 @@ services:
     volumes:
       - ../config/config.yml:/config/config.yml
       - ../config/wallets/main_wallet:/config/wallets/main_wallet
+  pagu-discord-testnet:
+    build:
+      context: ../.
+      dockerfile: deployment/testnet/discord/Dockerfile
+    hostname: pagu-discord-testnet
+    container_name: pagu-discord-testnet
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
+    volumes:
+      - ../config/config.yml:/config/config.yml
       - ../config/wallets/test_wallet:/config/wallets/test_wallet
   pagu-node:
     hostname: pagu-node

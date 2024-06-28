@@ -34,7 +34,7 @@ func run(cmd *cobra.Command, args []string) {
 	botEngine, err := engine.NewBotEngine(configs)
 	pCmd.ExitOnError(cmd, err)
 
-	botEngine.RegisterAllCommands()
+	botEngine.RegisterCommands()
 	botEngine.Start()
 
 	reader := bufio.NewReader(os.Stdin)

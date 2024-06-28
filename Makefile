@@ -38,22 +38,25 @@ check:
 	golangci-lint run --timeout=20m0s
 
 ### building
-build: build-cli build-discord build-grpc build-telegram build-http
+build: build-cli build-discord-mainnet build-discord-testnet build-grpc build-telegram build-http
 
 build-cli:
 	go build -o build/pagu-cli     ./cmd/cli
 
-build-discord:
-	go build -o build/pagu-discord ./cmd/discord
-
 build-grpc:
-	go build -o build/pagu-grpc ./cmd/grpc
-	
+	go build -o build/pagu-grpc ./cmd/mainnet/grpc
+
+build-discord-mainnet:
+	go build -o build/pagu-discord-mainnet ./cmd/mainnet/discord
+
+build-discord-testnet:
+	go build -o build/pagu-discord-testnet ./cmd/testnet/discord
+
 build-telegram:
-	go build -o build/pagu-telegram ./cmd/telegram
+	go build -o build/pagu-telegram ./cmd/mainnet/telegram
 
 build-http:
-	go build -o build/pagu-http ./cmd/http
+	go build -o build/pagu-http ./cmd/mainnet/http
 
 ### pre commit
 pre-commit: mock proto fmt check unit_test

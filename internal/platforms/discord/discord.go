@@ -21,11 +21,14 @@ type DiscordBot struct {
 	cfg     config.DiscordBot
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.DiscordBot) (*DiscordBot, error) {
-	s, err := discordgo.New("Bot " + token)
+func NewDiscordBot(botEngine *engine.BotEngine, cfg config.DiscordBot, targets int) (*DiscordBot, error) {
+	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		return nil, err
 	}
+
+	botEngine.RegisterCommands(targets)
+	botEngine.Start()
 
 	return &DiscordBot{
 		Session: s,

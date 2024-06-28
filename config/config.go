@@ -9,19 +9,21 @@ import (
 )
 
 type Config struct {
-	Network       string         `yaml:"network"`
-	NetworkNodes  []string       `yaml:"network_nodes"`
-	LocalNode     string         `yaml:"local_node"`
-	Database      Database       `yaml:"database"`
-	AuthIDs       []string       `yaml:"auth_ids"`
-	DiscordBot    DiscordBot     `yaml:"discord"`
-	GRPC          GRPC           `yaml:"grpc"`
-	Wallet        Wallet         `yaml:"main_net_wallet"`
-	TestNetWallet Wallet         `yaml:"test_net_wallet"`
-	Logger        Logger         `yaml:"logger"`
-	HTTP          HTTP           `yaml:"http"`
-	Phoenix       PhoenixNetwork `yaml:"phoenix"`
-	Telegram      Telegram       `yaml:"telegram"`
+	Network              string         `yaml:"network"`
+	NetworkNodes         []string       `yaml:"network_nodes"`
+	LocalNode            string         `yaml:"local_node"`
+	Database             Database       `yaml:"database"`
+	AuthIDs              []string       `yaml:"auth_ids"`
+	DiscordMainBot       DiscordBot     `yaml:"discord_main"`
+	DiscordTestBot       DiscordBot     `yaml:"discord_test"`
+	DiscordModerationBot DiscordBot     `yaml:"discord_mod"`
+	GRPC                 GRPC           `yaml:"grpc"`
+	Wallet               Wallet         `yaml:"main_net_wallet"`
+	TestNetWallet        Wallet         `yaml:"test_net_wallet"`
+	Logger               Logger         `yaml:"logger"`
+	HTTP                 HTTP           `yaml:"http"`
+	Phoenix              PhoenixNetwork `yaml:"phoenix"`
+	Telegram             Telegram       `yaml:"telegram"`
 }
 
 type Database struct {

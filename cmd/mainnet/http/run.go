@@ -34,7 +34,7 @@ func runCommand(parentCmd *cobra.Command) {
 		botEngine, err := engine.NewBotEngine(configs)
 		pCmd.ExitOnError(cmd, err)
 
-		botEngine.RegisterAllCommands()
+		botEngine.RegisterCommands()
 		botEngine.Start()
 
 		httpServer := http.NewHTTPServer(botEngine, configs.HTTP)

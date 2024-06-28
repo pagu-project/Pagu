@@ -166,15 +166,39 @@ func (be *BotEngine) Commands() []command.Command {
 	return be.rootCmd.SubCommands
 }
 
-func (be *BotEngine) RegisterAllCommands() {
+func (be *BotEngine) RegisterCommands(targets ...int) {
+	for _, target := range targets {
+		switch target {
+		case config.TargetMaskMain:
+			be.registerMainnetCommands()
+		case config.TargetMaskTest:
+			be.registerTestnetCommands()
+		case config.TargetMaskModerator:
+			be.registerModerationCommands()
+		case config.TargetMaskAll:
+			be.registerMainnetCommands()
+			be.registerTestnetCommands()
+			be.registerModerationCommands()
+		}
+	}
+}
+
+func (be *BotEngine) registerMainnetCommands() {
 	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.zealyCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
-	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
-
 	be.rootCmd.AddHelpSubCommand()
+}
+
+func (be *BotEngine) registerTestnetCommands() {
+	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
+	be.rootCmd.AddHelpSubCommand()
+}
+
+func (be *BotEngine) registerModerationCommands() {
+	// TODO: register moderation commands
 }
 
 func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) command.CommandResult {
