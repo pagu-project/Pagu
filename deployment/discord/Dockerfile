@@ -7,7 +7,7 @@ WORKDIR /pagu
 COPY ../.. .
 
 RUN go mod tidy
-RUN go mod ven
+RUN go mod vendor
 RUN make build-discord
 
 FROM alpine:3.14
