@@ -40,45 +40,6 @@ func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr,
 func (pt *Phoenix) GetCommand() command.Command {
 	middlewareHandler := command.NewMiddlewareHandler(&pt.db, pt.wallet)
 
-	/*
-
-		subCmdWallet := command.Command{
-				Name:        WalletCommandName,
-				Desc:        "Check the status of Pagu faucet address wallet on Phoenix network",
-				Help:        "",
-				Args:        nil,
-				SubCommands: nil,
-				AppIDs:      entity.AllAppIDs(),
-				Handler:     pt.walletHandler,
-			}
-
-		subCmdHealth := command.Command{
-			Name:        HealthCommandName,
-			Desc:        "Checking Phoenix test-network health status",
-			Help:        "",
-			Args:        []command.Args{},
-			SubCommands: nil,
-			AppIDs:      entity.AllAppIDs(),
-			MiddlewareHandler:     pt.networkHealthHandler,
-		}
-
-		subCmdNodeInfo := command.Command{
-			Name: NodeInfoCommandName,
-			Desc: "View the information of a node running on Phoenix test-network",
-			Help: "Provide your validator address on the specific node to get the validator and node info (Phoenix network)",
-			Args: []command.Args{
-				{
-					Name:     "validator_address",
-					Desc:     "Your validator address start with tpc1p...",
-					Optional: false,
-				},
-			},
-			SubCommands: nil,
-			AppIDs:      entity.AllAppIDs(),
-			MiddlewareHandler:     pt.nodeInfoHandler,
-		}
-	*/
-
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
 		Desc:        "Phoenix test-network statistics",
@@ -117,9 +78,6 @@ func (pt *Phoenix) GetCommand() command.Command {
 		Handler:     nil,
 	}
 
-	// cmdPhoenix.AddSubCommand(subCmdHealth)
-	// cmdPhoenix.AddSubCommand(subCmdNodeInfo)
-	// cmdPhoenix.AddSubCommand(subCmdWallet)
 	cmdPhoenix.AddSubCommand(subCmdFaucet)
 	cmdPhoenix.AddSubCommand(subCmdStatus)
 
