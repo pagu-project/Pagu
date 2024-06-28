@@ -70,7 +70,7 @@ func (cm *Mgr) updateValMap() {
 		}
 
 		for _, p := range networkInfo.ConnectedPeers {
-			for _, addr := range p.ConsensusAddress {
+			for _, addr := range p.ConsensusAddresses {
 				current := freshValMap[addr]
 				if current != nil {
 					if current.LastSent < p.LastSent {

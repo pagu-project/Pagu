@@ -61,7 +61,7 @@ func (c *Client) GetPeerInfo(ctx context.Context, address string) (*pactus.PeerI
 	networkInfo, _ := c.GetNetworkInfo(ctx)
 	if networkInfo != nil {
 		for _, p := range networkInfo.ConnectedPeers {
-			for _, addr := range p.ConsensusAddress {
+			for _, addr := range p.ConsensusAddresses {
 				if addr != "" {
 					if addr == address {
 						return p, nil
@@ -99,7 +99,7 @@ func (c *Client) GetValidatorInfoByNumber(ctx context.Context, num int32) (*pact
 func (c *Client) TransactionData(ctx context.Context, hash string) (*pactus.TransactionInfo, error) {
 	data, err := c.transactionClient.GetTransaction(ctx,
 		&pactus.GetTransactionRequest{
-			Id:        []byte(hash),
+			Id:        hash,
 			Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
 		})
 	if err != nil {
@@ -134,7 +134,7 @@ func (c *Client) GetNodeInfo(ctx context.Context) (*pactus.GetNodeInfoResponse, 
 
 func (c *Client) GetTransactionData(ctx context.Context, txID string) (*pactus.GetTransactionResponse, error) {
 	return c.transactionClient.GetTransaction(ctx, &pactus.GetTransactionRequest{
-		Id:        []byte(txID),
+		Id:        txID,
 		Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
 	})
 }
