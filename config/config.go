@@ -9,19 +9,19 @@ import (
 )
 
 type Config struct {
-	Network       string         `yaml:"network"`
-	NetworkNodes  []string       `yaml:"network_nodes"`
-	LocalNode     string         `yaml:"local_node"`
-	Database      Database       `yaml:"database"`
-	AuthIDs       []string       `yaml:"auth_ids"`
-	DiscordBot    DiscordBot     `yaml:"discord"`
-	GRPC          GRPC           `yaml:"grpc"`
-	Wallet        Wallet         `yaml:"main_net_wallet"`
-	TestNetWallet Wallet         `yaml:"test_net_wallet"`
-	Logger        Logger         `yaml:"logger"`
-	HTTP          HTTP           `yaml:"http"`
-	Phoenix       PhoenixNetwork `yaml:"phoenix"`
-	Telegram      Telegram       `yaml:"telegram"`
+	Network      string         `yaml:"network"`
+	NetworkNodes []string       `yaml:"network_nodes"`
+	LocalNode    string         `yaml:"local_node"`
+	Database     Database       `yaml:"database"`
+	AuthIDs      []string       `yaml:"auth_ids"`
+	GRPC         GRPC           `yaml:"grpc"`
+	Wallet       Wallet         `yaml:"wallet"`
+	Logger       Logger         `yaml:"logger"`
+	HTTP         HTTP           `yaml:"http"`
+	Phoenix      PhoenixNetwork `yaml:"phoenix"`
+	DiscordBot   DiscordBot     `yaml:"discord"`
+	Telegram     Telegram       `yaml:"telegram"`
+	TargetMask   int            `yaml:"target_mask"`
 }
 
 type Database struct {
@@ -50,8 +50,7 @@ type HTTP struct {
 }
 
 type PhoenixNetwork struct {
-	NetworkNodes []string `yaml:"network_nodes"`
-	FaucetAmount uint     `yaml:"faucet_amount"`
+	FaucetAmount uint `yaml:"faucet_amount"`
 }
 
 type Logger struct {
@@ -101,18 +100,7 @@ func (cfg *Config) BasicCheck() error {
 		}
 	}
 
-	if cfg.TestNetWallet.Enable {
-		if cfg.TestNetWallet.Address == "" {
-			return fmt.Errorf("config: basic check error: TESTNET_WALLET_ADDRESS dose not set")
-		}
-
-		// Check if the WalletPath exists.
-		if !util.PathExists(cfg.TestNetWallet.Path) {
-			return fmt.Errorf("config: basic check error: TESTNET_WALLET_PATH does not exist: %s", cfg.TestNetWallet.Path)
-		}
-	}
-
-	if len(cfg.NetworkNodes) == 0 || len(cfg.Phoenix.NetworkNodes) == 0 {
+	if len(cfg.NetworkNodes) == 0 {
 		return fmt.Errorf("config: basic check error: NETWORK_NODES is not set or incorrect")
 	}
 

@@ -18,13 +18,15 @@ type Voucher struct {
 	db            *repository.DB
 	wallet        *wallet.Wallet
 	clientManager *client.Mgr
+	targetMask    int
 }
 
-func NewVoucher(db *repository.DB, wallet *wallet.Wallet, cli *client.Mgr) Voucher {
+func NewVoucher(db *repository.DB, wallet *wallet.Wallet, cli *client.Mgr, target int) Voucher {
 	return Voucher{
 		db:            db,
 		wallet:        wallet,
 		clientManager: cli,
+		targetMask:    target,
 	}
 }
 
@@ -58,6 +60,7 @@ func (v *Voucher) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetMask:  v.targetMask,
 	}
 
 	cmdVoucher.AddSubCommand(subCmdClaim)

@@ -3,6 +3,8 @@ package discord
 import (
 	"time"
 
+	"github.com/pactus-project/pactus/util"
+
 	"github.com/pagu-project/Pagu/internal/entity"
 
 	"github.com/pagu-project/Pagu/internal/engine"
@@ -16,21 +18,23 @@ import (
 )
 
 type DiscordBot struct {
-	Session *discordgo.Session
-	engine  *engine.BotEngine
-	cfg     config.DiscordBot
+	Session     *discordgo.Session
+	engine      *engine.BotEngine
+	cfg         config.DiscordBot
+	targetMasks int
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.DiscordBot) (*DiscordBot, error) {
-	s, err := discordgo.New("Bot " + token)
+func NewDiscordBot(botEngine *engine.BotEngine, cfg config.DiscordBot, targets int) (*DiscordBot, error) {
+	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		return nil, err
 	}
 
 	return &DiscordBot{
-		Session: s,
-		engine:  botEngine,
-		cfg:     cfg,
+		Session:     s,
+		engine:      botEngine,
+		cfg:         cfg,
+		targetMasks: targets,
 	}, nil
 }
 
@@ -69,6 +73,10 @@ func (bot *DiscordBot) registerCommands() error {
 	beCmds := bot.engine.Commands()
 	for i, beCmd := range beCmds {
 		if !beCmd.HasAppId(entity.AppIdDiscord) {
+			continue
+		}
+
+		if !util.IsFlagSet(beCmd.TargetMask, bot.targetMasks) {
 			continue
 		}
 

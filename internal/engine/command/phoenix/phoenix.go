@@ -25,15 +25,16 @@ type Phoenix struct {
 	db           repository.DB
 	clientMgr    *client.Mgr
 	faucetAmount uint
+	targetMask   int
 }
 
-func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr, db repository.DB,
-) Phoenix {
+func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr, db repository.DB, target int) Phoenix {
 	return Phoenix{
 		wallet:       wallet,
 		clientMgr:    clientMgr,
 		db:           db,
 		faucetAmount: faucetAmount,
+		targetMask:   target,
 	}
 }
 
@@ -76,6 +77,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetMask:  pt.targetMask,
 	}
 
 	cmdPhoenix.AddSubCommand(subCmdFaucet)

@@ -27,6 +27,7 @@ type Command struct {
 	Middlewares []MiddlewareFunc
 	Handler     HandlerFunc
 	User        *entity.User
+	TargetMask  int
 }
 
 type CommandResult struct {

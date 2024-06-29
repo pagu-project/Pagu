@@ -7,18 +7,18 @@ import (
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (be *Network) networkStatusHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
-	netInfo, err := be.clientMgr.GetNetworkInfo()
+func (n *Network) networkStatusHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
+	netInfo, err := n.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	chainInfo, err := be.clientMgr.GetBlockchainInfo()
+	chainInfo, err := n.clientMgr.GetBlockchainInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	cs, err := be.clientMgr.GetCirculatingSupply()
+	cs, err := n.clientMgr.GetCirculatingSupply()
 	if err != nil {
 		cs = 0
 	}
@@ -40,7 +40,7 @@ func (be *Network) networkStatusHandler(cmd command.Command, _ entity.AppID, _ s
 
 	return cmd.SuccessfulResult("Network Name: %s\nConnected Peers: %v\n"+
 		"Validators Count: %v\nAccounts Count: %v\nCurrent Block Height: %v\nTotal Power: %v PAC\nTotal Committee Power: %v PAC\nCirculating Supply: %v PAC\n"+
-		"\n> Note📝: This info is from one random network node. Non-calculator data may not be consistent.",
+		"\n> Note📝: This info is from one random network node. Non-calculator data may not n consistent.",
 		net.NetworkName,
 		utils2.FormatNumber(int64(net.ConnectedPeersCount)),
 		utils2.FormatNumber(int64(net.ValidatorsCount)),
