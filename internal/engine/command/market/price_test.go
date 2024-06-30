@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pagu-project/Pagu/config"
-
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/job"
@@ -19,7 +17,7 @@ func setup() (Market, command.Command) {
 	priceJobSched := job.NewScheduler()
 	priceJobSched.Submit(priceJob)
 	go priceJobSched.Run()
-	m := NewMarket(nil, priceCache, config.TargetMaskMain)
+	m := NewMarket(nil, priceCache)
 
 	return m, command.Command{
 		Name:        PriceCommandName,
@@ -28,7 +26,6 @@ func setup() (Market, command.Command) {
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		TargetMask:  m.targetMask,
 	}
 }
 

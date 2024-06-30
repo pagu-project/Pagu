@@ -18,16 +18,14 @@ const (
 )
 
 type Network struct {
-	ctx        context.Context
-	clientMgr  *client.Mgr
-	targetMask int
+	ctx       context.Context
+	clientMgr *client.Mgr
 }
 
-func NewNetwork(ctx context.Context, clientMgr *client.Mgr, target int) Network {
+func NewNetwork(ctx context.Context, clientMgr *client.Mgr) Network {
 	return Network{
-		ctx:        ctx,
-		clientMgr:  clientMgr,
-		targetMask: target,
+		ctx:       ctx,
+		clientMgr: clientMgr,
 	}
 }
 
@@ -106,7 +104,6 @@ func (n *Network) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
-		TargetMask:  n.targetMask,
 	}
 
 	cmdNetwork.AddSubCommand(subCmdHealth)

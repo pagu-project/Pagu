@@ -15,16 +15,14 @@ const (
 )
 
 type Zealy struct {
-	db         *repository.DB
-	wallet     *wallet.Wallet
-	targetMask int
+	db     *repository.DB
+	wallet *wallet.Wallet
 }
 
-func NewZealy(db *repository.DB, wallet *wallet.Wallet, target int) Zealy {
+func NewZealy(db *repository.DB, wallet *wallet.Wallet) Zealy {
 	return Zealy{
-		db:         db,
-		wallet:     wallet,
-		targetMask: target,
+		db:     db,
+		wallet: wallet,
 	}
 }
 
@@ -63,7 +61,6 @@ func (z *Zealy) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
-		TargetMask:  z.targetMask,
 	}
 
 	cmdZealy.AddSubCommand(subCmdClaim)

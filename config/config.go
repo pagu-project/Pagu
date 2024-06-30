@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	BotName      string         `yaml:"bot_name"`
 	Network      string         `yaml:"network"`
 	NetworkNodes []string       `yaml:"network_nodes"`
 	LocalNode    string         `yaml:"local_node"`
@@ -21,7 +22,6 @@ type Config struct {
 	Phoenix      PhoenixNetwork `yaml:"phoenix"`
 	DiscordBot   DiscordBot     `yaml:"discord"`
 	Telegram     Telegram       `yaml:"telegram"`
-	TargetMask   int            `yaml:"target_mask"`
 }
 
 type Database struct {

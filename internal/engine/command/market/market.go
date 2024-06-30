@@ -16,14 +16,12 @@ const (
 type Market struct {
 	clientMgr  *client.Mgr
 	priceCache cache.Cache[string, entity.Price]
-	targetMask int
 }
 
-func NewMarket(clientMgr *client.Mgr, priceCache cache.Cache[string, entity.Price], target int) Market {
+func NewMarket(clientMgr *client.Mgr, priceCache cache.Cache[string, entity.Price]) Market {
 	return Market{
 		clientMgr:  clientMgr,
 		priceCache: priceCache,
-		targetMask: target,
 	}
 }
 
@@ -46,7 +44,6 @@ func (m *Market) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
-		TargetMask:  m.targetMask,
 	}
 
 	cmdMarket.AddSubCommand(subCmdPrice)

@@ -7,6 +7,14 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
+var (
+	TargetMaskMain      = 1
+	TargetMaskTest      = 2
+	TargetMaskModerator = 4
+
+	TargetMaskAll = TargetMaskMain | TargetMaskTest | TargetMaskModerator
+)
+
 type Args struct {
 	Name     string
 	Desc     string
