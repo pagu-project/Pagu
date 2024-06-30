@@ -78,17 +78,17 @@ func (bot *DiscordBot) registerCommands() error {
 
 		switch bot.target {
 		case config.BotNamePaguMainnet:
-			if !util.IsFlagSet(beCmd.TargetMask, command.TargetMaskMain) {
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskMain) {
 				continue
 			}
 
 		case config.BotNamePaguTestnet:
-			if !util.IsFlagSet(beCmd.TargetMask, command.TargetMaskTest) {
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskTest) {
 				continue
 			}
 
 		case config.BotNamePaguModerator:
-			if !util.IsFlagSet(beCmd.TargetMask, command.TargetMaskModerator) {
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskModerator) {
 				continue
 			}
 		}

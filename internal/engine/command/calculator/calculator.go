@@ -69,6 +69,7 @@ func (bc *Calculator) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	cmdBlockchain.AddSubCommand(subCmdCalcReward)

@@ -35,7 +35,7 @@ type Command struct {
 	Middlewares []MiddlewareFunc
 	Handler     HandlerFunc
 	User        *entity.User
-	TargetMask  int
+	TargetFlag  int
 }
 
 type CommandResult struct {
