@@ -1,31 +1,23 @@
+bot_name: ""
 network: "Localnet"
 
 # Pactus clients
 local_node: "localhost:50051"
 network_nodes: ["localhost:50051"]
 
-
-# TestNet Wallet
-test_net_wallet:
-  enable: false
-  address: "wallet_address"
-  rpc: "localhost:50052"
-  path: "./test/test_wallet"
-  password: "wallet_password"
-
 # Wallet
-main_net_wallet:
+wallet:
   enable: true
   address: "wallet_address"
   rpc: "localhost:50051"
   path: "./local/net1/wallets/main_wallet"
   password: "wallet_password"
 
-  # Phoenix TestNet
+# Phoenix TestNet
 phoenix:
   network_nodes: ["localhost:50052"]
   faucet_amount: 5
-  
+
 #Database
 database:
   url: ""
@@ -34,15 +26,15 @@ database:
 discord:
   token: 0
   guild_id: 0
-  
+
 # gRPC
 grpc:
   listen: "localhost:9090"
-  
+
 # HTTP
 http:
   listen: "localhost:3000"
-  
+
 # Logger
 logger:
   level: "info"
@@ -56,4 +48,3 @@ telegram:
   bot_token: "token"
   chat_id: 0
   group_link: "https://t.me/pactuschat"
-
