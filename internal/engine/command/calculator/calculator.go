@@ -17,9 +17,7 @@ type Calculator struct {
 	clientMgr *client.Mgr
 }
 
-func NewCalculator(
-	clientMgr *client.Mgr,
-) Calculator {
+func NewCalculator(clientMgr *client.Mgr) Calculator {
 	return Calculator{
 		clientMgr: clientMgr,
 	}
@@ -71,6 +69,7 @@ func (bc *Calculator) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	cmdBlockchain.AddSubCommand(subCmdCalcReward)

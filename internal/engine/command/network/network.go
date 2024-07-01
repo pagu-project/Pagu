@@ -22,9 +22,7 @@ type Network struct {
 	clientMgr *client.Mgr
 }
 
-func NewNetwork(ctx context.Context,
-	clientMgr *client.Mgr,
-) Network {
+func NewNetwork(ctx context.Context, clientMgr *client.Mgr) Network {
 	return Network{
 		ctx:       ctx,
 		clientMgr: clientMgr,
@@ -106,6 +104,7 @@ func (n *Network) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetFlag:  command.TargetMaskAll,
 	}
 
 	cmdNetwork.AddSubCommand(subCmdHealth)

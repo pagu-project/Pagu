@@ -3,6 +3,8 @@ package discord
 import (
 	"time"
 
+	"github.com/pactus-project/pactus/util"
+
 	"github.com/pagu-project/Pagu/internal/entity"
 
 	"github.com/pagu-project/Pagu/internal/engine"
@@ -19,10 +21,11 @@ type DiscordBot struct {
 	Session *discordgo.Session
 	engine  *engine.BotEngine
 	cfg     config.DiscordBot
+	target  string
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.DiscordBot) (*DiscordBot, error) {
-	s, err := discordgo.New("Bot " + token)
+func NewDiscordBot(botEngine *engine.BotEngine, cfg config.DiscordBot, target string) (*DiscordBot, error) {
+	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -31,6 +34,7 @@ func NewDiscordBot(botEngine *engine.BotEngine, token string, cfg config.Discord
 		Session: s,
 		engine:  botEngine,
 		cfg:     cfg,
+		target:  target,
 	}, nil
 }
 
@@ -70,6 +74,23 @@ func (bot *DiscordBot) registerCommands() error {
 	for i, beCmd := range beCmds {
 		if !beCmd.HasAppId(entity.AppIdDiscord) {
 			continue
+		}
+
+		switch bot.target {
+		case config.BotNamePaguMainnet:
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskMain) {
+				continue
+			}
+
+		case config.BotNamePaguTestnet:
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskTest) {
+				continue
+			}
+
+		case config.BotNamePaguModerator:
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskModerator) {
+				continue
+			}
 		}
 
 		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Desc, "index", i, "object", beCmd)
@@ -195,7 +216,7 @@ func (bot *DiscordBot) respondResultMsg(res command.CommandResult, s *discordgo.
 	bot.respondEmbed(resEmbed, s, i)
 }
 
-func (db *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -209,23 +230,15 @@ func (db *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.S
 	}
 }
 
-func (db *DiscordBot) UpdateStatusInfo() {
+func (bot *DiscordBot) UpdateStatusInfo() {
 	log.Info("info status started")
 	for {
-		ns, err := db.engine.NetworkStatus()
+		ns, err := bot.engine.NetworkStatus()
 		if err != nil {
 			continue
 		}
 
-		err = db.Session.UpdateStatusComplex(newStatus("validators count", utils.FormatNumber(int64(ns.ValidatorsCount))))
-		if err != nil {
-			log.Error("can't set status", "err", err)
-			continue
-		}
-
-		time.Sleep(time.Second * 5)
-
-		err = db.Session.UpdateStatusComplex(newStatus("total accounts", utils.FormatNumber(int64(ns.TotalAccounts))))
+		err = bot.Session.UpdateStatusComplex(newStatus("validators count", utils.FormatNumber(int64(ns.ValidatorsCount))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -233,7 +246,15 @@ func (db *DiscordBot) UpdateStatusInfo() {
 
 		time.Sleep(time.Second * 5)
 
-		err = db.Session.UpdateStatusComplex(newStatus("height", utils.FormatNumber(int64(ns.CurrentBlockHeight))))
+		err = bot.Session.UpdateStatusComplex(newStatus("total accounts", utils.FormatNumber(int64(ns.TotalAccounts))))
+		if err != nil {
+			log.Error("can't set status", "err", err)
+			continue
+		}
+
+		time.Sleep(time.Second * 5)
+
+		err = bot.Session.UpdateStatusComplex(newStatus("height", utils.FormatNumber(int64(ns.CurrentBlockHeight))))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -244,7 +265,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 		circulatingSupplyAmount := amount.Amount(ns.CirculatingSupply)
 		formattedCirculatingSupply := circulatingSupplyAmount.Format(amount.UnitPAC) + " PAC"
 
-		err = db.Session.UpdateStatusComplex(newStatus("circ supply", formattedCirculatingSupply))
+		err = bot.Session.UpdateStatusComplex(newStatus("circ supply", formattedCirculatingSupply))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -255,7 +276,7 @@ func (db *DiscordBot) UpdateStatusInfo() {
 		totalNetworkPowerAmount := amount.Amount(ns.TotalNetworkPower)
 		formattedTotalNetworkPower := totalNetworkPowerAmount.Format(amount.UnitPAC) + " PAC"
 
-		err = db.Session.UpdateStatusComplex(newStatus("total power", formattedTotalNetworkPower))
+		err = bot.Session.UpdateStatusComplex(newStatus("total power", formattedTotalNetworkPower))
 		if err != nil {
 			log.Error("can't set status", "err", err)
 			continue
@@ -265,8 +286,8 @@ func (db *DiscordBot) UpdateStatusInfo() {
 	}
 }
 
-func (db *DiscordBot) Stop() error {
+func (bot *DiscordBot) Stop() error {
 	log.Info("Stopping Discord Bot")
 
-	return db.Session.Close()
+	return bot.Session.Close()
 }

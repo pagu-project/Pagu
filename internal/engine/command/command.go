@@ -7,6 +7,14 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
+var (
+	TargetMaskMain      = 1
+	TargetMaskTest      = 2
+	TargetMaskModerator = 4
+
+	TargetMaskAll = TargetMaskMain | TargetMaskTest | TargetMaskModerator
+)
+
 type Args struct {
 	Name     string
 	Desc     string
@@ -27,6 +35,7 @@ type Command struct {
 	Middlewares []MiddlewareFunc
 	Handler     HandlerFunc
 	User        *entity.User
+	TargetFlag  int
 }
 
 type CommandResult struct {

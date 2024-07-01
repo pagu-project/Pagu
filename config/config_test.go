@@ -30,9 +30,7 @@ func TestBasicCheck(t *testing.T) {
 					Token:   "MTEabc123",
 					GuildID: "123456789",
 				},
-				Phoenix: PhoenixNetwork{
-					NetworkNodes: []string{""},
-				},
+				Phoenix: PhoenixNetwork{},
 			},
 			wantErr: false,
 		},

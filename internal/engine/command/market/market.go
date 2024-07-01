@@ -44,6 +44,7 @@ func (m *Market) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	cmdMarket.AddSubCommand(subCmdPrice)

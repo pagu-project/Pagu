@@ -7,18 +7,18 @@ import (
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (be *Network) networkStatusHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
-	netInfo, err := be.clientMgr.GetNetworkInfo()
+func (n *Network) networkStatusHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
+	netInfo, err := n.clientMgr.GetNetworkInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	chainInfo, err := be.clientMgr.GetBlockchainInfo()
+	chainInfo, err := n.clientMgr.GetBlockchainInfo()
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	cs, err := be.clientMgr.GetCirculatingSupply()
+	cs, err := n.clientMgr.GetCirculatingSupply()
 	if err != nil {
 		cs = 0
 	}

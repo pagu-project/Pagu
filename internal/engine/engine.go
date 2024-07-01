@@ -50,16 +50,24 @@ type IEngine interface {
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// ? adding main network client manager.
-	cm := client2.NewClientMgr(ctx)
-
-	localClient, err := client2.NewClient(cfg.LocalNode)
+	db, err := repository.NewDB(cfg.Database.URL)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
+	log.Info("database loaded successfully")
 
-	cm.AddClient(localClient)
+	cm := client2.NewClientMgr(ctx)
+
+	if len(cfg.LocalNode) > 0 {
+		localClient, err := client2.NewClient(cfg.LocalNode)
+		if err != nil {
+			cancel()
+			return nil, err
+		}
+
+		cm.AddClient(localClient)
+	}
 
 	for _, nn := range cfg.NetworkNodes {
 		c, err := client2.NewClient(nn)
@@ -69,18 +77,6 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		cm.AddClient(c)
 	}
 
-	// ? adding phoenix test network client manager.
-	phoenixCm := client2.NewClientMgr(ctx)
-	for _, tnn := range cfg.Phoenix.NetworkNodes {
-		c, err := client2.NewClient(tnn)
-		if err != nil {
-			log.Error("can't add new network node client", "err", err, "addr", tnn)
-		}
-
-		phoenixCm.AddClient(c)
-	}
-
-	// ? opening wallet if it's enabled.
 	var wal *wallet.Wallet
 	if cfg.Wallet.Enable {
 		// load or create wallet.
@@ -95,35 +91,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		log.Info("wallet opened successfully", "address", wal.Address())
 	}
 
-	// ? opening testnet (Phoenix) wallet if it's enabled.
-	var phoenixWal *wallet.Wallet
-	if cfg.TestNetWallet.Enable {
-		// load or create wallet.
-		phoenixWal = wallet.Open(&cfg.TestNetWallet)
-		if phoenixWal == nil {
-			cancel()
-			return nil, WalletError{
-				Reason: "can't open testnet wallet",
-			}
-		}
-
-		log.Info("testnet wallet opened successfully", "address", phoenixWal.Address())
-	}
-
-	// ? loading database.
-	db, err := repository.NewDB(cfg.Database.URL)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-	log.Info("database loaded successfully")
-
-	return newBotEngine(cm, phoenixCm, wal, phoenixWal, cfg.Phoenix.FaucetAmount, db, cfg.AuthIDs, ctx, cancel), nil
+	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount, cfg.BotName), nil
 }
 
-func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wallet.Wallet, phoenixFaucetAmount uint, db *repository.DB, _ []string,
-	ctx context.Context, cnl context.CancelFunc,
-) *BotEngine {
+func newBotEngine(ctx context.Context, cnl context.CancelFunc, db *repository.DB, cm *client2.Mgr, wallet *wallet.Wallet, phoenixFaucetAmount uint, botName string) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",
@@ -142,7 +113,7 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := calculator.NewCalculator(cm)
-	ptCmd := phoenixtestnet.NewPhoenix(phoenixWal, phoenixFaucetAmount, ptcm, *db)
+	ptCmd := phoenixtestnet.NewPhoenix(wallet, phoenixFaucetAmount, cm, *db)
 	zealyCmd := zealy.NewZealy(db, wallet)
 	voucherCmd := voucher.NewVoucher(db, wallet, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
@@ -155,7 +126,7 @@ func newBotEngine(cm, ptcm *client2.Mgr, wallet *wallet.Wallet, phoenixWal *wall
 		networkCmd:       netCmd,
 		blockchainCmd:    bcCmd,
 		phoenixCmd:       ptCmd,
-		phoenixClientMgr: ptcm,
+		phoenixClientMgr: cm,
 		zealyCmd:         zealyCmd,
 		voucherCmd:       voucherCmd,
 		marketCmd:        marketCmd,

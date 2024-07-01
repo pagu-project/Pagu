@@ -58,6 +58,7 @@ func (v *Voucher) GetCommand() command.Command {
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	cmdVoucher.AddSubCommand(subCmdClaim)

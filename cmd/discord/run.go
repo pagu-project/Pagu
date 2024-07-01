@@ -17,7 +17,7 @@ import (
 func runCommand(parentCmd *cobra.Command) {
 	run := &cobra.Command{
 		Use:   "run",
-		Short: "Runs a mainnet instance of Pagu",
+		Short: "Runs an instance of Pagu",
 	}
 
 	parentCmd.AddCommand(run)
@@ -37,7 +37,7 @@ func runCommand(parentCmd *cobra.Command) {
 		botEngine.RegisterAllCommands()
 		botEngine.Start()
 
-		discordBot, err := discord.NewDiscordBot(botEngine, configs.DiscordBot.Token, configs.DiscordBot)
+		discordBot, err := discord.NewDiscordBot(botEngine, configs.DiscordBot, configs.BotName)
 		pCmd.ExitOnError(cmd, err)
 
 		err = discordBot.Start()
