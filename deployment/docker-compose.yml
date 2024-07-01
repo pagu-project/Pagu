@@ -82,7 +82,7 @@ services:
     depends_on:
       - pagu-db
     volumes:
-      - ../config/testnet.config.yml:/config/testnet.config.yml
+      - ../config/config.yml:/config/config.testnet.yml
       - ../config/wallets/testnet_wallet:/config/wallets/testnet_wallet
   pagu-node:
     hostname: pagu-node
