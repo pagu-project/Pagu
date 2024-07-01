@@ -14,7 +14,7 @@ FROM alpine:3.14
 RUN apk --no-cache add ca-certificates tzdata git
 
 RUN mkdir /pagu-discord-testnet
-COPY --from=builder /pagu/build /pagu-discord
+COPY --from=builder /pagu/build /pagu-discord-testnet
 
 RUN chmod +x /pagu-discord-testnet/pagu-discord
 

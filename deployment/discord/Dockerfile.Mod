@@ -14,7 +14,7 @@ FROM alpine:3.14
 RUN apk --no-cache add ca-certificates tzdata git
 
 RUN mkdir /pagu-discord-mod
-COPY --from=builder /pagu/build /pagu-discord
+COPY --from=builder /pagu/build /pagu-discord-mod
 
 RUN chmod +x /pagu-discord-mod/pagu-discord
 
