@@ -56,7 +56,7 @@ services:
     depends_on:
       - pagu-db
     volumes:
-      - ../config/config.yml:/config/config.mainnet.yml
+      - ../config/config.mainnet.yml:/config/config.mainnet.yml
       - ../config/wallets/main_wallet:/config/wallets/main_wallet
   pagu-discord-mod:
     build:
