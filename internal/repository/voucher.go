@@ -4,6 +4,17 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
+func (db *DB) AddVoucher(v *entity.Voucher) error {
+	tx := db.Create(v)
+	if tx.Error != nil {
+		return WriteError{
+			Message: tx.Error.Error(),
+		}
+	}
+
+	return nil
+}
+
 func (db *DB) GetVoucherByCode(code string) (entity.Voucher, error) {
 	var voucher entity.Voucher
 	err := db.Model(&entity.Voucher{}).Where("code = ?", code).First(&voucher).Error

@@ -15,7 +15,6 @@ func setup() (Phoenix, command.Command) {
 
 	return p, command.Command{
 		Name:        FaucetCommandName,
-		Desc:        "",
 		Help:        "",
 		Args:        []command.Args{},
 		SubCommands: nil,

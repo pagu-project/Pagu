@@ -2,6 +2,7 @@ package voucher
 
 import (
 	"errors"
+	"time"
 
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -16,6 +17,11 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, _ string, ar
 	voucher, err := v.db.GetVoucherByCode(code)
 	if err != nil {
 		return cmd.ErrorResult(errors.New("voucher code is not valid"))
+	}
+
+	now := time.Now().Month()
+	if voucher.CreatedAt.Month() >= (now + time.Month(voucher.ValidMonths)) {
+		return cmd.ErrorResult(errors.New("voucher is expired"))
 	}
 
 	if len(voucher.TxHash) > 0 {

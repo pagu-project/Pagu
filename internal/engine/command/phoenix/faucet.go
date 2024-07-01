@@ -21,7 +21,7 @@ func (pt *Phoenix) faucetHandler(cmd command.Command, _ entity.AppID, _ string, 
 		return cmd.FailedResult("Uh, you used your share of faucets today!")
 	}
 
-	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu PhoenixFaucet", int64(pt.faucetAmount)) //! define me on config?
+	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu PhoenixFaucet", int64(pt.faucetAmount))
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}

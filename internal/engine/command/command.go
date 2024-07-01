@@ -27,7 +27,6 @@ type Command struct {
 	Emoji       string
 	Color       string
 	Name        string
-	Desc        string
 	Help        string
 	Args        []Args //! should be nil for commands.
 	AppIDs      []entity.AppID
@@ -49,7 +48,7 @@ type CommandResult struct {
 func (cmd *Command) SuccessfulResult(message string, a ...interface{}) CommandResult {
 	return CommandResult{
 		Color:      cmd.Color,
-		Title:      fmt.Sprintf("%v %v", cmd.Desc, cmd.Emoji),
+		Title:      fmt.Sprintf("%v %v", cmd.Help, cmd.Emoji),
 		Message:    fmt.Sprintf(message, a...),
 		Successful: true,
 	}
@@ -58,7 +57,7 @@ func (cmd *Command) SuccessfulResult(message string, a ...interface{}) CommandRe
 func (cmd *Command) FailedResult(message string, a ...interface{}) CommandResult {
 	return CommandResult{
 		Color:      cmd.Color,
-		Title:      fmt.Sprintf("%v %v", cmd.Desc, cmd.Emoji),
+		Title:      fmt.Sprintf("%v %v", cmd.Help, cmd.Emoji),
 		Message:    fmt.Sprintf(message, a...),
 		Successful: false,
 	}
@@ -71,7 +70,7 @@ func (cmd *Command) ErrorResult(err error) CommandResult {
 func (cmd *Command) HelpResult() CommandResult {
 	return CommandResult{
 		Color:      cmd.Color,
-		Title:      fmt.Sprintf("%v %v", cmd.Desc, cmd.Emoji),
+		Title:      fmt.Sprintf("%v %v", cmd.Help, cmd.Emoji),
 		Message:    cmd.HelpMessage(),
 		Successful: false,
 	}
@@ -106,7 +105,7 @@ func (cmd *Command) HelpMessage() string {
 	help := cmd.Help
 	help += "\n\nAvailable commands:\n"
 	for _, sc := range cmd.SubCommands {
-		help += fmt.Sprintf("  %-12s %s\n", sc.Name, sc.Desc)
+		help += fmt.Sprintf("  %-12s %s\n", sc.Name, sc.Help)
 	}
 	return help
 }
@@ -122,7 +121,7 @@ func (cmd *Command) AddSubCommand(subCmd Command) {
 func (cmd *Command) AddHelpSubCommand() {
 	helpCmd := Command{
 		Name:   "help",
-		Desc:   fmt.Sprintf("Help for %v command", cmd.Name),
+		Help:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: entity.AllAppIDs(),
 		Handler: func(_ Command, _ entity.AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())

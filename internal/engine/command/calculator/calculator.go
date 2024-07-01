@@ -26,8 +26,7 @@ func NewCalculator(clientMgr *client.Mgr) Calculator {
 func (bc *Calculator) GetCommand() command.Command {
 	subCmdCalcReward := command.Command{
 		Name: CalcRewardCommandName,
-		Desc: "Calculate how many PAC coins you will earn with your validator stake",
-		Help: "Provide a stake amount between 1 to 100, please avoid using float numbers like: 1.9 or PAC suffix",
+		Help: "Calculate how many PAC coins you will earn with your validator stake",
 		Args: []command.Args{
 			{
 				Name:     "stake",
@@ -47,8 +46,7 @@ func (bc *Calculator) GetCommand() command.Command {
 
 	subCmdCalcFee := command.Command{
 		Name: CalcFeeCommandName,
-		Desc: "Calculate fee of a transaction with providing amount",
-		Help: "Provide your amount in PAC, please avoid using float numbers like: 1.9 or PAC suffix",
+		Help: "Calculate fee of a transaction with providing amount",
 		Args: []command.Args{
 			{
 				Name:     "amount",
@@ -63,8 +61,7 @@ func (bc *Calculator) GetCommand() command.Command {
 
 	cmdBlockchain := command.Command{
 		Name:        CommandName,
-		Desc:        "Calculator information and tools",
-		Help:        "",
+		Help:        "Calculator information and tools",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),

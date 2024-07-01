@@ -28,8 +28,7 @@ func NewMarket(clientMgr *client.Mgr, priceCache cache.Cache[string, entity.Pric
 func (m *Market) GetCommand() command.Command {
 	subCmdPrice := command.Command{
 		Name:        PriceCommandName,
-		Desc:        "Shows the last price of PAC coin on the markets",
-		Help:        "",
+		Help:        "Shows the last price of PAC coin on the markets",
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
@@ -38,8 +37,7 @@ func (m *Market) GetCommand() command.Command {
 
 	cmdMarket := command.Command{
 		Name:        CommandName,
-		Desc:        "Blockchain data and information",
-		Help:        "",
+		Help:        "Blockchain data and information",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),

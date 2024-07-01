@@ -62,8 +62,7 @@ type NetStatus struct {
 func (n *Network) GetCommand() command.Command {
 	subCmdNodeInfo := command.Command{
 		Name: NodeInfoCommandName,
-		Desc: "View the information of a node",
-		Help: "Provide your validator address on the specific node to get the validator and node info",
+		Help: "View the information of a node",
 		Args: []command.Args{
 			{
 				Name:     "validator_address",
@@ -78,8 +77,7 @@ func (n *Network) GetCommand() command.Command {
 
 	subCmdHealth := command.Command{
 		Name:        HealthCommandName,
-		Desc:        "Checking network health status",
-		Help:        "",
+		Help:        "Checking network health status",
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
@@ -88,8 +86,7 @@ func (n *Network) GetCommand() command.Command {
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
-		Desc:        "Network statistics",
-		Help:        "",
+		Help:        "Network statistics",
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
@@ -98,8 +95,7 @@ func (n *Network) GetCommand() command.Command {
 
 	cmdNetwork := command.Command{
 		Name:        CommandName,
-		Desc:        "Network related commands",
-		Help:        "",
+		Help:        "Network related commands",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),

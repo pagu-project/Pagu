@@ -98,8 +98,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db *repository.DB
 	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",
-		Desc:        "Root Command",
-		Help:        "Pagu Help Command",
+		Help:        "Root Command",
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 3),
 	}

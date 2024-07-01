@@ -41,8 +41,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
-		Desc:        "Phoenix test-network statistics",
-		Help:        "",
+		Help:        "Phoenix test-network statistics",
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
@@ -52,8 +51,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 
 	subCmdFaucet := command.Command{
 		Name: FaucetCommandName,
-		Desc: fmt.Sprintf("Get %d tPAC Coins on Phoenix Testnet for Testing your code or project", pt.faucetAmount),
-		Help: "There is a limit that you can only get faucets 1 time per day with each user ID and address",
+		Help: fmt.Sprintf("Get %d tPAC Coins on Phoenix Testnet for Testing your code or project", pt.faucetAmount),
 		Args: []command.Args{
 			{
 				Name:     "address",
@@ -69,8 +67,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 
 	cmdPhoenix := command.Command{
 		Name:        CommandName,
-		Desc:        "Phoenix Testnet tools and utils for developers",
-		Help:        "",
+		Help:        "Phoenix Testnet tools and utils for developers",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
