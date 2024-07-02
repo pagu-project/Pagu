@@ -3,24 +3,24 @@ package voucher
 import (
 	"strconv"
 
+	"github.com/pagu-project/Pagu/pkg/utils"
+
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, callerID string, args ...string) command.CommandResult {
+func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	//! Admin only check
 
-	cID, err := strconv.Atoi(callerID)
-	if err != nil {
-		return cmd.ErrorResult(err)
+	code := utils.RandomString(8, utils.CapitalLetterNumbers)
+	for _, err := v.db.GetVoucherByCode(code); err == nil; {
+		code = utils.RandomString(8, utils.CapitalLetterNumbers)
 	}
 
 	recipient := args[0]
-	description := args[1]
+	amount := args[1]
 	validMonths := args[2]
-	amount := args[3]
-	discordID := args[4]
-	code := args[5]
+	description := args[3]
 
 	expireMonths, err := strconv.Atoi(validMonths)
 	if err != nil {
@@ -33,12 +33,11 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, callerID st
 	}
 
 	err = v.db.AddVoucher(&entity.Voucher{
-		Creator:     uint(cID),
+		Creator:     cmd.User.ID,
 		Code:        code,
 		Desc:        description,
-		DiscordID:   discordID,
 		Recipient:   recipient,
-		ValidMonths: uint(expireMonths),
+		ValidMonths: uint8(expireMonths),
 		Amount:      uint(intAmount),
 	})
 	if err != nil {

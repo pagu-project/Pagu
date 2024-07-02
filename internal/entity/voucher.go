@@ -9,11 +9,11 @@ type Voucher struct {
 	Creator     uint   `gorm:"size:255"`
 	Code        string `gorm:"size:8"`
 	Desc        string
-	DiscordID   string
 	Recipient   string
-	ValidMonths uint
+	ValidMonths uint8
 	Amount      uint
 	TxHash      string
+	CallerID    string
 	gorm.Model
 }
 
