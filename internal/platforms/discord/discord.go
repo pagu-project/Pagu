@@ -107,6 +107,23 @@ func (bot *DiscordBot) registerCommands() error {
 					continue
 				}
 
+				switch bot.target {
+				case config.BotNamePaguMainnet:
+					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskMain) {
+						continue
+					}
+
+				case config.BotNamePaguTestnet:
+					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskTest) {
+						continue
+					}
+
+				case config.BotNamePaguModerator:
+					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskModerator) {
+						continue
+					}
+				}
+
 				log.Info("adding command sub-command", "command", beCmd.Name,
 					"sub-command", sCmd.Name, "desc", sCmd.Help)
 
