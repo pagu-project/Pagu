@@ -73,6 +73,7 @@ func (n *Network) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     n.nodeInfoHandler,
+		TargetFlag:  command.TargetMaskAll,
 	}
 
 	subCmdHealth := command.Command{
@@ -82,6 +83,7 @@ func (n *Network) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     n.networkHealthHandler,
+		TargetFlag:  command.TargetMaskAll,
 	}
 
 	subCmdStatus := command.Command{
@@ -91,6 +93,7 @@ func (n *Network) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     n.networkStatusHandler,
+		TargetFlag:  command.TargetMaskAll,
 	}
 
 	cmdNetwork := command.Command{

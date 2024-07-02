@@ -42,6 +42,7 @@ func (bc *Calculator) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     bc.calcRewardHandler,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	subCmdCalcFee := command.Command{
@@ -57,6 +58,7 @@ func (bc *Calculator) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     bc.calcFeeHandler,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	cmdBlockchain := command.Command{

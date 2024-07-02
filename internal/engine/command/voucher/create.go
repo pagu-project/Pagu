@@ -12,9 +12,9 @@ import (
 func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	//! Admin only check
 
-	code := utils.RandomString(8, utils.CapitalLetterNumbers)
+	code := utils.RandomString(8, utils.CapitalAlphanumerical)
 	for _, err := v.db.GetVoucherByCode(code); err == nil; {
-		code = utils.RandomString(8, utils.CapitalLetterNumbers)
+		code = utils.RandomString(8, utils.CapitalAlphanumerical)
 	}
 
 	amount := args[0]
