@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	Letters              = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	Numbers              = "0123456789"
-	CapitalLetterNumbers = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	Alphabet              = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	Numbers               = "0123456789"
+	CapitalAlphanumerical = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
 const (

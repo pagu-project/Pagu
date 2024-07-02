@@ -33,6 +33,7 @@ func (m *Market) GetCommand() command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     m.getPrice,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	cmdMarket := command.Command{
