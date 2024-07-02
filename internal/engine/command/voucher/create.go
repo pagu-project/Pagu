@@ -32,8 +32,7 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 	vch := &entity.Voucher{
 		Creator: cmd.User.ID,
 		Code:    code,
-		/*		Desc:        description,
-				Recipient:   recipient,*/
+
 		ValidMonths: uint8(expireMonths),
 		Amount:      uint(intAmount),
 	}
