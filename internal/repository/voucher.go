@@ -25,8 +25,8 @@ func (db *DB) GetVoucherByCode(code string) (entity.Voucher, error) {
 	return voucher, nil
 }
 
-func (db *DB) UpdateVoucher(id uint, txHash, callerID string) error {
-	tx := db.Model(&entity.Voucher{}).Where("id = ?", id).Update("tx_hash", txHash).Update("caller_id", callerID)
+func (db *DB) UpdateVoucher(id uint, txHash string, claimer uint) error {
+	tx := db.Model(&entity.Voucher{}).Where("id = ?", id).Update("tx_hash", txHash).Update("claimed_by", claimer)
 	if tx.Error != nil {
 		return WriteError{
 			Message: tx.Error.Error(),

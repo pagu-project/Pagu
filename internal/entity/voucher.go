@@ -13,7 +13,7 @@ type Voucher struct {
 	ValidMonths uint8
 	Amount      uint
 	TxHash      string
-	CallerID    string
+	ClaimedBy   uint
 	gorm.Model
 }
 
