@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	CommandName      = "voucher"
-	ClaimCommandName = "claim"
-	HelpCommandName  = "help"
+	CommandName       = "voucher"
+	ClaimCommandName  = "claim"
+	CreateCommandName = "create"
+	HelpCommandName   = "help"
 )
 
 type Voucher struct {
@@ -29,10 +30,11 @@ func NewVoucher(db *repository.DB, wallet *wallet.Wallet, cli *client.Mgr) Vouch
 }
 
 func (v *Voucher) GetCommand() command.Command {
+	middlewareHandler := command.NewMiddlewareHandler(v.db, v.wallet)
+
 	subCmdClaim := command.Command{
 		Name: ClaimCommandName,
-		Desc: "Claim your voucher coins and bond to validator",
-		Help: "",
+		Help: "Claim your voucher coins and bond to validator",
 		Args: []command.Args{
 			{
 				Name:     "code",
@@ -47,20 +49,54 @@ func (v *Voucher) GetCommand() command.Command {
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.WalletBalance},
 		Handler:     v.claimHandler,
+		TargetFlag:  command.TargetMaskMain,
+	}
+
+	subCmdCreate := command.Command{
+		Name: CreateCommandName,
+		Help: "Add a new voucher to database",
+		Args: []command.Args{
+			{
+				Name:     "recipient",
+				Desc:     "Indicates the name of the recipient of the voucher",
+				Optional: true,
+			},
+			{
+				Name:     "amount",
+				Desc:     "Amount of PAC to bond",
+				Optional: false,
+			},
+			{
+				Name:     "valid-months",
+				Desc:     "Indicates how many months the voucher is valid after it is issued",
+				Optional: false,
+			},
+			{
+				Name:     "description",
+				Desc:     "Describes the reason for issuing the voucher",
+				Optional: true,
+			},
+		},
+		SubCommands: nil,
+		AppIDs:      entity.AllAppIDs(),
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser},
+		Handler:     v.createHandler,
+		TargetFlag:  command.TargetMaskModerator,
 	}
 
 	cmdVoucher := command.Command{
 		Name:        CommandName,
-		Desc:        "Voucher Commands",
-		Help:        "",
+		Help:        "Voucher Commands",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
 		Handler:     nil,
-		TargetFlag:  command.TargetMaskMain,
+		TargetFlag:  command.TargetMaskMain | command.TargetMaskModerator,
 	}
 
 	cmdVoucher.AddSubCommand(subCmdClaim)
+	cmdVoucher.AddSubCommand(subCmdCreate)
 	return cmdVoucher
 }

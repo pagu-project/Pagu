@@ -93,27 +93,27 @@ func (bot *DiscordBot) registerCommands() error {
 			}
 		}
 
-		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Desc, "index", i, "object", beCmd)
+		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Help, "index", i, "object", beCmd)
 
 		discordCmd := discordgo.ApplicationCommand{
 			Type:        discordgo.ChatApplicationCommand,
 			Name:        beCmd.Name,
-			Description: beCmd.Desc,
+			Description: beCmd.Help,
 		}
 
 		if beCmd.HasSubCommand() {
 			for _, sCmd := range beCmd.SubCommands {
-				if sCmd.Name == "" || sCmd.Desc == "" {
+				if sCmd.Name == "" || sCmd.Help == "" {
 					continue
 				}
 
 				log.Info("adding command sub-command", "command", beCmd.Name,
-					"sub-command", sCmd.Name, "desc", sCmd.Desc)
+					"sub-command", sCmd.Name, "desc", sCmd.Help)
 
 				subCmd := &discordgo.ApplicationCommandOption{
 					Type:        discordgo.ApplicationCommandOptionSubCommand,
 					Name:        sCmd.Name,
-					Description: sCmd.Desc,
+					Description: sCmd.Help,
 				}
 
 				for _, arg := range sCmd.Args {

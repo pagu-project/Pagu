@@ -21,8 +21,7 @@ func setup() (Market, command.Command) {
 
 	return m, command.Command{
 		Name:        PriceCommandName,
-		Desc:        "Shows the last price of PAC coin on the markets",
-		Help:        "",
+		Help:        "Shows the last price of PAC coin on the markets",
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),

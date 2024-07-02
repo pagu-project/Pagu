@@ -29,8 +29,7 @@ func NewZealy(db *repository.DB, wallet *wallet.Wallet) Zealy {
 func (z *Zealy) GetCommand() command.Command {
 	subCmdClaim := command.Command{
 		Name: ClaimCommandName,
-		Desc: "Claim your Zealy Reward",
-		Help: "",
+		Help: "Claim your Zealy Reward",
 		Args: []command.Args{
 			{
 				Name:     "address",
@@ -45,8 +44,7 @@ func (z *Zealy) GetCommand() command.Command {
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
-		Desc:        "Status of Zealy reward claims",
-		Help:        "",
+		Help:        "Status of Zealy reward claims",
 		Args:        nil,
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
@@ -55,8 +53,7 @@ func (z *Zealy) GetCommand() command.Command {
 
 	cmdZealy := command.Command{
 		Name:        CommandName,
-		Desc:        "Zealy Commands",
-		Help:        "",
+		Help:        "Zealy Commands",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]command.Command, 0),
