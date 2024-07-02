@@ -59,11 +59,6 @@ func (v *Voucher) GetCommand() command.Command {
 		Help: "Add a new voucher to database",
 		Args: []command.Args{
 			{
-				Name:     "recipient",
-				Desc:     "Indicates the name of the recipient of the voucher",
-				Optional: true,
-			},
-			{
 				Name:     "amount",
 				Desc:     "Amount of PAC to bond",
 				Optional: false,
@@ -72,6 +67,11 @@ func (v *Voucher) GetCommand() command.Command {
 				Name:     "valid-months",
 				Desc:     "Indicates how many months the voucher is valid after it is issued",
 				Optional: false,
+			},
+			{
+				Name:     "recipient",
+				Desc:     "Indicates the name of the recipient of the voucher",
+				Optional: true,
 			},
 			{
 				Name:     "description",

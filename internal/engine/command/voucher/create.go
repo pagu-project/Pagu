@@ -17,10 +17,10 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 		code = utils.RandomString(8, utils.CapitalLetterNumbers)
 	}
 
-	recipient := args[0]
-	amount := args[1]
-	validMonths := args[2]
-	description := args[3]
+	amount := args[0]
+	validMonths := args[1]
+	recipient := args[3]
+	description := args[4]
 
 	expireMonths, err := strconv.Atoi(validMonths)
 	if err != nil {
