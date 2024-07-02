@@ -18,28 +18,34 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 	}
 
 	amount := args[0]
-	validMonths := args[1]
-	recipient := args[3]
-	description := args[4]
-
-	expireMonths, err := strconv.Atoi(validMonths)
-	if err != nil {
-		return cmd.ErrorResult(err)
-	}
-
 	intAmount, err := strconv.Atoi(amount)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	err = v.db.AddVoucher(&entity.Voucher{
-		Creator:     cmd.User.ID,
-		Code:        code,
-		Desc:        description,
-		Recipient:   recipient,
+	validMonths := args[1]
+	expireMonths, err := strconv.Atoi(validMonths)
+	if err != nil {
+		return cmd.ErrorResult(err)
+	}
+
+	vch := &entity.Voucher{
+		Creator: cmd.User.ID,
+		Code:    code,
+		/*		Desc:        description,
+				Recipient:   recipient,*/
 		ValidMonths: uint8(expireMonths),
 		Amount:      uint(intAmount),
-	})
+	}
+
+	if len(args) > 2 {
+		vch.Recipient = args[2]
+	}
+	if len(args) > 3 {
+		vch.Desc = args[3]
+	}
+
+	err = v.db.AddVoucher(vch)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
