@@ -41,7 +41,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,
-		Help:        "Phoenix test-network statistics",
+		Help:        "Phoenix Testnet statistics",
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
