@@ -1,6 +1,7 @@
 package voucher
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/pagu-project/Pagu/pkg/utils"
@@ -23,6 +24,10 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 		return cmd.ErrorResult(err)
 	}
 
+	if intAmount > 1000 {
+		return cmd.ErrorResult(errors.New("stake amount is more than 1000"))
+	}
+
 	validMonths := args[1]
 	expireMonths, err := strconv.Atoi(validMonths)
 	if err != nil {
@@ -30,9 +35,8 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 	}
 
 	vch := &entity.Voucher{
-		Creator: cmd.User.ID,
-		Code:    code,
-
+		Creator:     cmd.User.ID,
+		Code:        code,
 		ValidMonths: uint8(expireMonths),
 		Amount:      uint(intAmount),
 	}
@@ -49,5 +53,5 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 		return cmd.ErrorResult(err)
 	}
 
-	return cmd.SuccessfulResult("Voucher crated successfully!")
+	return cmd.SuccessfulResult("Voucher created successfully! \n Code: %s", vch.Code)
 }
