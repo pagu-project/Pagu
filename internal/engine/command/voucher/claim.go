@@ -44,7 +44,7 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID str
 		return cmd.ErrorResult(errors.New("can't send bond transaction"))
 	}
 
-	if err = v.db.UpdateVoucher(voucher.ID, txHash, cmd.User.ID); err != nil {
+	if err = v.db.ClaimVoucher(voucher.ID, txHash, cmd.User.ID); err != nil {
 		return cmd.ErrorResult(err)
 	}
 
