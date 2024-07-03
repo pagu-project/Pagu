@@ -22,12 +22,12 @@ const (
 
 type Phoenix struct {
 	wallet       *wallet.Wallet
-	db           repository.DB
+	db           repository.Database
 	clientMgr    *client.Mgr
 	faucetAmount uint
 }
 
-func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr, db repository.DB) Phoenix {
+func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr, db repository.Database) Phoenix {
 	return Phoenix{
 		wallet:       wallet,
 		clientMgr:    clientMgr,
@@ -37,7 +37,7 @@ func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr,
 }
 
 func (pt *Phoenix) GetCommand() command.Command {
-	middlewareHandler := command.NewMiddlewareHandler(&pt.db, pt.wallet)
+	middlewareHandler := command.NewMiddlewareHandler(pt.db, pt.wallet)
 
 	subCmdStatus := command.Command{
 		Name:        StatusCommandName,

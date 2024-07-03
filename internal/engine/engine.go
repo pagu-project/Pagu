@@ -94,7 +94,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount, cfg.BotName), nil
 }
 
-func newBotEngine(ctx context.Context, cnl context.CancelFunc, db *repository.DB, cm *client2.Mgr, wallet *wallet.Wallet, phoenixFaucetAmount uint, botName string) *BotEngine {
+func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm *client2.Mgr, wallet *wallet.Wallet, phoenixFaucetAmount uint, botName string) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",
@@ -112,7 +112,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db *repository.DB
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := calculator.NewCalculator(cm)
-	ptCmd := phoenixtestnet.NewPhoenix(wallet, phoenixFaucetAmount, cm, *db)
+	ptCmd := phoenixtestnet.NewPhoenix(wallet, phoenixFaucetAmount, cm, db)
 	zealyCmd := zealy.NewZealy(db, wallet)
 	voucherCmd := voucher.NewVoucher(db, wallet, cm)
 	marketCmd := market.NewMarket(cm, priceCache)

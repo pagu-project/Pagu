@@ -15,11 +15,11 @@ const (
 )
 
 type Zealy struct {
-	db     *repository.DB
+	db     repository.Database
 	wallet *wallet.Wallet
 }
 
-func NewZealy(db *repository.DB, wallet *wallet.Wallet) Zealy {
+func NewZealy(db repository.Database, wallet *wallet.Wallet) Zealy {
 	return Zealy{
 		db:     db,
 		wallet: wallet,

@@ -10,7 +10,7 @@ type DB struct {
 	*gorm.DB
 }
 
-func NewDB(path string) (*DB, error) {
+func NewDB(path string) (Database, error) {
 	db, err := gorm.Open(mysql.Open(path), &gorm.Config{})
 	if err != nil {
 		return nil, ConnectionError{
