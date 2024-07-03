@@ -21,8 +21,7 @@ devtools:
 
 ### mock
 mock:
-	mockgen -source=./client/interface.go      -destination=./client/mock.go      -package=client
-	mockgen -source=./wallet/interface.go      -destination=./wallet/mock.go      -package=wallet
+	mockgen -source=./internal/repository/interface.go -destination=./internal/repository/mock.go -package=repository
 
 ### proto file generate
 proto:
