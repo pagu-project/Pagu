@@ -10,10 +10,10 @@ type MiddlewareFunc func(cmd *Command, appID entity.AppID, callerID string, args
 
 type MiddlewareHandler struct {
 	db     repository.Database
-	wallet *wallet.Wallet
+	wallet wallet.IWallet
 }
 
-func NewMiddlewareHandler(d repository.Database, w *wallet.Wallet) *MiddlewareHandler {
+func NewMiddlewareHandler(d repository.Database, w wallet.IWallet) *MiddlewareHandler {
 	return &MiddlewareHandler{
 		db:     d,
 		wallet: w,
