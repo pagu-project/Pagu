@@ -30,9 +30,8 @@ type BotEngine struct {
 	ctx    context.Context //nolint
 	cancel context.CancelFunc
 
-	clientMgr        *client2.Mgr
-	phoenixClientMgr *client2.Mgr
-	rootCmd          command.Command
+	clientMgr client2.Manager
+	rootCmd   command.Command
 
 	blockchainCmd calculator.Calculator
 	networkCmd    network.Network
@@ -94,7 +93,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount, cfg.BotName), nil
 }
 
-func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm *client2.Mgr, wallet wallet.IWallet, phoenixFaucetAmount uint, botName string) *BotEngine {
+func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm client2.Manager, wallet wallet.IWallet, phoenixFaucetAmount uint, botName string) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",
@@ -118,17 +117,16 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	marketCmd := market.NewMarket(cm, priceCache)
 
 	return &BotEngine{
-		ctx:              ctx,
-		cancel:           cnl,
-		clientMgr:        cm,
-		rootCmd:          rootCmd,
-		networkCmd:       netCmd,
-		blockchainCmd:    bcCmd,
-		phoenixCmd:       ptCmd,
-		phoenixClientMgr: cm,
-		zealyCmd:         zealyCmd,
-		voucherCmd:       voucherCmd,
-		marketCmd:        marketCmd,
+		ctx:           ctx,
+		cancel:        cnl,
+		clientMgr:     cm,
+		rootCmd:       rootCmd,
+		networkCmd:    netCmd,
+		blockchainCmd: bcCmd,
+		phoenixCmd:    ptCmd,
+		zealyCmd:      zealyCmd,
+		voucherCmd:    voucherCmd,
+		marketCmd:     marketCmd,
 	}
 }
 
@@ -244,12 +242,10 @@ func (be *BotEngine) Stop() {
 
 	be.cancel()
 	be.clientMgr.Stop()
-	be.phoenixClientMgr.Stop()
 }
 
 func (be *BotEngine) Start() {
 	log.Info("Starting the Bot Engine")
 
 	be.clientMgr.Start()
-	be.phoenixClientMgr.Start()
 }

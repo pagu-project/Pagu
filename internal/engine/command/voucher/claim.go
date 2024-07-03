@@ -5,21 +5,20 @@ import (
 	"time"
 
 	amt "github.com/pactus-project/pactus/types/amount"
-	"github.com/pagu-project/Pagu/pkg/log"
-
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/log"
 )
 
 func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID string, args ...string) command.CommandResult {
 	code := args[0]
 	if len(code) != 8 {
-		return cmd.ErrorResult(errors.New("voucher code is not valid"))
+		return cmd.ErrorResult(errors.New("voucher code is not valid, length must be 8"))
 	}
 
 	voucher, err := v.db.GetVoucherByCode(code)
 	if err != nil {
-		return cmd.ErrorResult(errors.New("voucher code is not valid"))
+		return cmd.ErrorResult(errors.New("voucher code is not valid, no voucher found"))
 	}
 
 	now := time.Now().Month()

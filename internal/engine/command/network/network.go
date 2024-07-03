@@ -19,10 +19,10 @@ const (
 
 type Network struct {
 	ctx       context.Context
-	clientMgr *client.Mgr
+	clientMgr client.Manager
 }
 
-func NewNetwork(ctx context.Context, clientMgr *client.Mgr) Network {
+func NewNetwork(ctx context.Context, clientMgr client.Manager) Network {
 	return Network{
 		ctx:       ctx,
 		clientMgr: clientMgr,

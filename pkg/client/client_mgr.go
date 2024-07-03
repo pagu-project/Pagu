@@ -19,7 +19,7 @@ type Mgr struct {
 	clients []IClient
 }
 
-func NewClientMgr(ctx context.Context) *Mgr {
+func NewClientMgr(ctx context.Context) Manager {
 	return &Mgr{
 		clients:    make([]IClient, 0),
 		valMap:     make(map[string]*pactus.PeerInfo),

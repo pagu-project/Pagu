@@ -59,6 +59,7 @@ func (cmd *Command) FailedResult(message string, a ...interface{}) CommandResult
 		Color:      cmd.Color,
 		Title:      fmt.Sprintf("%v %v", cmd.Help, cmd.Emoji),
 		Message:    fmt.Sprintf(message, a...),
+		Error:      message,
 		Successful: false,
 	}
 }
