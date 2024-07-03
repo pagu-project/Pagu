@@ -77,14 +77,14 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		cm.AddClient(c)
 	}
 
-	var wal *wallet.Wallet
+	var wal wallet.IWallet
 	if cfg.Wallet.Enable {
 		// load or create wallet.
-		wal = wallet.Open(&cfg.Wallet)
-		if wal == nil {
+		wal, err := wallet.Open(&cfg.Wallet)
+		if err != nil {
 			cancel()
 			return nil, WalletError{
-				Reason: "can't open mainnet wallet",
+				Reason: err.Error(),
 			}
 		}
 
@@ -94,7 +94,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount, cfg.BotName), nil
 }
 
-func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm *client2.Mgr, wallet *wallet.Wallet, phoenixFaucetAmount uint, botName string) *BotEngine {
+func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm *client2.Mgr, wallet wallet.IWallet, phoenixFaucetAmount uint, botName string) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",

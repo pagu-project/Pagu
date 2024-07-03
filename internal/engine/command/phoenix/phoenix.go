@@ -21,13 +21,13 @@ const (
 )
 
 type Phoenix struct {
-	wallet       *wallet.Wallet
+	wallet       wallet.IWallet
 	db           repository.Database
 	clientMgr    *client.Mgr
 	faucetAmount uint
 }
 
-func NewPhoenix(wallet *wallet.Wallet, faucetAmount uint, clientMgr *client.Mgr, db repository.Database) Phoenix {
+func NewPhoenix(wallet wallet.IWallet, faucetAmount uint, clientMgr *client.Mgr, db repository.Database) Phoenix {
 	return Phoenix{
 		wallet:       wallet,
 		clientMgr:    clientMgr,

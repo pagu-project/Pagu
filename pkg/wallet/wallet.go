@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"errors"
 	"os"
 
 	"github.com/pactus-project/pactus/crypto"
@@ -23,23 +24,23 @@ type Wallet struct {
 	wallet   *pwallet.Wallet
 }
 
-func Open(cfg *config.Wallet) *Wallet {
+func Open(cfg *config.Wallet) (IWallet, error) {
 	if doesWalletExist(cfg.Path) {
 
 		wt, err := pwallet.Open(cfg.Path, false)
 		if err != nil {
-			log.Fatal("error opening existing wallet", "err", err)
+			return &Wallet{}, err
 		}
 
 		return &Wallet{
 			wallet:   wt,
 			address:  cfg.Address,
 			password: cfg.Password,
-		}
+		}, nil
 	}
 
 	// if the wallet does not exist, create one
-	return nil
+	return &Wallet{}, errors.New("can't open the wallet")
 }
 
 func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
