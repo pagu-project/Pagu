@@ -14,10 +14,10 @@ const (
 )
 
 type Calculator struct {
-	clientMgr *client.Mgr
+	clientMgr client.Manager
 }
 
-func NewCalculator(clientMgr *client.Mgr) Calculator {
+func NewCalculator(clientMgr client.Manager) Calculator {
 	return Calculator{
 		clientMgr: clientMgr,
 	}

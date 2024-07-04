@@ -18,10 +18,10 @@ const (
 type Voucher struct {
 	db            repository.Database
 	wallet        wallet.IWallet
-	clientManager *client.Mgr
+	clientManager client.Manager
 }
 
-func NewVoucher(db repository.Database, wallet wallet.IWallet, cli *client.Mgr) Voucher {
+func NewVoucher(db repository.Database, wallet wallet.IWallet, cli client.Manager) Voucher {
 	return Voucher{
 		db:            db,
 		wallet:        wallet,

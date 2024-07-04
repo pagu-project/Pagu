@@ -14,11 +14,11 @@ const (
 )
 
 type Market struct {
-	clientMgr  *client.Mgr
+	clientMgr  client.Manager
 	priceCache cache.Cache[string, entity.Price]
 }
 
-func NewMarket(clientMgr *client.Mgr, priceCache cache.Cache[string, entity.Price]) Market {
+func NewMarket(clientMgr client.Manager, priceCache cache.Cache[string, entity.Price]) Market {
 	return Market{
 		clientMgr:  clientMgr,
 		priceCache: priceCache,
