@@ -11,8 +11,8 @@ import (
 )
 
 func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
-	if cmd.User.Role != entity.Admin {
-		return cmd.ErrorResult(errors.New("only users with Admin role can create a new voucher"))
+	if cmd.User.Role != entity.Moderator {
+		return cmd.ErrorResult(errors.New("only users with Moderator role can create a new voucher"))
 	}
 
 	code := utils.RandomString(8, utils.CapitalAlphanumerical)

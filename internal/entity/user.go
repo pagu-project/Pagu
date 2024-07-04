@@ -11,7 +11,7 @@ type Role int
 
 const (
 	Admin     Role = 0
-	Mod       Role = 1
+	Moderator Role = 1
 	BasicUser Role = 2
 )
 
