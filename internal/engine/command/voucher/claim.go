@@ -34,18 +34,18 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID str
 	validatorInfo, err := v.clientManager.GetValidatorInfo(address)
 	if err != nil {
 		log.Error("error get validator info", "err", err)
-		return cmd.ErrorResult(errors.New("bond error"))
+		return cmd.ErrorResult(err)
 	}
 
 	pubKey := validatorInfo.GetValidator().GetPublicKey()
 
-	amountInNanoPAC, err := amt.NewAmount(float64(voucher.Amount))
+	PACAmount, err := amt.NewAmount(float64(voucher.Amount))
 	if err != nil {
 		log.Error("error converting amount to nanoPAC", "err", err)
-		return cmd.ErrorResult(errors.New("bond error"))
+		return cmd.ErrorResult(err)
 	}
 
-	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim for bond in validator", amountInNanoPAC.ToNanoPAC())
+	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim from Pagu", PACAmount.ToNanoPAC())
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
