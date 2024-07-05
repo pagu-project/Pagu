@@ -81,7 +81,7 @@ func (v *Voucher) GetCommand() command.Command {
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.OnlyModerator},
 		Handler:     v.createHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}
