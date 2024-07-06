@@ -93,7 +93,7 @@ func (v *Voucher) GetCommand() command.Command {
 		Args: []command.Args{
 			{
 				Name:     "code",
-				Desc:     "Voucher code (8 characters))",
+				Desc:     "Voucher code (8 characters)",
 				Optional: true,
 			},
 		},

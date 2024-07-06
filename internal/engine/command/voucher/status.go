@@ -10,12 +10,12 @@ import (
 )
 
 func (v *Voucher) statusHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
-	if len(args) > 0 {
-		code := args[0]
-		return v.codeStatus(cmd, code)
+	if args == nil {
+		return v.vouchersStatus(cmd)
 	}
 
-	return v.vouchersStatus(cmd)
+	code := args[0]
+	return v.codeStatus(cmd, code)
 }
 
 func (v *Voucher) codeStatus(cmd command.Command, code string) command.CommandResult {
