@@ -12,6 +12,7 @@ const (
 	CommandName       = "voucher"
 	ClaimCommandName  = "claim"
 	CreateCommandName = "create"
+	StatusCommandName = "status"
 	HelpCommandName   = "help"
 )
 
@@ -86,6 +87,23 @@ func (v *Voucher) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskModerator,
 	}
 
+	subCmdStatus := command.Command{
+		Name: StatusCommandName,
+		Help: "Get status of vouchers/one voucher",
+		Args: []command.Args{
+			{
+				Name:     "code",
+				Desc:     "Voucher code (8 characters))",
+				Optional: true,
+			},
+		},
+		SubCommands: nil,
+		AppIDs:      entity.AllAppIDs(),
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.OnlyModerator},
+		Handler:     v.statusHandler,
+		TargetFlag:  command.TargetMaskModerator,
+	}
+
 	cmdVoucher := command.Command{
 		Name:        CommandName,
 		Help:        "Voucher Commands",
@@ -98,5 +116,6 @@ func (v *Voucher) GetCommand() command.Command {
 
 	cmdVoucher.AddSubCommand(subCmdClaim)
 	cmdVoucher.AddSubCommand(subCmdCreate)
+	cmdVoucher.AddSubCommand(subCmdStatus)
 	return cmdVoucher
 }

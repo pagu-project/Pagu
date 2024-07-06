@@ -197,6 +197,21 @@ func (mr *MockDatabaseMockRecorder) HasUser(id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasUser", reflect.TypeOf((*MockDatabase)(nil).HasUser), id)
 }
 
+// ListVoucher mocks base method.
+func (m *MockDatabase) ListVoucher() ([]*entity.Voucher, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListVoucher")
+	ret0, _ := ret[0].([]*entity.Voucher)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListVoucher indicates an expected call of ListVoucher.
+func (mr *MockDatabaseMockRecorder) ListVoucher() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVoucher", reflect.TypeOf((*MockDatabase)(nil).ListVoucher))
+}
+
 // UpdateZealyUser mocks base method.
 func (m *MockDatabase) UpdateZealyUser(id, txHash string) error {
 	m.ctrl.T.Helper()

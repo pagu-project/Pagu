@@ -63,7 +63,7 @@ func TestClaimNormal(t *testing.T) {
 	})
 }
 
-func TestClaimNotZFound(t *testing.T) {
+func TestClaimNotFound(t *testing.T) {
 	voucher, db, _, _ := setup(t)
 
 	db.EXPECT().GetVoucherByCode("12345678").Return(
