@@ -2,6 +2,12 @@ package repository
 
 import "github.com/pagu-project/Pagu/internal/entity"
 
+type IUser interface {
+	AddUser(u *entity.User) error
+	HasUser(id string) bool
+	GetUserInApp(appID entity.AppID, callerID string) (*entity.User, error)
+}
+
 func (db *DB) AddUser(u *entity.User) error {
 	tx := db.Create(u)
 	if tx.Error != nil {

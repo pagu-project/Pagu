@@ -6,6 +6,11 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
+type IFaucet interface {
+	AddFaucet(f *entity.PhoenixFaucet) error
+	CanGetFaucet(user *entity.User) bool
+}
+
 func (db *DB) AddFaucet(f *entity.PhoenixFaucet) error {
 	tx := db.Create(f)
 	if tx.Error != nil {

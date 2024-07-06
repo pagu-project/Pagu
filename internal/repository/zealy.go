@@ -2,6 +2,13 @@ package repository
 
 import "github.com/pagu-project/Pagu/internal/entity"
 
+type IZealy interface {
+	GetZealyUser(id string) (*entity.ZealyUser, error)
+	AddZealyUser(u *entity.ZealyUser) error
+	UpdateZealyUser(id string, txHash string) error
+	GetAllZealyUser() ([]*entity.ZealyUser, error)
+}
+
 func (db *DB) GetZealyUser(id string) (*entity.ZealyUser, error) {
 	var u *entity.ZealyUser
 	tx := db.Model(&entity.ZealyUser{}).First(&u, "discord_id = ?", id)

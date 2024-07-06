@@ -4,6 +4,13 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
+type IVoucher interface {
+	AddVoucher(v *entity.Voucher) error
+	GetVoucherByCode(code string) (entity.Voucher, error)
+	ClaimVoucher(id uint, txHash string, claimer uint) error
+	ListVoucher() ([]*entity.Voucher, error)
+}
+
 func (db *DB) AddVoucher(v *entity.Voucher) error {
 	tx := db.Create(v)
 	if tx.Error != nil {
@@ -34,4 +41,16 @@ func (db *DB) ClaimVoucher(id uint, txHash string, claimer uint) error {
 	}
 
 	return nil
+}
+
+func (db *DB) ListVoucher() ([]*entity.Voucher, error) {
+	var v []*entity.Voucher
+	tx := db.Find(&v)
+	if tx.Error != nil {
+		return nil, ReadError{
+			Message: tx.Error.Error(),
+		}
+	}
+
+	return v, nil
 }
