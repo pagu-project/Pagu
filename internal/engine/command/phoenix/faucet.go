@@ -7,7 +7,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (pt *Phoenix) faucetHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (pt *Phoenix) faucetHandler(cmd *command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	if len(args) == 0 {
 		return cmd.ErrorResult(errors.New("invalid wallet address"))
 	}
@@ -21,7 +21,7 @@ func (pt *Phoenix) faucetHandler(cmd command.Command, _ entity.AppID, _ string, 
 		return cmd.FailedResult("Uh, you used your share of faucets today!")
 	}
 
-	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu PhoenixFaucet", int64(pt.faucetAmount))
+	txID, err := pt.wallet.TransferTransaction(toAddr, "Phoenix Testnet Pagu PhoenixFaucet", pt.faucetAmount)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}

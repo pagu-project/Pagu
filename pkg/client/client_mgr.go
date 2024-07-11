@@ -96,8 +96,9 @@ func (cm *Mgr) AddClient(c IClient) {
 	cm.clients = append(cm.clients, c)
 }
 
-// NOTE: local client is always the first client.
-func (cm *Mgr) getLocalClient() IClient {
+// GetLocalClient returns the local client.
+// The local is always the first client in list of clients.
+func (cm *Mgr) GetLocalClient() IClient {
 	return cm.clients[0]
 }
 
@@ -110,7 +111,7 @@ func (cm *Mgr) GetRandomClient() IClient {
 }
 
 func (cm *Mgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
-	localClient := cm.getLocalClient()
+	localClient := cm.GetLocalClient()
 	info, err := localClient.GetBlockchainInfo(cm.ctx)
 	if err != nil {
 		return nil, err
@@ -119,7 +120,7 @@ func (cm *Mgr) GetBlockchainInfo() (*pactus.GetBlockchainInfoResponse, error) {
 }
 
 func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
-	localClient := cm.getLocalClient()
+	localClient := cm.GetLocalClient()
 	height, err := localClient.GetBlockchainHeight(cm.ctx)
 	if err != nil {
 		return 0, err
@@ -127,14 +128,9 @@ func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
 	return height, nil
 }
 
-func (cm *Mgr) GetLastBlockTime() (uint32, uint32) {
-	localClient := cm.getLocalClient()
-	lastBlockTime, lastBlockHeight, err := localClient.LastBlockTime(cm.ctx)
-	if err != nil {
-		return 0, 0
-	}
-
-	return lastBlockTime, lastBlockHeight
+func (cm *Mgr) GetLastBlockTime() (lastBlockTime, lastBlockHeight uint32) {
+	localClient := cm.GetLocalClient()
+	return localClient.GetLastBlockTime(cm.ctx)
 }
 
 func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
@@ -167,7 +163,7 @@ func (cm *Mgr) GetPeerInfo(address string) (*pactus.PeerInfo, error) {
 }
 
 func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, error) {
-	localClient := cm.getLocalClient()
+	localClient := cm.GetLocalClient()
 	val, err := localClient.GetValidatorInfo(cm.ctx, address)
 	if err != nil {
 		return nil, err
@@ -176,7 +172,7 @@ func (cm *Mgr) GetValidatorInfo(address string) (*pactus.GetValidatorResponse, e
 }
 
 func (cm *Mgr) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorResponse, error) {
-	localClient := cm.getLocalClient()
+	localClient := cm.GetLocalClient()
 	val, err := localClient.GetValidatorInfoByNumber(cm.ctx, num)
 	if err != nil {
 		return nil, err
@@ -185,7 +181,7 @@ func (cm *Mgr) GetValidatorInfoByNumber(num int32) (*pactus.GetValidatorResponse
 }
 
 func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, error) {
-	localClient := cm.getLocalClient()
+	localClient := cm.GetLocalClient()
 	txData, err := localClient.GetTransactionData(cm.ctx, txID)
 	if err != nil {
 		return nil, err
@@ -194,15 +190,15 @@ func (cm *Mgr) GetTransactionData(txID string) (*pactus.GetTransactionResponse, 
 }
 
 func (cm *Mgr) GetBalance(addr string) (int64, error) {
-	return cm.getLocalClient().GetBalance(cm.ctx, addr)
+	return cm.GetLocalClient().GetBalance(cm.ctx, addr)
 }
 
 func (cm *Mgr) GetFee(amt int64) (int64, error) {
-	return cm.getLocalClient().GetFee(cm.ctx, amt)
+	return cm.GetLocalClient().GetFee(cm.ctx, amt)
 }
 
 func (cm *Mgr) GetCirculatingSupply() (int64, error) {
-	localClient := cm.getLocalClient()
+	localClient := cm.GetLocalClient()
 
 	height, err := localClient.GetBlockchainInfo(cm.ctx)
 	if err != nil {
@@ -212,12 +208,12 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	staked := height.TotalPower
 	warm := int64(630_000_000_000_000)
 
-	var addr1Out int64 = 0
-	var addr2Out int64 = 0
-	var addr3Out int64 = 0
-	var addr4Out int64 = 0
-	var addr5Out int64 = 0 // warm wallet
-	var addr6Out int64 = 0 // warm wallet
+	addr1Out := int64(0)
+	addr2Out := int64(0)
+	addr3Out := int64(0)
+	addr4Out := int64(0)
+	addr5Out := int64(0) // warm wallet
+	addr6Out := int64(0) // warm wallet
 
 	balance1, err := localClient.GetBalance(cm.ctx, "pc1z2r0fmu8sg2ffa0tgrr08gnefcxl2kq7wvquf8z")
 	if err == nil {

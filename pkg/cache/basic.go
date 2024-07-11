@@ -73,7 +73,10 @@ func (c *BasicCache[K, V]) Update(key K, newValue V, expiration time.Duration) b
 	}
 
 	// Update the Value
-	entry := value.(basicCacheEntry[V])
+	entry, ok := value.(basicCacheEntry[V])
+	if !ok {
+		return false
+	}
 	entry.Value = newValue
 
 	// Update the expiration time if a new expiration is provided
@@ -94,7 +97,7 @@ func (c *BasicCache[K, V]) Exists(key K) bool {
 
 func (c *BasicCache[K, V]) Keys() []K {
 	keys := make([]K, 0)
-	c.cache.Range(func(key, _ interface{}) bool {
+	c.cache.Range(func(key, _ any) bool {
 		keys = append(keys, key.(K))
 		return true
 	})
@@ -111,8 +114,11 @@ func (c *BasicCache[K, V]) cleanupExpiredEntries() {
 	ticker := time.NewTicker(c.cleanUpCheckDuration) // adjust the cleanup frequency as needed
 
 	for range ticker.C {
-		c.cache.Range(func(key, value interface{}) bool {
-			entry := value.(basicCacheEntry[V])
+		c.cache.Range(func(key, value any) bool {
+			entry, ok := value.(basicCacheEntry[V])
+			if !ok {
+				return true
+			}
 
 			// Skip entries with zero expiration time
 			if entry.Expiry.IsZero() {

@@ -4,25 +4,26 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/pagu-project/Pagu/pkg/utils"
-
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/amount"
+	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	code := utils.RandomString(8, utils.CapitalAlphanumerical)
 	for _, err := v.db.GetVoucherByCode(code); err == nil; {
 		code = utils.RandomString(8, utils.CapitalAlphanumerical)
 	}
 
-	amount := args[0]
-	intAmount, err := strconv.Atoi(amount)
+	amountStr := args[0]
+	amt, err := amount.FromString(amountStr)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
 
-	if intAmount > 1000 {
+	maxStake, _ := amount.NewAmount(1000)
+	if amt > maxStake {
 		return cmd.ErrorResult(errors.New("stake amount is more than 1000"))
 	}
 
@@ -36,7 +37,7 @@ func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, a
 		Creator:     cmd.User.ID,
 		Code:        code,
 		ValidMonths: uint8(expireMonths),
-		Amount:      uint(intAmount),
+		Amount:      amt,
 	}
 
 	if len(args) > 2 {

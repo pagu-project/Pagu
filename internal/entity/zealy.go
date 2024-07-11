@@ -1,15 +1,18 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"github.com/pagu-project/Pagu/pkg/amount"
+	"gorm.io/gorm"
+)
 
 type ZealyUser struct {
-	Amount    int64
-	DiscordID string `gorm:"column:discord_id"`
+	Amount    amount.Amount `gorm:"column:amount"`
+	DiscordID string        `gorm:"column:discord_id"`
 	TxHash    string
 
 	gorm.Model
 }
 
 func (z *ZealyUser) IsClaimed() bool {
-	return len(z.TxHash) > 0
+	return z.TxHash != ""
 }

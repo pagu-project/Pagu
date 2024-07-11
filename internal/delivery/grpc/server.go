@@ -4,11 +4,10 @@ import (
 	"context"
 	"net"
 
+	"github.com/pagu-project/Pagu/config"
 	pagu "github.com/pagu-project/Pagu/internal/delivery/grpc/gen/go"
 	"github.com/pagu-project/Pagu/internal/engine"
 	"github.com/pagu-project/Pagu/pkg/log"
-
-	"github.com/pagu-project/Pagu/config"
 	"google.golang.org/grpc"
 )
 
@@ -19,10 +18,10 @@ type Server struct {
 	address  string
 	engine   *engine.BotEngine
 	grpc     *grpc.Server
-	cfg      config.GRPC
+	cfg      *config.GRPC
 }
 
-func NewServer(be *engine.BotEngine, cfg config.GRPC) *Server {
+func NewServer(be *engine.BotEngine, cfg *config.GRPC) *Server {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &Server{

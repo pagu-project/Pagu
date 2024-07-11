@@ -3,7 +3,6 @@ package utils
 import (
 	"math/rand"
 	"time"
-	"unsafe"
 )
 
 const (
@@ -33,5 +32,5 @@ func RandomString(n int, input string) string {
 		remain--
 	}
 
-	return *(*string)(unsafe.Pointer(&b))
+	return string(b)
 }

@@ -33,7 +33,7 @@ type ExbitronPriceResponse []struct {
 }
 
 type ExbitronTicker struct {
-	TickerId       string `json:"ticker_id"`
+	TickerID       string `json:"ticker_id"`
 	BaseCurrency   string `json:"base_currency"`
 	TargetCurrency string `json:"target_currency"`
 	LastPrice      string `json:"last_price"`
@@ -46,12 +46,13 @@ type ExbitronTicker struct {
 }
 
 func (e ExbitronPriceResponse) GetPacToUSDT() ExbitronTicker {
-	const tickerId = "PAC-USDT"
+	const tickerID = "PAC-USDT"
 
-	for _, ticker := range e {
-		if ticker.TickerID == tickerId {
+	for index := range e {
+		ticker := e[index]
+		if ticker.TickerID == tickerID {
 			return ExbitronTicker{
-				TickerId:       tickerId,
+				TickerID:       tickerID,
 				BaseCurrency:   ticker.BaseCurrency,
 				TargetCurrency: ticker.TargetCurrency,
 				LastPrice:      ticker.LastPrice,

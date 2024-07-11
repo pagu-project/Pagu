@@ -4,13 +4,14 @@ import (
 	"errors"
 	"time"
 
-	amt "github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
 )
 
-func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID string, args ...string) command.CommandResult {
+func (v *Voucher) claimHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	code := args[0]
 	if len(code) != 8 {
 		return cmd.ErrorResult(errors.New("voucher code is not valid, length must be 8"))
@@ -26,7 +27,7 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID str
 		return cmd.ErrorResult(errors.New("voucher is expired"))
 	}
 
-	if len(voucher.TxHash) > 0 {
+	if voucher.IsClaimed() {
 		return cmd.ErrorResult(errors.New("voucher code claimed before"))
 	}
 
@@ -38,14 +39,7 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID str
 	}
 
 	pubKey := validatorInfo.GetValidator().GetPublicKey()
-
-	PACAmount, err := amt.NewAmount(float64(voucher.Amount))
-	if err != nil {
-		log.Error("error converting amount to nanoPAC", "err", err)
-		return cmd.ErrorResult(err)
-	}
-
-	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim from Pagu", PACAmount.ToNanoPAC())
+	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim from Pagu", voucher.Amount)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}

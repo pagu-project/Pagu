@@ -5,28 +5,26 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
-	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/pkg/log"
-
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/log"
 )
 
 type TelegramBot struct {
+	ctx             context.Context
+	cancel          context.CancelFunc
 	botEngine       *engine.BotEngine
 	chatID          int64
 	botInstance     *gotgbot.Bot
 	config          *config.Config
 	commandHandlers map[string]ext.Handler
-	ctx             context.Context
-	cancel          context.CancelFunc
 	updater         *ext.Updater
 }
 
-func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, config *config.Config) (*TelegramBot, error) {
+func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, cfg *config.Config) (*TelegramBot, error) {
 	bot, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		log.Error("Failed to create Telegram bot:", err)
@@ -41,7 +39,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 		botEngine:       botEngine,
 		chatID:          chatID,
 		botInstance:     bot,
-		config:          config,
+		config:          cfg,
 		commandHandlers: commandHandlers,
 		ctx:             ctx,
 		cancel:          cancel,
@@ -52,12 +50,12 @@ func (bot *TelegramBot) Start() error {
 	log.Info("Starting Telegram Bot...")
 
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
-		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+		Error: func(_ *gotgbot.Bot, _ *ext.Context, err error) ext.DispatcherAction {
 			log.Error("Error handling update:", err)
 			bot.cancel()
 			return ext.DispatcherActionNoop
 		},
-		Panic: func(b *gotgbot.Bot, ctx *ext.Context, r interface{}) {
+		Panic: func(_ *gotgbot.Bot, _ *ext.Context, r any) {
 			log.Error("Panic occurred:", r)
 			bot.cancel()
 		},
@@ -100,7 +98,7 @@ func (bot *TelegramBot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 		messageParts := strings.Split(fullMessage, " ")
 
 		// Pass the array to the bot engine.
-		res := bot.botEngine.Run(entity.AppIdTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
+		res := bot.botEngine.Run(entity.AppIDTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
 
 		// Check if the command execution resulted in an error.
 		if res.Error != "" {

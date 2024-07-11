@@ -18,15 +18,15 @@ type Market struct {
 	priceCache cache.Cache[string, entity.Price]
 }
 
-func NewMarket(clientMgr client.Manager, priceCache cache.Cache[string, entity.Price]) Market {
-	return Market{
+func NewMarket(clientMgr client.Manager, priceCache cache.Cache[string, entity.Price]) *Market {
+	return &Market{
 		clientMgr:  clientMgr,
 		priceCache: priceCache,
 	}
 }
 
-func (m *Market) GetCommand() command.Command {
-	subCmdPrice := command.Command{
+func (m *Market) GetCommand() *command.Command {
+	subCmdPrice := &command.Command{
 		Name:        PriceCommandName,
 		Help:        "Shows the last price of PAC coin on the markets",
 		Args:        []command.Args{},
@@ -36,12 +36,12 @@ func (m *Market) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskMain,
 	}
 
-	cmdMarket := command.Command{
+	cmdMarket := &command.Command{
 		Name:        CommandName,
 		Help:        "Blockchain data and information",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]command.Command, 0),
+		SubCommands: make([]*command.Command, 0),
 		Handler:     nil,
 		TargetFlag:  command.TargetMaskMain,
 	}

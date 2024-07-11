@@ -96,8 +96,8 @@ func (c *Client) GetValidatorInfoByNumber(ctx context.Context, num int32) (*pact
 	return validator, nil
 }
 
-func (c *Client) TransactionData(ctx context.Context, hash string) (*pactus.TransactionInfo, error) {
-	data, err := c.transactionClient.GetTransaction(ctx,
+func (c *Client) GetTransactionData(ctx context.Context, hash string) (*pactus.GetTransactionResponse, error) {
+	res, err := c.transactionClient.GetTransaction(ctx,
 		&pactus.GetTransactionRequest{
 			Id:        hash,
 			Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
@@ -106,21 +106,27 @@ func (c *Client) TransactionData(ctx context.Context, hash string) (*pactus.Tran
 		return nil, err
 	}
 
-	return data.GetTransaction(), nil
+	return res, nil
 }
 
-func (c *Client) LastBlockTime(ctx context.Context) (uint32, uint32, error) {
+func (c *Client) GetLastBlockTime(ctx context.Context) (lastBlockTime, lastBlockHeight uint32) {
 	info, err := c.blockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
-		return 0, 0, err
+		return 0, 0
 	}
 
-	lastBlockTime, err := c.blockchainClient.GetBlock(ctx, &pactus.GetBlockRequest{
+	lastBlock, err := c.blockchainClient.GetBlock(ctx, &pactus.GetBlockRequest{
 		Height:    info.LastBlockHeight,
 		Verbosity: pactus.BlockVerbosity_BLOCK_INFO,
 	})
+	if err != nil {
+		return 0, 0
+	}
 
-	return lastBlockTime.BlockTime, info.LastBlockHeight, err
+	lastBlockHeight = lastBlock.Height
+	lastBlockTime = lastBlock.BlockTime
+
+	return lastBlockTime, lastBlockHeight
 }
 
 func (c *Client) GetNodeInfo(ctx context.Context) (*pactus.GetNodeInfoResponse, error) {
@@ -130,13 +136,6 @@ func (c *Client) GetNodeInfo(ctx context.Context) (*pactus.GetNodeInfoResponse, 
 	}
 
 	return info, err
-}
-
-func (c *Client) GetTransactionData(ctx context.Context, txID string) (*pactus.GetTransactionResponse, error) {
-	return c.transactionClient.GetTransaction(ctx, &pactus.GetTransactionRequest{
-		Id:        txID,
-		Verbosity: pactus.TransactionVerbosity_TRANSACTION_DATA,
-	})
 }
 
 func (c *Client) GetBalance(ctx context.Context, address string) (int64, error) {

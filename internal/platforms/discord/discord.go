@@ -3,28 +3,25 @@ package discord
 import (
 	"time"
 
-	"github.com/pactus-project/pactus/util"
-
-	"github.com/pagu-project/Pagu/internal/entity"
-
-	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/internal/engine/command"
-	"github.com/pagu-project/Pagu/pkg/log"
-	"github.com/pagu-project/Pagu/pkg/utils"
-
 	"github.com/bwmarrin/discordgo"
 	"github.com/pactus-project/pactus/types/amount"
+	"github.com/pactus-project/pactus/util"
 	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/log"
+	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
 type DiscordBot struct {
 	Session *discordgo.Session
 	engine  *engine.BotEngine
-	cfg     config.DiscordBot
+	cfg     *config.DiscordBot
 	target  string
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, cfg config.DiscordBot, target string) (*DiscordBot, error) {
+func NewDiscordBot(botEngine *engine.BotEngine, cfg *config.DiscordBot, target string) (*DiscordBot, error) {
 	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		return nil, err
@@ -72,7 +69,7 @@ func (bot *DiscordBot) registerCommands() error {
 
 	beCmds := bot.engine.Commands()
 	for i, beCmd := range beCmds {
-		if !beCmd.HasAppId(entity.AppIdDiscord) {
+		if !beCmd.HasAppID(entity.AppIDDiscord) {
 			continue
 		}
 
@@ -103,10 +100,6 @@ func (bot *DiscordBot) registerCommands() error {
 
 		if beCmd.HasSubCommand() {
 			for _, sCmd := range beCmd.SubCommands {
-				if sCmd.Name == "" || sCmd.Help == "" {
-					continue
-				}
-
 				switch bot.target {
 				case config.BotNamePaguMainnet:
 					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskMain) {
@@ -200,7 +193,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		}
 	}
 
-	res := db.engine.Run(entity.AppIdDiscord, i.Member.User.ID, beInput)
+	res := db.engine.Run(entity.AppIDDiscord, i.Member.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
 }
@@ -214,7 +207,9 @@ func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *dis
 	bot.respondEmbed(errorEmbed, s, i)
 }
 
-func (bot *DiscordBot) respondResultMsg(res command.CommandResult, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *DiscordBot) respondResultMsg(res command.CommandResult,
+	s *discordgo.Session, i *discordgo.InteractionCreate,
+) {
 	var resEmbed *discordgo.MessageEmbed
 	if res.Successful {
 		resEmbed = &discordgo.MessageEmbed{
@@ -233,7 +228,9 @@ func (bot *DiscordBot) respondResultMsg(res command.CommandResult, s *discordgo.
 	bot.respondEmbed(resEmbed, s, i)
 }
 
-func (bot *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed,
+	s *discordgo.Session, i *discordgo.InteractionCreate,
+) {
 	response := &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

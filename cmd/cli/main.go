@@ -5,25 +5,23 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
-	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/pkg/log"
-
 	"github.com/pactus-project/pactus/crypto"
 	pagu "github.com/pagu-project/Pagu"
-	pCmd "github.com/pagu-project/Pagu/cmd"
+	pagucmd "github.com/pagu-project/Pagu/cmd"
 	"github.com/pagu-project/Pagu/config"
-	cobra "github.com/spf13/cobra"
+	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/log"
+	"github.com/spf13/cobra"
 )
 
 var configPath string
 
 const PROMPT = "\n>> "
 
-func run(cmd *cobra.Command, args []string) {
+func run(cmd *cobra.Command, _ []string) {
 	configs, err := config.Load(configPath)
-	pCmd.ExitOnError(cmd, err)
+	pagucmd.ExitOnError(cmd, err)
 
 	log.InitGlobalLogger(configs.Logger)
 
@@ -32,7 +30,7 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	botEngine, err := engine.NewBotEngine(configs)
-	pCmd.ExitOnError(cmd, err)
+	pagucmd.ExitOnError(cmd, err)
 
 	botEngine.RegisterAllCommands()
 	botEngine.Start()
@@ -45,7 +43,7 @@ func run(cmd *cobra.Command, args []string) {
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSuffix(input, "\n")
 
-		if strings.ToLower(input) == "exit" {
+		if strings.EqualFold(input, "exit") {
 			cmd.Println("exiting from cli")
 
 			return
@@ -53,7 +51,7 @@ func run(cmd *cobra.Command, args []string) {
 
 		inputs := strings.Split(input, " ")
 
-		response := botEngine.Run(entity.AppIdCLI, "0", inputs)
+		response := botEngine.Run(entity.AppIDCLI, "0", inputs)
 
 		cmd.Printf("%v\n%v", response.Title, response.Message)
 	}
@@ -68,5 +66,5 @@ func main() {
 
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config.yml", "config path ./config.yml")
 	err := rootCmd.Execute()
-	pCmd.ExitOnError(rootCmd, err)
+	pagucmd.ExitOnError(rootCmd, err)
 }

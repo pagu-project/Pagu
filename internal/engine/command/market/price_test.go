@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setup() (Market, command.Command) {
+func setup() (*Market, *command.Command) {
 	priceCache := cache.NewBasic[string, entity.Price](1 * time.Second)
 	priceJob := job.NewPrice(priceCache)
 	priceJobSched := job.NewScheduler()
@@ -19,7 +19,7 @@ func setup() (Market, command.Command) {
 	go priceJobSched.Run()
 	m := NewMarket(nil, priceCache)
 
-	return m, command.Command{
+	return m, &command.Command{
 		Name:        PriceCommandName,
 		Help:        "Shows the last price of PAC coin on the markets",
 		Args:        []command.Args{},
@@ -31,6 +31,6 @@ func setup() (Market, command.Command) {
 func TestGetPrice(t *testing.T) {
 	market, cmd := setup()
 	time.Sleep(10 * time.Second)
-	result := market.getPrice(cmd, entity.AppIdDiscord, "")
+	result := market.getPrice(cmd, entity.AppIDDiscord, "")
 	assert.Equal(t, result.Successful, true)
 }

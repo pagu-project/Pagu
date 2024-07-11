@@ -3,14 +3,15 @@ package network
 import (
 	"fmt"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (n *Network) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (n *Network) nodeInfoHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)
@@ -19,7 +20,7 @@ func (n *Network) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string,
 	}
 
 	ip := utils2.ExtractIPFromMultiAddr(peerInfo.Address)
-	geoData := utils2.GetGeoIP(ip)
+	geoData := utils2.GetGeoIP(n.ctx, ip)
 
 	nodeInfo := &NodeInfo{
 		PeerID:     peerInfo.PeerId,
@@ -64,6 +65,7 @@ func (n *Network) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string,
 		"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
 		"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 		nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
-		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils2.FormatNumber(int64(nodeInfo.ValidatorNum)),
+		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP,
+		utils2.FormatNumber(int64(nodeInfo.ValidatorNum)),
 		pip19Score, utils2.FormatNumber(nodeInfo.StakeAmount))
 }

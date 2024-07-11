@@ -19,15 +19,15 @@ type Zealy struct {
 	wallet wallet.IWallet
 }
 
-func NewZealy(db repository.Database, wallet wallet.IWallet) Zealy {
-	return Zealy{
+func NewZealy(db repository.Database, wlt wallet.IWallet) *Zealy {
+	return &Zealy{
 		db:     db,
-		wallet: wallet,
+		wallet: wlt,
 	}
 }
 
-func (z *Zealy) GetCommand() command.Command {
-	subCmdClaim := command.Command{
+func (z *Zealy) GetCommand() *command.Command {
+	subCmdClaim := &command.Command{
 		Name: ClaimCommandName,
 		Help: "Claim your Zealy Reward",
 		Args: []command.Args{
@@ -42,7 +42,7 @@ func (z *Zealy) GetCommand() command.Command {
 		Handler:     z.claimHandler,
 	}
 
-	subCmdStatus := command.Command{
+	subCmdStatus := &command.Command{
 		Name:        StatusCommandName,
 		Help:        "Status of Zealy reward claims",
 		Args:        nil,
@@ -51,12 +51,12 @@ func (z *Zealy) GetCommand() command.Command {
 		Handler:     z.statusHandler,
 	}
 
-	cmdZealy := command.Command{
+	cmdZealy := &command.Command{
 		Name:        CommandName,
 		Help:        "Zealy Commands",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]command.Command, 0),
+		SubCommands: make([]*command.Command, 0),
 		Handler:     nil,
 		TargetFlag:  command.TargetMaskMain,
 	}

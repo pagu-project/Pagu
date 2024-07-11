@@ -3,16 +3,17 @@ package phoenix
 import (
 	"fmt"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-// nolint
-func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+//nolint:unused // remove me after I am used
+func (pt *Phoenix) nodeInfoHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := pt.clientMgr.GetPeerInfo(valAddress)
@@ -21,7 +22,7 @@ func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string
 	}
 
 	ip := utils2.ExtractIPFromMultiAddr(peerInfo.Address)
-	geoData := utils2.GetGeoIP(ip)
+	geoData := utils2.GetGeoIP(pt.ctx, ip)
 
 	nodeInfo := &network.NodeInfo{
 		PeerID:     peerInfo.PeerId,
@@ -60,7 +61,7 @@ func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string
 		pip19Score = fmt.Sprintf("%v⚠️", nodeInfo.AvailabilityScore)
 	}
 
-	stakeAmountInNanoPAC := int64(nodeInfo.StakeAmount)
+	stakeAmountInNanoPAC := nodeInfo.StakeAmount
 	stakeAmount := amount.Amount(stakeAmountInNanoPAC)
 
 	// Format the stake amount for display.
@@ -70,6 +71,7 @@ func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string
 		"Moniker: %s\nCountry: %s\nCity: %s\nRegion Name: %s\nTimeZone: %s\n"+
 		"ISP: %s\n\nValidator Info🔍\nNumber: %v\nPIP-19 Score: %s\nStake: %v PAC's\n",
 		nodeInfo.PeerID, nodeInfo.IPAddress, nodeInfo.Agent, nodeInfo.Moniker, nodeInfo.Country,
-		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP, utils2.FormatNumber(int64(nodeInfo.ValidatorNum)),
+		nodeInfo.City, nodeInfo.RegionName, nodeInfo.TimeZone, nodeInfo.ISP,
+		utils2.FormatNumber(int64(nodeInfo.ValidatorNum)),
 		pip19Score, formattedStakeAmount)
 }

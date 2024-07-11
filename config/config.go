@@ -5,23 +5,24 @@ import (
 	"os"
 
 	"github.com/pactus-project/pactus/util"
+	"github.com/pagu-project/Pagu/pkg/amount"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	BotName      string         `yaml:"bot_name"`
-	Network      string         `yaml:"network"`
-	NetworkNodes []string       `yaml:"network_nodes"`
-	LocalNode    string         `yaml:"local_node"`
-	Database     Database       `yaml:"database"`
-	AuthIDs      []string       `yaml:"auth_ids"`
-	GRPC         GRPC           `yaml:"grpc"`
-	Wallet       Wallet         `yaml:"wallet"`
-	Logger       Logger         `yaml:"logger"`
-	HTTP         HTTP           `yaml:"http"`
-	Phoenix      PhoenixNetwork `yaml:"phoenix"`
-	DiscordBot   DiscordBot     `yaml:"discord"`
-	Telegram     Telegram       `yaml:"telegram"`
+	BotName      string          `yaml:"bot_name"`
+	Network      string          `yaml:"network"`
+	NetworkNodes []string        `yaml:"network_nodes"`
+	LocalNode    string          `yaml:"local_node"`
+	Database     Database        `yaml:"database"`
+	AuthIDs      []string        `yaml:"auth_ids"`
+	GRPC         *GRPC           `yaml:"grpc"` // ! TODO: config for modules should moved to the module.
+	Wallet       *Wallet         `yaml:"wallet"`
+	Logger       *Logger         `yaml:"logger"`
+	HTTP         *HTTP           `yaml:"http"`
+	Phoenix      *PhoenixNetwork `yaml:"phoenix"`
+	DiscordBot   *DiscordBot     `yaml:"discord"`
+	Telegram     *Telegram       `yaml:"telegram"`
 }
 
 type Database struct {
@@ -50,7 +51,7 @@ type HTTP struct {
 }
 
 type PhoenixNetwork struct {
-	FaucetAmount uint `yaml:"faucet_amount"`
+	FaucetAmount amount.Amount `yaml:"faucet_amount"`
 }
 
 type Logger struct {

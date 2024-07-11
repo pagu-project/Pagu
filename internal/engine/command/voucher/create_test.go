@@ -13,7 +13,9 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func setup(t *testing.T) (Voucher, repository.MockDatabase, client.MockManager, wallet.MockIWallet) {
+func setup(t *testing.T) (*Voucher, repository.MockDatabase, client.MockManager, wallet.MockIWallet) {
+	t.Helper()
+
 	ctrl := gomock.NewController(t)
 
 	mockDB := repository.NewMockDatabase(ctrl)
@@ -35,13 +37,13 @@ func TestCreate(t *testing.T) {
 
 		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "100", "1")
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "100", "1")
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
 	})
@@ -53,13 +55,13 @@ func TestCreate(t *testing.T) {
 
 		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "1001", "1")
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "1001", "1")
 		assert.False(t, result.Successful)
 		assert.Contains(t, result.Message, "stake amount is more than 1000")
 	})
@@ -71,13 +73,13 @@ func TestCreate(t *testing.T) {
 
 		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "1.2", "1")
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "Nan", "1")
 		assert.False(t, result.Successful)
 	})
 
@@ -88,13 +90,13 @@ func TestCreate(t *testing.T) {
 
 		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "100", "1.1")
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "100", "1.1")
 		assert.False(t, result.Successful)
 	})
 
@@ -105,13 +107,13 @@ func TestCreate(t *testing.T) {
 
 		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "100", "12", "Kayhan", "Testnet node")
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "100", "12", "Kayhan", "Testnet node")
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
 	})

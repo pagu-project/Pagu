@@ -5,14 +5,14 @@ import (
 	"html/template"
 )
 
-func ExecuteHtml(tmpl string, keyValue any) (string, error) {
+func ExecuteHTML(tmpl string, keyValue any) (string, error) {
 	b := bytes.Buffer{}
 	tp, err := template.New("").Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
 
-	if err = tp.Execute(&b, keyValue); err != nil {
+	if err := tp.Execute(&b, keyValue); err != nil {
 		return "", err
 	}
 
