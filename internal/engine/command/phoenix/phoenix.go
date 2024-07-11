@@ -32,8 +32,8 @@ type Phoenix struct {
 
 func NewPhoenix(ctx context.Context, wlt wallet.IWallet, faucetAmount amount.Amount,
 	clientMgr client.Manager, db repository.Database,
-) Phoenix {
-	return Phoenix{
+) *Phoenix {
+	return &Phoenix{
 		ctx:          ctx,
 		wallet:       wlt,
 		clientMgr:    clientMgr,
@@ -42,10 +42,10 @@ func NewPhoenix(ctx context.Context, wlt wallet.IWallet, faucetAmount amount.Amo
 	}
 }
 
-func (pt *Phoenix) GetCommand() command.Command {
+func (pt *Phoenix) GetCommand() *command.Command {
 	middlewareHandler := command.NewMiddlewareHandler(pt.db, pt.wallet)
 
-	subCmdStatus := command.Command{
+	subCmdStatus := &command.Command{
 		Name:        StatusCommandName,
 		Help:        "Phoenix Testnet statistics",
 		Args:        []command.Args{},
@@ -56,7 +56,7 @@ func (pt *Phoenix) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskTest,
 	}
 
-	subCmdFaucet := command.Command{
+	subCmdFaucet := &command.Command{
 		Name: FaucetCommandName,
 		Help: fmt.Sprintf("Get %d tPAC Coins on Phoenix Testnet for Testing your code or project", pt.faucetAmount),
 		Args: []command.Args{
@@ -73,12 +73,12 @@ func (pt *Phoenix) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskTest,
 	}
 
-	cmdPhoenix := command.Command{
+	cmdPhoenix := &command.Command{
 		Name:        CommandName,
 		Help:        "Phoenix Testnet tools and utils for developers",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]command.Command, 0),
+		SubCommands: make([]*command.Command, 0),
 		Handler:     nil,
 		TargetFlag:  command.TargetMaskTest,
 	}

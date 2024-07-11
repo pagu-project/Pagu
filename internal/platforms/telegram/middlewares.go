@@ -3,10 +3,9 @@ package telegram
 import (
 	"strings"
 
-	"github.com/pagu-project/Pagu/pkg/log"
-
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/pagu-project/Pagu/pkg/log"
 )
 
 // CommandFunc is a function type that matches the signature of command handlers.

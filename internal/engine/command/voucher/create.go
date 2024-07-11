@@ -10,7 +10,7 @@ import (
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (v *Voucher) createHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	code := utils.RandomString(8, utils.CapitalAlphanumerical)
 	for _, err := v.db.GetVoucherByCode(code); err == nil; {
 		code = utils.RandomString(8, utils.CapitalAlphanumerical)

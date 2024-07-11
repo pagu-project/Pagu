@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (bc *Calculator) calcRewardHandler(cmd command.Command,
+func (bc *Calculator) calcRewardHandler(cmd *command.Command,
 	_ entity.AppID, _ string, args ...string,
 ) command.CommandResult {
 	stake, err := strconv.Atoi(args[0])

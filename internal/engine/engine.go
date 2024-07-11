@@ -28,14 +28,14 @@ type BotEngine struct {
 	cancel context.CancelFunc
 
 	clientMgr client.Manager
-	rootCmd   command.Command
+	rootCmd   *command.Command
 
-	blockchainCmd calculator.Calculator
-	networkCmd    network.Network
-	phoenixCmd    phoenixtestnet.Phoenix
-	zealyCmd      zealy.Zealy
-	voucherCmd    voucher.Voucher
-	marketCmd     market.Market
+	calculatorCmd *calculator.Calculator
+	networkCmd    *network.Network
+	phoenixCmd    *phoenixtestnet.Phoenix
+	zealyCmd      *zealy.Zealy
+	voucherCmd    *voucher.Voucher
+	marketCmd     *market.Market
 }
 
 type IEngine interface {
@@ -93,12 +93,12 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm client.Manager,
 	wlt wallet.IWallet, phoenixFaucetAmount amount.Amount,
 ) *BotEngine {
-	rootCmd := command.Command{
+	rootCmd := &command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",
 		Help:        "Root Command",
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]command.Command, 3),
+		SubCommands: make([]*command.Command, 3),
 	}
 
 	// price caching job
@@ -109,7 +109,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	go priceJobSched.Run()
 
 	netCmd := network.NewNetwork(ctx, cm)
-	bcCmd := calculator.NewCalculator(cm)
+	calcCmd := calculator.NewCalculator(cm)
 	ptCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
 	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
@@ -121,7 +121,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 		clientMgr:     cm,
 		rootCmd:       rootCmd,
 		networkCmd:    netCmd,
-		blockchainCmd: bcCmd,
+		calculatorCmd: calcCmd,
 		phoenixCmd:    ptCmd,
 		zealyCmd:      zealyCmd,
 		voucherCmd:    voucherCmd,
@@ -129,12 +129,12 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	}
 }
 
-func (be *BotEngine) Commands() []command.Command {
+func (be *BotEngine) Commands() []*command.Command {
 	return be.rootCmd.SubCommands
 }
 
 func (be *BotEngine) RegisterAllCommands() {
-	be.rootCmd.AddSubCommand(be.blockchainCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.calculatorCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.zealyCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
@@ -163,7 +163,7 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) c
 	}
 
 	for _, middlewareFunc := range cmd.Middlewares {
-		if err = middlewareFunc(&cmd, appID, callerID, args...); err != nil {
+		if err = middlewareFunc(cmd, appID, callerID, args...); err != nil {
 			log.Error(err.Error())
 			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
 		}
@@ -172,7 +172,7 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) c
 	return cmd.Handler(cmd, appID, callerID, args...)
 }
 
-func (be *BotEngine) getCommand(tokens []string) (command.Command, int) {
+func (be *BotEngine) getCommand(tokens []string) (*command.Command, int) {
 	index := 0
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands

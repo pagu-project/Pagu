@@ -24,7 +24,6 @@ linters:
     - gci
     - ginkgolinter
     - gocheckcompilerdirectives
-    - gocognit
     - gocritic
     - gocyclo
     - godot
@@ -82,15 +81,9 @@ linters-settings:
       - name: unused-receiver
         disabled: true
 
-      - name: var-naming
-        arguments: [["Id"], [""], [{upperCaseConst=true}]]
-
       - name: "exported"
-        # TODO: Enable me
-        # all exported function should have comment.
         disabled: true
 
-      # TODO: Enable me
       - name: package-comments
         disabled: true
 
@@ -109,19 +102,10 @@ linters-settings:
       - name: "cyclomatic"
         disabled: true
 
-      - name: "unchecked-type-assertion"
-        disabled: true
-
       - name: max-public-structs
         disabled: true
 
-      - name: "flag-parameter"
-        disabled: true
-
       - name: "deep-exit"
-        disabled: true
-
-      - name: "get-return"
         disabled: true
 
       - name: "confusing-naming"
@@ -182,7 +166,6 @@ issues:
     - path: _test.go
       linters:
         - maintidx
-        - gocognit
         - forbidigo
 
     - linters:

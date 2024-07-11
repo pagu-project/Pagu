@@ -3,24 +3,24 @@ package entity
 type AppID int
 
 const (
-	AppIdCLI      AppID = 1
-	AppIdDiscord  AppID = 2
-	AppIdgRPC     AppID = 3
-	AppIdHTTP     AppID = 4
-	AppIdTelegram AppID = 5
+	AppIDCLI      AppID = 1
+	AppIDDiscord  AppID = 2
+	AppIDgRPC     AppID = 3
+	AppIDHTTP     AppID = 4
+	AppIDTelegram AppID = 5
 )
 
 func (appID AppID) String() string {
 	switch appID {
-	case AppIdCLI:
+	case AppIDCLI:
 		return "CLI"
-	case AppIdDiscord:
+	case AppIDDiscord:
 		return "Discord"
-	case AppIdgRPC:
+	case AppIDgRPC:
 		return "gRPC"
-	case AppIdHTTP:
+	case AppIDHTTP:
 		return "HTTP"
-	case AppIdTelegram:
+	case AppIDTelegram:
 		return "Telegram"
 	}
 
@@ -29,10 +29,10 @@ func (appID AppID) String() string {
 
 func AllAppIDs() []AppID {
 	return []AppID{
-		AppIdCLI,
-		AppIdDiscord,
-		AppIdgRPC,
-		AppIdHTTP,
-		AppIdTelegram,
+		AppIDCLI,
+		AppIDDiscord,
+		AppIDgRPC,
+		AppIDHTTP,
+		AppIDTelegram,
 	}
 }

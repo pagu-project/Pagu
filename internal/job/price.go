@@ -27,11 +27,11 @@ type price struct {
 }
 
 func NewPrice(
-	cache cache.Cache[string, entity.Price],
+	cch cache.Cache[string, entity.Price],
 ) Job {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &price{
-		cache:  cache,
+		cache:  cch,
 		ticker: time.NewTicker(128 * time.Second),
 		ctx:    ctx,
 		cancel: cancel,
@@ -97,7 +97,7 @@ func (p *price) runTicker() {
 
 func (p *price) getPrice(ctx context.Context, endpoint string, priceResponse any) error {
 	cli := http.DefaultClient
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, http.NoBody)
 	if err != nil {
 		return err
 	}

@@ -22,18 +22,18 @@ type Voucher struct {
 	clientManager client.Manager
 }
 
-func NewVoucher(db repository.Database, wlt wallet.IWallet, cli client.Manager) Voucher {
-	return Voucher{
+func NewVoucher(db repository.Database, wlt wallet.IWallet, cli client.Manager) *Voucher {
+	return &Voucher{
 		db:            db,
 		wallet:        wlt,
 		clientManager: cli,
 	}
 }
 
-func (v *Voucher) GetCommand() command.Command {
+func (v *Voucher) GetCommand() *command.Command {
 	middlewareHandler := command.NewMiddlewareHandler(v.db, v.wallet)
 
-	subCmdClaim := command.Command{
+	subCmdClaim := &command.Command{
 		Name: ClaimCommandName,
 		Help: "Claim your voucher coins and bond to validator",
 		Args: []command.Args{
@@ -55,7 +55,7 @@ func (v *Voucher) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskMain,
 	}
 
-	subCmdCreate := command.Command{
+	subCmdCreate := &command.Command{
 		Name: CreateCommandName,
 		Help: "Add a new voucher to database",
 		Args: []command.Args{
@@ -87,7 +87,7 @@ func (v *Voucher) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskModerator,
 	}
 
-	subCmdStatus := command.Command{
+	subCmdStatus := &command.Command{
 		Name: StatusCommandName,
 		Help: "Get status of vouchers/one voucher",
 		Args: []command.Args{
@@ -104,12 +104,12 @@ func (v *Voucher) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskModerator,
 	}
 
-	cmdVoucher := command.Command{
+	cmdVoucher := &command.Command{
 		Name:        CommandName,
 		Help:        "Voucher Commands",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]command.Command, 0),
+		SubCommands: make([]*command.Command, 0),
 		Handler:     nil,
 		TargetFlag:  command.TargetMaskMain | command.TargetMaskModerator,
 	}

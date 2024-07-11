@@ -3,9 +3,8 @@ package network
 import (
 	"context"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/client"
 )
 
@@ -22,8 +21,8 @@ type Network struct {
 	clientMgr client.Manager
 }
 
-func NewNetwork(ctx context.Context, clientMgr client.Manager) Network {
-	return Network{
+func NewNetwork(ctx context.Context, clientMgr client.Manager) *Network {
+	return &Network{
 		ctx:       ctx,
 		clientMgr: clientMgr,
 	}
@@ -59,8 +58,8 @@ type NetStatus struct {
 	CirculatingSupply   int64
 }
 
-func (n *Network) GetCommand() command.Command {
-	subCmdNodeInfo := command.Command{
+func (n *Network) GetCommand() *command.Command {
+	subCmdNodeInfo := &command.Command{
 		Name: NodeInfoCommandName,
 		Help: "View the information of a node",
 		Args: []command.Args{
@@ -76,7 +75,7 @@ func (n *Network) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskAll,
 	}
 
-	subCmdHealth := command.Command{
+	subCmdHealth := &command.Command{
 		Name:        HealthCommandName,
 		Help:        "Checking network health status",
 		Args:        []command.Args{},
@@ -86,7 +85,7 @@ func (n *Network) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskAll,
 	}
 
-	subCmdStatus := command.Command{
+	subCmdStatus := &command.Command{
 		Name:        StatusCommandName,
 		Help:        "Network statistics",
 		Args:        []command.Args{},
@@ -96,12 +95,12 @@ func (n *Network) GetCommand() command.Command {
 		TargetFlag:  command.TargetMaskAll,
 	}
 
-	cmdNetwork := command.Command{
+	cmdNetwork := &command.Command{
 		Name:        CommandName,
 		Help:        "Network related commands",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]command.Command, 0),
+		SubCommands: make([]*command.Command, 0),
 		Handler:     nil,
 		TargetFlag:  command.TargetMaskAll,
 	}

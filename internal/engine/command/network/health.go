@@ -8,7 +8,9 @@ import (
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (n *Network) networkHealthHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
+func (n *Network) networkHealthHandler(cmd *command.Command,
+	_ entity.AppID, _ string, _ ...string,
+) command.CommandResult {
 	lastBlockTime, lastBlockHeight := n.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0).Format("02/01/2006, 15:04:05")
 	currentTime := time.Now()

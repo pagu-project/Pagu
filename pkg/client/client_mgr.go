@@ -128,7 +128,7 @@ func (cm *Mgr) GetBlockchainHeight() (uint32, error) {
 	return height, nil
 }
 
-func (cm *Mgr) GetLastBlockTime() (lastBlockTime uint32, lastBlockHeight uint32) {
+func (cm *Mgr) GetLastBlockTime() (lastBlockTime, lastBlockHeight uint32) {
 	localClient := cm.GetLocalClient()
 	return localClient.GetLastBlockTime(cm.ctx)
 }

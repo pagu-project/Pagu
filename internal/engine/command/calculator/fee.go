@@ -6,7 +6,9 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (bc *Calculator) calcFeeHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (bc *Calculator) calcFeeHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	amt, err := amount.FromString(args[0])
 	if err != nil {
 		return cmd.ErrorResult(err)

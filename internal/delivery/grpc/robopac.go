@@ -4,9 +4,8 @@ import (
 	"context"
 	"strings"
 
+	robopac "github.com/pagu-project/Pagu/internal/delivery/grpc/gen/go"
 	"github.com/pagu-project/Pagu/internal/entity"
-
-	"github.com/pagu-project/Pagu/internal/delivery/grpc/gen/go"
 )
 
 type robopacServer struct {
@@ -25,7 +24,7 @@ func (rs *robopacServer) Run(_ context.Context, er *robopac.RunRequest) (*robopa
 	tokens := strings.Split(er.Command, " ")
 	beInput = append(beInput, tokens...)
 
-	res := rs.engine.Run(entity.AppIdgRPC, er.Id, beInput)
+	res := rs.engine.Run(entity.AppIDgRPC, er.Id, beInput)
 
 	return &robopac.RunResponse{
 		Response: res.Message,

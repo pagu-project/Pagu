@@ -9,7 +9,9 @@ import (
 	"github.com/pagu-project/Pagu/pkg/log"
 )
 
-func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID string, args ...string) command.CommandResult {
+func (v *Voucher) claimHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	code := args[0]
 	if len(code) != 8 {
 		return cmd.ErrorResult(errors.New("voucher code is not valid, length must be 8"))
@@ -25,7 +27,7 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID str
 		return cmd.ErrorResult(errors.New("voucher is expired"))
 	}
 
-	if len(voucher.TxHash) > 0 {
+	if voucher.IsClaimed() {
 		return cmd.ErrorResult(errors.New("voucher code claimed before"))
 	}
 

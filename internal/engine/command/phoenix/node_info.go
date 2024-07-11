@@ -3,16 +3,17 @@ package phoenix
 import (
 	"fmt"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-// nolint: remove me after I used
-func (pt *Phoenix) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+//nolint:unused // remove me after I am used
+func (pt *Phoenix) nodeInfoHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := pt.clientMgr.GetPeerInfo(valAddress)

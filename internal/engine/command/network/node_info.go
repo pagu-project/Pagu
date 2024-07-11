@@ -3,14 +3,15 @@ package network
 import (
 	"fmt"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (n *Network) nodeInfoHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (n *Network) nodeInfoHandler(cmd *command.Command,
+	_ entity.AppID, _ string, args ...string,
+) command.CommandResult {
 	valAddress := args[0]
 
 	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)

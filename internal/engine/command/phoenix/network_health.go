@@ -3,14 +3,15 @@ package phoenix
 import (
 	"time"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-// nolint: remove me after I used
-func (pt *Phoenix) networkHealthHandler(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
+//nolint:unused // remove me after I am used
+func (pt *Phoenix) networkHealthHandler(cmd *command.Command,
+	_ entity.AppID, _ string, _ ...string,
+) command.CommandResult {
 	lastBlockTime, lastBlockHeight := pt.clientMgr.GetLastBlockTime()
 	lastBlockTimeFormatted := time.Unix(int64(lastBlockTime), 0).Format("02/01/2006, 15:04:05")
 	currentTime := time.Now()

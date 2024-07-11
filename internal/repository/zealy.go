@@ -32,7 +32,7 @@ func (db *DB) AddZealyUser(u *entity.ZealyUser) error {
 	return nil
 }
 
-func (db *DB) UpdateZealyUser(id string, txHash string) error {
+func (db *DB) UpdateZealyUser(id, txHash string) error {
 	tx := db.Model(&entity.ZealyUser{
 		DiscordID: id,
 	}).Where("discord_id = ?", id).Update("tx_hash", txHash)

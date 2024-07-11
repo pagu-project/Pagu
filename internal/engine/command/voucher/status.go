@@ -10,7 +10,7 @@ import (
 	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
-func (v *Voucher) statusHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
+func (v *Voucher) statusHandler(cmd *command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
 	if args == nil {
 		return v.vouchersStatus(cmd)
 	}
@@ -19,7 +19,7 @@ func (v *Voucher) statusHandler(cmd command.Command, _ entity.AppID, _ string, a
 	return v.codeStatus(cmd, code)
 }
 
-func (v *Voucher) codeStatus(cmd command.Command, code string) command.CommandResult {
+func (v *Voucher) codeStatus(cmd *command.Command, code string) command.CommandResult {
 	voucher, err := v.db.GetVoucherByCode(code)
 	if err != nil {
 		return cmd.ErrorResult(errors.New("voucher code is not valid, no voucher found"))
@@ -27,7 +27,7 @@ func (v *Voucher) codeStatus(cmd command.Command, code string) command.CommandRe
 
 	isClaimed := "NO"
 	txLink := ""
-	if len(voucher.TxHash) > 0 {
+	if voucher.IsClaimed() {
 		isClaimed = "YES"
 		txLink = fmt.Sprintf("https://pacviewer.com/transaction/%s", voucher.TxHash)
 	}
@@ -44,7 +44,7 @@ func (v *Voucher) codeStatus(cmd command.Command, code string) command.CommandRe
 		txLink)
 }
 
-func (v *Voucher) vouchersStatus(cmd command.Command) command.CommandResult {
+func (v *Voucher) vouchersStatus(cmd *command.Command) command.CommandResult {
 	vouchers, err := v.db.ListVoucher()
 	if err != nil {
 		return cmd.ErrorResult(err)

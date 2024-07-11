@@ -25,7 +25,7 @@ func GetGeoIP(ctx context.Context, ip string) *GeoIP {
 	geo := &GeoIP{}
 	endpoint := "http://ip-api.com/json/" + ip
 	cli := http.DefaultClient
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, http.NoBody)
 	if err != nil {
 		return geo
 	}

@@ -51,7 +51,7 @@ func run(cmd *cobra.Command, _ []string) {
 
 		inputs := strings.Split(input, " ")
 
-		response := botEngine.Run(entity.AppIdCLI, "0", inputs)
+		response := botEngine.Run(entity.AppIDCLI, "0", inputs)
 
 		cmd.Printf("%v\n%v", response.Title, response.Message)
 	}

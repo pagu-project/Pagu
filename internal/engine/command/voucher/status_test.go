@@ -39,13 +39,13 @@ func TestStatusNormal(t *testing.T) {
 
 		expTime := now.AddDate(0, int(validMonths), 0).Format("02/01/2006, 15:04:05")
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.statusHandler(cmd, entity.AppIdDiscord, "", "12345678")
+		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", "12345678")
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, fmt.Sprintf("Code: 12345678\nAmount: 100 PAC\n"+
 			"Expire At: %s\nRecipient: some_recipient\nDescription: some_desc\nClaimed: YES\n"+
@@ -58,13 +58,13 @@ func TestStatusNormal(t *testing.T) {
 			entity.Voucher{}, errors.New(""),
 		).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.statusHandler(cmd, entity.AppIdDiscord, "", "invalid_code")
+		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", "invalid_code")
 		assert.False(t, result.Successful)
 		assert.Equal(t, result.Message, "An error occurred: voucher code is not valid, no voucher found")
 	})
@@ -107,13 +107,13 @@ func TestStatusNormal(t *testing.T) {
 			}, nil,
 		).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.statusHandler(cmd, entity.AppIdDiscord, "")
+		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "")
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, "Total Codes: 3\nTotal Amount: 300 PAC\n\n\n"+
 			"Claimed: 1\nTotal Claimed Amount: 100 PAC\nTotal Expired: 1"+

@@ -6,7 +6,9 @@ import (
 	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
-func (z *Zealy) claimHandler(cmd command.Command, _ entity.AppID, callerID string, args ...string) command.CommandResult {
+func (z *Zealy) claimHandler(cmd *command.Command,
+	_ entity.AppID, callerID string, args ...string,
+) command.CommandResult {
 	user, err := z.db.GetZealyUser(callerID)
 	if err != nil {
 		return cmd.ErrorResult(err)

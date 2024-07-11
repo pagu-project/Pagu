@@ -21,7 +21,7 @@ type Args struct {
 	Optional bool
 }
 
-type HandlerFunc func(cmd Command, appID entity.AppID, callerID string, args ...string) CommandResult
+type HandlerFunc func(cmd *Command, appID entity.AppID, callerID string, args ...string) CommandResult
 
 type Command struct {
 	Emoji       string
@@ -30,7 +30,7 @@ type Command struct {
 	Help        string
 	Args        []Args // should be nil for commands.
 	AppIDs      []entity.AppID
-	SubCommands []Command
+	SubCommands []*Command
 	Middlewares []MiddlewareFunc
 	Handler     HandlerFunc
 	User        *entity.User
@@ -111,7 +111,7 @@ func (cmd *Command) HelpMessage() string {
 	return help
 }
 
-func (cmd *Command) AddSubCommand(subCmd Command) {
+func (cmd *Command) AddSubCommand(subCmd *Command) {
 	if subCmd.HasSubCommand() {
 		subCmd.AddHelpSubCommand()
 	}
@@ -120,11 +120,11 @@ func (cmd *Command) AddSubCommand(subCmd Command) {
 }
 
 func (cmd *Command) AddHelpSubCommand() {
-	helpCmd := Command{
+	helpCmd := &Command{
 		Name:   "help",
 		Help:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: entity.AllAppIDs(),
-		Handler: func(_ Command, _ entity.AppID, _ string, _ ...string) CommandResult {
+		Handler: func(_ *Command, _ entity.AppID, _ string, _ ...string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
 	}

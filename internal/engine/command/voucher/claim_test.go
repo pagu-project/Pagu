@@ -40,25 +40,25 @@ func TestClaimNormal(t *testing.T) {
 			nil,
 		).AnyTimes()
 
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.claimHandler(cmd, entity.AppIdDiscord, "", "12345678", "pc1z")
+		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, "Voucher claimed successfully: https://pacviewer.com/transaction/0x1")
 	})
 
 	t.Run("wrong code", func(t *testing.T) {
-		cmd := command.Command{
+		cmd := &command.Command{
 			User: &entity.User{
 				ID: 1,
 			},
 		}
 
-		result := voucher.claimHandler(cmd, entity.AppIdDiscord, "", "0", "pc1z")
+		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "0", "pc1z")
 		assert.False(t, result.Successful)
 		assert.Equal(t, result.Message, "An error occurred: voucher code is not valid, length must be 8")
 	})
@@ -71,13 +71,13 @@ func TestClaimNotFound(t *testing.T) {
 		entity.Voucher{}, errors.New(""),
 	).AnyTimes()
 
-	cmd := command.Command{
+	cmd := &command.Command{
 		User: &entity.User{
 			ID: 1,
 		},
 	}
 
-	result := voucher.claimHandler(cmd, entity.AppIdDiscord, "", "12345678", "pc1z")
+	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
 	assert.False(t, result.Successful)
 	assert.Equal(t, result.Message, "An error occurred: voucher code is not valid, no voucher found")
 }
@@ -91,13 +91,13 @@ func TestClaimAlreadyClaimed(t *testing.T) {
 		}, nil,
 	).AnyTimes()
 
-	cmd := command.Command{
+	cmd := &command.Command{
 		User: &entity.User{
 			ID: 1,
 		},
 	}
 
-	result := voucher.claimHandler(cmd, entity.AppIdDiscord, "", "12345678", "pc1z")
+	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
 	assert.False(t, result.Successful)
 	assert.Equal(t, result.Message, "An error occurred: voucher code claimed before")
 }

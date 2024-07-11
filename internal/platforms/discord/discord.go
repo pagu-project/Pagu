@@ -69,7 +69,7 @@ func (bot *DiscordBot) registerCommands() error {
 
 	beCmds := bot.engine.Commands()
 	for i, beCmd := range beCmds {
-		if !beCmd.HasAppID(entity.AppIdDiscord) {
+		if !beCmd.HasAppID(entity.AppIDDiscord) {
 			continue
 		}
 
@@ -193,7 +193,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		}
 	}
 
-	res := db.engine.Run(entity.AppIdDiscord, i.Member.User.ID, beInput)
+	res := db.engine.Run(entity.AppIDDiscord, i.Member.User.ID, beInput)
 
 	bot.respondResultMsg(res, s, i)
 }
