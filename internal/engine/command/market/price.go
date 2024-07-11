@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 )
 
 func (m *Market) getPrice(cmd command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
@@ -22,5 +21,6 @@ func (m *Market) getPrice(cmd command.Command, _ entity.AppID, _ string, _ ...st
 	}
 
 	return cmd.SuccessfulResult("PAC Price: %f	USDT"+
-		"\n\n\n See below markets link for more details: \n xeggex: https://xeggex.com/market/PACTUS_USDT \n exbitron: https://exbitron.com/trade?market=PAC-USDT", lastPrice)
+		"\n\n\n See below markets link for more details: \n xeggex: https://xeggex.com/market/PACTUS_USDT \n "+
+		"exbitron: https://exbitron.com/trade?market=PAC-USDT", lastPrice)
 }

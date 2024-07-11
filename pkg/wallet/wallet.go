@@ -6,10 +6,10 @@ import (
 
 	"github.com/pactus-project/pactus/crypto"
 	"github.com/pactus-project/pactus/crypto/bls"
-	amt "github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx/payload"
 	pwallet "github.com/pactus-project/pactus/wallet"
 	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/pkg/amount"
 	"github.com/pagu-project/Pagu/pkg/log"
 )
 
@@ -26,7 +26,6 @@ type Wallet struct {
 
 func Open(cfg *config.Wallet) (IWallet, error) {
 	if doesWalletExist(cfg.Path) {
-
 		wt, err := pwallet.Open(cfg.Path, false)
 		if err != nil {
 			return &Wallet{}, err
@@ -43,24 +42,21 @@ func Open(cfg *config.Wallet) (IWallet, error) {
 	return &Wallet{}, errors.New("can't open the wallet")
 }
 
-func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (string, error) {
-	amountInNanoPAC := amt.Amount(amount)
-
+func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amt amount.Amount) (string, error) {
 	opts := []pwallet.TxOption{
 		pwallet.OptionMemo(memo),
 	}
-	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey,
-		amountInNanoPAC, opts...)
+	tx, err := w.wallet.MakeBondTx(w.address, toAddress, pubKey, amt.ToPactusAmount(), opts...)
 	if err != nil {
 		log.Error("error creating bond transaction", "err", err, "to",
-			toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			toAddress, "amount", amt)
 		return "", err
 	}
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Error("error signing bond transaction", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.String())
+			"to", toAddress, "amount", amt)
 		return "", err
 	}
 
@@ -68,28 +64,21 @@ func (w *Wallet) BondTransaction(pubKey, toAddress, memo string, amount int64) (
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Error("error broadcasting bond transaction", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"to", toAddress, "amount", amt)
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		log.Error("error saving wallet transaction history", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"to", toAddress, "amount", amt)
 	}
 	return res, nil // return transaction hash
 }
 
-func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (string, error) {
-	// Convert int64 to amt.Amount.
-	amountInNanoPAC, err := amt.NewAmount(float64(amount))
-	if err != nil {
-		log.Error("error converting amount to nanoPAC", "err", err)
-		return "", err
-	}
-
-	// claculate fee using amount struct.
-	fee, err := w.wallet.CalculateFee(amountInNanoPAC, payload.TypeTransfer)
+func (w *Wallet) TransferTransaction(toAddress, memo string, amt amount.Amount) (string, error) {
+	// calculate fee using amount struct.
+	fee, err := w.wallet.CalculateFee(amt.ToPactusAmount(), payload.TypeTransfer)
 	if err != nil {
 		log.Error("error calculating fee", "err", err, "client")
 		return "", err
@@ -101,10 +90,10 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	}
 
 	// Use amt.Amount for transaction amount.
-	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amountInNanoPAC, opts...)
+	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amt.ToPactusAmount(), opts...)
 	if err != nil {
 		log.Error("error creating transfer transaction", "err", err,
-			"from", w.address, "to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"from", w.address, "to", toAddress, "amount", amt)
 		return "", err
 	}
 
@@ -112,7 +101,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
 		log.Error("error signing transfer transaction", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"to", toAddress, "amount", amt)
 		return "", err
 	}
 
@@ -120,14 +109,14 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	res, err := w.wallet.BroadcastTransaction(tx)
 	if err != nil {
 		log.Error("error broadcasting transfer transaction", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"to", toAddress, "amount", amt)
 		return "", err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
 		log.Error("error saving wallet transaction history", "err", err,
-			"to", toAddress, "amount", amountInNanoPAC.Format(amt.UnitNanoPAC))
+			"to", toAddress, "amount", amt)
 	}
 	return res, nil // return transaction hash.
 }

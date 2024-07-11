@@ -4,26 +4,24 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
-	"github.com/pagu-project/Pagu/internal/engine"
-	"github.com/pagu-project/Pagu/pkg/log"
-
 	"github.com/labstack/echo/v4"
 	"github.com/pagu-project/Pagu/config"
+	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/log"
 )
 
 type HTTPServer struct {
 	handler HTTPHandler
 	eServer *echo.Echo
-	cfg     config.HTTP
+	cfg     *config.HTTP
 }
 
 type HTTPHandler struct {
 	engine *engine.BotEngine
 }
 
-func NewHTTPServer(be *engine.BotEngine, cfg config.HTTP) HTTPServer {
+func NewHTTPServer(be *engine.BotEngine, cfg *config.HTTP) HTTPServer {
 	return HTTPServer{
 		handler: HTTPHandler{
 			engine: be,

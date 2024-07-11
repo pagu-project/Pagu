@@ -5,32 +5,29 @@ import (
 	"errors"
 	"time"
 
-	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
-
-	"github.com/pagu-project/Pagu/internal/engine/command/market"
-	"github.com/pagu-project/Pagu/internal/entity"
-	"github.com/pagu-project/Pagu/internal/job"
-	"github.com/pagu-project/Pagu/pkg/cache"
-
-	"github.com/pagu-project/Pagu/internal/repository"
-
+	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/engine/command/calculator"
+	"github.com/pagu-project/Pagu/internal/engine/command/market"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
+	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
 	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
-	client2 "github.com/pagu-project/Pagu/pkg/client"
+	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/internal/job"
+	"github.com/pagu-project/Pagu/internal/repository"
+	"github.com/pagu-project/Pagu/pkg/amount"
+	"github.com/pagu-project/Pagu/pkg/cache"
+	"github.com/pagu-project/Pagu/pkg/client"
 	"github.com/pagu-project/Pagu/pkg/log"
 	"github.com/pagu-project/Pagu/pkg/wallet"
-
-	"github.com/pagu-project/Pagu/config"
 )
 
 type BotEngine struct {
-	ctx    context.Context //nolint
+	ctx    context.Context
 	cancel context.CancelFunc
 
-	clientMgr client2.Manager
+	clientMgr client.Manager
 	rootCmd   command.Command
 
 	blockchainCmd calculator.Calculator
@@ -56,10 +53,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 	log.Info("database loaded successfully")
 
-	cm := client2.NewClientMgr(ctx)
+	cm := client.NewClientMgr(ctx)
 
-	if len(cfg.LocalNode) > 0 {
-		localClient, err := client2.NewClient(cfg.LocalNode)
+	if cfg.LocalNode != "" {
+		localClient, err := client.NewClient(cfg.LocalNode)
 		if err != nil {
 			cancel()
 			return nil, err
@@ -69,7 +66,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	}
 
 	for _, nn := range cfg.NetworkNodes {
-		c, err := client2.NewClient(nn)
+		c, err := client.NewClient(nn)
 		if err != nil {
 			log.Error("can't add new network node client", "err", err, "addr", nn)
 		}
@@ -79,7 +76,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 	var wal wallet.IWallet
 	if cfg.Wallet.Enable {
 		// load or create wallet.
-		wal, err := wallet.Open(&cfg.Wallet)
+		wlt, err := wallet.Open(cfg.Wallet)
 		if err != nil {
 			cancel()
 			return nil, WalletError{
@@ -87,13 +84,15 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 			}
 		}
 
-		log.Info("wallet opened successfully", "address", wal.Address())
+		log.Info("wallet opened successfully", "address", wlt.Address())
 	}
 
-	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount, cfg.BotName), nil
+	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount), nil
 }
 
-func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm client2.Manager, wallet wallet.IWallet, phoenixFaucetAmount uint, botName string) *BotEngine {
+func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm client.Manager,
+	wlt wallet.IWallet, phoenixFaucetAmount amount.Amount,
+) *BotEngine {
 	rootCmd := command.Command{
 		Emoji:       "🤖",
 		Name:        "pagu",
@@ -111,9 +110,9 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 
 	netCmd := network.NewNetwork(ctx, cm)
 	bcCmd := calculator.NewCalculator(cm)
-	ptCmd := phoenixtestnet.NewPhoenix(wallet, phoenixFaucetAmount, cm, db)
-	zealyCmd := zealy.NewZealy(db, wallet)
-	voucherCmd := voucher.NewVoucher(db, wallet, cm)
+	ptCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
+	zealyCmd := zealy.NewZealy(db, wlt)
+	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
 
 	return &BotEngine{
@@ -149,7 +148,7 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) c
 	log.Debug("run command", "callerID", callerID, "inputs", tokens)
 
 	cmd, argsIndex := be.getCommand(tokens)
-	if !cmd.HasAppId(appID) {
+	if !cmd.HasAppID(appID) {
 		return cmd.FailedResult("unauthorized appID: %v", appID)
 	}
 
@@ -201,7 +200,7 @@ func (be *BotEngine) getCommand(tokens []string) (command.Command, int) {
 	}
 
 	if len(targetCmd.Args) != 0 && index != 0 {
-		return targetCmd, index - 1 //! TODO: FIX ME IN THE MAIN LOGIC
+		return targetCmd, index - 1 // TODO: FIX ME IN THE MAIN LOGIC
 	}
 
 	return targetCmd, index

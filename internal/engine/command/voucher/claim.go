@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	amt "github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
@@ -38,14 +37,7 @@ func (v *Voucher) claimHandler(cmd command.Command, _ entity.AppID, callerID str
 	}
 
 	pubKey := validatorInfo.GetValidator().GetPublicKey()
-
-	PACAmount, err := amt.NewAmount(float64(voucher.Amount))
-	if err != nil {
-		log.Error("error converting amount to nanoPAC", "err", err)
-		return cmd.ErrorResult(err)
-	}
-
-	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim from Pagu", PACAmount.ToNanoPAC())
+	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim from Pagu", voucher.Amount)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}

@@ -7,6 +7,7 @@ import (
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/amount"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,11 +15,11 @@ func TestClaimNormal(t *testing.T) {
 	voucher, db, client, wallet := setup(t)
 
 	t.Run("normal", func(t *testing.T) {
-		amount := uint(100)
+		amt, _ := amount.NewAmount(100)
 		db.EXPECT().GetVoucherByCode("12345678").Return(
 			entity.Voucher{
 				ValidMonths: 1,
-				Amount:      amount,
+				Amount:      amt,
 				ID:          1,
 			}, nil,
 		).AnyTimes()
@@ -31,7 +32,7 @@ func TestClaimNormal(t *testing.T) {
 			}, nil,
 		).AnyTimes()
 
-		wallet.EXPECT().BondTransaction("pc1z", "pc1z", "Voucher claim from Pagu", int64(amount*1e9)).Return(
+		wallet.EXPECT().BondTransaction("pc1z", "pc1z", "Voucher claim from Pagu", amt).Return(
 			"0x1", nil,
 		).AnyTimes()
 

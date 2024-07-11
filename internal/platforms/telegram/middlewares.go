@@ -17,7 +17,7 @@ type CommandHandler struct {
 	handler CommandFunc
 }
 
-func (bot *TelegramBot) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+func (bot *TelegramBot) CheckUpdate(_ *gotgbot.Bot, ctx *ext.Context) bool {
 	return ctx.Update.Message.Chat.Type == "private"
 }
 
@@ -30,7 +30,7 @@ func NewCommandHandler(handler CommandFunc) *CommandHandler {
 	return &CommandHandler{handler: handler}
 }
 
-func (ch *CommandHandler) CheckUpdate(b *gotgbot.Bot, ctx *ext.Context) bool {
+func (ch *CommandHandler) CheckUpdate(_ *gotgbot.Bot, ctx *ext.Context) bool {
 	// Check if the update is a message and if it's from a private chat.
 	if ctx.Update.Message != nil && ctx.Update.Message.Chat.Type == "private" {
 		// Manually check if the message is a command.

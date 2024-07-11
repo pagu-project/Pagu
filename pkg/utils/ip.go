@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -20,14 +21,24 @@ func ExtractIPFromMultiAddr(multiAddr string) string {
 	return parts[0]
 }
 
-func GetGeoIP(ip string) *GeoIP {
+func GetGeoIP(ctx context.Context, ip string) *GeoIP {
 	geo := &GeoIP{}
-	res, err := http.Get("http://ip-api.com/json/" + ip)
+	endpoint := "http://ip-api.com/json/" + ip
+	cli := http.DefaultClient
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return geo
 	}
 
-	body, err := io.ReadAll(res.Body)
+	resp, err := cli.Do(req)
+	if err != nil {
+		return geo
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return geo
 	}

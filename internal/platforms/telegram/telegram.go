@@ -16,17 +16,17 @@ import (
 )
 
 type TelegramBot struct {
+	ctx             context.Context
+	cancel          context.CancelFunc
 	botEngine       *engine.BotEngine
 	chatID          int64
 	botInstance     *gotgbot.Bot
 	config          *config.Config
 	commandHandlers map[string]ext.Handler
-	ctx             context.Context
-	cancel          context.CancelFunc
 	updater         *ext.Updater
 }
 
-func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, config *config.Config) (*TelegramBot, error) {
+func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, cfg *config.Config) (*TelegramBot, error) {
 	bot, err := gotgbot.NewBot(token, nil)
 	if err != nil {
 		log.Error("Failed to create Telegram bot:", err)
@@ -41,7 +41,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, con
 		botEngine:       botEngine,
 		chatID:          chatID,
 		botInstance:     bot,
-		config:          config,
+		config:          cfg,
 		commandHandlers: commandHandlers,
 		ctx:             ctx,
 		cancel:          cancel,
@@ -52,12 +52,12 @@ func (bot *TelegramBot) Start() error {
 	log.Info("Starting Telegram Bot...")
 
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
-		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+		Error: func(_ *gotgbot.Bot, _ *ext.Context, err error) ext.DispatcherAction {
 			log.Error("Error handling update:", err)
 			bot.cancel()
 			return ext.DispatcherActionNoop
 		},
-		Panic: func(b *gotgbot.Bot, ctx *ext.Context, r interface{}) {
+		Panic: func(_ *gotgbot.Bot, _ *ext.Context, r any) {
 			log.Error("Panic occurred:", r)
 			bot.cancel()
 		},

@@ -1,0 +1,190 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - decorder
+    - dogsled
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - gci
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gocognit
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - grouper
+    - importas
+    - lll
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - musttag
+    - nakedret
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - prealloc
+    - predeclared
+    - promlinter
+    - reassign
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - stylecheck
+    - tagalign
+    - tenv
+    - testableexamples
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - zerologlint
+
+linters-settings:
+  gosimple:
+    checks: ["all"]
+
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: unused-receiver
+        disabled: true
+
+      - name: var-naming
+        arguments: [["Id"], [""], [{upperCaseConst=true}]]
+
+      - name: "exported"
+        # TODO: Enable me
+        # all exported function should have comment.
+        disabled: true
+
+      # TODO: Enable me
+      - name: package-comments
+        disabled: true
+
+      - name: "add-constant"
+        disabled: true
+
+      - name: "line-length-limit"
+        disabled: true
+
+      - name: "cognitive-complexity"
+        disabled: true
+
+      - name: "function-length"
+        disabled: true
+
+      - name: "cyclomatic"
+        disabled: true
+
+      - name: "unchecked-type-assertion"
+        disabled: true
+
+      - name: max-public-structs
+        disabled: true
+
+      - name: "flag-parameter"
+        disabled: true
+
+      - name: "deep-exit"
+        disabled: true
+
+      - name: "get-return"
+        disabled: true
+
+      - name: "confusing-naming"
+        disabled: true
+
+      - name: "function-result-limit"
+        disabled: true
+
+      - name: unhandled-error
+        arguments:
+          - "fmt.Printf"
+          - "fmt.Println"
+          - "fmt.Fprintf"
+          - "strings.Builder.WriteString"
+          - "strings.Builder.WriteRune"
+          - "strings.Builder.WriteByte"
+          - "bytes.Buffer.Write"
+          - "bytes.Buffer.WriteString"
+
+  gosec:
+    excludes:
+      - G304
+      - G204
+
+  stylecheck:
+    # TODO: enable ST1000 (at least one file in a package should have a package comment)
+    checks: ["all", "-ST1000"]
+
+  govet:
+    enable-all: true
+    disable: ["fieldalignment"]
+
+    settings:
+      shadow:
+        strict: true
+
+  predeclared:
+    # Comma-separated list of predeclared identifiers to not report on.
+    # Default: ""
+    ignore: "len"
+    # Include method names and field names (i.e., qualified names) in checks.
+    # Default: false
+    q: true
+
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+      - unnamedResult
+      - builtinShadow
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test.go
+      linters:
+        - maintidx
+        - gocognit
+        - forbidigo
+
+    - linters:
+        - govet
+      text: "shadow: declaration of \"err\" shadows"

@@ -3,9 +3,8 @@ package network
 import (
 	"time"
 
-	"github.com/pagu-project/Pagu/internal/entity"
-
 	"github.com/pagu-project/Pagu/internal/engine/command"
+	"github.com/pagu-project/Pagu/internal/entity"
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
@@ -28,6 +27,8 @@ func (n *Network) networkHealthHandler(cmd command.Command, _ entity.AppID, _ st
 		status = "UnHealthy❌"
 	}
 
-	return cmd.SuccessfulResult("Network is %s\nCurrentTime: %v\nLastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
-		status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff, utils2.FormatNumber(int64(lastBlockHeight)))
+	return cmd.SuccessfulResult("Network is %s\nCurrentTime: %v\n"+
+		"LastBlockTime: %v\nTime Diff: %v\nLast Block Height: %v",
+		status, currentTime.Format("02/01/2006, 15:04:05"), lastBlockTimeFormatted, timeDiff,
+		utils2.FormatNumber(int64(lastBlockHeight)))
 }

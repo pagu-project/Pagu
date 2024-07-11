@@ -15,7 +15,7 @@ devtools:
 	@echo "Installing devtools"
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install mvdan.cc/gofumpt@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install go.uber.org/mock/mockgen@latest
 	go install github.com/bufbuild/buf/cmd/buf@latest
 
@@ -42,19 +42,19 @@ check:
 build: build-cli build-discord build-grpc build-telegram build-http
 
 build-cli:
-	go build -o build/pagu-cli     ./cmd/cli
+	go build -o build/pagu-cli      ./cmd/cli
 
 build-discord:
-	go build -o build/pagu-discord ./cmd/discord
+	go build -o build/pagu-discord  ./cmd/discord
 
 build-grpc:
-	go build -o build/pagu-grpc ./cmd/grpc
-	
+	go build -o build/pagu-grpc     ./cmd/grpc
+
 build-telegram:
 	go build -o build/pagu-telegram ./cmd/telegram
 
 build-http:
-	go build -o build/pagu-http ./cmd/http
+	go build -o build/pagu-http     ./cmd/http
 
 ### pre commit
 pre-commit: mock proto fmt check unit_test

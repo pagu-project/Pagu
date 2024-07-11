@@ -13,7 +13,7 @@ const (
 	PACTUS = 0x052D5A
 )
 
-func newStatus(name string, value interface{}) discordgo.UpdateStatusData {
+func newStatus(name string, value any) discordgo.UpdateStatusData {
 	return discordgo.UpdateStatusData{
 		Status: "online",
 		Activities: []*discordgo.Activity{

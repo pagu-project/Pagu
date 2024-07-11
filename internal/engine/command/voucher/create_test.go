@@ -14,6 +14,8 @@ import (
 )
 
 func setup(t *testing.T) (Voucher, repository.MockDatabase, client.MockManager, wallet.MockIWallet) {
+	t.Helper()
+
 	ctrl := gomock.NewController(t)
 
 	mockDB := repository.NewMockDatabase(ctrl)
@@ -77,7 +79,7 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "1.2", "1")
+		result := voucher.createHandler(cmd, entity.AppIdDiscord, "", "Nan", "1")
 		assert.False(t, result.Successful)
 	})
 

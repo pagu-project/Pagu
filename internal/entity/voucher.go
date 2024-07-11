@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"github.com/pagu-project/Pagu/pkg/amount"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +12,7 @@ type Voucher struct {
 	Desc        string
 	Recipient   string
 	ValidMonths uint8
-	Amount      uint
+	Amount      amount.Amount `gorm:"column:amount"`
 	TxHash      string
 	ClaimedBy   uint
 	gorm.Model
@@ -19,4 +20,8 @@ type Voucher struct {
 
 func (Voucher) TableName() string {
 	return "voucher"
+}
+
+func (v *Voucher) IsClaimed() bool {
+	return v.TxHash != ""
 }

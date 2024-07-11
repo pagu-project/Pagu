@@ -114,6 +114,21 @@ func (mr *MockIClientMockRecorder) GetFee(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFee", reflect.TypeOf((*MockIClient)(nil).GetFee), arg0, arg1)
 }
 
+// GetLastBlockTime mocks base method.
+func (m *MockIClient) GetLastBlockTime(arg0 context.Context) (uint32, uint32) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastBlockTime", arg0)
+	ret0, _ := ret[0].(uint32)
+	ret1, _ := ret[1].(uint32)
+	return ret0, ret1
+}
+
+// GetLastBlockTime indicates an expected call of GetLastBlockTime.
+func (mr *MockIClientMockRecorder) GetLastBlockTime(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastBlockTime", reflect.TypeOf((*MockIClient)(nil).GetLastBlockTime), arg0)
+}
+
 // GetNetworkInfo mocks base method.
 func (m *MockIClient) GetNetworkInfo(arg0 context.Context) (*pactus.GetNetworkInfoResponse, error) {
 	m.ctrl.T.Helper()
@@ -172,22 +187,6 @@ func (m *MockIClient) GetValidatorInfoByNumber(arg0 context.Context, arg1 int32)
 func (mr *MockIClientMockRecorder) GetValidatorInfoByNumber(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidatorInfoByNumber", reflect.TypeOf((*MockIClient)(nil).GetValidatorInfoByNumber), arg0, arg1)
-}
-
-// LastBlockTime mocks base method.
-func (m *MockIClient) LastBlockTime(arg0 context.Context) (uint32, uint32, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LastBlockTime", arg0)
-	ret0, _ := ret[0].(uint32)
-	ret1, _ := ret[1].(uint32)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// LastBlockTime indicates an expected call of LastBlockTime.
-func (mr *MockIClientMockRecorder) LastBlockTime(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LastBlockTime", reflect.TypeOf((*MockIClient)(nil).LastBlockTime), arg0)
 }
 
 // MockManager is a mock of Manager interface.
@@ -315,6 +314,20 @@ func (mr *MockManagerMockRecorder) GetLastBlockTime() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastBlockTime", reflect.TypeOf((*MockManager)(nil).GetLastBlockTime))
 }
 
+// GetLocalClient mocks base method.
+func (m *MockManager) GetLocalClient() IClient {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLocalClient")
+	ret0, _ := ret[0].(IClient)
+	return ret0
+}
+
+// GetLocalClient indicates an expected call of GetLocalClient.
+func (mr *MockManagerMockRecorder) GetLocalClient() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLocalClient", reflect.TypeOf((*MockManager)(nil).GetLocalClient))
+}
+
 // GetNetworkInfo mocks base method.
 func (m *MockManager) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
 	m.ctrl.T.Helper()
@@ -426,20 +439,6 @@ func (m *MockManager) Stop() {
 func (mr *MockManagerMockRecorder) Stop() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockManager)(nil).Stop))
-}
-
-// getLocalClient mocks base method.
-func (m *MockManager) getLocalClient() IClient {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "getLocalClient")
-	ret0, _ := ret[0].(IClient)
-	return ret0
-}
-
-// getLocalClient indicates an expected call of getLocalClient.
-func (mr *MockManagerMockRecorder) getLocalClient() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getLocalClient", reflect.TypeOf((*MockManager)(nil).getLocalClient))
 }
 
 // updateValMap mocks base method.

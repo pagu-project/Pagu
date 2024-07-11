@@ -7,6 +7,7 @@ import (
 
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
 func (v *Voucher) statusHandler(cmd command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
@@ -31,7 +32,7 @@ func (v *Voucher) codeStatus(cmd command.Command, code string) command.CommandRe
 		txLink = fmt.Sprintf("https://pacviewer.com/transaction/%s", voucher.TxHash)
 	}
 
-	return cmd.SuccessfulResult("Code: %s\nAmount: %d PAC\n"+
+	return cmd.SuccessfulResult("Code: %s\nAmount: %s\n"+
 		"Expire At: %s\nRecipient: %s\nDescription: %s\nClaimed: %v\nTx Link: %s"+
 		"\n",
 		voucher.Code,
@@ -50,26 +51,26 @@ func (v *Voucher) vouchersStatus(cmd command.Command) command.CommandResult {
 	}
 
 	total := 0
-	totalAmount := 0
-	totalClaimedAmount := 0
+	totalAmount := amount.Amount(0)
+	totalClaimedAmount := amount.Amount(0)
 	totalClaimed := 0
 	totalExpired := 0
 
 	for _, vch := range vouchers {
 		total++
-		totalAmount += int(vch.Amount)
+		totalAmount += vch.Amount
 
-		if len(vch.TxHash) > 0 {
+		if vch.IsClaimed() {
 			totalClaimed++
-			totalClaimedAmount += int(vch.Amount)
+			totalClaimedAmount += vch.Amount
 		}
 		if time.Until(vch.CreatedAt.AddDate(0, int(vch.ValidMonths), 0)) <= 0 {
 			totalExpired++
 		}
 	}
 
-	return cmd.SuccessfulResult("Total Codes: %d\nTotal Amount: %d PAC\n\n\n"+
-		"Claimed: %d\nTotal Claimed Amount: %d\nTotal Expired: %d"+
+	return cmd.SuccessfulResult("Total Codes: %d\nTotal Amount: %s\n\n\n"+
+		"Claimed: %d\nTotal Claimed Amount: %s\nTotal Expired: %d"+
 		"\n",
 		total,
 		totalAmount,

@@ -20,9 +20,9 @@ const (
 )
 
 type price struct {
+	ctx    context.Context
 	cache  cache.Cache[string, entity.Price]
 	ticker *time.Ticker
-	ctx    context.Context
 	cancel context.CancelFunc
 }
 
@@ -97,7 +97,6 @@ func (p *price) runTicker() {
 
 func (p *price) getPrice(ctx context.Context, endpoint string, priceResponse any) error {
 	cli := http.DefaultClient
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return err
@@ -107,7 +106,9 @@ func (p *price) getPrice(ctx context.Context, endpoint string, priceResponse any
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("response code is %v", resp.StatusCode)

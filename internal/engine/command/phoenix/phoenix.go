@@ -1,11 +1,13 @@
 package phoenix
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/repository"
+	"github.com/pagu-project/Pagu/pkg/amount"
 	"github.com/pagu-project/Pagu/pkg/client"
 	"github.com/pagu-project/Pagu/pkg/wallet"
 )
@@ -21,15 +23,19 @@ const (
 )
 
 type Phoenix struct {
+	ctx          context.Context
 	wallet       wallet.IWallet
 	db           repository.Database
 	clientMgr    client.Manager
-	faucetAmount uint
+	faucetAmount amount.Amount
 }
 
-func NewPhoenix(wallet wallet.IWallet, faucetAmount uint, clientMgr client.Manager, db repository.Database) Phoenix {
+func NewPhoenix(ctx context.Context, wlt wallet.IWallet, faucetAmount amount.Amount,
+	clientMgr client.Manager, db repository.Database,
+) Phoenix {
 	return Phoenix{
-		wallet:       wallet,
+		ctx:          ctx,
+		wallet:       wlt,
 		clientMgr:    clientMgr,
 		db:           db,
 		faucetAmount: faucetAmount,

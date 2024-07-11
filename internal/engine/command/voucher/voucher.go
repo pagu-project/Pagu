@@ -22,10 +22,10 @@ type Voucher struct {
 	clientManager client.Manager
 }
 
-func NewVoucher(db repository.Database, wallet wallet.IWallet, cli client.Manager) Voucher {
+func NewVoucher(db repository.Database, wlt wallet.IWallet, cli client.Manager) Voucher {
 	return Voucher{
 		db:            db,
-		wallet:        wallet,
+		wallet:        wlt,
 		clientManager: cli,
 	}
 }

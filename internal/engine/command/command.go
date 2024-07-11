@@ -28,7 +28,7 @@ type Command struct {
 	Color       string
 	Name        string
 	Help        string
-	Args        []Args //! should be nil for commands.
+	Args        []Args // should be nil for commands.
 	AppIDs      []entity.AppID
 	SubCommands []Command
 	Middlewares []MiddlewareFunc
@@ -45,7 +45,7 @@ type CommandResult struct {
 	Successful bool
 }
 
-func (cmd *Command) SuccessfulResult(message string, a ...interface{}) CommandResult {
+func (cmd *Command) SuccessfulResult(message string, a ...any) CommandResult {
 	return CommandResult{
 		Color:      cmd.Color,
 		Title:      fmt.Sprintf("%v %v", cmd.Help, cmd.Emoji),
@@ -54,7 +54,7 @@ func (cmd *Command) SuccessfulResult(message string, a ...interface{}) CommandRe
 	}
 }
 
-func (cmd *Command) FailedResult(message string, a ...interface{}) CommandResult {
+func (cmd *Command) FailedResult(message string, a ...any) CommandResult {
 	return CommandResult{
 		Color:      cmd.Color,
 		Title:      fmt.Sprintf("%v %v", cmd.Help, cmd.Emoji),
@@ -94,7 +94,7 @@ func (cmd *Command) CheckArgs(input []string) error {
 	return nil
 }
 
-func (cmd *Command) HasAppId(appID entity.AppID) bool {
+func (cmd *Command) HasAppID(appID entity.AppID) bool {
 	return slices.Contains(cmd.AppIDs, appID)
 }
 

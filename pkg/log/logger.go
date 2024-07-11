@@ -30,22 +30,22 @@ type SubLogger struct {
 	name   string
 }
 
-func InitGlobalLogger(config config.Logger) {
+func InitGlobalLogger(cfg *config.Logger) {
 	if globalInst == nil {
 		writers := []io.Writer{}
 
-		if slices.Contains(config.Targets, "file") {
+		if slices.Contains(cfg.Targets, "file") {
 			// File writer.
 			fw := &lumberjack.Logger{
-				Filename:   config.Filename,
-				MaxSize:    config.MaxSize,
-				MaxBackups: config.MaxBackups,
-				Compress:   config.Compress,
+				Filename:   cfg.Filename,
+				MaxSize:    cfg.MaxSize,
+				MaxBackups: cfg.MaxBackups,
+				Compress:   cfg.Compress,
 			}
 			writers = append(writers, fw)
 		}
 
-		if slices.Contains(config.Targets, "console") {
+		if slices.Contains(cfg.Targets, "console") {
 			// Console writer.
 			writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 		}
@@ -56,7 +56,7 @@ func InitGlobalLogger(config config.Logger) {
 		}
 
 		// Set the global log level from the configuration.
-		level, err := zerolog.ParseLevel(strings.ToLower(config.LogLevel))
+		level, err := zerolog.ParseLevel(strings.ToLower(cfg.LogLevel))
 		if err != nil {
 			level = zerolog.InfoLevel // Default to info level if parsing fails.
 		}
@@ -83,7 +83,7 @@ func getLoggersInst() *logger {
 	return globalInst
 }
 
-// function to set logger level based on env.
+// SetLoggerLevel sets logger level based on env.
 func SetLoggerLevel(level string) {
 	parsedLevel, err := zerolog.ParseLevel(strings.ToLower(level))
 	if err != nil {
@@ -96,7 +96,7 @@ func GetCurrentLogLevel() zerolog.Level {
 	return logLevel
 }
 
-func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
+func addFields(event *zerolog.Event, keyvals ...any) *zerolog.Event {
 	if len(keyvals)%2 != 0 {
 		keyvals = append(keyvals, "!MISSING-VALUE!")
 	}
@@ -106,7 +106,7 @@ func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
 		if !ok {
 			key = "!INVALID-KEY!"
 		}
-		///
+
 		value := keyvals[i+1]
 		switch v := value.(type) {
 		case fmt.Stringer:
@@ -139,67 +139,67 @@ func NewSubLogger(name string) *SubLogger {
 	return sl
 }
 
-func (sl *SubLogger) logObj(event *zerolog.Event, msg string, keyvals ...interface{}) {
+func (sl *SubLogger) logObj(event *zerolog.Event, msg string, keyvals ...any) {
 	addFields(event, keyvals...).Msg(msg)
 }
 
-func (sl *SubLogger) Trace(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Trace(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Trace(), msg, keyvals...)
 }
 
-func (sl *SubLogger) Debug(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Debug(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Debug(), msg, keyvals...)
 }
 
-func (sl *SubLogger) Info(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Info(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Info(), msg, keyvals...)
 }
 
-func (sl *SubLogger) Warn(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Warn(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Warn(), msg, keyvals...)
 }
 
-func (sl *SubLogger) Error(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Error(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Error(), msg, keyvals...)
 }
 
-func (sl *SubLogger) Fatal(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Fatal(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Fatal(), msg, keyvals...)
 }
 
-func (sl *SubLogger) Panic(msg string, keyvals ...interface{}) {
+func (sl *SubLogger) Panic(msg string, keyvals ...any) {
 	sl.logObj(sl.logger.Panic(), msg, keyvals...)
 }
 
-func Trace(msg string, keyvals ...interface{}) {
+func Trace(msg string, keyvals ...any) {
 	addFields(log.Trace(), keyvals...).Msg(msg)
 }
 
-func Debug(msg string, keyvals ...interface{}) {
+func Debug(msg string, keyvals ...any) {
 	addFields(log.Debug(), keyvals...).Msg(msg)
 }
 
-func Info(msg string, keyvals ...interface{}) {
+func Info(msg string, keyvals ...any) {
 	addFields(log.Info(), keyvals...).Msg(msg)
 }
 
-func Warn(msg string, keyvals ...interface{}) {
+func Warn(msg string, keyvals ...any) {
 	addFields(log.Warn(), keyvals...).Msg(msg)
 }
 
-func Error(msg string, keyvals ...interface{}) {
+func Error(msg string, keyvals ...any) {
 	addFields(log.Error(), keyvals...).Msg(msg)
 }
 
-func Fatal(msg string, keyvals ...interface{}) {
+func Fatal(msg string, keyvals ...any) {
 	addFields(log.Fatal(), keyvals...).Msg(msg)
 }
 
-func Panic(msg string, keyvals ...interface{}) {
+func Panic(msg string, keyvals ...any) {
 	addFields(log.Panic(), keyvals...).Msg(msg)
 }
 
-func isNil(i interface{}) bool {
+func isNil(i any) bool {
 	if i == nil {
 		return true
 	}
