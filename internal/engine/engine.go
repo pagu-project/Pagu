@@ -98,7 +98,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 		Name:        "pagu",
 		Help:        "Root Command",
 		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]*command.Command, 3),
+		SubCommands: make([]*command.Command, 0),
 	}
 
 	// price caching job
