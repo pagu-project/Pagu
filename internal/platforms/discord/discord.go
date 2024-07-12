@@ -135,7 +135,7 @@ func (bot *DiscordBot) registerCommands() error {
 						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
 
 					subCmd.Options = append(subCmd.Options, &discordgo.ApplicationCommandOption{
-						Type:        discordgo.ApplicationCommandOptionString,
+						Type:        setCommandArgType(arg.Type),
 						Name:        arg.Name,
 						Description: arg.Desc,
 						Required:    !arg.Optional,
@@ -154,7 +154,7 @@ func (bot *DiscordBot) registerCommands() error {
 					"argument", arg.Name, "desc", arg.Desc)
 
 				discordCmd.Options = append(discordCmd.Options, &discordgo.ApplicationCommandOption{
-					Type:        discordgo.ApplicationCommandOptionString,
+					Type:        setCommandArgType(arg.Type),
 					Name:        arg.Name,
 					Description: arg.Desc,
 					Required:    !arg.Optional,
@@ -179,16 +179,16 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		return
 	}
 
-	beInput := []string{}
+	beInput := make(map[string]any)
 
 	// Get the application command data
 	discordCmd := i.ApplicationCommandData()
-	beInput = append(beInput, discordCmd.Name)
+	beInput[discordCmd.Name] = ""
 	for _, opt := range discordCmd.Options {
 		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
-			beInput = append(beInput, opt.Name)
-			for _, args := range opt.Options {
-				beInput = append(beInput, args.StringValue())
+			beInput[opt.Name] = ""
+			for _, arg := range opt.Options {
+				beInput[arg.Name] = arg.Value
 			}
 		}
 	}
@@ -304,4 +304,12 @@ func (bot *DiscordBot) Stop() error {
 	log.Info("Stopping Discord Bot")
 
 	return bot.Session.Close()
+}
+
+func setCommandArgType(t uint8) discordgo.ApplicationCommandOptionType {
+	if t == 0 {
+		return discordgo.ApplicationCommandOptionString
+	}
+
+	return discordgo.ApplicationCommandOptionType(t)
 }

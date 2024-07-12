@@ -45,7 +45,9 @@ func TestStatusNormal(t *testing.T) {
 			},
 		}
 
-		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", "12345678")
+		args := make(map[string]any)
+		args["code"] = "12345678"
+		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, fmt.Sprintf("Code: 12345678\nAmount: 100 PAC\n"+
 			"Expire At: %s\nRecipient: some_recipient\nDescription: some_desc\nClaimed: YES\n"+
@@ -64,7 +66,9 @@ func TestStatusNormal(t *testing.T) {
 			},
 		}
 
-		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", "invalid_code")
+		args := make(map[string]any)
+		args["code"] = "000"
+		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
 		assert.Equal(t, result.Message, "An error occurred: voucher code is not valid, no voucher found")
 	})
@@ -113,7 +117,8 @@ func TestStatusNormal(t *testing.T) {
 			},
 		}
 
-		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "")
+		args := make(map[string]any)
+		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, "Total Codes: 3\nTotal Amount: 300 PAC\n\n\n"+
 			"Claimed: 1\nTotal Claimed Amount: 100 PAC\nTotal Expired: 1"+

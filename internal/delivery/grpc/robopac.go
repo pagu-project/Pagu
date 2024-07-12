@@ -19,10 +19,12 @@ func newRoboPacServer(server *Server) *robopacServer {
 }
 
 func (rs *robopacServer) Run(_ context.Context, er *robopac.RunRequest) (*robopac.RunResponse, error) {
-	beInput := []string{}
+	beInput := make(map[string]any)
 
 	tokens := strings.Split(er.Command, " ")
-	beInput = append(beInput, tokens...)
+	for _, t := range tokens {
+		beInput[t] = t
+	}
 
 	res := rs.engine.Run(entity.AppIDgRPC, er.Id, beInput)
 

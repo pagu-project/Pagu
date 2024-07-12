@@ -46,7 +46,10 @@ func TestClaimNormal(t *testing.T) {
 			},
 		}
 
-		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
+		args := make(map[string]any)
+		args["code"] = "12345678"
+		args["address"] = "pc1z"
+		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, "Voucher claimed successfully!\n\n https://pacviewer.com/transaction/0x1")
 	})
@@ -58,7 +61,10 @@ func TestClaimNormal(t *testing.T) {
 			},
 		}
 
-		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "0", "pc1z")
+		args := make(map[string]any)
+		args["code"] = "0"
+		args["address"] = "pc1z"
+		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
 		assert.Equal(t, result.Message, "An error occurred: voucher code is not valid, length must be 8")
 	})
@@ -77,7 +83,10 @@ func TestClaimNotFound(t *testing.T) {
 		},
 	}
 
-	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
+	args := make(map[string]any)
+	args["code"] = "12345678"
+	args["address"] = "pc1z"
+	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
 	assert.False(t, result.Successful)
 	assert.Equal(t, result.Message, "An error occurred: voucher code is not valid, no voucher found")
 }
@@ -97,7 +106,10 @@ func TestClaimAlreadyClaimed(t *testing.T) {
 		},
 	}
 
-	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
+	args := make(map[string]any)
+	args["code"] = "12345678"
+	args["address"] = "pc1z"
+	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
 	assert.False(t, result.Successful)
 	assert.Equal(t, result.Message, "An error occurred: voucher code claimed before")
 }

@@ -1,8 +1,8 @@
 package calculator
 
 import (
+	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pagu-project/Pagu/internal/engine/command"
@@ -11,11 +11,11 @@ import (
 )
 
 func (bc *Calculator) calcRewardHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args ...string,
+	_ entity.AppID, _ string, args map[string]any,
 ) command.CommandResult {
-	stake, err := strconv.Atoi(args[0])
-	if err != nil {
-		return cmd.ErrorResult(err)
+	stake, ok := args["stake"].(int)
+	if !ok {
+		return cmd.ErrorResult(errors.New("invalid stake param"))
 	}
 
 	if stake < 1 || stake > 1_000 {
@@ -23,9 +23,9 @@ func (bc *Calculator) calcRewardHandler(cmd *command.Command,
 			fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
 	}
 
-	numOfDays, err := strconv.Atoi(args[1])
-	if err != nil {
-		return cmd.ErrorResult(err)
+	numOfDays, ok := args["days"].(int)
+	if !ok {
+		return cmd.ErrorResult(errors.New("invalid days param"))
 	}
 
 	if numOfDays < 1 || numOfDays > 365 {

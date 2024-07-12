@@ -10,9 +10,13 @@ import (
 )
 
 func (v *Voucher) claimHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args ...string,
+	_ entity.AppID, _ string, args map[string]any,
 ) command.CommandResult {
-	code := args[0]
+	code, ok := args["code"].(string)
+	if !ok {
+		return cmd.ErrorResult(errors.New("invalid voucher code"))
+	}
+
 	if len(code) != 8 {
 		return cmd.ErrorResult(errors.New("voucher code is not valid, length must be 8"))
 	}
@@ -31,7 +35,11 @@ func (v *Voucher) claimHandler(cmd *command.Command,
 		return cmd.ErrorResult(errors.New("voucher code claimed before"))
 	}
 
-	address := args[1]
+	address, ok := args["address"].(string)
+	if !ok {
+		return cmd.ErrorResult(errors.New("invalid address param"))
+	}
+
 	validatorInfo, err := v.clientManager.GetValidatorInfo(address)
 	if err != nil {
 		log.Error("error get validator info", "err", err)

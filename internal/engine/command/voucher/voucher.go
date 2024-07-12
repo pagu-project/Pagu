@@ -40,11 +40,13 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "code",
 				Desc:     "voucher code",
+				Type:     command.CommandParamTypeString,
 				Optional: false,
 			},
 			{
 				Name:     "address",
 				Desc:     "your pactus validator address",
+				Type:     command.CommandParamTypeString,
 				Optional: false,
 			},
 		},
@@ -62,21 +64,25 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "amount",
 				Desc:     "Amount of PAC to bond",
+				Type:     command.CommandParamTypeNumber,
 				Optional: false,
 			},
 			{
 				Name:     "valid-months",
 				Desc:     "Indicates how many months the voucher is valid after it is issued",
+				Type:     command.CommandParamTypeInteger,
 				Optional: false,
 			},
 			{
 				Name:     "recipient",
 				Desc:     "Indicates the name of the recipient of the voucher",
+				Type:     command.CommandParamTypeString,
 				Optional: true,
 			},
 			{
 				Name:     "description",
 				Desc:     "Describes the reason for issuing the voucher",
+				Type:     command.CommandParamTypeString,
 				Optional: true,
 			},
 		},
@@ -94,6 +100,7 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "code",
 				Desc:     "Voucher code (8 characters)",
+				Type:     command.CommandParamTypeString,
 				Optional: true,
 			},
 		},

@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/pactus-project/pactus/types/amount"
@@ -10,9 +11,12 @@ import (
 )
 
 func (n *Network) nodeInfoHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args ...string,
+	_ entity.AppID, _ string, args map[string]any,
 ) command.CommandResult {
-	valAddress := args[0]
+	valAddress, ok := args["validator_address"].(string)
+	if !ok {
+		return cmd.ErrorResult(errors.New("invalid validator address"))
+	}
 
 	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)
 	if err != nil {

@@ -10,16 +10,22 @@ import (
 	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
-func (v *Voucher) statusHandler(cmd *command.Command, _ entity.AppID, _ string, args ...string) command.CommandResult {
-	if args == nil {
-		return v.vouchersStatus(cmd)
+func (v *Voucher) statusHandler(cmd *command.Command, _ entity.AppID,
+	_ string, args map[string]any,
+) command.CommandResult {
+	if args["code"] != nil {
+		code, ok := args["code"].(string)
+		if !ok {
+			return cmd.ErrorResult(errors.New("invalid code param"))
+		}
+
+		return v.statusVoucher(cmd, code)
 	}
 
-	code := args[0]
-	return v.codeStatus(cmd, code)
+	return v.statusAllVouchers(cmd)
 }
 
-func (v *Voucher) codeStatus(cmd *command.Command, code string) command.CommandResult {
+func (v *Voucher) statusVoucher(cmd *command.Command, code string) command.CommandResult {
 	voucher, err := v.db.GetVoucherByCode(code)
 	if err != nil {
 		return cmd.ErrorResult(errors.New("voucher code is not valid, no voucher found"))
@@ -44,7 +50,7 @@ func (v *Voucher) codeStatus(cmd *command.Command, code string) command.CommandR
 		txLink)
 }
 
-func (v *Voucher) vouchersStatus(cmd *command.Command) command.CommandResult {
+func (v *Voucher) statusAllVouchers(cmd *command.Command) command.CommandResult {
 	vouchers, err := v.db.ListVoucher()
 	if err != nil {
 		return cmd.ErrorResult(err)

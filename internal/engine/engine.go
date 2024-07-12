@@ -11,6 +11,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command/market"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
+	"github.com/pagu-project/Pagu/internal/engine/command/validator"
 	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
 	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -36,6 +37,7 @@ type BotEngine struct {
 	zealyCmd      *zealy.Zealy
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
+	validatorCmd  *validator.Validator
 }
 
 type IEngine interface {
@@ -114,6 +116,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
+	validatorCmd := validator.NewValidator(db, wlt, cm)
 
 	return &BotEngine{
 		ctx:           ctx,
@@ -126,6 +129,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 		zealyCmd:      zealyCmd,
 		voucherCmd:    voucherCmd,
 		marketCmd:     marketCmd,
+		validatorCmd:  validatorCmd,
 	}
 }
 
@@ -140,14 +144,15 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.validatorCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
 
-func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) command.CommandResult {
+func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]any) command.CommandResult {
 	log.Debug("run command", "callerID", callerID, "inputs", tokens)
 
-	cmd, argsIndex := be.getCommand(tokens)
+	cmd, args := be.getCommand(tokens)
 	if !cmd.HasAppID(appID) {
 		return cmd.FailedResult("unauthorized appID: %v", appID)
 	}
@@ -156,54 +161,48 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) c
 		return cmd.HelpResult()
 	}
 
-	args := tokens[argsIndex:]
-	err := cmd.CheckArgs(args)
-	if err != nil {
-		return cmd.ErrorResult(err)
-	}
-
 	for _, middlewareFunc := range cmd.Middlewares {
-		if err = middlewareFunc(cmd, appID, callerID, args...); err != nil {
+		if err := middlewareFunc(cmd, appID, callerID, args); err != nil {
 			log.Error(err.Error())
 			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
 		}
 	}
 
-	return cmd.Handler(cmd, appID, callerID, args...)
+	return cmd.Handler(cmd, appID, callerID, args)
 }
 
-func (be *BotEngine) getCommand(tokens []string) (*command.Command, int) {
+func (be *BotEngine) getCommand(tokens map[string]any) (*command.Command, map[string]any) {
 	index := 0
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands
-	for {
-		if len(tokens) <= index {
-			break
-		}
-		token := tokens[index]
+	args := make(map[string]any)
+
+	for key := range tokens {
 		index++
 
 		found := false
 		for _, cmd := range cmds {
-			if cmd.Name == token {
-				targetCmd = cmd
-				cmds = cmd.SubCommands
-				found = true
-
-				break
+			if cmd.Name != key {
+				continue
 			}
-		}
 
+			targetCmd = cmd
+			cmds = cmd.SubCommands
+			for _, a := range cmd.Args {
+				if tokens[a.Name] != nil {
+					args[a.Name] = tokens[a.Name]
+				}
+			}
+
+			found = true
+			break
+		}
 		if !found {
 			break
 		}
 	}
 
-	if len(targetCmd.Args) != 0 && index != 0 {
-		return targetCmd, index - 1 // TODO: FIX ME IN THE MAIN LOGIC
-	}
-
-	return targetCmd, index
+	return targetCmd, args
 }
 
 func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {

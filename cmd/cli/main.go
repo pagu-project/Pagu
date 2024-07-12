@@ -50,8 +50,11 @@ func run(cmd *cobra.Command, _ []string) {
 		}
 
 		inputs := strings.Split(input, " ")
-
-		response := botEngine.Run(entity.AppIDCLI, "0", inputs)
+		args := make(map[string]any)
+		for _, i := range inputs {
+			args[i] = i
+		}
+		response := botEngine.Run(entity.AppIDCLI, "0", args)
 
 		cmd.Printf("%v\n%v", response.Title, response.Message)
 	}

@@ -43,7 +43,10 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "100", "1")
+		args := make(map[string]any)
+		args["amount"] = 100
+		args["valid-months"] = 1
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
 	})
@@ -61,26 +64,12 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "1001", "1")
+		args := make(map[string]any)
+		args["amount"] = 1001
+		args["valid-months"] = 1
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
 		assert.Contains(t, result.Message, "stake amount is more than 1000")
-	})
-
-	t.Run("wrong amount", func(t *testing.T) {
-		db.EXPECT().GetVoucherByCode(gomock.Any()).Return(
-			entity.Voucher{}, errors.New(""),
-		).AnyTimes()
-
-		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
-
-		cmd := &command.Command{
-			User: &entity.User{
-				ID: 1,
-			},
-		}
-
-		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "Nan", "1")
-		assert.False(t, result.Successful)
 	})
 
 	t.Run("wrong month", func(t *testing.T) {
@@ -96,7 +85,10 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "100", "1.1")
+		args := make(map[string]any)
+		args["amount"] = 100
+		args["valid-months"] = 1.1
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
 	})
 
@@ -113,7 +105,12 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", "100", "12", "Kayhan", "Testnet node")
+		args := make(map[string]any)
+		args["amount"] = 100
+		args["valid-months"] = 12
+		args["recipient"] = "Kayhan"
+		args["description"] = "Testnet node"
+		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
 	})

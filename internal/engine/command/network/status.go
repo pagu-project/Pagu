@@ -8,7 +8,7 @@ import (
 )
 
 func (n *Network) networkStatusHandler(cmd *command.Command,
-	_ entity.AppID, _ string, _ ...string,
+	_ entity.AppID, _ string, _ map[string]any,
 ) command.CommandResult {
 	netInfo, err := n.clientMgr.GetNetworkInfo()
 	if err != nil {

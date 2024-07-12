@@ -15,13 +15,26 @@ var (
 	TargetMaskAll = TargetMaskMain | TargetMaskTest | TargetMaskModerator
 )
 
+const (
+	CommandParamTypeString      uint8 = 3
+	CommandParamTypeInteger     uint8 = 4
+	CommandParamTypeBoolean     uint8 = 5
+	CommandParamTypeUser        uint8 = 6
+	CommandParamTypeChannel     uint8 = 7
+	CommandParamTypeRole        uint8 = 8
+	CommandParamTypeMentionable uint8 = 9
+	CommandParamTypeNumber      uint8 = 10
+	CommandParamTypeAttachment  uint8 = 11
+)
+
 type Args struct {
 	Name     string
 	Desc     string
+	Type     uint8
 	Optional bool
 }
 
-type HandlerFunc func(cmd *Command, appID entity.AppID, callerID string, args ...string) CommandResult
+type HandlerFunc func(cmd *Command, appID entity.AppID, callerID string, args map[string]any) CommandResult
 
 type Command struct {
 	Emoji       string
@@ -77,23 +90,6 @@ func (cmd *Command) HelpResult() CommandResult {
 	}
 }
 
-func (cmd *Command) CheckArgs(input []string) error {
-	minArg := len(cmd.Args)
-	maxArg := len(cmd.Args)
-
-	for _, arg := range cmd.Args {
-		if arg.Optional {
-			minArg--
-		}
-	}
-
-	if len(input) < minArg || len(input) > maxArg {
-		return fmt.Errorf("incorrect number of arguments, expected %d but got %d", minArg, len(input))
-	}
-
-	return nil
-}
-
 func (cmd *Command) HasAppID(appID entity.AppID) bool {
 	return slices.Contains(cmd.AppIDs, appID)
 }
@@ -124,7 +120,7 @@ func (cmd *Command) AddHelpSubCommand() {
 		Name:   "help",
 		Help:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: entity.AllAppIDs(),
-		Handler: func(_ *Command, _ entity.AppID, _ string, _ ...string) CommandResult {
+		Handler: func(_ *Command, _ entity.AppID, _ string, _ map[string]any) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
 	}
