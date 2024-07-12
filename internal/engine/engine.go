@@ -73,10 +73,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		cm.AddClient(c)
 	}
 
-	var wal wallet.IWallet
+	var wlt wallet.IWallet
 	if cfg.Wallet.Enable {
 		// load or create wallet.
-		wlt, err := wallet.Open(cfg.Wallet)
+		wlt, err = wallet.Open(cfg.Wallet)
 		if err != nil {
 			cancel()
 			return nil, WalletError{
@@ -87,7 +87,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		log.Info("wallet opened successfully", "address", wlt.Address())
 	}
 
-	return newBotEngine(ctx, cancel, db, cm, wal, cfg.Phoenix.FaucetAmount), nil
+	return newBotEngine(ctx, cancel, db, cm, wlt, cfg.Phoenix.FaucetAmount), nil
 }
 
 func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm client.Manager,
