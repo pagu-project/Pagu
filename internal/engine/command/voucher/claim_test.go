@@ -48,7 +48,7 @@ func TestClaimNormal(t *testing.T) {
 
 		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", "12345678", "pc1z")
 		assert.True(t, result.Successful)
-		assert.Equal(t, result.Message, "Voucher claimed successfully: https://pacviewer.com/transaction/0x1")
+		assert.Equal(t, result.Message, "Voucher claimed successfully!\n\n https://pacviewer.com/transaction/0x1")
 	})
 
 	t.Run("wrong code", func(t *testing.T) {
