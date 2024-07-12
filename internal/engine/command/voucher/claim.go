@@ -52,5 +52,5 @@ func (v *Voucher) claimHandler(cmd *command.Command,
 		return cmd.ErrorResult(err)
 	}
 
-	return cmd.SuccessfulResult("Voucher claimed successfully: https://pacviewer.com/transaction/%s", txHash)
+	return cmd.SuccessfulResult("Voucher claimed successfully!\n\n https://pacviewer.com/transaction/%s", txHash)
 }
