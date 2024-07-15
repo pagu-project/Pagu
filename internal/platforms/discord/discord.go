@@ -47,6 +47,12 @@ func (bot *DiscordBot) Start() error {
 	return bot.registerCommands()
 }
 
+func (bot *DiscordBot) Stop() error {
+	log.Info("Stopping Discord Bot")
+
+	return bot.Session.Close()
+}
+
 func (bot *DiscordBot) deleteAllCommands() {
 	cmdsServer, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, bot.cfg.GuildID)
 	cmdsGlobal, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, "")
@@ -135,7 +141,7 @@ func (bot *DiscordBot) registerCommands() error {
 						"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
 
 					subCmd.Options = append(subCmd.Options, &discordgo.ApplicationCommandOption{
-						Type:        setCommandArgType(arg.Type),
+						Type:        setCommandArgType(arg.InputBox.Int()),
 						Name:        arg.Name,
 						Description: arg.Desc,
 						Required:    !arg.Optional,
@@ -154,7 +160,7 @@ func (bot *DiscordBot) registerCommands() error {
 					"argument", arg.Name, "desc", arg.Desc)
 
 				discordCmd.Options = append(discordCmd.Options, &discordgo.ApplicationCommandOption{
-					Type:        setCommandArgType(arg.Type),
+					Type:        setCommandArgType(arg.InputBox.Int()),
 					Name:        arg.Name,
 					Description: arg.Desc,
 					Required:    !arg.Optional,
@@ -179,23 +185,43 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 		return
 	}
 
-	beInput := make(map[string]any)
-
 	// Get the application command data
-	discordCmd := i.ApplicationCommandData()
-	beInput[discordCmd.Name] = ""
-	for _, opt := range discordCmd.Options {
-		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
-			beInput[opt.Name] = ""
-			for _, arg := range opt.Options {
-				beInput[arg.Name] = arg.Value
+	args := make(map[string]any)
+	rootCmd := i.ApplicationCommandData()
+	args[rootCmd.Name] = rootCmd.Name
+	for _, opt := range rootCmd.Options {
+		args = parseCmdOption(&rootCmd, opt, args)
+	}
+
+	res := db.engine.Run(entity.AppIDDiscord, i.Member.User.ID, args)
+	bot.respondResultMsg(res, s, i)
+}
+
+func parseCmdOption(
+	rootCmd *discordgo.ApplicationCommandInteractionData,
+	opt *discordgo.ApplicationCommandInteractionDataOption,
+	result map[string]any,
+) map[string]any {
+	for _, o := range opt.Options {
+		//nolint
+		switch o.Type {
+		// case discordgo.ApplicationCommandOptionSubCommand:
+		// return parseCmdOption(rootCmd, o, result)
+		case discordgo.ApplicationCommandOptionString:
+			result[o.Name] = o.StringValue()
+		case discordgo.ApplicationCommandOptionInteger:
+			result[o.Name] = o.IntValue()
+		case discordgo.ApplicationCommandOptionNumber:
+			result[o.Name] = o.FloatValue()
+		case discordgo.ApplicationCommandOptionAttachment:
+			// TODO: handle multiple attachment
+			for _, attachment := range rootCmd.Resolved.Attachments {
+				result[o.Name] = attachment.URL
 			}
 		}
 	}
 
-	res := db.engine.Run(entity.AppIDDiscord, i.Member.User.ID, beInput)
-
-	bot.respondResultMsg(res, s, i)
+	return result
 }
 
 func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -300,16 +326,17 @@ func (bot *DiscordBot) UpdateStatusInfo() {
 	}
 }
 
-func (bot *DiscordBot) Stop() error {
-	log.Info("Stopping Discord Bot")
-
-	return bot.Session.Close()
-}
-
-func setCommandArgType(t uint8) discordgo.ApplicationCommandOptionType {
-	if t == 0 {
+func setCommandArgType(inputBox int) discordgo.ApplicationCommandOptionType {
+	switch inputBox {
+	case 0:
+		return discordgo.ApplicationCommandOptionString
+	case 1:
+		return discordgo.ApplicationCommandOptionNumber
+	case 2:
+		return discordgo.ApplicationCommandOptionBoolean
+	case 3:
+		return discordgo.ApplicationCommandOptionAttachment
+	default:
 		return discordgo.ApplicationCommandOptionString
 	}
-
-	return discordgo.ApplicationCommandOptionType(t)
 }

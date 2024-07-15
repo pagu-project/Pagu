@@ -63,7 +63,7 @@ func (pt *Phoenix) GetCommand() *command.Command {
 			{
 				Name:     "address",
 				Desc:     "your testnet address [example: tpc1z...]",
-				Type:     command.CommandParamTypeString,
+				InputBox: command.InputBoxText,
 				Optional: false,
 			},
 		},

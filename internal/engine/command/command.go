@@ -15,22 +15,23 @@ var (
 	TargetMaskAll = TargetMaskMain | TargetMaskTest | TargetMaskModerator
 )
 
+type InputBox int
+
 const (
-	CommandParamTypeString      uint8 = 3
-	CommandParamTypeInteger     uint8 = 4
-	CommandParamTypeBoolean     uint8 = 5
-	CommandParamTypeUser        uint8 = 6
-	CommandParamTypeChannel     uint8 = 7
-	CommandParamTypeRole        uint8 = 8
-	CommandParamTypeMentionable uint8 = 9
-	CommandParamTypeNumber      uint8 = 10
-	CommandParamTypeAttachment  uint8 = 11
+	InputBoxText    InputBox = iota
+	InputBoxNumber           = iota
+	InputBoxBoolean          = iota
+	InputBoxFile             = iota
 )
+
+func (i InputBox) Int() int {
+	return int(i)
+}
 
 type Args struct {
 	Name     string
 	Desc     string
-	Type     uint8
+	InputBox InputBox
 	Optional bool
 }
 

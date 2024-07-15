@@ -31,13 +31,13 @@ func (bc *Calculator) GetCommand() *command.Command {
 			{
 				Name:     "stake",
 				Desc:     "Amount of stake in your validator (1-1000)",
-				Type:     command.CommandParamTypeInteger,
+				InputBox: command.InputBoxNumber,
 				Optional: false,
 			},
 			{
 				Name:     "days",
 				Desc:     "Number of days (1-365)",
-				Type:     command.CommandParamTypeInteger,
+				InputBox: command.InputBoxNumber,
 				Optional: false,
 			},
 		},
@@ -54,7 +54,7 @@ func (bc *Calculator) GetCommand() *command.Command {
 			{
 				Name:     "amount",
 				Desc:     "Amount of transaction",
-				Type:     command.CommandParamTypeInteger,
+				InputBox: command.InputBoxNumber,
 				Optional: false,
 			},
 		},

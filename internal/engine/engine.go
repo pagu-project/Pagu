@@ -116,7 +116,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
-	validatorCmd := validator.NewValidator(db, wlt, cm)
+	validatorCmd := validator.NewValidator(db)
 
 	return &BotEngine{
 		ctx:           ctx,
@@ -172,28 +172,29 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]
 }
 
 func (be *BotEngine) getCommand(tokens map[string]any) (*command.Command, map[string]any) {
-	index := 0
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands
 	args := make(map[string]any)
 
 	for key := range tokens {
-		index++
-
 		found := false
 		for _, cmd := range cmds {
 			if cmd.Name != key {
 				continue
 			}
-
 			targetCmd = cmd
-			cmds = cmd.SubCommands
+			if len(cmd.SubCommands) > 0 {
+				cmds = cmd.SubCommands
+				found = true
+				break
+			}
 			for _, a := range cmd.Args {
-				if tokens[a.Name] != nil {
-					args[a.Name] = tokens[a.Name]
+				for argKey, argValue := range tokens {
+					if a.Name == argKey {
+						args[a.Name] = argValue
+					}
 				}
 			}
-
 			found = true
 			break
 		}

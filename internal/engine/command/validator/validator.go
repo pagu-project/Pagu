@@ -4,8 +4,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/repository"
-	"github.com/pagu-project/Pagu/pkg/client"
-	"github.com/pagu-project/Pagu/pkg/wallet"
 )
 
 const (
@@ -15,21 +13,17 @@ const (
 )
 
 type Validator struct {
-	db            repository.Database
-	wallet        wallet.IWallet
-	clientManager client.Manager
+	db repository.Database
 }
 
-func NewValidator(db repository.Database, wlt wallet.IWallet, cli client.Manager) *Validator {
+func NewValidator(db repository.Database) *Validator {
 	return &Validator{
-		db:            db,
-		wallet:        wlt,
-		clientManager: cli,
+		db: db,
 	}
 }
 
 func (v *Validator) GetCommand() *command.Command {
-	middlewareHandler := command.NewMiddlewareHandler(v.db, v.wallet)
+	middlewareHandler := command.NewMiddlewareHandler(v.db, nil)
 
 	subCmdImport := &command.Command{
 		Name: ImportCommandName,
@@ -38,13 +32,13 @@ func (v *Validator) GetCommand() *command.Command {
 			{
 				Name:     "file",
 				Desc:     "include list of validators",
-				Type:     command.CommandParamTypeAttachment,
+				InputBox: command.InputBoxFile,
 				Optional: false,
 			},
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.WalletBalance},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser},
 		Handler:     v.importHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}

@@ -67,6 +67,20 @@ func (mr *MockDatabaseMockRecorder) AddUser(u any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUser", reflect.TypeOf((*MockDatabase)(nil).AddUser), u)
 }
 
+// AddValidator mocks base method.
+func (m *MockDatabase) AddValidator(arg0 *entity.Validator) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddValidator", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddValidator indicates an expected call of AddValidator.
+func (mr *MockDatabaseMockRecorder) AddValidator(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddValidator", reflect.TypeOf((*MockDatabase)(nil).AddValidator), arg0)
+}
+
 // AddVoucher mocks base method.
 func (m *MockDatabase) AddVoucher(v *entity.Voucher) error {
 	m.ctrl.T.Helper()
@@ -151,6 +165,21 @@ func (m *MockDatabase) GetUserInApp(appID entity.AppID, callerID string) (*entit
 func (mr *MockDatabaseMockRecorder) GetUserInApp(appID, callerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInApp", reflect.TypeOf((*MockDatabase)(nil).GetUserInApp), appID, callerID)
+}
+
+// GetValidator mocks base method.
+func (m *MockDatabase) GetValidator(arg0 uint) (entity.Validator, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetValidator", arg0)
+	ret0, _ := ret[0].(entity.Validator)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetValidator indicates an expected call of GetValidator.
+func (mr *MockDatabaseMockRecorder) GetValidator(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValidator", reflect.TypeOf((*MockDatabase)(nil).GetValidator), arg0)
 }
 
 // GetVoucherByCode mocks base method.
