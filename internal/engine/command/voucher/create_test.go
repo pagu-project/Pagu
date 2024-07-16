@@ -43,9 +43,9 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
-		args["amount"] = 100
-		args["valid-months"] = 1
+		args := make(map[string]string)
+		args["amount"] = "100"
+		args["valid-months"] = "1"
 		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
@@ -64,9 +64,9 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
-		args["amount"] = 1001
-		args["valid-months"] = 1
+		args := make(map[string]string)
+		args["amount"] = "1001"
+		args["valid-months"] = "1"
 		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
 		assert.Contains(t, result.Message, "stake amount is more than 1000")
@@ -85,9 +85,9 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
-		args["amount"] = 100
-		args["valid-months"] = 1.1
+		args := make(map[string]string)
+		args["amount"] = "100"
+		args["valid-months"] = "1.1"
 		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
 	})
@@ -105,9 +105,9 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
-		args["amount"] = 100
-		args["valid-months"] = 12
+		args := make(map[string]string)
+		args["amount"] = "100"
+		args["valid-months"] = "12"
 		args["recipient"] = "Kayhan"
 		args["description"] = "Testnet node"
 		result := voucher.createHandler(cmd, entity.AppIDDiscord, "", args)

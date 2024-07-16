@@ -11,10 +11,10 @@ import (
 )
 
 func (v *Voucher) statusHandler(cmd *command.Command, _ entity.AppID,
-	_ string, args map[string]any,
+	_ string, args map[string]string,
 ) command.CommandResult {
-	if args["code"] != nil {
-		code, ok := args["code"].(string)
+	if args["code"] != "" {
+		code, ok := args["code"]
 		if !ok {
 			return cmd.ErrorResult(errors.New("invalid code param"))
 		}

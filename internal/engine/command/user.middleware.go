@@ -4,7 +4,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (h *MiddlewareHandler) CreateUser(cmd *Command, appID entity.AppID, callerID string, _ map[string]any) error {
+func (h *MiddlewareHandler) CreateUser(cmd *Command, appID entity.AppID, callerID string, _ map[string]string) error {
 	if user, _ := h.db.GetUserInApp(appID, callerID); user != nil {
 		cmd.User = user
 		return nil

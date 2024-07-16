@@ -45,7 +45,7 @@ func TestStatusNormal(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
+		args := make(map[string]string)
 		args["code"] = "12345678"
 		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
@@ -56,7 +56,7 @@ func TestStatusNormal(t *testing.T) {
 	})
 
 	t.Run("wrong code", func(t *testing.T) {
-		db.EXPECT().GetVoucherByCode("invalid_code").Return(
+		db.EXPECT().GetVoucherByCode("000").Return(
 			entity.Voucher{}, errors.New(""),
 		).AnyTimes()
 
@@ -66,7 +66,7 @@ func TestStatusNormal(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
+		args := make(map[string]string)
 		args["code"] = "000"
 		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.False(t, result.Successful)
@@ -117,7 +117,7 @@ func TestStatusNormal(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
+		args := make(map[string]string)
 		result := voucher.statusHandler(cmd, entity.AppIDDiscord, "", args)
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, "Total Codes: 3\nTotal Amount: 300 PAC\n\n\n"+

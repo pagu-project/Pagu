@@ -149,7 +149,7 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddHelpSubCommand()
 }
 
-func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]any) command.CommandResult {
+func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]string) command.CommandResult {
 	log.Debug("run command", "callerID", callerID, "inputs", tokens)
 
 	cmd, args := be.getCommand(tokens)
@@ -171,10 +171,10 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]
 	return cmd.Handler(cmd, appID, callerID, args)
 }
 
-func (be *BotEngine) getCommand(tokens map[string]any) (*command.Command, map[string]any) {
+func (be *BotEngine) getCommand(tokens map[string]string) (*command.Command, map[string]string) {
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands
-	args := make(map[string]any)
+	args := make(map[string]string)
 
 	for key := range tokens {
 		found := false

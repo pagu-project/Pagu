@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -186,7 +187,7 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 	}
 
 	// Get the application command data
-	args := make(map[string]any)
+	args := make(map[string]string)
 	rootCmd := i.ApplicationCommandData()
 	args[rootCmd.Name] = rootCmd.Name
 	for _, opt := range rootCmd.Options {
@@ -200,19 +201,24 @@ func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *d
 func parseCmdOption(
 	rootCmd *discordgo.ApplicationCommandInteractionData,
 	opt *discordgo.ApplicationCommandInteractionDataOption,
-	result map[string]any,
-) map[string]any {
+	result map[string]string,
+) map[string]string {
+	if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
+		result[opt.Name] = opt.Name
+	}
+
 	for _, o := range opt.Options {
 		//nolint
 		switch o.Type {
-		// case discordgo.ApplicationCommandOptionSubCommand:
-		// return parseCmdOption(rootCmd, o, result)
+		case discordgo.ApplicationCommandOptionSubCommand:
+			return parseCmdOption(rootCmd, o, result)
 		case discordgo.ApplicationCommandOptionString:
 			result[o.Name] = o.StringValue()
 		case discordgo.ApplicationCommandOptionInteger:
-			result[o.Name] = o.IntValue()
+			result[o.Name] = strconv.Itoa(int(o.IntValue()))
 		case discordgo.ApplicationCommandOptionNumber:
-			result[o.Name] = o.FloatValue()
+			v := strconv.FormatFloat(o.FloatValue(), 'f', 10, 64)
+			result[o.Name] = v
 		case discordgo.ApplicationCommandOptionAttachment:
 			// TODO: handle multiple attachment
 			for _, attachment := range rootCmd.Resolved.Attachments {
@@ -331,11 +337,11 @@ func setCommandArgType(inputBox int) discordgo.ApplicationCommandOptionType {
 	case 0:
 		return discordgo.ApplicationCommandOptionString
 	case 1:
-		return discordgo.ApplicationCommandOptionNumber
+		return discordgo.ApplicationCommandOptionInteger
 	case 2:
-		return discordgo.ApplicationCommandOptionBoolean
-	case 3:
 		return discordgo.ApplicationCommandOptionAttachment
+	case 3:
+		return discordgo.ApplicationCommandOptionNumber
 	default:
 		return discordgo.ApplicationCommandOptionString
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 func (z *Zealy) statusHandler(cmd *command.Command,
-	_ entity.AppID, _ string, _ map[string]any,
+	_ entity.AppID, _ string, _ map[string]string,
 ) command.CommandResult {
 	allUsers, err := z.db.GetAllZealyUser()
 	if err != nil {

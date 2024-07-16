@@ -18,10 +18,10 @@ var (
 type InputBox int
 
 const (
-	InputBoxText    InputBox = iota
-	InputBoxNumber           = iota
-	InputBoxBoolean          = iota
-	InputBoxFile             = iota
+	InputBoxText   InputBox = iota
+	InputBoxNumber          = iota
+	InputBoxFile            = iota
+	InputBoxAmount          = iota
 )
 
 func (i InputBox) Int() int {
@@ -35,7 +35,7 @@ type Args struct {
 	Optional bool
 }
 
-type HandlerFunc func(cmd *Command, appID entity.AppID, callerID string, args map[string]any) CommandResult
+type HandlerFunc func(cmd *Command, appID entity.AppID, callerID string, args map[string]string) CommandResult
 
 type Command struct {
 	Emoji       string
@@ -121,7 +121,7 @@ func (cmd *Command) AddHelpSubCommand() {
 		Name:   "help",
 		Help:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: entity.AllAppIDs(),
-		Handler: func(_ *Command, _ entity.AppID, _ string, _ map[string]any) CommandResult {
+		Handler: func(_ *Command, _ entity.AppID, _ string, _ map[string]string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
 	}

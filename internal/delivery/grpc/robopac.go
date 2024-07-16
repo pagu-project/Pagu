@@ -19,7 +19,7 @@ func newRoboPacServer(server *Server) *robopacServer {
 }
 
 func (rs *robopacServer) Run(_ context.Context, er *robopac.RunRequest) (*robopac.RunResponse, error) {
-	beInput := make(map[string]any)
+	beInput := make(map[string]string)
 
 	tokens := strings.Split(er.Command, " ")
 	for _, t := range tokens {

@@ -46,7 +46,7 @@ func TestClaimNormal(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
+		args := make(map[string]string)
 		args["code"] = "12345678"
 		args["address"] = "pc1z"
 		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
@@ -61,7 +61,7 @@ func TestClaimNormal(t *testing.T) {
 			},
 		}
 
-		args := make(map[string]any)
+		args := make(map[string]string)
 		args["code"] = "0"
 		args["address"] = "pc1z"
 		result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
@@ -83,7 +83,7 @@ func TestClaimNotFound(t *testing.T) {
 		},
 	}
 
-	args := make(map[string]any)
+	args := make(map[string]string)
 	args["code"] = "12345678"
 	args["address"] = "pc1z"
 	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)
@@ -106,7 +106,7 @@ func TestClaimAlreadyClaimed(t *testing.T) {
 		},
 	}
 
-	args := make(map[string]any)
+	args := make(map[string]string)
 	args["code"] = "12345678"
 	args["address"] = "pc1z"
 	result := voucher.claimHandler(cmd, entity.AppIDDiscord, "", args)

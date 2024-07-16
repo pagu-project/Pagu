@@ -50,7 +50,7 @@ func run(cmd *cobra.Command, _ []string) {
 		}
 
 		inputs := strings.Split(input, " ")
-		args := make(map[string]any)
+		args := make(map[string]string)
 		for _, i := range inputs {
 			args[i] = i
 		}

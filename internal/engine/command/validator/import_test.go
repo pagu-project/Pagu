@@ -40,7 +40,7 @@ func TestImport(t *testing.T) {
 
 		mockDB.EXPECT().AddValidator(gomock.Any()).Return(nil).AnyTimes()
 
-		args := make(map[string]any)
+		args := make(map[string]string)
 		args["file"] = "http://foo.com/bar"
 		result := validatorCmd.importHandler(cmd, entity.AppIDDiscord, "", args)
 

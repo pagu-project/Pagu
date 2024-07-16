@@ -12,12 +12,9 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (v *Validator) importHandler(cmd *command.Command, _ entity.AppID, _ string, args map[string]any,
+func (v *Validator) importHandler(cmd *command.Command, _ entity.AppID, _ string, args map[string]string,
 ) command.CommandResult {
-	fileURL, ok := args["file"].(string)
-	if !ok {
-		return cmd.ErrorResult(errors.New("invalid attachment param"))
-	}
+	fileURL := args["file"]
 
 	httpClient := new(http.Client)
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, fileURL, http.NoBody)

@@ -31,7 +31,7 @@ func (bc *Calculator) GetCommand() *command.Command {
 			{
 				Name:     "stake",
 				Desc:     "Amount of stake in your validator (1-1000)",
-				InputBox: command.InputBoxNumber,
+				InputBox: command.InputBoxAmount,
 				Optional: false,
 			},
 			{
@@ -54,7 +54,7 @@ func (bc *Calculator) GetCommand() *command.Command {
 			{
 				Name:     "amount",
 				Desc:     "Amount of transaction",
-				InputBox: command.InputBoxNumber,
+				InputBox: command.InputBoxAmount,
 				Optional: false,
 			},
 		},

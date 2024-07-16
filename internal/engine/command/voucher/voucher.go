@@ -64,7 +64,7 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "amount",
 				Desc:     "Amount of PAC to bond",
-				InputBox: command.InputBoxNumber,
+				InputBox: command.InputBoxAmount,
 				Optional: false,
 			},
 			{

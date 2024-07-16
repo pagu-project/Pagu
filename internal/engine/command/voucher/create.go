@@ -2,6 +2,7 @@ package voucher
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -10,21 +11,16 @@ import (
 )
 
 func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID,
-	_ string, args map[string]any,
+	_ string, args map[string]string,
 ) command.CommandResult {
 	code := utils.RandomString(8, utils.CapitalAlphanumerical)
 	for _, err := v.db.GetVoucherByCode(code); err == nil; {
 		code = utils.RandomString(8, utils.CapitalAlphanumerical)
 	}
 
-	amountStr, ok := args["amount"].(float64)
-	if !ok {
-		return cmd.ErrorResult(errors.New("invalid amount param"))
-	}
-
-	amt, err := amount.NewAmount(amountStr)
+	amt, err := amount.FromString(args["amount"])
 	if err != nil {
-		return cmd.ErrorResult(err)
+		return cmd.ErrorResult(errors.New("invalid amount param"))
 	}
 
 	maxStake, _ := amount.NewAmount(1000)
@@ -32,8 +28,8 @@ func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID,
 		return cmd.ErrorResult(errors.New("stake amount is more than 1000"))
 	}
 
-	expireMonths, ok := args["valid-months"].(int)
-	if !ok {
+	expireMonths, err := strconv.Atoi(args["valid-months"])
+	if err != nil {
 		return cmd.ErrorResult(errors.New("invalid valid-months param"))
 	}
 
@@ -44,19 +40,8 @@ func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID,
 		Amount:      amt,
 	}
 
-	if args["recipient"] != nil {
-		vch.Recipient, ok = args["recipient"].(string)
-		if !ok {
-			return cmd.ErrorResult(errors.New("invalid recipient param"))
-		}
-	}
-
-	if args["description"] != nil {
-		vch.Desc, ok = args["description"].(string)
-		if !ok {
-			return cmd.ErrorResult(errors.New("invalid description param"))
-		}
-	}
+	vch.Recipient = args["recipient"]
+	vch.Desc = args["description"]
 
 	err = v.db.AddVoucher(vch)
 	if err != nil {

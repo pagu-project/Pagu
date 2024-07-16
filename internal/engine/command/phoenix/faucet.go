@@ -7,17 +7,13 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (pt *Phoenix) faucetHandler(cmd *command.Command, _ entity.AppID, _ string, args map[string]any,
+func (pt *Phoenix) faucetHandler(cmd *command.Command, _ entity.AppID, _ string, args map[string]string,
 ) command.CommandResult {
 	if len(args) == 0 {
 		return cmd.ErrorResult(errors.New("invalid wallet address"))
 	}
 
-	toAddr, ok := args["address"].(string)
-	if !ok {
-		return cmd.ErrorResult(errors.New("invalid wallet address"))
-	}
-
+	toAddr := args["address"]
 	if len(toAddr) != 43 || toAddr[:3] != "tpc" {
 		return cmd.ErrorResult(errors.New("invalid wallet address"))
 	}

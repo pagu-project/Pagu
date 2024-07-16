@@ -96,7 +96,7 @@ func (bot *TelegramBot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 
 		// Split the message into an array.
 		messageParts := strings.Split(fullMessage, " ")
-		beInput := make(map[string]any)
+		beInput := make(map[string]string)
 
 		for _, t := range messageParts {
 			beInput[t] = t

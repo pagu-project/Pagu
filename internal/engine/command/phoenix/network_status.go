@@ -9,7 +9,7 @@ import (
 )
 
 func (pt *Phoenix) networkStatusHandler(cmd *command.Command,
-	_ entity.AppID, _ string, _ map[string]any,
+	_ entity.AppID, _ string, _ map[string]string,
 ) command.CommandResult {
 	netInfo, err := pt.clientMgr.GetNetworkInfo()
 	if err != nil {

@@ -51,7 +51,7 @@ func (hh *HTTPHandler) Run(c echo.Context) error {
 		return err
 	}
 
-	beInput := make(map[string]any)
+	beInput := make(map[string]string)
 
 	tokens := strings.Split(r.Command, " ")
 	for _, t := range tokens {
