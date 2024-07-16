@@ -23,8 +23,6 @@ func NewValidator(db repository.Database) *Validator {
 }
 
 func (v *Validator) GetCommand() *command.Command {
-	middlewareHandler := command.NewMiddlewareHandler(v.db, nil)
-
 	subCmdImport := &command.Command{
 		Name: ImportCommandName,
 		Help: "Import list of validator",
@@ -38,7 +36,7 @@ func (v *Validator) GetCommand() *command.Command {
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser},
+		Middlewares: nil,
 		Handler:     v.importHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}

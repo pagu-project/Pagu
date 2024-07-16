@@ -11,8 +11,10 @@ import (
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (bc *Calculator) calcRewardHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args map[string]string,
+func (bc *Calculator) calcRewardHandler(
+	_ *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
 	stake, err := amount.FromString(args["stake"])
 	if err != nil {

@@ -152,19 +152,19 @@ func (mr *MockDatabaseMockRecorder) GetAllZealyUser() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllZealyUser", reflect.TypeOf((*MockDatabase)(nil).GetAllZealyUser))
 }
 
-// GetUserInApp mocks base method.
-func (m *MockDatabase) GetUserInApp(appID entity.AppID, callerID string) (*entity.User, error) {
+// GetUserByApp mocks base method.
+func (m *MockDatabase) GetUserByApp(appID entity.AppID, callerID string) (*entity.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserInApp", appID, callerID)
+	ret := m.ctrl.Call(m, "GetUserByApp", appID, callerID)
 	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUserInApp indicates an expected call of GetUserInApp.
-func (mr *MockDatabaseMockRecorder) GetUserInApp(appID, callerID any) *gomock.Call {
+// GetUserByApp indicates an expected call of GetUserByApp.
+func (mr *MockDatabaseMockRecorder) GetUserByApp(appID, callerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInApp", reflect.TypeOf((*MockDatabase)(nil).GetUserInApp), appID, callerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByApp", reflect.TypeOf((*MockDatabase)(nil).GetUserByApp), appID, callerID)
 }
 
 // GetValidator mocks base method.

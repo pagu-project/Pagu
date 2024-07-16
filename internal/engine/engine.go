@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/pagu-project/Pagu/config"
@@ -29,8 +30,10 @@ type BotEngine struct {
 	cancel context.CancelFunc
 
 	clientMgr client.Manager
+	db        repository.Database
 	rootCmd   *command.Command
 
+	// commands
 	calculatorCmd *calculator.Calculator
 	networkCmd    *network.Network
 	phoenixCmd    *phoenixtestnet.Phoenix
@@ -38,11 +41,6 @@ type BotEngine struct {
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
 	validatorCmd  *validator.Validator
-}
-
-type IEngine interface {
-	Run(appID entity.AppID, callerID string, tokens []string) (*command.CommandResult, error)
-	Commands() []command.Command
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -122,6 +120,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 		ctx:           ctx,
 		cancel:        cnl,
 		clientMgr:     cm,
+		db:            db,
 		rootCmd:       rootCmd,
 		networkCmd:    netCmd,
 		calculatorCmd: calcCmd,
@@ -161,14 +160,20 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]
 		return cmd.HelpResult()
 	}
 
+	user, err := be.GetUser(appID, callerID)
+	if err != nil {
+		log.Error(err.Error())
+		return cmd.ErrorResult(fmt.Errorf("user is not defined in %s application", appID.String()))
+	}
+
 	for _, middlewareFunc := range cmd.Middlewares {
-		if err := middlewareFunc(cmd, appID, callerID, args); err != nil {
+		if err := middlewareFunc(user, cmd, args); err != nil {
 			log.Error(err.Error())
 			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
 		}
 	}
 
-	return cmd.Handler(cmd, appID, callerID, args)
+	return cmd.Handler(user, cmd, args)
 }
 
 func (be *BotEngine) getCommand(tokens map[string]string) (*command.Command, map[string]string) {
@@ -234,6 +239,19 @@ func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
 		TotalAccounts:       chainInfo.TotalAccounts,
 		CirculatingSupply:   cs,
 	}, nil
+}
+
+func (be *BotEngine) GetUser(appID entity.AppID, callerID string) (*entity.User, error) {
+	if u, _ := be.db.GetUserByApp(appID, callerID); u != nil {
+		return u, nil
+	}
+
+	user := &entity.User{ApplicationID: appID, CallerID: callerID}
+	if err := be.db.AddUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (be *BotEngine) Stop() {

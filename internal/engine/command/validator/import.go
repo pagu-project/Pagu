@@ -12,8 +12,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (v *Validator) importHandler(cmd *command.Command, _ entity.AppID, _ string, args map[string]string,
-) command.CommandResult {
+func (v *Validator) importHandler(_ *entity.User, cmd *command.Command, args map[string]string) command.CommandResult {
 	fileURL := args["file"]
 
 	httpClient := new(http.Client)

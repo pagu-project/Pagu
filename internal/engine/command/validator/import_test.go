@@ -5,7 +5,6 @@ import (
 
 	"github.com/h2non/gock"
 	"github.com/pagu-project/Pagu/internal/engine/command"
-	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -32,17 +31,13 @@ func TestImport(t *testing.T) {
 			Reply(200).
 			BodyString("Name,Email\nValidator1,validator1@abc.com\nValidator2,validator2@abc.com\nValidator3,validator3@abc.com")
 
-		cmd := &command.Command{
-			User: &entity.User{
-				ID: 1,
-			},
-		}
+		cmd := &command.Command{}
 
 		mockDB.EXPECT().AddValidator(gomock.Any()).Return(nil).AnyTimes()
 
 		args := make(map[string]string)
 		args["file"] = "http://foo.com/bar"
-		result := validatorCmd.importHandler(cmd, entity.AppIDDiscord, "", args)
+		result := validatorCmd.importHandler(nil, cmd, args)
 
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Validators created successfully!")

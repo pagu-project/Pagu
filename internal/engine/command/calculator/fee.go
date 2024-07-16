@@ -8,8 +8,10 @@ import (
 	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
-func (bc *Calculator) calcFeeHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args map[string]string,
+func (bc *Calculator) calcFeeHandler(
+	_ *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
 	amt, err := amount.FromString(args["amount"])
 	if err != nil {

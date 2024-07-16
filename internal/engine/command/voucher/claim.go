@@ -9,8 +9,10 @@ import (
 	"github.com/pagu-project/Pagu/pkg/log"
 )
 
-func (v *Voucher) claimHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args map[string]string,
+func (v *Voucher) claimHandler(
+	caller *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
 	code := args["code"]
 	if len(code) != 8 {
@@ -48,7 +50,7 @@ func (v *Voucher) claimHandler(cmd *command.Command,
 		return cmd.ErrorResult(errors.New("can't send bond transaction"))
 	}
 
-	if err = v.db.ClaimVoucher(voucher.ID, txHash, cmd.User.ID); err != nil {
+	if err = v.db.ClaimVoucher(voucher.ID, txHash, caller.ID); err != nil {
 		return cmd.ErrorResult(err)
 	}
 

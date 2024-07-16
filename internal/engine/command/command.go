@@ -35,7 +35,7 @@ type Args struct {
 	Optional bool
 }
 
-type HandlerFunc func(cmd *Command, appID entity.AppID, callerID string, args map[string]string) CommandResult
+type HandlerFunc func(caller *entity.User, cmd *Command, args map[string]string) CommandResult
 
 type Command struct {
 	Emoji       string
@@ -47,7 +47,6 @@ type Command struct {
 	SubCommands []*Command
 	Middlewares []MiddlewareFunc
 	Handler     HandlerFunc
-	User        *entity.User
 	TargetFlag  int
 }
 
@@ -121,7 +120,7 @@ func (cmd *Command) AddHelpSubCommand() {
 		Name:   "help",
 		Help:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: entity.AllAppIDs(),
-		Handler: func(_ *Command, _ entity.AppID, _ string, _ map[string]string) CommandResult {
+		Handler: func(_ *entity.User, _ *Command, _ map[string]string) CommandResult {
 			return cmd.SuccessfulResult(cmd.HelpMessage())
 		},
 	}

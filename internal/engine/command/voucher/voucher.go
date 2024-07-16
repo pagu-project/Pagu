@@ -52,7 +52,7 @@ func (v *Voucher) GetCommand() *command.Command {
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.WalletBalance},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.WalletBalance},
 		Handler:     v.claimHandler,
 		TargetFlag:  command.TargetMaskMain,
 	}
@@ -88,7 +88,7 @@ func (v *Voucher) GetCommand() *command.Command {
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.OnlyModerator},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.OnlyModerator},
 		Handler:     v.createHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}
@@ -106,7 +106,7 @@ func (v *Voucher) GetCommand() *command.Command {
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.OnlyModerator},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.OnlyModerator},
 		Handler:     v.statusHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}

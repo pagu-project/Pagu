@@ -10,8 +10,10 @@ import (
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID,
-	_ string, args map[string]string,
+func (v *Voucher) createHandler(
+	caller *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
 	code := utils.RandomString(8, utils.CapitalAlphanumerical)
 	for _, err := v.db.GetVoucherByCode(code); err == nil; {
@@ -34,7 +36,7 @@ func (v *Voucher) createHandler(cmd *command.Command, _ entity.AppID,
 	}
 
 	vch := &entity.Voucher{
-		Creator:     cmd.User.ID,
+		Creator:     caller.ID,
 		Code:        code,
 		ValidMonths: uint8(expireMonths),
 		Amount:      amt,

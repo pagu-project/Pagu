@@ -10,9 +10,7 @@ import (
 	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
-func (v *Voucher) statusHandler(cmd *command.Command, _ entity.AppID,
-	_ string, args map[string]string,
-) command.CommandResult {
+func (v *Voucher) statusHandler(_ *entity.User, cmd *command.Command, args map[string]string) command.CommandResult {
 	if args["code"] != "" {
 		code, ok := args["code"]
 		if !ok {

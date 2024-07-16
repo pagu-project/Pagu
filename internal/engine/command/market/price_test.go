@@ -31,6 +31,6 @@ func setup() (*Market, *command.Command) {
 func TestGetPrice(t *testing.T) {
 	market, cmd := setup()
 	time.Sleep(10 * time.Second)
-	result := market.getPrice(cmd, entity.AppIDDiscord, "", nil)
+	result := market.getPrice(nil, cmd, nil)
 	assert.Equal(t, result.Successful, true)
 }

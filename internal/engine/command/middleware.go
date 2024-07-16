@@ -6,7 +6,7 @@ import (
 	"github.com/pagu-project/Pagu/pkg/wallet"
 )
 
-type MiddlewareFunc func(cmd *Command, appID entity.AppID, callerID string, args map[string]string) error
+type MiddlewareFunc func(caller *entity.User, cmd *Command, args map[string]string) error
 
 type MiddlewareHandler struct {
 	db     repository.Database

@@ -7,7 +7,10 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (pt *Phoenix) faucetHandler(cmd *command.Command, _ entity.AppID, _ string, args map[string]string,
+func (pt *Phoenix) faucetHandler(
+	caller *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
 	if len(args) == 0 {
 		return cmd.ErrorResult(errors.New("invalid wallet address"))
@@ -18,7 +21,7 @@ func (pt *Phoenix) faucetHandler(cmd *command.Command, _ entity.AppID, _ string,
 		return cmd.ErrorResult(errors.New("invalid wallet address"))
 	}
 
-	if !pt.db.CanGetFaucet(cmd.User) {
+	if !pt.db.CanGetFaucet(caller) {
 		return cmd.FailedResult("Uh, you used your share of faucets today!")
 	}
 
@@ -28,7 +31,7 @@ func (pt *Phoenix) faucetHandler(cmd *command.Command, _ entity.AppID, _ string,
 	}
 
 	if err = pt.db.AddFaucet(&entity.PhoenixFaucet{
-		UserID:          cmd.User.ID,
+		UserID:          caller.ID,
 		Address:         toAddr,
 		Amount:          pt.faucetAmount,
 		TransactionHash: txHash,

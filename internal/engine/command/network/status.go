@@ -7,8 +7,10 @@ import (
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (n *Network) networkStatusHandler(cmd *command.Command,
-	_ entity.AppID, _ string, _ map[string]string,
+func (n *Network) networkStatusHandler(
+	_ *entity.User,
+	cmd *command.Command,
+	_ map[string]string,
 ) command.CommandResult {
 	netInfo, err := n.clientMgr.GetNetworkInfo()
 	if err != nil {
