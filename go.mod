@@ -15,8 +15,6 @@ require (
 	gorm.io/gorm v1.25.10
 )
 
-require github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
-
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/NathanBaulch/protoc-gen-cobra v1.2.1 // indirect
@@ -27,6 +25,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
+	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/boxo v0.21.0 // indirect
