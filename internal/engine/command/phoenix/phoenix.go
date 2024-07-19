@@ -58,7 +58,7 @@ func (pt *Phoenix) GetCommand() *command.Command {
 
 	subCmdFaucet := &command.Command{
 		Name: FaucetCommandName,
-		Help: fmt.Sprintf("Get %d tPAC Coins on Phoenix Testnet for Testing your code or project", pt.faucetAmount),
+		Help: fmt.Sprintf("Get %f tPAC Coins on Phoenix Testnet for Testing your code or project", pt.faucetAmount.ToPAC()),
 		Args: []command.Args{
 			{
 				Name:     "address",

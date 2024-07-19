@@ -41,6 +41,7 @@ func (z *Zealy) GetCommand() *command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     z.claimHandler,
+		TargetFlag:  command.TargetMaskMain,
 	}
 
 	subCmdStatus := &command.Command{
@@ -50,6 +51,7 @@ func (z *Zealy) GetCommand() *command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Handler:     z.statusHandler,
+		TargetFlag:  command.TargetMaskModerator,
 	}
 
 	cmdZealy := &command.Command{
