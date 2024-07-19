@@ -51,7 +51,7 @@ func (pt *Phoenix) GetCommand() *command.Command {
 		Args:        []command.Args{},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser},
+		Middlewares: nil,
 		Handler:     pt.networkStatusHandler,
 		TargetFlag:  command.TargetMaskTest,
 	}
@@ -63,12 +63,13 @@ func (pt *Phoenix) GetCommand() *command.Command {
 			{
 				Name:     "address",
 				Desc:     "your testnet address [example: tpc1z...]",
+				InputBox: command.InputBoxText,
 				Optional: false,
 			},
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.WalletBalance},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.WalletBalance},
 		Handler:     pt.faucetHandler,
 		TargetFlag:  command.TargetMaskTest,
 	}

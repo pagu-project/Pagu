@@ -40,17 +40,19 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "code",
 				Desc:     "voucher code",
+				InputBox: command.InputBoxText,
 				Optional: false,
 			},
 			{
 				Name:     "address",
 				Desc:     "your pactus validator address",
+				InputBox: command.InputBoxText,
 				Optional: false,
 			},
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.WalletBalance},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.WalletBalance},
 		Handler:     v.claimHandler,
 		TargetFlag:  command.TargetMaskMain,
 	}
@@ -62,27 +64,31 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "amount",
 				Desc:     "Amount of PAC to bond",
+				InputBox: command.InputBoxAmount,
 				Optional: false,
 			},
 			{
 				Name:     "valid-months",
 				Desc:     "Indicates how many months the voucher is valid after it is issued",
+				InputBox: command.InputBoxNumber,
 				Optional: false,
 			},
 			{
 				Name:     "recipient",
 				Desc:     "Indicates the name of the recipient of the voucher",
+				InputBox: command.InputBoxText,
 				Optional: true,
 			},
 			{
 				Name:     "description",
 				Desc:     "Describes the reason for issuing the voucher",
+				InputBox: command.InputBoxText,
 				Optional: true,
 			},
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.OnlyModerator},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.OnlyModerator},
 		Handler:     v.createHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}
@@ -94,12 +100,13 @@ func (v *Voucher) GetCommand() *command.Command {
 			{
 				Name:     "code",
 				Desc:     "Voucher code (8 characters)",
+				InputBox: command.InputBoxText,
 				Optional: true,
 			},
 		},
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
-		Middlewares: []command.MiddlewareFunc{middlewareHandler.CreateUser, middlewareHandler.OnlyModerator},
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.OnlyModerator},
 		Handler:     v.statusHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}

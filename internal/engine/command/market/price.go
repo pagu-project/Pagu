@@ -9,7 +9,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (m *Market) getPrice(cmd *command.Command, _ entity.AppID, _ string, _ ...string) command.CommandResult {
+func (m *Market) getPrice(_ *entity.User, cmd *command.Command, _ map[string]string) command.CommandResult {
 	priceData, ok := m.priceCache.Get(config.PriceCacheKey)
 	if !ok {
 		return cmd.ErrorResult(fmt.Errorf("failed to get price from markets. please try again later"))

@@ -5,7 +5,7 @@ import "github.com/pagu-project/Pagu/internal/entity"
 type IUser interface {
 	AddUser(u *entity.User) error
 	HasUser(id string) bool
-	GetUserInApp(appID entity.AppID, callerID string) (*entity.User, error)
+	GetUserByApp(appID entity.AppID, callerID string) (*entity.User, error)
 }
 
 func (db *DB) AddUser(u *entity.User) error {
@@ -31,7 +31,7 @@ func (db *DB) HasUser(id string) bool {
 	return exists
 }
 
-func (db *DB) GetUserInApp(appID entity.AppID, callerID string) (*entity.User, error) {
+func (db *DB) GetUserByApp(appID entity.AppID, callerID string) (*entity.User, error) {
 	var u *entity.User
 	tx := db.Model(&entity.User{}).
 		Where("application_id = ?", appID).

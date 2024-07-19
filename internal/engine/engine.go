@@ -3,6 +3,7 @@ package engine
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/pagu-project/Pagu/config"
@@ -11,6 +12,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command/market"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
+	"github.com/pagu-project/Pagu/internal/engine/command/validator"
 	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
 	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -28,19 +30,17 @@ type BotEngine struct {
 	cancel context.CancelFunc
 
 	clientMgr client.Manager
+	db        repository.Database
 	rootCmd   *command.Command
 
+	// commands
 	calculatorCmd *calculator.Calculator
 	networkCmd    *network.Network
 	phoenixCmd    *phoenixtestnet.Phoenix
 	zealyCmd      *zealy.Zealy
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
-}
-
-type IEngine interface {
-	Run(appID entity.AppID, callerID string, tokens []string) (*command.CommandResult, error)
-	Commands() []command.Command
+	validatorCmd  *validator.Validator
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -114,11 +114,13 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
+	validatorCmd := validator.NewValidator(db)
 
 	return &BotEngine{
 		ctx:           ctx,
 		cancel:        cnl,
 		clientMgr:     cm,
+		db:            db,
 		rootCmd:       rootCmd,
 		networkCmd:    netCmd,
 		calculatorCmd: calcCmd,
@@ -126,6 +128,7 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 		zealyCmd:      zealyCmd,
 		voucherCmd:    voucherCmd,
 		marketCmd:     marketCmd,
+		validatorCmd:  validatorCmd,
 	}
 }
 
@@ -140,14 +143,15 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.validatorCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
 
-func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) command.CommandResult {
+func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]string) command.CommandResult {
 	log.Debug("run command", "callerID", callerID, "inputs", tokens)
 
-	cmd, argsIndex := be.getCommand(tokens)
+	cmd, args := be.getCommand(tokens)
 	if !cmd.HasAppID(appID) {
 		return cmd.FailedResult("unauthorized appID: %v", appID)
 	}
@@ -156,54 +160,55 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens []string) c
 		return cmd.HelpResult()
 	}
 
-	args := tokens[argsIndex:]
-	err := cmd.CheckArgs(args)
+	user, err := be.GetUser(appID, callerID)
 	if err != nil {
-		return cmd.ErrorResult(err)
+		log.Error(err.Error())
+		return cmd.ErrorResult(fmt.Errorf("user is not defined in %s application", appID.String()))
 	}
 
 	for _, middlewareFunc := range cmd.Middlewares {
-		if err = middlewareFunc(cmd, appID, callerID, args...); err != nil {
+		if err := middlewareFunc(user, cmd, args); err != nil {
 			log.Error(err.Error())
 			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
 		}
 	}
 
-	return cmd.Handler(cmd, appID, callerID, args...)
+	return cmd.Handler(user, cmd, args)
 }
 
-func (be *BotEngine) getCommand(tokens []string) (*command.Command, int) {
-	index := 0
+func (be *BotEngine) getCommand(tokens map[string]string) (*command.Command, map[string]string) {
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands
-	for {
-		if len(tokens) <= index {
-			break
-		}
-		token := tokens[index]
-		index++
+	args := make(map[string]string)
 
+	for key := range tokens {
 		found := false
 		for _, cmd := range cmds {
-			if cmd.Name == token {
-				targetCmd = cmd
+			if cmd.Name != key {
+				continue
+			}
+			targetCmd = cmd
+			if len(cmd.SubCommands) > 0 {
 				cmds = cmd.SubCommands
 				found = true
-
 				break
 			}
+			for _, a := range cmd.Args {
+				for argKey, argValue := range tokens {
+					if a.Name == argKey {
+						args[a.Name] = argValue
+					}
+				}
+			}
+			found = true
+			break
 		}
-
 		if !found {
 			break
 		}
 	}
 
-	if len(targetCmd.Args) != 0 && index != 0 {
-		return targetCmd, index - 1 // TODO: FIX ME IN THE MAIN LOGIC
-	}
-
-	return targetCmd, index
+	return targetCmd, args
 }
 
 func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
@@ -234,6 +239,19 @@ func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
 		TotalAccounts:       chainInfo.TotalAccounts,
 		CirculatingSupply:   cs,
 	}, nil
+}
+
+func (be *BotEngine) GetUser(appID entity.AppID, callerID string) (*entity.User, error) {
+	if u, _ := be.db.GetUserByApp(appID, callerID); u != nil {
+		return u, nil
+	}
+
+	user := &entity.User{ApplicationID: appID, CallerID: callerID}
+	if err := be.db.AddUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (be *BotEngine) Stop() {

@@ -66,6 +66,7 @@ func (n *Network) GetCommand() *command.Command {
 			{
 				Name:     "validator_address",
 				Desc:     "Your validator address",
+				InputBox: command.InputBoxText,
 				Optional: false,
 			},
 		},

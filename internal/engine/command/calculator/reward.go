@@ -1,6 +1,7 @@
 package calculator
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -10,12 +11,14 @@ import (
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (bc *Calculator) calcRewardHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args ...string,
+func (bc *Calculator) calcRewardHandler(
+	_ *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
-	stake, err := strconv.Atoi(args[0])
+	stake, err := amount.FromString(args["stake"])
 	if err != nil {
-		return cmd.ErrorResult(err)
+		return cmd.ErrorResult(errors.New("invalid stake param"))
 	}
 
 	if stake < 1 || stake > 1_000 {
@@ -23,9 +26,9 @@ func (bc *Calculator) calcRewardHandler(cmd *command.Command,
 			fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
 	}
 
-	numOfDays, err := strconv.Atoi(args[1])
+	numOfDays, err := strconv.Atoi(args["days"])
 	if err != nil {
-		return cmd.ErrorResult(err)
+		return cmd.ErrorResult(errors.New("invalid days param"))
 	}
 
 	if numOfDays < 1 || numOfDays > 365 {
@@ -38,7 +41,7 @@ func (bc *Calculator) calcRewardHandler(cmd *command.Command,
 		return cmd.ErrorResult(err)
 	}
 
-	reward := int64(stake*blocks) / int64(amount.Amount(bi.TotalPower).ToPAC())
+	reward := (stake.ToNanoPAC() * int64(blocks)) / bi.TotalPower
 
 	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator "+
 		"in %d days ⏰ with %s total power ⚡ of committee."+

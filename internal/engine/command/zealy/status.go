@@ -5,9 +5,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 )
 
-func (z *Zealy) statusHandler(cmd *command.Command,
-	_ entity.AppID, _ string, _ ...string,
-) command.CommandResult {
+func (z *Zealy) statusHandler(_ *entity.User, cmd *command.Command, _ map[string]string) command.CommandResult {
 	allUsers, err := z.db.GetAllZealyUser()
 	if err != nil {
 		return cmd.ErrorResult(err)

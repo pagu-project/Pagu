@@ -9,10 +9,8 @@ import (
 	utils2 "github.com/pagu-project/Pagu/pkg/utils"
 )
 
-func (n *Network) nodeInfoHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args ...string,
-) command.CommandResult {
-	valAddress := args[0]
+func (n *Network) nodeInfoHandler(_ *entity.User, cmd *command.Command, args map[string]string) command.CommandResult {
+	valAddress := args["validator_address"]
 
 	peerInfo, err := n.clientMgr.GetPeerInfo(valAddress)
 	if err != nil {

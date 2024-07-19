@@ -34,6 +34,7 @@ func (z *Zealy) GetCommand() *command.Command {
 			{
 				Name:     "address",
 				Desc:     "Your Pactus address",
+				InputBox: command.InputBoxText,
 				Optional: false,
 			},
 		},

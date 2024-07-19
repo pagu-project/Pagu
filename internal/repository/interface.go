@@ -5,4 +5,5 @@ type Database interface {
 	IVoucher
 	IFaucet
 	IZealy
+	IValidator
 }

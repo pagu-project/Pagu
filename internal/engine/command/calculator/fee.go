@@ -1,20 +1,24 @@
 package calculator
 
 import (
-	"github.com/pactus-project/pactus/types/amount"
+	"errors"
+
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
-func (bc *Calculator) calcFeeHandler(cmd *command.Command,
-	_ entity.AppID, _ string, args ...string,
+func (bc *Calculator) calcFeeHandler(
+	_ *entity.User,
+	cmd *command.Command,
+	args map[string]string,
 ) command.CommandResult {
-	amt, err := amount.FromString(args[0])
+	amt, err := amount.FromString(args["amount"])
 	if err != nil {
-		return cmd.ErrorResult(err)
+		return cmd.ErrorResult(errors.New("invalid amount param"))
 	}
 
-	fee, err := bc.clientMgr.GetFee(int64(amt))
+	fee, err := bc.clientMgr.GetFee(amt.ToNanoPAC())
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
@@ -22,5 +26,5 @@ func (bc *Calculator) calcFeeHandler(cmd *command.Command,
 	feeAmount := amount.Amount(fee)
 
 	return cmd.SuccessfulResult("Sending %s will cost %s with current fee percentage."+
-		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt, feeAmount.String())
+		"\n> Note: Consider unbond and sortition transaction fee is 0 PAC always.", amt.String(), feeAmount.String())
 }

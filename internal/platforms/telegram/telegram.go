@@ -96,9 +96,14 @@ func (bot *TelegramBot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 
 		// Split the message into an array.
 		messageParts := strings.Split(fullMessage, " ")
+		beInput := make(map[string]string)
+
+		for _, t := range messageParts {
+			beInput[t] = t
+		}
 
 		// Pass the array to the bot engine.
-		res := bot.botEngine.Run(entity.AppIDTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), messageParts)
+		res := bot.botEngine.Run(entity.AppIDTelegram, strconv.FormatInt(ctx.EffectiveSender.User.Id, 10), beInput)
 
 		// Check if the command execution resulted in an error.
 		if res.Error != "" {

@@ -51,10 +51,12 @@ func (hh *HTTPHandler) Run(c echo.Context) error {
 		return err
 	}
 
-	beInput := []string{}
+	beInput := make(map[string]string)
 
 	tokens := strings.Split(r.Command, " ")
-	beInput = append(beInput, tokens...)
+	for _, t := range tokens {
+		beInput[t] = t
+	}
 
 	cmdResult := hh.engine.Run(entity.AppIDHTTP, c.RealIP(), beInput)
 
