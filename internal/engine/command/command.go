@@ -18,10 +18,11 @@ var (
 type InputBox int
 
 const (
-	InputBoxText   InputBox = iota
-	InputBoxNumber          = iota
-	InputBoxFile            = iota
-	InputBoxAmount          = iota
+	InputBoxText InputBox = iota
+	InputBoxNumber
+	InputBoxFile
+	InputBoxAmount
+	InputBoxToggle
 )
 
 func (i InputBox) Int() int {

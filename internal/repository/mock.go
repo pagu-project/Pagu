@@ -53,6 +53,20 @@ func (mr *MockDatabaseMockRecorder) AddFaucet(f any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFaucet", reflect.TypeOf((*MockDatabase)(nil).AddFaucet), f)
 }
 
+// AddNotification mocks base method.
+func (m *MockDatabase) AddNotification(v *entity.Notification) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddNotification", v)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddNotification indicates an expected call of AddNotification.
+func (mr *MockDatabaseMockRecorder) AddNotification(v any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNotification", reflect.TypeOf((*MockDatabase)(nil).AddNotification), v)
+}
+
 // AddUser mocks base method.
 func (m *MockDatabase) AddUser(u *entity.User) error {
 	m.ctrl.T.Helper()

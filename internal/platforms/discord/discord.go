@@ -219,6 +219,11 @@ func parseCmdOption(
 		case discordgo.ApplicationCommandOptionNumber:
 			v := strconv.FormatFloat(o.FloatValue(), 'f', 10, 64)
 			result[o.Name] = v
+		case discordgo.ApplicationCommandOptionBoolean:
+			result[o.Name] = "FALSE"
+			if o.BoolValue() {
+				result[o.Name] = "TRUE"
+			}
 		case discordgo.ApplicationCommandOptionAttachment:
 			// TODO: handle multiple attachment
 			for _, attachment := range rootCmd.Resolved.Attachments {
@@ -342,6 +347,8 @@ func setCommandArgType(inputBox int) discordgo.ApplicationCommandOptionType {
 		return discordgo.ApplicationCommandOptionAttachment
 	case 3:
 		return discordgo.ApplicationCommandOptionNumber
+	case 4:
+		return discordgo.ApplicationCommandOptionBoolean
 	default:
 		return discordgo.ApplicationCommandOptionString
 	}
