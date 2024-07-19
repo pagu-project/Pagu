@@ -39,15 +39,24 @@ func (v *Validator) importHandler(_ *entity.User, cmd *command.Command, args map
 		return cmd.ErrorResult(errors.New("failed to read attachment content"))
 	}
 
-	for rowIndex, row := range records {
-		if len(row) != 2 {
+	if len(records) < 2 {
+		err = fmt.Errorf("no record founded. please add at least one record to csv file")
+		return cmd.ErrorResult(err)
+	}
+
+	for rowIndex := 1; rowIndex < len(records); rowIndex++ {
+		if len(records[rowIndex]) != 2 {
 			err = fmt.Errorf("invalid data at row %d", rowIndex)
 			return cmd.ErrorResult(err)
 		}
 
+		if rowIndex == 0 {
+			continue
+		}
+
 		validator := &entity.Validator{
-			Name:  row[0],
-			Email: row[1],
+			Name:  records[rowIndex][0],
+			Email: records[rowIndex][1],
 		}
 
 		if err = v.db.AddValidator(validator); err != nil {
