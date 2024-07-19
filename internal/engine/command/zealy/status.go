@@ -3,6 +3,7 @@ package zealy
 import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
+	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
 func (z *Zealy) statusHandler(_ *entity.User, cmd *command.Command, _ map[string]string) command.CommandResult {
@@ -15,25 +16,25 @@ func (z *Zealy) statusHandler(_ *entity.User, cmd *command.Command, _ map[string
 	totalClaimed := 0
 	totalNotClaimed := 0
 
-	totalAmount := 0
-	totalClaimedAmount := 0
-	totalNotClaimedAmount := 0
+	totalAmount := amount.Amount(0)
+	totalClaimedAmount := amount.Amount(0)
+	totalNotClaimedAmount := amount.Amount(0)
 
 	for _, u := range allUsers {
 		total++
-		totalAmount += int(u.Amount)
+		totalAmount += u.Amount
 
 		if u.IsClaimed() {
 			totalClaimed++
-			totalClaimedAmount += int(u.Amount)
+			totalClaimedAmount += u.Amount
 		} else {
 			totalNotClaimed++
-			totalNotClaimedAmount += int(u.Amount)
+			totalNotClaimedAmount += u.Amount
 		}
 	}
 
 	return cmd.SuccessfulResult("Total Users: %v\nTotal Claims: %v\nTotal not remained claims: %v\nTotal Coins: %v PAC\n"+
 		"Total claimed coins: %v PAC\nTotal not claimed coins: %v PAC\n", total, totalClaimed, totalNotClaimed,
-		totalAmount, totalClaimedAmount, totalNotClaimedAmount,
+		totalAmount.ToPAC(), totalClaimedAmount.ToPAC(), totalNotClaimedAmount.ToPAC(),
 	)
 }
