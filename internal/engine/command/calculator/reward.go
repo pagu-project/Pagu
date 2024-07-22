@@ -49,6 +49,6 @@ func (bc *Calculator) calcRewardHandler(
 		"in %d days ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. "+
 		"It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), numOfDays,
+		utils.FormatNumber(reward), stake, numOfDays,
 		utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
 }
