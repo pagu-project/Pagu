@@ -21,7 +21,9 @@ func (bc *Calculator) calcRewardHandler(
 		return cmd.ErrorResult(errors.New("invalid stake param"))
 	}
 
-	if stake < 1 || stake > 1_000 {
+	minStake, _ := amount.NewAmount(1)
+	maxStake, _ := amount.NewAmount(1000)
+	if stake < minStake || stake > maxStake {
 		return cmd.ErrorResult(
 			fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
 	}
