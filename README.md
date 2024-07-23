@@ -21,12 +21,16 @@ commands:
 
 > Note: make sure you enable the gRPC for them.
 
-Then you can make a .env file by following .env.example and fill it with you own node data and test wallet.
+Make sure you run a postgres instance using docker on your local machine and make a proper config based on [this](./config/), also you can find deployment info and guidelines [here](./deployment/) to run your local instance on Pagu using docker compose.
 
 > Note2: you can make test-net wallets like: `pactus-wallet create --testnet`
 
 
 Last step is to run `make build` and use the pagu-cli binary to start testing your new feature or command.
+
+## Assets
+
+The Pagu logo and other assets are available on [here](./assets/) on this repo for usage.
 
 ## Contributing
 
