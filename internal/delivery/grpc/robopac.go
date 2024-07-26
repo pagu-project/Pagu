@@ -26,7 +26,7 @@ func (rs *robopacServer) Run(_ context.Context, er *robopac.RunRequest) (*robopa
 		beInput[t] = t
 	}
 
-	res := rs.engine.Run(entity.AppIDgRPC, er.Id, beInput)
+	res := rs.engine.Run(entity.AppIDgRPC, er.Id, nil, beInput)
 
 	return &robopac.RunResponse{
 		Response: res.Message,
