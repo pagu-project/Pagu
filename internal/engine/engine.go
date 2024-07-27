@@ -12,7 +12,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command/market"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
-	"github.com/pagu-project/Pagu/internal/engine/command/validator"
 	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
 	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -40,7 +39,6 @@ type BotEngine struct {
 	zealyCmd      *zealy.Zealy
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
-	validatorCmd  *validator.Validator
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -114,7 +112,6 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
-	validatorCmd := validator.NewValidator(db)
 
 	return &BotEngine{
 		ctx:           ctx,
@@ -128,7 +125,6 @@ func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Dat
 		zealyCmd:      zealyCmd,
 		voucherCmd:    voucherCmd,
 		marketCmd:     marketCmd,
-		validatorCmd:  validatorCmd,
 	}
 }
 
@@ -143,7 +139,6 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
-	be.rootCmd.AddSubCommand(be.validatorCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }

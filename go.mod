@@ -5,7 +5,6 @@ go 1.22.2
 require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27
 	github.com/bwmarrin/discordgo v0.28.1
-	github.com/h2non/gock v1.2.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/pactus-project/pactus v1.3.0
 	github.com/spf13/cobra v1.8.1
@@ -25,7 +24,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
-	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/boxo v0.21.0 // indirect
