@@ -58,7 +58,7 @@ func (hh *HTTPHandler) Run(c echo.Context) error {
 		beInput[t] = t
 	}
 
-	cmdResult := hh.engine.Run(entity.AppIDHTTP, c.RealIP(), beInput)
+	cmdResult := hh.engine.Run(entity.AppIDHTTP, c.RealIP(), nil, beInput)
 
 	return c.JSON(http.StatusOK, RunResponse{
 		Result: cmdResult.Message,

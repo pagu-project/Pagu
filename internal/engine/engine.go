@@ -148,10 +148,15 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddHelpSubCommand()
 }
 
-func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]string) command.CommandResult {
-	log.Debug("run command", "callerID", callerID, "inputs", tokens)
+func (be *BotEngine) Run(
+	appID entity.AppID,
+	callerID string,
+	commands []string,
+	args map[string]string,
+) command.CommandResult {
+	log.Debug("run command", "callerID", callerID, "commands", args, "inputs", args)
 
-	cmd, args := be.getCommand(tokens)
+	cmd := be.getTargetCommand(commands)
 	if !cmd.HasAppID(appID) {
 		return cmd.FailedResult("unauthorized appID: %v", appID)
 	}
@@ -160,31 +165,30 @@ func (be *BotEngine) Run(appID entity.AppID, callerID string, tokens map[string]
 		return cmd.HelpResult()
 	}
 
-	user, err := be.GetUser(appID, callerID)
+	caller, err := be.GetUser(appID, callerID)
 	if err != nil {
 		log.Error(err.Error())
 		return cmd.ErrorResult(fmt.Errorf("user is not defined in %s application", appID.String()))
 	}
 
 	for _, middlewareFunc := range cmd.Middlewares {
-		if err := middlewareFunc(user, cmd, args); err != nil {
+		if err := middlewareFunc(caller, cmd, args); err != nil {
 			log.Error(err.Error())
 			return cmd.ErrorResult(errors.New("command is not available. please try again later"))
 		}
 	}
 
-	return cmd.Handler(user, cmd, args)
+	return cmd.Handler(caller, cmd, args)
 }
 
-func (be *BotEngine) getCommand(tokens map[string]string) (*command.Command, map[string]string) {
+func (be *BotEngine) getTargetCommand(inCommands []string) *command.Command {
 	targetCmd := be.rootCmd
 	cmds := be.rootCmd.SubCommands
-	args := make(map[string]string)
 
-	for key := range tokens {
+	for _, inCmd := range inCommands {
 		found := false
 		for _, cmd := range cmds {
-			if cmd.Name != key {
+			if cmd.Name != inCmd {
 				continue
 			}
 			targetCmd = cmd
@@ -192,13 +196,6 @@ func (be *BotEngine) getCommand(tokens map[string]string) (*command.Command, map
 				cmds = cmd.SubCommands
 				found = true
 				break
-			}
-			for _, a := range cmd.Args {
-				for argKey, argValue := range tokens {
-					if a.Name == argKey {
-						args[a.Name] = argValue
-					}
-				}
 			}
 			found = true
 			break
@@ -208,7 +205,7 @@ func (be *BotEngine) getCommand(tokens map[string]string) (*command.Command, map
 		}
 	}
 
-	return targetCmd, args
+	return targetCmd
 }
 
 func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {

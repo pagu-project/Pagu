@@ -21,7 +21,9 @@ func (bc *Calculator) calcRewardHandler(
 		return cmd.ErrorResult(errors.New("invalid stake param"))
 	}
 
-	if stake < 1 || stake > 1_000 {
+	minStake, _ := amount.NewAmount(1)
+	maxStake, _ := amount.NewAmount(1000)
+	if stake < minStake || stake > maxStake {
 		return cmd.ErrorResult(
 			fmt.Errorf("%v is invalid amount; minimum stake amount is 1 PAC and maximum is 1,000 PAC", stake))
 	}
@@ -47,6 +49,6 @@ func (bc *Calculator) calcRewardHandler(
 		"in %d days ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. "+
 		"It will vary depending on your stake amount and total network power.",
-		utils.FormatNumber(reward), utils.FormatNumber(int64(stake)), numOfDays,
+		utils.FormatNumber(reward), stake, numOfDays,
 		utils.FormatNumber(int64(amount.Amount(bi.TotalPower).ToPAC())))
 }

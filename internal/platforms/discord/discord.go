@@ -71,7 +71,7 @@ func (bot *DiscordBot) deleteAllCommands() {
 
 func (bot *DiscordBot) registerCommands() error {
 	bot.Session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		bot.commandHandler(bot, s, i)
+		bot.commandHandler(s, i)
 	})
 
 	beCmds := bot.engine.Commands()
@@ -180,55 +180,49 @@ func (bot *DiscordBot) registerCommands() error {
 	return nil
 }
 
-func (bot *DiscordBot) commandHandler(db *DiscordBot, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *DiscordBot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if i.GuildID != bot.cfg.GuildID {
 		bot.respondErrMsg("Please send messages on server chat", s, i)
 		return
 	}
 
-	// Get the application command data
+	var commands []string
 	args := make(map[string]string)
-	rootCmd := i.ApplicationCommandData()
-	args[rootCmd.Name] = rootCmd.Name
-	for _, opt := range rootCmd.Options {
-		args = parseCmdOption(&rootCmd, opt, args)
+
+	// Get the application command data
+	discordCmd := i.ApplicationCommandData()
+	commands = append(commands, discordCmd.Name)
+	for _, opt := range discordCmd.Options {
+		if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
+			commands = append(commands, opt.Name)
+			for _, o := range opt.Options {
+				args = parseArgs(&discordCmd, o, args)
+			}
+		}
 	}
 
-	res := db.engine.Run(entity.AppIDDiscord, i.Member.User.ID, args)
+	res := bot.engine.Run(entity.AppIDDiscord, i.Member.User.ID, commands, args)
 	bot.respondResultMsg(res, s, i)
 }
 
-func parseCmdOption(
+func parseArgs(
 	rootCmd *discordgo.ApplicationCommandInteractionData,
 	opt *discordgo.ApplicationCommandInteractionDataOption,
 	result map[string]string,
 ) map[string]string {
-	if opt.Type == discordgo.ApplicationCommandOptionSubCommand {
-		result[opt.Name] = opt.Name
-	}
-
-	for _, o := range opt.Options {
-		//nolint
-		switch o.Type {
-		case discordgo.ApplicationCommandOptionSubCommand:
-			return parseCmdOption(rootCmd, o, result)
-		case discordgo.ApplicationCommandOptionString:
-			result[o.Name] = o.StringValue()
-		case discordgo.ApplicationCommandOptionInteger:
-			result[o.Name] = strconv.Itoa(int(o.IntValue()))
-		case discordgo.ApplicationCommandOptionNumber:
-			v := strconv.FormatFloat(o.FloatValue(), 'f', 10, 64)
-			result[o.Name] = v
-		case discordgo.ApplicationCommandOptionBoolean:
-			result[o.Name] = "FALSE"
-			if o.BoolValue() {
-				result[o.Name] = "TRUE"
-			}
-		case discordgo.ApplicationCommandOptionAttachment:
-			// TODO: handle multiple attachment
-			for _, attachment := range rootCmd.Resolved.Attachments {
-				result[o.Name] = attachment.URL
-			}
+	//nolint
+	switch opt.Type {
+	case discordgo.ApplicationCommandOptionString:
+		result[opt.Name] = opt.StringValue()
+	case discordgo.ApplicationCommandOptionInteger:
+		result[opt.Name] = strconv.Itoa(int(opt.IntValue()))
+	case discordgo.ApplicationCommandOptionNumber:
+		v := strconv.FormatFloat(opt.FloatValue(), 'f', 10, 64)
+		result[opt.Name] = v
+	case discordgo.ApplicationCommandOptionAttachment:
+		// TODO: handle multiple attachment
+		for _, attachment := range rootCmd.Resolved.Attachments {
+			result[opt.Name] = attachment.URL
 		}
 	}
 
