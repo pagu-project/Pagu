@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27
 	github.com/bwmarrin/discordgo v0.28.1
+	github.com/go-mail/mail/v2 v2.3.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/pactus-project/pactus v1.3.0
 	github.com/spf13/cobra v1.8.1
@@ -55,6 +56,8 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 	google.golang.org/protobuf v1.34.2
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/mail.v2 v2.3.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v3 v3.0.1
 )
