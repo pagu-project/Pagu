@@ -1,27 +1,24 @@
 package entity
 
-import "gorm.io/gorm"
-
-type NotificationType int
-
-const (
-	NotificationTypeEmail = 0
+import (
+	"github.com/pagu-project/Pagu/pkg/notification"
+	"gorm.io/gorm"
 )
 
 type NotificationStatus int
 
 const (
 	NotificationStatusPending = iota
-	NotificationStatusInProgress
 	NotificationStatusDone
 	NotificationStatusFail
 )
 
 type Notification struct {
-	ID     uint `gorm:"primaryKey;unique"`
-	Type   NotificationType
-	Email  string
-	Status NotificationStatus
+	ID        uint `gorm:"primaryKey;unique"`
+	Type      notification.NotificationType
+	Recipient string
+	Data      []byte `gorm:"Blob"`
+	Status    NotificationStatus
 
 	gorm.Model
 }

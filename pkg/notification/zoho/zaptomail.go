@@ -3,20 +3,23 @@ package zoho
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-mail/mail/v2"
 	"html/template"
 	"time"
+
+	"github.com/go-mail/mail/v2"
 )
 
 type ZapToMailerConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host      string
+	Port      int
+	Username  string
+	Password  string
+	Templates map[string]string
 }
 
 type ZapToMailer struct {
-	dialer *mail.Dialer
+	dialer    *mail.Dialer
+	templates map[string]string
 }
 
 func NewZapToMailer(config ZapToMailerConfig) *ZapToMailer {
@@ -24,7 +27,8 @@ func NewZapToMailer(config ZapToMailerConfig) *ZapToMailer {
 	dialer.Timeout = 5 * time.Second
 
 	return &ZapToMailer{
-		dialer: dialer,
+		dialer:    dialer,
+		templates: config.Templates,
 	}
 }
 
@@ -32,19 +36,19 @@ func (z *ZapToMailer) SendByTemplate(sender string, recipients []string, tmpl *t
 	subject := new(bytes.Buffer)
 	err := tmpl.ExecuteTemplate(subject, "subject", data)
 	if err != nil {
-		return fmt.Errorf("error executing template with subject: %v", err)
+		return fmt.Errorf("error executing template with subject: %w", err)
 	}
 
 	plainBody := new(bytes.Buffer)
 	err = tmpl.ExecuteTemplate(plainBody, "plainBody", data)
 	if err != nil {
-		return fmt.Errorf("error executing plainbody: %v", err)
+		return fmt.Errorf("error executing plainbody: %w", err)
 	}
 
 	htmlBody := new(bytes.Buffer)
 	err = tmpl.ExecuteTemplate(htmlBody, "htmlBody", data)
 	if err != nil {
-		return fmt.Errorf("error executing HTML body: %v", err)
+		return fmt.Errorf("error executing HTML body: %w", err)
 	}
 
 	msg := mail.NewMessage()
@@ -54,11 +58,5 @@ func (z *ZapToMailer) SendByTemplate(sender string, recipients []string, tmpl *t
 	msg.SetBody("text/plain", plainBody.String())
 	msg.AddAlternative("text/html", htmlBody.String())
 
-	//return z.dialer.DialAndSend(msg)
-	err = z.dialer.DialAndSend(msg)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return z.dialer.DialAndSend(msg)
 }

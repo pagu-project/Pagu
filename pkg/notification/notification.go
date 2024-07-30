@@ -5,15 +5,25 @@ import (
 	"html/template"
 )
 
-type NotificationType string
-
-const (
-	NotificationTypeMail NotificationType = "mail"
-	//other types like sms, firebase,...
+type (
+	Provider         string
+	ProviderConfig   any
+	NotificationType int
 )
 
-type Provider string
-type ProviderConfig any
+const (
+	NotificationTypeMail NotificationType = 0
+	// other types like sms, firebase,...
+)
+
+func (n NotificationType) String() string {
+	switch n {
+	case NotificationTypeMail:
+		return "mail"
+	default:
+		return ""
+	}
+}
 
 const (
 	NotificationProviderZapToMail = "zoho"
@@ -28,6 +38,6 @@ func New(notificationType NotificationType, configs ProviderConfig) (ISender, er
 	case NotificationTypeMail:
 		return &EmailSender{configs}, nil
 	default:
-		return nil, fmt.Errorf("unsupported notification type: %s", notificationType)
+		return nil, fmt.Errorf("unsupported notification type: %s", notificationType.String())
 	}
 }

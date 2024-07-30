@@ -13,6 +13,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/amount"
+	"github.com/pagu-project/Pagu/pkg/notification"
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
@@ -65,6 +66,7 @@ func (v *Voucher) createBulkHandler(
 	args map[string]string,
 ) command.CommandResult {
 	fileURL := args["file"]
+	notify := args["notify"]
 
 	httpClient := new(http.Client)
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, fileURL, http.NoBody)
@@ -140,11 +142,12 @@ func (v *Voucher) createBulkHandler(
 			return cmd.ErrorResult(err)
 		}
 
-		if args["notify"] == "TRUE" {
+		if notify == "TRUE" {
 			err = v.db.AddNotification(&entity.Notification{
-				Type:   entity.NotificationTypeEmail,
-				Email:  vch.Email,
-				Status: entity.NotificationStatusPending,
+				Type:      notification.NotificationTypeMail,
+				Recipient: vch.Email,
+				Data:      []byte(vch.Code),
+				Status:    entity.NotificationStatusPending,
 			})
 			if err != nil {
 				return cmd.ErrorResult(err)

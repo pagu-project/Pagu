@@ -2,8 +2,9 @@ package notification
 
 import (
 	"fmt"
-	"github.com/pagu-project/Pagu/pkg/notification/zoho"
 	"html/template"
+
+	"github.com/pagu-project/Pagu/pkg/notification/zoho"
 )
 
 type EmailSender struct {
@@ -14,7 +15,13 @@ type IEmailSender interface {
 	SendByTemplate(sender string, recipients []string, tmpl *template.Template, data any) error
 }
 
-func (e *EmailSender) SendTemplateMail(provider Provider, sender string, recipients []string, tmpl *template.Template, data any) error {
+func (e *EmailSender) SendTemplateMail(
+	provider Provider,
+	sender string,
+	recipients []string,
+	tmpl *template.Template,
+	data any,
+) error {
 	switch provider {
 	case NotificationProviderZapToMail:
 		config, ok := e.ProviderConfig.(zoho.ZapToMailerConfig)
