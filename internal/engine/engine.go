@@ -265,7 +265,7 @@ func newBotEngine(ctx context.Context,
 
 	netCmd := network.NewNetwork(ctx, cm)
 	calcCmd := calculator.NewCalculator(cm)
-	ptCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
+	phoenixCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
 	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
@@ -278,7 +278,7 @@ func newBotEngine(ctx context.Context,
 		rootCmd:       rootCmd,
 		networkCmd:    netCmd,
 		calculatorCmd: calcCmd,
-		phoenixCmd:    ptCmd,
+		phoenixCmd:    phoenixCmd,
 		zealyCmd:      zealyCmd,
 		voucherCmd:    voucherCmd,
 		marketCmd:     marketCmd,
