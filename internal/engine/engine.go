@@ -257,7 +257,7 @@ func newBotEngine(ctx context.Context,
 	}
 
 	// price caching job
-	priceCache := cache.NewBasic[string, entity.Price](0 * time.Second)
+	priceCache := cache.NewBasic[string, entity.Price](10 * time.Second)
 	priceJob := job.NewPrice(priceCache)
 	priceJobSched := job.NewScheduler()
 	priceJobSched.Submit(priceJob)
