@@ -20,3 +20,5 @@ dev_wallet
 config/config.yml
 config/config.*.yml
 config/wallets
+config/templates
+

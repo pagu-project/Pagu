@@ -27,7 +27,7 @@ func setup(t *testing.T) (*Voucher, repository.MockDatabase, client.MockManager,
 	return mockVoucher, *mockDB, *mockClient, *mockWallet
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateOne(t *testing.T) {
 	voucher, db, _, _ := setup(t)
 
 	t.Run("normal", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestCreate(t *testing.T) {
 		args := make(map[string]string)
 		args["amount"] = "100"
 		args["valid-months"] = "1"
-		result := voucher.createHandler(caller, cmd, args)
+		result := voucher.createOneHandler(caller, cmd, args)
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
 	})
@@ -61,7 +61,7 @@ func TestCreate(t *testing.T) {
 		args := make(map[string]string)
 		args["amount"] = "1001"
 		args["valid-months"] = "1"
-		result := voucher.createHandler(caller, cmd, args)
+		result := voucher.createOneHandler(caller, cmd, args)
 		assert.False(t, result.Successful)
 		assert.Contains(t, result.Message, "stake amount is more than 1000")
 	})
@@ -79,7 +79,7 @@ func TestCreate(t *testing.T) {
 		args := make(map[string]string)
 		args["amount"] = "100"
 		args["valid-months"] = "1.1"
-		result := voucher.createHandler(caller, cmd, args)
+		result := voucher.createOneHandler(caller, cmd, args)
 		assert.False(t, result.Successful)
 	})
 
@@ -98,8 +98,22 @@ func TestCreate(t *testing.T) {
 		args["valid-months"] = "12"
 		args["recipient"] = "Kayhan"
 		args["description"] = "Testnet node"
-		result := voucher.createHandler(caller, cmd, args)
+		result := voucher.createOneHandler(caller, cmd, args)
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
+	})
+}
+
+func TestCreateBulk(t *testing.T) {
+	voucher, db, _, _ := setup(t)
+	t.Run("create and save notification", func(t *testing.T) {
+		db.EXPECT().GetPendingMailNotification().Return(
+			&entity.Notification{}, errors.New(""),
+		).AnyTimes()
+
+		db.EXPECT().AddNotification(gomock.Any()).Return(nil).AnyTimes()
+
+		err := voucher.createNotification("foo@bar", "12345678")
+		assert.Equal(t, nil, err)
 	})
 }

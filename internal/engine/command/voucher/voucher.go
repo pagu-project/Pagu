@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	CommandName       = "voucher"
-	ClaimCommandName  = "claim"
-	CreateCommandName = "create"
-	StatusCommandName = "status"
-	HelpCommandName   = "help"
+	CommandName           = "voucher"
+	ClaimCommandName      = "claim"
+	CreateOneCommandName  = "create-one"
+	CreateBulkCommandName = "create-bulk"
+	StatusCommandName     = "status"
+	HelpCommandName       = "help"
 )
 
 type Voucher struct {
@@ -57,9 +58,9 @@ func (v *Voucher) GetCommand() *command.Command {
 		TargetFlag:  command.TargetMaskMain,
 	}
 
-	subCmdCreate := &command.Command{
-		Name: CreateCommandName,
-		Help: "Add a new voucher to database",
+	subCmdCreateOne := &command.Command{
+		Name: CreateOneCommandName,
+		Help: "Create a new voucher code",
 		Args: []command.Args{
 			{
 				Name:     "amount",
@@ -89,7 +90,31 @@ func (v *Voucher) GetCommand() *command.Command {
 		SubCommands: nil,
 		AppIDs:      entity.AllAppIDs(),
 		Middlewares: []command.MiddlewareFunc{middlewareHandler.OnlyModerator},
-		Handler:     v.createHandler,
+		Handler:     v.createOneHandler,
+		TargetFlag:  command.TargetMaskModerator,
+	}
+
+	subCmdCreateBulk := &command.Command{
+		Name: CreateBulkCommandName,
+		Help: "Create more than one voucher code by importing file",
+		Args: []command.Args{
+			{
+				Name:     "file",
+				Desc:     "include list of vouchers receivers",
+				InputBox: command.InputBoxFile,
+				Optional: false,
+			},
+			{
+				Name:     "notify",
+				Desc:     "Notify receivers by sending mail",
+				InputBox: command.InputBoxToggle,
+				Optional: false,
+			},
+		},
+		SubCommands: nil,
+		AppIDs:      entity.AllAppIDs(),
+		Middlewares: []command.MiddlewareFunc{middlewareHandler.OnlyModerator},
+		Handler:     v.createBulkHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}
 
@@ -122,7 +147,8 @@ func (v *Voucher) GetCommand() *command.Command {
 	}
 
 	cmdVoucher.AddSubCommand(subCmdClaim)
-	cmdVoucher.AddSubCommand(subCmdCreate)
+	cmdVoucher.AddSubCommand(subCmdCreateOne)
+	cmdVoucher.AddSubCommand(subCmdCreateBulk)
 	cmdVoucher.AddSubCommand(subCmdStatus)
 	return cmdVoucher
 }

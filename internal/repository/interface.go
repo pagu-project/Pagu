@@ -6,4 +6,5 @@ type Database interface {
 	IFaucet
 	IZealy
 	IValidator
+	INotification
 }

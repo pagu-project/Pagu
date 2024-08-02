@@ -6,15 +6,17 @@ import (
 )
 
 type Voucher struct {
-	ID          uint   `gorm:"primaryKey;unique"`
-	Creator     uint   `gorm:"size:255"`
-	Code        string `gorm:"size:8"`
+	ID          uint          `gorm:"primaryKey;unique"`
+	Creator     uint          `gorm:"size:255"`
+	Code        string        `gorm:"size:8"`
+	Amount      amount.Amount `gorm:"column:amount"`
 	Desc        string
+	Email       string
 	Recipient   string
 	ValidMonths uint8
-	Amount      amount.Amount `gorm:"column:amount"`
 	TxHash      string
 	ClaimedBy   uint
+
 	gorm.Model
 }
 

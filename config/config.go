@@ -23,6 +23,7 @@ type Config struct {
 	Phoenix      *PhoenixNetwork `yaml:"phoenix"`
 	DiscordBot   *DiscordBot     `yaml:"discord"`
 	Telegram     *Telegram       `yaml:"telegram"`
+	Notification *Notification   `yaml:"notification"`
 }
 
 type Database struct {
@@ -67,6 +68,22 @@ type Telegram struct {
 	BotToken  string `yaml:"bot_token"`
 	ChatID    int64  `yaml:"chat_id"`
 	GroupLink string `yaml:"group_link"`
+}
+
+type Notification struct {
+	Zoho *Zoho `yaml:"zoho"`
+}
+
+type Zoho struct {
+	Mail ZapToMail `yaml:"mail"`
+}
+
+type ZapToMail struct {
+	Host      string            `yaml:"host"`
+	Port      int               `yaml:"port"`
+	Username  string            `yaml:"username"`
+	Password  string            `yaml:"password"`
+	Templates map[string]string `yaml:"templates"`
 }
 
 func Load(path string) (*Config, error) {

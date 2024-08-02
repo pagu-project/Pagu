@@ -12,7 +12,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command/market"
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
-	"github.com/pagu-project/Pagu/internal/engine/command/validator"
 	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
 	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -22,6 +21,8 @@ import (
 	"github.com/pagu-project/Pagu/pkg/cache"
 	"github.com/pagu-project/Pagu/pkg/client"
 	"github.com/pagu-project/Pagu/pkg/log"
+	"github.com/pagu-project/Pagu/pkg/notification"
+	"github.com/pagu-project/Pagu/pkg/notification/zoho"
 	"github.com/pagu-project/Pagu/pkg/wallet"
 )
 
@@ -40,7 +41,6 @@ type BotEngine struct {
 	zealyCmd      *zealy.Zealy
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
-	validatorCmd  *validator.Validator
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -87,49 +87,27 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		log.Info("wallet opened successfully", "address", wlt.Address())
 	}
 
+	if cfg.BotName == config.BotNamePaguModerator {
+		zapToMailConfig := zoho.ZapToMailerConfig{
+			Host:     cfg.Notification.Zoho.Mail.Host,
+			Port:     cfg.Notification.Zoho.Mail.Port,
+			Username: cfg.Notification.Zoho.Mail.Username,
+			Password: cfg.Notification.Zoho.Mail.Password,
+		}
+		mailSender, err := notification.New(notification.NotificationTypeMail, zapToMailConfig)
+		if err != nil {
+			cancel()
+			return nil, err
+		}
+
+		// notification job
+		mailSenderJob := job.NewMailSender(db, mailSender, cfg.Notification.Zoho.Mail.Templates)
+		mailSenderSched := job.NewScheduler()
+		mailSenderSched.Submit(mailSenderJob)
+		go mailSenderSched.Run()
+	}
+
 	return newBotEngine(ctx, cancel, db, cm, wlt, cfg.Phoenix.FaucetAmount), nil
-}
-
-func newBotEngine(ctx context.Context, cnl context.CancelFunc, db repository.Database, cm client.Manager,
-	wlt wallet.IWallet, phoenixFaucetAmount amount.Amount,
-) *BotEngine {
-	rootCmd := &command.Command{
-		Emoji:       "🤖",
-		Name:        "pagu",
-		Help:        "Root Command",
-		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]*command.Command, 0),
-	}
-
-	// price caching job
-	priceCache := cache.NewBasic[string, entity.Price](0 * time.Second)
-	priceJob := job.NewPrice(priceCache)
-	priceJobSched := job.NewScheduler()
-	priceJobSched.Submit(priceJob)
-	go priceJobSched.Run()
-
-	netCmd := network.NewNetwork(ctx, cm)
-	calcCmd := calculator.NewCalculator(cm)
-	ptCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
-	zealyCmd := zealy.NewZealy(db, wlt)
-	voucherCmd := voucher.NewVoucher(db, wlt, cm)
-	marketCmd := market.NewMarket(cm, priceCache)
-	validatorCmd := validator.NewValidator(db)
-
-	return &BotEngine{
-		ctx:           ctx,
-		cancel:        cnl,
-		clientMgr:     cm,
-		db:            db,
-		rootCmd:       rootCmd,
-		networkCmd:    netCmd,
-		calculatorCmd: calcCmd,
-		phoenixCmd:    ptCmd,
-		zealyCmd:      zealyCmd,
-		voucherCmd:    voucherCmd,
-		marketCmd:     marketCmd,
-		validatorCmd:  validatorCmd,
-	}
 }
 
 func (be *BotEngine) Commands() []*command.Command {
@@ -143,7 +121,6 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
-	be.rootCmd.AddSubCommand(be.validatorCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
 }
@@ -262,4 +239,48 @@ func (be *BotEngine) Start() {
 	log.Info("Starting the Bot Engine")
 
 	be.clientMgr.Start()
+}
+
+func newBotEngine(ctx context.Context,
+	cnl context.CancelFunc,
+	db repository.Database,
+	cm client.Manager,
+	wlt wallet.IWallet,
+	phoenixFaucetAmount amount.Amount,
+) *BotEngine {
+	rootCmd := &command.Command{
+		Emoji:       "🤖",
+		Name:        "pagu",
+		Help:        "Root Command",
+		AppIDs:      entity.AllAppIDs(),
+		SubCommands: make([]*command.Command, 0),
+	}
+
+	// price caching job
+	priceCache := cache.NewBasic[string, entity.Price](10 * time.Second)
+	priceJob := job.NewPrice(priceCache)
+	priceJobSched := job.NewScheduler()
+	priceJobSched.Submit(priceJob)
+	go priceJobSched.Run()
+
+	netCmd := network.NewNetwork(ctx, cm)
+	calcCmd := calculator.NewCalculator(cm)
+	phoenixCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
+	zealyCmd := zealy.NewZealy(db, wlt)
+	voucherCmd := voucher.NewVoucher(db, wlt, cm)
+	marketCmd := market.NewMarket(cm, priceCache)
+
+	return &BotEngine{
+		ctx:           ctx,
+		cancel:        cnl,
+		clientMgr:     cm,
+		db:            db,
+		rootCmd:       rootCmd,
+		networkCmd:    netCmd,
+		calculatorCmd: calcCmd,
+		phoenixCmd:    phoenixCmd,
+		zealyCmd:      zealyCmd,
+		voucherCmd:    voucherCmd,
+		marketCmd:     marketCmd,
+	}
 }

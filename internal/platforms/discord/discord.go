@@ -341,6 +341,8 @@ func setCommandArgType(inputBox int) discordgo.ApplicationCommandOptionType {
 		return discordgo.ApplicationCommandOptionAttachment
 	case 3:
 		return discordgo.ApplicationCommandOptionNumber
+	case 4:
+		return discordgo.ApplicationCommandOptionBoolean
 	default:
 		return discordgo.ApplicationCommandOptionString
 	}

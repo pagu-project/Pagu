@@ -53,6 +53,20 @@ func (mr *MockDatabaseMockRecorder) AddFaucet(f any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFaucet", reflect.TypeOf((*MockDatabase)(nil).AddFaucet), f)
 }
 
+// AddNotification mocks base method.
+func (m *MockDatabase) AddNotification(v *entity.Notification) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddNotification", v)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddNotification indicates an expected call of AddNotification.
+func (mr *MockDatabaseMockRecorder) AddNotification(v any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNotification", reflect.TypeOf((*MockDatabase)(nil).AddNotification), v)
+}
+
 // AddUser mocks base method.
 func (m *MockDatabase) AddUser(u *entity.User) error {
 	m.ctrl.T.Helper()
@@ -152,6 +166,21 @@ func (mr *MockDatabaseMockRecorder) GetAllZealyUser() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllZealyUser", reflect.TypeOf((*MockDatabase)(nil).GetAllZealyUser))
 }
 
+// GetPendingMailNotification mocks base method.
+func (m *MockDatabase) GetPendingMailNotification() (*entity.Notification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPendingMailNotification")
+	ret0, _ := ret[0].(*entity.Notification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPendingMailNotification indicates an expected call of GetPendingMailNotification.
+func (mr *MockDatabaseMockRecorder) GetPendingMailNotification() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingMailNotification", reflect.TypeOf((*MockDatabase)(nil).GetPendingMailNotification))
+}
+
 // GetUserByApp mocks base method.
 func (m *MockDatabase) GetUserByApp(appID entity.AppID, callerID string) (*entity.User, error) {
 	m.ctrl.T.Helper()
@@ -239,6 +268,20 @@ func (m *MockDatabase) ListVoucher() ([]*entity.Voucher, error) {
 func (mr *MockDatabaseMockRecorder) ListVoucher() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListVoucher", reflect.TypeOf((*MockDatabase)(nil).ListVoucher))
+}
+
+// UpdateNotificationStatus mocks base method.
+func (m *MockDatabase) UpdateNotificationStatus(id uint, status entity.NotificationStatus) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNotificationStatus", id, status)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateNotificationStatus indicates an expected call of UpdateNotificationStatus.
+func (mr *MockDatabaseMockRecorder) UpdateNotificationStatus(id, status any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNotificationStatus", reflect.TypeOf((*MockDatabase)(nil).UpdateNotificationStatus), id, status)
 }
 
 // UpdateZealyUser mocks base method.
