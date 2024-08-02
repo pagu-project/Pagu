@@ -2,6 +2,7 @@ package job
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/pactus-project/pactus/util/logger"
@@ -16,9 +17,10 @@ type mailSenderJob struct {
 	cancel     context.CancelFunc
 	db         repository.Database
 	mailSender notification.ISender
+	templates  map[string]string
 }
 
-func NewMailSender(db repository.Database, mailSender notification.ISender) Job {
+func NewMailSender(db repository.Database, mailSender notification.ISender, templates map[string]string) Job {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &mailSenderJob{
 		ticker:     time.NewTicker(10 * time.Minute),
@@ -26,6 +28,7 @@ func NewMailSender(db repository.Database, mailSender notification.ISender) Job 
 		cancel:     cancel,
 		db:         db,
 		mailSender: mailSender,
+		templates:  templates,
 	}
 }
 
@@ -41,10 +44,17 @@ func (p *mailSenderJob) sendVoucherNotifications() {
 		return
 	}
 
-	tmpl, _ := notification.LoadMailTemplate("./templates/voucher.html")
+	v := entity.VoucherNotificationData{}
+	vByte, _ := notif.Data.MarshalJSON()
+	_ = json.Unmarshal(vByte, &v)
+	tmpl, err := notification.LoadMailTemplate(p.templates["voucher"])
+	if err != nil {
+		logger.Fatal("failed to load mail template", "err", err)
+	}
+
 	err = p.mailSender.SendTemplateMail(
 		notification.NotificationProviderZapToMail,
-		"no-reply@pactus.org", []string{notif.Recipient}, tmpl, notif.Data)
+		"no-reply@pactus.org", []string{notif.Recipient}, tmpl, v)
 	if err != nil {
 		logger.Error("failed to send mail notification", "err", err)
 		err = p.db.UpdateNotificationStatus(notif.ID, entity.NotificationStatusFail)

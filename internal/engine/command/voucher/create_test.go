@@ -27,7 +27,7 @@ func setup(t *testing.T) (*Voucher, repository.MockDatabase, client.MockManager,
 	return mockVoucher, *mockDB, *mockClient, *mockWallet
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateOne(t *testing.T) {
 	voucher, db, _, _ := setup(t)
 
 	t.Run("normal", func(t *testing.T) {
@@ -101,5 +101,19 @@ func TestCreate(t *testing.T) {
 		result := voucher.createOneHandler(caller, cmd, args)
 		assert.True(t, result.Successful)
 		assert.Contains(t, result.Message, "Voucher created successfully!")
+	})
+}
+
+func TestCreateBulk(t *testing.T) {
+	voucher, db, _, _ := setup(t)
+	t.Run("create and save notification", func(t *testing.T) {
+		db.EXPECT().GetPendingMailNotification().Return(
+			&entity.Notification{}, errors.New(""),
+		).AnyTimes()
+
+		db.EXPECT().AddNotification(gomock.Any()).Return(nil).AnyTimes()
+
+		err := voucher.createNotification("foo@bar", "12345678")
+		assert.Equal(t, nil, err)
 	})
 }

@@ -89,11 +89,10 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 
 	if cfg.BotName == config.BotNamePaguModerator {
 		zapToMailConfig := zoho.ZapToMailerConfig{
-			Host:      cfg.Notification.Zoho.Mail.Host,
-			Port:      cfg.Notification.Zoho.Mail.Port,
-			Username:  cfg.Notification.Zoho.Mail.Username,
-			Password:  cfg.Notification.Zoho.Mail.Password,
-			Templates: cfg.Notification.Zoho.Mail.Templates,
+			Host:     cfg.Notification.Zoho.Mail.Host,
+			Port:     cfg.Notification.Zoho.Mail.Port,
+			Username: cfg.Notification.Zoho.Mail.Username,
+			Password: cfg.Notification.Zoho.Mail.Password,
 		}
 		mailSender, err := notification.New(notification.NotificationTypeMail, zapToMailConfig)
 		if err != nil {
@@ -102,7 +101,7 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		}
 
 		// notification job
-		mailSenderJob := job.NewMailSender(db, mailSender)
+		mailSenderJob := job.NewMailSender(db, mailSender, cfg.Notification.Zoho.Mail.Templates)
 		mailSenderSched := job.NewScheduler()
 		mailSenderSched.Submit(mailSenderJob)
 		go mailSenderSched.Run()

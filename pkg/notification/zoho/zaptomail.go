@@ -10,16 +10,14 @@ import (
 )
 
 type ZapToMailerConfig struct {
-	Host      string
-	Port      int
-	Username  string
-	Password  string
-	Templates map[string]string
+	Host     string
+	Port     int
+	Username string
+	Password string
 }
 
 type ZapToMailer struct {
-	dialer    *mail.Dialer
-	templates map[string]string
+	dialer *mail.Dialer
 }
 
 func NewZapToMailer(config ZapToMailerConfig) *ZapToMailer {
@@ -27,8 +25,7 @@ func NewZapToMailer(config ZapToMailerConfig) *ZapToMailer {
 	dialer.Timeout = 5 * time.Second
 
 	return &ZapToMailer{
-		dialer:    dialer,
-		templates: config.Templates,
+		dialer: dialer,
 	}
 }
 
