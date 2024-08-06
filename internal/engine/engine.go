@@ -13,7 +13,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
 	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
-	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/job"
 	"github.com/pagu-project/Pagu/internal/repository"
@@ -38,7 +37,6 @@ type BotEngine struct {
 	calculatorCmd *calculator.Calculator
 	networkCmd    *network.Network
 	phoenixCmd    *phoenixtestnet.Phoenix
-	zealyCmd      *zealy.Zealy
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
 }
@@ -265,7 +263,6 @@ func newBotEngine(ctx context.Context,
 	netCmd := network.NewNetwork(ctx, cm)
 	calcCmd := calculator.NewCalculator(cm)
 	phoenixCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
-	zealyCmd := zealy.NewZealy(db, wlt)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
 
@@ -278,7 +275,6 @@ func newBotEngine(ctx context.Context,
 		networkCmd:    netCmd,
 		calculatorCmd: calcCmd,
 		phoenixCmd:    phoenixCmd,
-		zealyCmd:      zealyCmd,
 		voucherCmd:    voucherCmd,
 		marketCmd:     marketCmd,
 	}
