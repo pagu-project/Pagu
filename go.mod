@@ -6,6 +6,8 @@ require (
 	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/go-mail/mail/v2 v2.3.0
+	github.com/h2non/gock v1.2.0
+	github.com/jszwec/csvutil v1.10.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/pactus-project/pactus v1.3.0
 	github.com/spf13/cobra v1.8.1
@@ -15,6 +17,8 @@ require (
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.10
 )
+
+require github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

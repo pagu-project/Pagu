@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/h2non/gock"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/repository"
@@ -106,14 +107,30 @@ func TestCreateOne(t *testing.T) {
 
 func TestCreateBulk(t *testing.T) {
 	voucher, db, _, _ := setup(t)
-	t.Run("create and save notification", func(t *testing.T) {
-		db.EXPECT().GetPendingMailNotification().Return(
-			&entity.Notification{}, errors.New(""),
+	t.Run("normal", func(t *testing.T) {
+		defer gock.Off()
+		gock.New("http://foo.com").
+			Get("/bar").
+			Reply(200).
+			BodyString("Recipient,Email,Amount,Validated,Description\n" +
+				"foo.bar,a@gmail.com,1,2,Some Descriptions\n" +
+				"foo.bar,b@gmail.com,1,2,Some Descriptions")
+
+		cmd := &command.Command{}
+
+		db.EXPECT().AddVoucher(gomock.Any()).Return(nil).AnyTimes()
+		db.EXPECT().AddNotification(gomock.Any()).Return(nil).AnyTimes()
+		db.EXPECT().GetVoucherByCode(gomock.Any()).Return(
+			entity.Voucher{}, errors.New(""),
 		).AnyTimes()
 
-		db.EXPECT().AddNotification(gomock.Any()).Return(nil).AnyTimes()
+		args := make(map[string]string)
+		args["file"] = "http://foo.com/bar"
+		args["notify"] = "TRUE"
+		caller := &entity.User{ID: 1}
+		result := voucher.createBulkHandler(caller, cmd, args)
 
-		err := voucher.createNotification("foo@bar", "12345678")
-		assert.Equal(t, nil, err)
+		assert.True(t, result.Successful)
+		assert.Contains(t, result.Message, "Vouchers created successfully!")
 	})
 }
