@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
+	"github.com/jszwec/csvutil"
 	"github.com/pactus-project/pactus/util/logger"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
@@ -18,6 +19,14 @@ import (
 	"github.com/pagu-project/Pagu/pkg/utils"
 	"gorm.io/datatypes"
 )
+
+type BulkRecorder struct {
+	Recipient        string  `csv:"Recipient"`
+	Email            string  `csv:"Email"`
+	Amount           float64 `csv:"Amount"`
+	ValidatedInMonth int     `csv:"Validated"`
+	Description      string  `csv:"Description"`
+}
 
 func (v *Voucher) createOneHandler(
 	caller *entity.User,
@@ -87,14 +96,27 @@ func (v *Voucher) createBulkHandler(
 		_ = resp.Body.Close()
 	}()
 
-	r := csv.NewReader(resp.Body)
-	records, err := r.ReadAll()
+	csvReader := csv.NewReader(resp.Body)
+	dec, err := csvutil.NewDecoder(csvReader)
 	if err != nil {
 		logger.Error(err.Error())
-		return cmd.ErrorResult(errors.New("failed to read attachment content"))
+		return cmd.ErrorResult(errors.New("failed to read csv content"))
 	}
 
-	if len(records) < 2 {
+	var records []BulkRecorder
+	for {
+		r := BulkRecorder{}
+		if err = dec.Decode(&r); errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			logger.Error(err.Error())
+			return cmd.ErrorResult(errors.New("failed to parse csv content"))
+		}
+
+		records = append(records, r)
+	}
+
+	if len(records) == 0 {
 		err = fmt.Errorf("no record founded. please add at least one record to csv file")
 		return cmd.ErrorResult(err)
 	}
@@ -112,7 +134,7 @@ func (v *Voucher) createBulkHandler(
 		}
 
 		if notify == "TRUE" {
-			if v.createNotification(vch.Email, vch.Code) != nil {
+			if v.createNotification(vch.Email, vch.Code, vch.Recipient, vch.Amount.ToPAC()) != nil {
 				return cmd.ErrorResult(err)
 			}
 		}
@@ -121,19 +143,21 @@ func (v *Voucher) createBulkHandler(
 	return cmd.SuccessfulResult("Vouchers created successfully!")
 }
 
-func (v *Voucher) createBulkVoucher(records [][]string, callerID uint) ([]*entity.Voucher, error) {
+func (v *Voucher) createBulkVoucher(records []BulkRecorder, callerID uint) ([]*entity.Voucher, error) {
 	vouchers := make([]*entity.Voucher, 0)
-	for rowIndex := 1; rowIndex < len(records); rowIndex++ {
+	for index, record := range records {
 		code := utils.RandomString(8, utils.CapitalAlphanumerical)
 		for _, err := v.db.GetVoucherByCode(code); err == nil; {
 			code = utils.RandomString(8, utils.CapitalAlphanumerical)
 		}
 
-		email := records[rowIndex][0] // TODO: validate email address using regex
-		recipient := records[rowIndex][1]
-		amt, err := amount.FromString(strings.TrimSpace(records[rowIndex][2]))
+		email := record.Email // TODO: validate email address using regex
+		recipient := record.Recipient
+		desc := record.Description
+
+		amt, err := amount.NewAmount(record.Amount)
 		if err != nil {
-			return nil, fmt.Errorf("invalid amount at row %d", rowIndex)
+			return nil, fmt.Errorf("invalid amount at row %d", index+1)
 		}
 
 		maxStake, _ := amount.NewAmount(1000)
@@ -141,12 +165,11 @@ func (v *Voucher) createBulkVoucher(records [][]string, callerID uint) ([]*entit
 			return nil, fmt.Errorf("stake amount is more than 1000")
 		}
 
-		validMonths, err := strconv.Atoi(strings.TrimSpace(records[rowIndex][3]))
-		if err != nil {
-			return nil, fmt.Errorf("invalid validate months at row %d", rowIndex)
+		validMonths := record.ValidatedInMonth
+		if validMonths < 1 {
+			return nil, fmt.Errorf("num of validated month of code must be greater than 0 at row %d", index+1)
 		}
 
-		desc := records[rowIndex][4]
 		vouchers = append(vouchers, &entity.Voucher{
 			Creator:     callerID,
 			Code:        code,
@@ -161,8 +184,12 @@ func (v *Voucher) createBulkVoucher(records [][]string, callerID uint) ([]*entit
 	return vouchers, nil
 }
 
-func (v *Voucher) createNotification(email, code string) error {
-	notificationData := entity.VoucherNotificationData{Code: code}
+func (v *Voucher) createNotification(email, code, recipient string, amt float64) error {
+	notificationData := entity.VoucherNotificationData{
+		Code:      code,
+		Recipient: recipient,
+		Amount:    amt,
+	}
 	b, err := json.Marshal(notificationData)
 	if err != nil {
 		return err
@@ -170,8 +197,8 @@ func (v *Voucher) createNotification(email, code string) error {
 	voucherCodeJSON := datatypes.JSON(b)
 	return v.db.AddNotification(&entity.Notification{
 		Type:      notification.NotificationTypeMail,
+		Status:    entity.NotificationStatusPending,
 		Recipient: email,
 		Data:      voucherCodeJSON,
-		Status:    entity.NotificationStatusPending,
 	})
 }

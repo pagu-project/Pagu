@@ -25,5 +25,7 @@ type Notification struct {
 }
 
 type VoucherNotificationData struct {
-	Code string `json:"code"`
+	Code      string  `json:"code"`
+	Amount    float64 `json:"amount"`
+	Recipient string  `json:"recipient"`
 }
