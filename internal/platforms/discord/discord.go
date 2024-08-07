@@ -2,6 +2,7 @@ package discord
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -219,6 +220,9 @@ func parseArgs(
 	case discordgo.ApplicationCommandOptionNumber:
 		v := strconv.FormatFloat(opt.FloatValue(), 'f', 10, 64)
 		result[opt.Name] = v
+	case discordgo.ApplicationCommandOptionBoolean:
+		v := strconv.FormatBool(true)
+		result[opt.Name] = strings.ToUpper(v)
 	case discordgo.ApplicationCommandOptionAttachment:
 		// TODO: handle multiple attachment
 		for _, attachment := range rootCmd.Resolved.Attachments {
