@@ -70,6 +70,7 @@ services:
       - pagu-db
     volumes:
       - ../config/config.mod.yml:/config/config.yml
+      - ../config/templates:/config/templates
       - ../config/wallets/main_wallet:/config/wallets/main_wallet
   pagu-discord-testnet:
     build:
