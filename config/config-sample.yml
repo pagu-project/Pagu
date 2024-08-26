@@ -1,0 +1,39 @@
+bot_name: "" # Pagu-Mainnet OR Pagu-Testnet
+network: "" # Mainnet or Localnet
+
+# Pactus clients
+local_node: "localhost:50052" # only set for network = Localnet
+network_nodes: ["localhost:50052"] # list the networks to connect to pagu in mainnet environment
+
+# Wallet
+wallet:
+  enable: true
+  address: ""
+  rpc: "localhost:50051"
+  path: "./config/wallets/main_wallet"
+  password: "123456789"
+
+# Phoenix TestNet
+phoenix:
+  network_nodes: ["localhost:50052"] # list the networks to connect to pagu in testnet environment
+  faucet_amount: 5 # num of coins to send as faucet
+
+# Database
+database:
+  url: "root:{DB_PASSWORD}@tcp({DB_HOST}:{DB_PORT})/{DB_NAME}?parseTime=true"
+
+# Discord
+discord:
+  token: { DISCORD_APPLICATION_TOKEN }
+  guild_id: { DISCORD_SERVER_GUILD_ID }
+
+# Logger
+logger:
+  level: "info"
+  filename: "pagu.log"
+  max_size: 10
+  max_backups: 10
+  compress: true
+  targets: [file, console]
+
+
