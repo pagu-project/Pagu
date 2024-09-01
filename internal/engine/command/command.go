@@ -122,7 +122,7 @@ func (cmd *Command) AddHelpSubCommand() {
 		Help:   fmt.Sprintf("Help for %v command", cmd.Name),
 		AppIDs: entity.AllAppIDs(),
 		Handler: func(_ *entity.User, _ *Command, _ map[string]string) CommandResult {
-			return cmd.SuccessfulResult(cmd.HelpMessage())
+			return cmd.SuccessfulResult(cmd.HelpMessage()) //nolint
 		},
 	}
 

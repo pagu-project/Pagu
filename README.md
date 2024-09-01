@@ -1,41 +1,83 @@
+# Pagu
+Pagu is a Bot engine that provides support and information about the [Pactus](https://pactus.org) Blockchain.
+
 <p align="center">
     <img alt="Pagu" src="./assets/PAGU.png" width="150" height="150" />
 </p>
 
-<h3 align="center">
-The PAGU is a Robot that provides support and information about the Pactus Blockchain.
-</h3>
+## Table of Contents
 
-# Run
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-The Pagu is required golang installed to be run. make sure you installed The Pactus daemon CLI (and wallet CLI) from here:
-https://pactus.org/download/#cli
+## Features
 
-You need to run 2 local pactus node (local-net) and add them to a file called local (it's on .gitignore) and run them. 
+- Pactus network health, status and statistics
+- Pactus fee and reward calculation
+- PAC coin market prices
+- Phoenix (Pactus testnet) health and status 
+- Phoenix faucet
+  
+## Installation
 
-commands:
+To get started with Pagu, follow these steps:
 
-```pactus-daemon init -w=./local/net1 --localnet```
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/pagu-project/Pagu.git
+    cd Pagu
+    ```
 
-```pactus-daemon init -w=./local/net2 --localnet```
+2. **Install dependencies**:
 
-> Note: make sure you enable the gRPC for them.
+   Install [Go](https://go.dev/doc/install) if you have not installed before and also install [Mysql](https://dev.mysql.com/downloads/workbench/) as main database of Pagu
+then run below commands
+   
+    ```bash 
+       make devtools
+       cp ./config/config-sample.yml ./config/config.yml # fill the file with correct values
+    ```
+3. **Run Local Nodes**
+   
+   To run local node and set thier address in config file please follow below instruction
 
-Make sure you run a postgres instance using docker on your local machine and make a proper config based on [this](./config/), also you can find deployment info and guidelines [here](./deployment/) to run your local instance on Pagu using docker compose.
-
-> Note2: you can make test-net wallets like: `pactus-wallet create --testnet`
+   https://docs.pactus.org/get-started/pactus-daemon/
 
 
-Last step is to run `make build` and use the pagu-cli binary to start testing your new feature or command.
+4. **Wallet requirements**:
+   
+   Pagu needs a Pactus wallet to call transaction methods. If you have no wallet follow bellow instruction to make one.
+ 
+   https://docs.pactus.org/tutorials/pactus-wallet/#create-a-wallet
 
-## Assets
 
-The Pagu logo and other assets are available on [here](./assets/) on this repo for usage.
+5. **Discord Server**:
+   
+   To run Pagu in Discord server you need a GuildID of server and discord application token. To make them please follow below link
+
+   https://discord.com/developers/docs/quick-start/getting-started
+   
+## Run
+1. **Discord Engine**
+
+    ```bash
+    make check
+    go run ./cmd/discord -c ./config/config.main.yml run
+    ```
 
 ## Contributing
 
-Contributions to the Pagu are appreciated.
+We welcome contributions! If you'd like to contribute to Pagu, please follow these guidelines:
 
-## License
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/YourFeature`).
+3. Make your changes.
+4. Commit your changes (`git commit -m 'Add some feature'`).
+5. Push to the branch (`git push origin feature/YourFeature`).
+6. Open a Pull Request.
 
-The Pagu it under [MIT](./LICENSE).
+---
