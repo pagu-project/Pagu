@@ -13,7 +13,7 @@ import (
 
 func setup() (*Market, *command.Command) {
 	priceCache := cache.NewBasic[string, entity.Price](1 * time.Second)
-	priceJob := job.NewPrice(priceCache)
+	priceJob := job.NewPrice(priceCache, "", "")
 	priceJobSched := job.NewScheduler()
 	priceJobSched.Submit(priceJob)
 	go priceJobSched.Run()

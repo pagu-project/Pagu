@@ -3,6 +3,7 @@ package entity
 type Price struct {
 	XeggexPacToUSDT   XeggexPriceResponse
 	ExbitronPacToUSDT ExbitronPriceResponse
+	P2BPacToUSDT      P2BPriceResponse
 }
 
 type XeggexPriceResponse struct {
@@ -17,6 +18,10 @@ type XeggexPriceResponse struct {
 	SpreadPercent  string  `json:"spreadPercent"`
 	ChangePercent  string  `json:"changePercent"`
 	MarketCap      float64 `json:"marketcapNumber"`
+}
+
+type P2BPriceResponse struct {
+	LastPrice string `json:"last"`
 }
 
 type ExbitronPriceResponse []struct {

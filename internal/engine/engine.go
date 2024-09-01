@@ -16,7 +16,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/job"
 	"github.com/pagu-project/Pagu/internal/repository"
-	"github.com/pagu-project/Pagu/pkg/amount"
 	"github.com/pagu-project/Pagu/pkg/cache"
 	"github.com/pagu-project/Pagu/pkg/client"
 	"github.com/pagu-project/Pagu/pkg/log"
@@ -105,7 +104,40 @@ func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
 		go mailSenderSched.Run()
 	}
 
-	return newBotEngine(ctx, cancel, db, cm, wlt, cfg.Phoenix.FaucetAmount), nil
+	priceCache := cache.NewBasic[string, entity.Price](10 * time.Second)
+	if cfg.BotName == config.BotNamePaguMainnet {
+		priceJob := job.NewPrice(priceCache, cfg.Market.P2B.APIKey, cfg.Market.P2B.SecretKey)
+		priceJobSched := job.NewScheduler()
+		priceJobSched.Submit(priceJob)
+		go priceJobSched.Run()
+	}
+
+	netCmd := network.NewNetwork(ctx, cm)
+	calcCmd := calculator.NewCalculator(cm)
+	phoenixCmd := phoenixtestnet.NewPhoenix(ctx, wlt, cfg.Phoenix.FaucetAmount, cm, db)
+	voucherCmd := voucher.NewVoucher(db, wlt, cm)
+	marketCmd := market.NewMarket(cm, priceCache)
+
+	rootCmd := &command.Command{
+		Emoji:       "🤖",
+		Name:        "pagu",
+		Help:        "Root Command",
+		AppIDs:      entity.AllAppIDs(),
+		SubCommands: make([]*command.Command, 0),
+	}
+
+	return &BotEngine{
+		ctx:           ctx,
+		cancel:        cancel,
+		clientMgr:     cm,
+		db:            db,
+		rootCmd:       rootCmd,
+		networkCmd:    netCmd,
+		calculatorCmd: calcCmd,
+		phoenixCmd:    phoenixCmd,
+		voucherCmd:    voucherCmd,
+		marketCmd:     marketCmd,
+	}, nil
 }
 
 func (be *BotEngine) Commands() []*command.Command {
@@ -236,46 +268,4 @@ func (be *BotEngine) Start() {
 	log.Info("Starting the Bot Engine")
 
 	be.clientMgr.Start()
-}
-
-func newBotEngine(ctx context.Context,
-	cnl context.CancelFunc,
-	db repository.Database,
-	cm client.Manager,
-	wlt wallet.IWallet,
-	phoenixFaucetAmount amount.Amount,
-) *BotEngine {
-	rootCmd := &command.Command{
-		Emoji:       "🤖",
-		Name:        "pagu",
-		Help:        "Root Command",
-		AppIDs:      entity.AllAppIDs(),
-		SubCommands: make([]*command.Command, 0),
-	}
-
-	// price caching job
-	priceCache := cache.NewBasic[string, entity.Price](10 * time.Second)
-	priceJob := job.NewPrice(priceCache)
-	priceJobSched := job.NewScheduler()
-	priceJobSched.Submit(priceJob)
-	go priceJobSched.Run()
-
-	netCmd := network.NewNetwork(ctx, cm)
-	calcCmd := calculator.NewCalculator(cm)
-	phoenixCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
-	voucherCmd := voucher.NewVoucher(db, wlt, cm)
-	marketCmd := market.NewMarket(cm, priceCache)
-
-	return &BotEngine{
-		ctx:           ctx,
-		cancel:        cnl,
-		clientMgr:     cm,
-		db:            db,
-		rootCmd:       rootCmd,
-		networkCmd:    netCmd,
-		calculatorCmd: calcCmd,
-		phoenixCmd:    phoenixCmd,
-		voucherCmd:    voucherCmd,
-		marketCmd:     marketCmd,
-	}
 }

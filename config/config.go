@@ -24,6 +24,7 @@ type Config struct {
 	DiscordBot   *DiscordBot     `yaml:"discord"`
 	Telegram     *Telegram       `yaml:"telegram"`
 	Notification *Notification   `yaml:"notification"`
+	Market       *Market         `yaml:"market"`
 }
 
 type Database struct {
@@ -84,6 +85,15 @@ type ZapToMail struct {
 	Username  string            `yaml:"username"`
 	Password  string            `yaml:"password"`
 	Templates map[string]string `yaml:"templates"`
+}
+
+type Market struct {
+	P2B *P2B `yaml:"p2b"`
+}
+
+type P2B struct {
+	APIKey    string `yaml:"api_key"`
+	SecretKey string `yaml:"secret_key"`
 }
 
 func Load(path string) (*Config, error) {
