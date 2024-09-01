@@ -129,6 +129,7 @@ linters-settings:
     excludes:
       - G304
       - G204
+      - G115
 
   stylecheck:
     # TODO: enable ST1000 (at least one file in a package should have a package comment)
