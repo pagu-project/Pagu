@@ -9,10 +9,8 @@ Pagu is a Bot engine that provides support and information about the [Pactus](ht
 
 - [Features](#features)
 - [Installation](#installation)
-- [Usage](#usage)
+- [Run](#run)
 - [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
 
 ## Features
 

@@ -45,7 +45,7 @@ func (bc *Calculator) calcRewardHandler(
 
 	reward := (stake.ToNanoPAC() * int64(blocks)) / bi.TotalPower
 
-	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v PAC stake 🔒 on your validator "+
+	return cmd.SuccessfulResult("Approximately you earn %v PAC reward, with %v stake 🔒 on your validator "+
 		"in %d days ⏰ with %s total power ⚡ of committee."+
 		"\n\n> Note📝: This number is just an estimation. "+
 		"It will vary depending on your stake amount and total network power.",
