@@ -39,10 +39,10 @@ type price struct {
 
 func NewPrice(
 	cch cache.Cache[string, entity.Price],
-	p2bApiKey, p2bSecretKey string,
+	p2bAPIKey, p2bSecretKey string,
 ) Job {
 	ctx, cancel := context.WithCancel(context.Background())
-	P2BAPIKey = p2bApiKey
+	P2BAPIKey = p2bAPIKey
 	P2BSecretKey = p2bSecretKey
 
 	return &price{
@@ -92,10 +92,12 @@ func (p *price) start() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := getP2BPrice(ctx, P2BAPIKey, P2BSecretKey, &p2b); err != nil {
+		p2pResp, err := p2bPrice(ctx, P2BAPIKey, P2BSecretKey)
+		if err != nil {
 			log.Error(err.Error())
 			return
 		}
+		p2b = p2pResp
 	}()
 
 	wg.Wait()
@@ -147,7 +149,11 @@ func (p *price) getPrice(ctx context.Context, endpoint string, priceResponse any
 	return dec.Decode(priceResponse)
 }
 
-func getP2BPrice(ctx context.Context, apiKey, secretKey string, p2bResponse *entity.P2BPriceResponse) error {
+func (p *price) Stop() {
+	p.ticker.Stop()
+}
+
+func p2bPrice(ctx context.Context, apiKey, secretKey string) (entity.P2BPriceResponse, error) {
 	payload := struct {
 		Request string `json:"request"`
 		Nonce   string `json:"nonce"`
@@ -156,16 +162,22 @@ func getP2BPrice(ctx context.Context, apiKey, secretKey string, p2bResponse *ent
 		Nonce:   fmt.Sprintf("%d", time.Now().UnixMilli()),
 	}
 
-	payloadByte, _ := json.Marshal(payload)
+	payloadByte, err := json.Marshal(payload)
+	if err != nil {
+		return entity.P2BPriceResponse{}, err
+	}
+
 	cli := http.DefaultClient
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, _defaultP2BPriceEndpoint, bytes.NewBuffer(payloadByte))
 	if err != nil {
-		return err
+		return entity.P2BPriceResponse{}, err
 	}
 
 	base64Data := base64.StdEncoding.EncodeToString(payloadByte)
 	h := hmac.New(sha512.New, []byte(secretKey))
-	h.Write([]byte(base64Data))
+	if _, err := h.Write([]byte(base64Data)); err != nil {
+		return entity.P2BPriceResponse{}, err
+	}
 	hmacData := h.Sum(nil)
 	hmacHex := hex.EncodeToString(hmacData)
 
@@ -176,7 +188,7 @@ func getP2BPrice(ctx context.Context, apiKey, secretKey string, p2bResponse *ent
 
 	resp, err := cli.Do(req)
 	if err != nil {
-		return err
+		return entity.P2BPriceResponse{}, err
 	}
 
 	defer func() {
@@ -184,7 +196,7 @@ func getP2BPrice(ctx context.Context, apiKey, secretKey string, p2bResponse *ent
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("p2b request failed with status: %v", resp.StatusCode)
+		return entity.P2BPriceResponse{}, fmt.Errorf("p2b request failed with status: %v", resp.StatusCode)
 	}
 
 	res := struct {
@@ -193,17 +205,12 @@ func getP2BPrice(ctx context.Context, apiKey, secretKey string, p2bResponse *ent
 		ErrorCode string                  `json:"errorCode"`
 	}{}
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return err
+		return entity.P2BPriceResponse{}, err
 	}
 
 	if !res.Success {
-		return fmt.Errorf("p2b response failed with code: %s", res.ErrorCode)
+		return entity.P2BPriceResponse{}, fmt.Errorf("p2b response failed with code: %s", res.ErrorCode)
 	}
 
-	p2bResponse = &res.Result
-	return nil
-}
-
-func (p *price) Stop() {
-	p.ticker.Stop()
+	return res.Result, nil
 }
