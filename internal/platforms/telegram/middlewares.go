@@ -16,11 +16,11 @@ type CommandHandler struct {
 	handler CommandFunc
 }
 
-func (bot *TelegramBot) CheckUpdate(_ *gotgbot.Bot, ctx *ext.Context) bool {
+func (bot *Bot) CheckUpdate(_ *gotgbot.Bot, ctx *ext.Context) bool {
 	return ctx.Update.Message.Chat.Type == "private"
 }
 
-func (bot *TelegramBot) Name() string {
+func (bot *Bot) Name() string {
 	return "TelegramBotHandler"
 }
 

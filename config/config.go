@@ -65,9 +65,7 @@ type Logger struct {
 }
 
 type Telegram struct {
-	BotToken  string `yaml:"bot_token"`
-	ChatID    int64  `yaml:"chat_id"`
-	GroupLink string `yaml:"group_link"`
+	BotToken string `yaml:"bot_token"`
 }
 
 type Notification struct {
