@@ -1,8 +1,8 @@
 package entity
 
 type Price struct {
-	XeggexPacToUSDT   XeggexPriceResponse
-	ExbitronPacToUSDT ExbitronPriceResponse
+	XeggexPacToUSDT XeggexPriceResponse
+	AzbitPacToUSDT  AzbitPriceResponse
 }
 
 type XeggexPriceResponse struct {
@@ -19,52 +19,15 @@ type XeggexPriceResponse struct {
 	MarketCap      float64 `json:"marketcapNumber"`
 }
 
-type ExbitronPriceResponse []struct {
-	TickerID       string `json:"ticker_id"`
-	BaseCurrency   string `json:"base_currency"`
-	TargetCurrency string `json:"target_currency"`
-	LastPrice      string `json:"last_price"`
-	BaseVolume     string `json:"base_volume"`
-	TargetVolume   string `json:"target_volume"`
-	Bid            string `json:"bid"`
-	Ask            string `json:"ask"`
-	High           string `json:"high"`
-	Low            string `json:"low"`
-}
-
-type ExbitronTicker struct {
-	TickerID       string `json:"ticker_id"`
-	BaseCurrency   string `json:"base_currency"`
-	TargetCurrency string `json:"target_currency"`
-	LastPrice      string `json:"last_price"`
-	BaseVolume     string `json:"base_volume"`
-	TargetVolume   string `json:"target_volume"`
-	Bid            string `json:"bid"`
-	Ask            string `json:"ask"`
-	High           string `json:"high"`
-	Low            string `json:"low"`
-}
-
-func (e ExbitronPriceResponse) GetPacToUSDT() ExbitronTicker {
-	const tickerID = "PAC-USDT"
-
-	for index := range e {
-		ticker := e[index]
-		if ticker.TickerID == tickerID {
-			return ExbitronTicker{
-				TickerID:       tickerID,
-				BaseCurrency:   ticker.BaseCurrency,
-				TargetCurrency: ticker.TargetCurrency,
-				LastPrice:      ticker.LastPrice,
-				BaseVolume:     ticker.BaseVolume,
-				TargetVolume:   ticker.TargetVolume,
-				Bid:            ticker.Bid,
-				Ask:            ticker.Ask,
-				High:           ticker.High,
-				Low:            ticker.Low,
-			}
-		}
-	}
-
-	return ExbitronTicker{}
+type AzbitPriceResponse struct {
+	Timestamp                int     `json:"timestamp"`
+	CurrencyPairCode         string  `json:"currencyPairCode"`
+	Price                    float64 `json:"price"`
+	Price24HAgo              float64 `json:"price24hAgo"`
+	PriceChangePercentage24H float64 `json:"priceChangePercentage24h"`
+	Volume24H                float64 `json:"volume24h"`
+	BidPrice                 float64 `json:"bidPrice"`
+	AskPrice                 float64 `json:"askPrice"`
+	Low24H                   float64 `json:"low24h"`
+	High24H                  float64 `json:"high24h"`
 }
