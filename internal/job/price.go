@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	_defaultXeggexPriceEndpoint   = "https://api.xeggex.com/api/v2/market/getbysymbol/Pactus%2Fusdt"
-	_defaultExbitronPriceEndpoint = "https://api.exbitron.digital/api/v1/cg/tickers"
+	_defaultXeggexPriceEndpoint = "https://api.xeggex.com/api/v2/market/getbysymbol/Pactus%2Fusdt"
+	_defaultAzbitPriceEndpoint  = "https://data.azbit.com/api/tickers?currencyPairCode=PAC_USDT"
 )
 
 type price struct {
@@ -45,10 +45,10 @@ func (p *price) Start() {
 
 func (p *price) start() {
 	var (
-		wg       sync.WaitGroup
-		price    entity.Price
-		xeggex   entity.XeggexPriceResponse
-		exbitron entity.ExbitronPriceResponse
+		wg     sync.WaitGroup
+		price  entity.Price
+		xeggex entity.XeggexPriceResponse
+		azbit  []entity.AzbitPriceResponse
 	)
 
 	ctx := context.Background()
@@ -65,15 +65,16 @@ func (p *price) start() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := p.getPrice(ctx, _defaultExbitronPriceEndpoint, &exbitron); err != nil {
+		if err := p.getPrice(ctx, _defaultAzbitPriceEndpoint, &azbit); err != nil {
 			log.Error(err.Error())
+			return
 		}
 	}()
 
 	wg.Wait()
 
 	price.XeggexPacToUSDT = xeggex
-	price.ExbitronPacToUSDT = exbitron
+	price.AzbitPacToUSDT = azbit[0]
 
 	ok := p.cache.Exists(config.PriceCacheKey)
 	if ok {

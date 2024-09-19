@@ -3,6 +3,7 @@ package market
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine/command"
@@ -15,12 +16,17 @@ func (m *Market) getPrice(_ *entity.User, cmd *command.Command, _ map[string]str
 		return cmd.ErrorResult(fmt.Errorf("failed to get price from markets. please try again later"))
 	}
 
-	lastPrice, err := strconv.ParseFloat(priceData.XeggexPacToUSDT.LastPrice, 64)
-	if err != nil {
-		return cmd.ErrorResult(fmt.Errorf("pagu can not calculate the price. please try again later"))
+	sb := strings.Builder{}
+	xeggexPrice, err := strconv.ParseFloat(priceData.XeggexPacToUSDT.LastPrice, 64)
+	if err == nil {
+		sb.WriteString(fmt.Sprintf("Xeggex Price: %f	USDT\n https://xeggex.com/market/PACTUS_USDT \n\n",
+			xeggexPrice))
 	}
 
-	return cmd.SuccessfulResult("PAC Price: %f	USDT"+
-		"\n\n\n See below markets link for more details: \n xeggex: https://xeggex.com/market/PACTUS_USDT \n "+
-		"exbitron: https://exbitron.com/trade?market=PAC-USDT", lastPrice)
+	if priceData.AzbitPacToUSDT.Price > 0 {
+		sb.WriteString(fmt.Sprintf("Azbit Price: %f	USDT\n https://azbit.com/exchange/PAC_USDT \n\n",
+			priceData.AzbitPacToUSDT.Price))
+	}
+
+	return cmd.SuccessfulResult(sb.String()) //nolint
 }

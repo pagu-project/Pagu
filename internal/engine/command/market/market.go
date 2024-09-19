@@ -38,7 +38,7 @@ func (m *Market) GetCommand() *command.Command {
 
 	cmdMarket := &command.Command{
 		Name:        CommandName,
-		Help:        "Blockchain data and information",
+		Help:        "Pactus market data and information",
 		Args:        nil,
 		AppIDs:      entity.AllAppIDs(),
 		SubCommands: make([]*command.Command, 0),
