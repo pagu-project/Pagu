@@ -74,7 +74,9 @@ func (p *price) start() {
 	wg.Wait()
 
 	price.XeggexPacToUSDT = xeggex
-	price.AzbitPacToUSDT = azbit[0]
+	if len(azbit) > 0 {
+		price.AzbitPacToUSDT = azbit[0]
+	}
 
 	ok := p.cache.Exists(config.PriceCacheKey)
 	if ok {
