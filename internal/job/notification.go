@@ -54,7 +54,7 @@ func (p *mailSenderJob) sendVoucherNotifications() {
 
 	err = p.mailSender.SendTemplateMail(
 		notification.NotificationProviderZapToMail,
-		"no-reply@pactus.org", []string{notif.Recipient}, tmpl, v)
+		"pagu@pactus.org", []string{notif.Recipient}, tmpl, v)
 	if err != nil {
 		logger.Error("failed to send mail notification", "err", err)
 		err = p.db.UpdateNotificationStatus(notif.ID, entity.NotificationStatusFail)
