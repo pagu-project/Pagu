@@ -155,8 +155,9 @@ func (bot *Bot) registerCommands() error {
 				//	})
 				//}
 			}
+
 			bot.botInstance.Handle(&btn, func(c tele.Context) error {
-				return c.Send(btn.Text, subMenu)
+				return bot.commandHandler(c, []string{beCmd.Name}, nil)
 			})
 			subMenu.Inline(subRows...)
 		} else {
@@ -185,7 +186,8 @@ func (bot *Bot) registerCommands() error {
 		return c.Send("select an option", menu)
 	})
 
-	return bot.commandHandler(bot.botInstance.sess)
+	return nil
+	//return bot.commandHandler(nil)
 }
 
 func (bot *Bot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -237,17 +239,17 @@ func (bot *Bot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func (bot *Bot) commandHandler(c tele.Context) error {
-	var commands []string
-	args := make(map[string]string)
+func (bot *Bot) commandHandler(c tele.Context, commands []string, args map[string]string) error {
 
-	cmd, err := bot.botInstance.Commands()
-	if err != nil {
-		return err
-	}
-	for _, c := range cmd {
-		commands = append(commands, c.Text)
-	}
+	//args := make(map[string]string)
+	//
+	//cmd, err := bot.botInstance.Commands()
+	//if err != nil {
+	//	return err
+	//}
+	//for _, c := range cmd {
+	//	commands = append(commands, c.Text)
+	//}
 
 	callerID := strconv.Itoa(int(c.Sender().ID))
 	res := bot.engine.Run(entity.AppIDTelegram, callerID, commands, args)
