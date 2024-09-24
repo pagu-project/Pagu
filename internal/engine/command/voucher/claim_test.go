@@ -2,6 +2,8 @@ package voucher
 
 import (
 	"errors"
+	"fmt"
+	"math/rand"
 	"testing"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -14,6 +16,7 @@ import (
 func TestClaimNormal(t *testing.T) {
 	voucher, db, client, wallet := setup(t)
 
+	validatorAddr := fmt.Sprintf("pc1z%d", rand.Intn(1000000))
 	t.Run("normal", func(t *testing.T) {
 		amt, _ := amount.NewAmount(100)
 		db.EXPECT().GetVoucherByCode("12345678").Return(
@@ -24,15 +27,17 @@ func TestClaimNormal(t *testing.T) {
 			}, nil,
 		).AnyTimes()
 
-		client.EXPECT().GetValidatorInfo("pc1z").Return(
+		client.EXPECT().GetValidatorInfo(validatorAddr).Return(
 			&pactus.GetValidatorResponse{
-				Validator: &pactus.ValidatorInfo{
-					PublicKey: "pc1z",
-				},
+				Validator: nil,
 			}, nil,
 		).AnyTimes()
 
-		wallet.EXPECT().BondTransaction("pc1z", "pc1z", "Voucher claim from Pagu", amt).Return(
+		client.EXPECT().FindPublicKey(validatorAddr, false).Return(
+			validatorAddr, nil,
+		).AnyTimes()
+
+		wallet.EXPECT().BondTransaction(validatorAddr, validatorAddr, "voucher 12345678 claimed by Pagu", amt).Return(
 			"0x1", nil,
 		).AnyTimes()
 
@@ -45,7 +50,7 @@ func TestClaimNormal(t *testing.T) {
 
 		args := make(map[string]string)
 		args["code"] = "12345678"
-		args["address"] = "pc1z"
+		args["address"] = validatorAddr
 		result := voucher.claimHandler(caller, cmd, args)
 		assert.True(t, result.Successful)
 		assert.Equal(t, result.Message, "Voucher claimed successfully!\n\n https://pacviewer.com/transaction/0x1")
