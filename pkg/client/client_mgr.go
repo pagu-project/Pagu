@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -134,6 +135,7 @@ func (cm *Mgr) GetLastBlockTime() (lastBlockTime, lastBlockHeight uint32) {
 }
 
 func (cm *Mgr) GetNetworkInfo() (*pactus.GetNetworkInfoResponse, error) {
+	// TODO: use caching and object
 	for _, c := range cm.clients {
 		info, err := c.GetNetworkInfo(cm.ctx)
 		if err != nil {
@@ -247,4 +249,22 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 
 	circulating := (addr1Out + addr2Out + addr3Out + addr4Out + addr5Out + addr6Out + int64(minted)) - staked - warm
 	return circulating, nil
+}
+
+func (cm *Mgr) FindPublicKey(address string, firstVal bool) (string, error) {
+	peerInfo, err := cm.GetPeerInfo(address)
+	if err != nil {
+		return "", err
+	}
+
+	for i, addr := range peerInfo.ConsensusAddresses {
+		if addr == address {
+			if firstVal && i != 0 {
+				return "", errors.New("please enter the first validator address")
+			}
+			return peerInfo.ConsensusKeys[i], nil
+		}
+	}
+
+	panic("unreachable")
 }
