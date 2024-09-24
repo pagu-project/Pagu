@@ -37,4 +37,5 @@ type Manager interface {
 	GetBalance(addr string) (int64, error)
 	GetFee(amt int64) (int64, error)
 	GetCirculatingSupply() (int64, error)
+	FindPublicKey(address string, firstVal bool) (string, error)
 }

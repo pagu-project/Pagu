@@ -224,6 +224,21 @@ func (mr *MockManagerMockRecorder) AddClient(c any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClient", reflect.TypeOf((*MockManager)(nil).AddClient), c)
 }
 
+// FindPublicKey mocks base method.
+func (m *MockManager) FindPublicKey(address string, firstVal bool) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindPublicKey", address, firstVal)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindPublicKey indicates an expected call of FindPublicKey.
+func (mr *MockManagerMockRecorder) FindPublicKey(address, firstVal any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindPublicKey", reflect.TypeOf((*MockManager)(nil).FindPublicKey), address, firstVal)
+}
+
 // GetBalance mocks base method.
 func (m *MockManager) GetBalance(addr string) (int64, error) {
 	m.ctrl.T.Helper()

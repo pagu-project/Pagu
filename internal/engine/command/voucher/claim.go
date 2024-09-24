@@ -2,6 +2,7 @@ package voucher
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/pagu-project/Pagu/internal/engine/command"
@@ -34,14 +35,21 @@ func (v *Voucher) claimHandler(
 	}
 
 	address := args["address"]
-	validatorInfo, err := v.clientManager.GetValidatorInfo(address)
-	if err != nil {
-		log.Error("error get validator info", "err", err)
+	valInfo, _ := v.clientManager.GetValidatorInfo(address)
+	if valInfo.Validator != nil {
+		err = errors.New("this address is already a staked validator")
+		log.Warn(fmt.Sprintf("staked validator found. %s", address))
 		return cmd.ErrorResult(err)
 	}
 
-	pubKey := validatorInfo.GetValidator().GetPublicKey()
-	txHash, err := v.wallet.BondTransaction(pubKey, address, "Voucher claim from Pagu", voucher.Amount)
+	pubKey, err := v.clientManager.FindPublicKey(address, false)
+	if err != nil {
+		log.Warn(fmt.Sprintf("peer not found. %s", address))
+		return cmd.ErrorResult(err)
+	}
+
+	memo := fmt.Sprintf("voucher %s claimed by Pagu", code)
+	txHash, err := v.wallet.BondTransaction(pubKey, address, memo, voucher.Amount)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
