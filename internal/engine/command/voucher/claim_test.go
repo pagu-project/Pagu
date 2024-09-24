@@ -16,7 +16,7 @@ import (
 func TestClaimNormal(t *testing.T) {
 	voucher, db, client, wallet := setup(t)
 
-	validatorAddr := fmt.Sprintf("pc1z%d", rand.Intn(1000000))
+	validatorAddr := fmt.Sprintf("pc1z%d", rand.Intn(1000000)) //nolint
 	t.Run("normal", func(t *testing.T) {
 		amt, _ := amount.NewAmount(100)
 		db.EXPECT().GetVoucherByCode("12345678").Return(
