@@ -1,81 +1,33 @@
-# Pagu
-Pagu is a Bot engine that provides support and information about the [Pactus](https://pactus.org) Blockchain.
+# Pagu - Pactus Guardian Bot
 
-<p align="center">
-    <img alt="Pagu" src="./assets/PAGU.png" width="150" height="150" />
-</p>
+Pagu is the intelligent guardian bot designed to interact with and monitor the [Pactus](https://pactus.org) Blockchain.
+It operates as a single engine that seamlessly supports various interfaces, including Discord, Telegram, Web, and more.
+By leveraging Pagu, users can access real-time network health information, calculate fees and rewards,
+check PAC coin market prices, and more—regardless of the platform.
 
-## Table of Contents
+### Key Features
 
-- [Features](#features)
-- [Installation](#installation)
-- [Run](#run)
-- [Contributing](#contributing)
+Pagu empowers users with several essential tools and services to interact with the Pactus blockchain:
 
-## Features
+- **Real-time Network Monitoring**: Access the latest network health, status, and performance metrics for the Pactus blockchain.
+- **Fee & Reward Calculations**: Easily calculate fees and rewards associated with transactions.
+- **PAC Coin Market Prices**: Stay up-to-date with the latest market prices for PAC coins.
+- **Phoenix Testnet Integration**: Track the Phoenix (Pactus testnet) network health and status.
+- **Phoenix Testnet Faucet**: Obtain testnet tokens through the Phoenix faucet for development purposes.
 
-- Pactus network health, status and statistics
-- Pactus fee and reward calculation
-- PAC coin market prices
-- Phoenix (Pactus testnet) health and status 
-- Phoenix faucet
-  
-## Installation
+### Multi-Platform Support
 
-To get started with Pagu, follow these steps:
+Pagu is designed to be flexible, allowing it to be used across different platforms with the same powerful engine.
+You can access Pagu on the following platforms:
 
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/pagu-project/Pagu.git
-    cd Pagu
-    ```
+- **Discord**: Join the [Pactus Discord server](https://discord.gg/H5vZkNnXCu) and interact with Pagu directly.
+- **Telegram**: Pagu will soon be available on Telegram—stay tuned for the release.
 
-2. **Install dependencies**:
+### Contributing
 
-   Install [Go](https://go.dev/doc/install) if you have not installed before and also install [Mysql](https://dev.mysql.com/downloads/workbench/) as main database of Pagu
-then run below commands
-   
-    ```bash 
-       make devtools
-       cp ./config/config-sample.yml ./config/config.yml # fill the file with correct values
-    ```
-3. **Run Local Nodes**
-   
-   To run local node and set thier address in config file please follow below instruction
-
-   https://docs.pactus.org/get-started/pactus-daemon/
-
-
-4. **Wallet requirements**:
-   
-   Pagu needs a Pactus wallet to call transaction methods. If you have no wallet follow bellow instruction to make one.
- 
-   https://docs.pactus.org/tutorials/pactus-wallet/#create-a-wallet
-
-
-5. **Discord Server**:
-   
-   To run Pagu in Discord server you need a GuildID of server and discord application token. To make them please follow below link
-
-   https://discord.com/developers/docs/quick-start/getting-started
-   
-## Run
-1. **Discord Engine**
-
-    ```bash
-    make check
-    go run ./cmd/discord -c ./config/config.main.yml run
-    ```
-
-## Contributing
-
-We welcome contributions! If you'd like to contribute to Pagu, please follow these guidelines:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Make your changes.
-4. Commit your changes (`git commit -m 'Add some feature'`).
-5. Push to the branch (`git push origin feature/YourFeature`).
-6. Open a Pull Request.
+We welcome contributions to Pagu! If you would like to help improve the bot, please feel free to contribute.
+You can find the development details, including installation and running instructions, in the [INSTALL.md](./INSTALL.md) file.
 
 ---
+
+<p align="center"> <img alt="Pagu" src="./assets/pagu-3d.png"  /> </p>
