@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"testing"
 
-	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/amount"
@@ -28,9 +27,7 @@ func TestClaimNormal(t *testing.T) {
 		).AnyTimes()
 
 		client.EXPECT().GetValidatorInfo(validatorAddr).Return(
-			&pactus.GetValidatorResponse{
-				Validator: nil,
-			}, nil,
+			nil, nil,
 		).AnyTimes()
 
 		client.EXPECT().FindPublicKey(validatorAddr, false).Return(
