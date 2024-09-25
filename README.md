@@ -2,18 +2,17 @@
 
 Pagu is the intelligent guardian bot designed to interact with and monitor the [Pactus](https://pactus.org) Blockchain.
 It operates as a single engine that seamlessly supports various interfaces, including Discord, Telegram, Web, and more.
-By leveraging Pagu, users can access real-time network health information, calculate fees and rewards,
-check PAC coin market prices, and more—regardless of the platform.
 
 ### Key Features
 
 Pagu empowers users with several essential tools and services to interact with the Pactus blockchain:
 
-- **Real-time Network Monitoring**: Access the latest network health, status, and performance metrics for the Pactus blockchain.
-- **Fee & Reward Calculations**: Easily calculate fees and rewards associated with transactions.
-- **PAC Coin Market Prices**: Stay up-to-date with the latest market prices for PAC coins.
-- **Phoenix Testnet Integration**: Track the Phoenix (Pactus testnet) network health and status.
-- **Phoenix Testnet Faucet**: Obtain testnet tokens through the Phoenix faucet for development purposes.
+- **Real-time Network Monitoring**: Stay informed with the latest network health, status, and performance metrics of the Pactus blockchain.
+- **Transaction Fee Calculations**: Easily determine the transaction fees.
+- **Block Reward Estimation**: Estimate block rewards for validators based on their stake.
+- **PAC Coin Market Prices**: Keep track of the latest market prices for PAC coins.
+- **Phoenix Testnet Integration**: Monitor the health and status of the Phoenix (Pactus testnet) network.
+- **Phoenix Testnet Faucet**: Obtain testnet tokens through the Phoenix faucet for development and testing purposes.
 
 ### Multi-Platform Support
 
