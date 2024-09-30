@@ -35,7 +35,6 @@ func (v *Voucher) claimHandler(
 	}
 
 	address := args["address"]
-
 	valInfo, _ := v.clientManager.GetValidatorInfo(address)
 	if valInfo != nil {
 		err = errors.New("this address is already a staked validator")

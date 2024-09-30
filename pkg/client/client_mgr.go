@@ -251,7 +251,7 @@ func (cm *Mgr) GetCirculatingSupply() (int64, error) {
 	return circulating, nil
 }
 
-func (cm *Mgr) FindPublicKey(address string, firstVal bool) (string, error) {
+func (cm *Mgr) FindPublicKey(address string, firstVal bool) (string, error) { //nolint
 	peerInfo, err := cm.GetPeerInfo(address)
 	if err != nil {
 		return "", err
