@@ -3,8 +3,9 @@ package telegram
 import (
 	"context"
 	"fmt"
-	"github.com/PaulSonOfLars/gotgbot/v2"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"strconv"
+	"time"
+
 	"github.com/pactus-project/pactus/util"
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine"
@@ -12,9 +13,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
 	tele "gopkg.in/telebot.v3"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type Bot struct {
@@ -26,8 +24,16 @@ type Bot struct {
 	target      string
 }
 
-func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Config) (*Bot, error) {
+type BotContext struct {
+	Commands []string
+}
 
+var (
+	argsContext = make(map[int64]*BotContext)
+	argsValue   = make(map[int64]map[string]string)
+)
+
+func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Config) (*Bot, error) {
 	pref := tele.Settings{
 		Token:  token,
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
@@ -51,7 +57,6 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Confi
 }
 
 func (bot *Bot) Start() error {
-	bot.deleteAllCommands()
 	if err := bot.registerCommands(); err != nil {
 		return err
 	}
@@ -64,25 +69,16 @@ func (bot *Bot) Start() error {
 	return nil
 }
 
-func (bot *Bot) deleteAllCommands() {
-	//cmdsServer, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, bot.cfg.GuildID)
-	//cmdsGlobal, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, "")
-	//cmds := append(cmdsServer, cmdsGlobal...) //nolint
-	//
-	//for _, cmd := range cmds {
-	//	err := bot.Session.ApplicationCommandDelete(cmd.ApplicationID, cmd.GuildID, cmd.ID)
-	//	if err != nil {
-	//		log.Error("unable to delete command", "error", err, "cmd", cmd.Name)
-	//	} else {
-	//		log.Info("telegram command unregistered", "name", cmd.Name)
-	//	}
-	//}
+func (bot *Bot) Stop() {
+	log.Info("Shutting down Telegram Bot")
+	bot.cancel()
+	bot.botInstance.Stop()
 }
 
 func (bot *Bot) registerCommands() error {
 	rows := make([]tele.Row, 0)
 	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
-	commands := make([]string, 0)
+
 	for i, beCmd := range bot.engine.Commands() {
 		if !beCmd.HasAppID(entity.AppIDTelegram) {
 			continue
@@ -107,8 +103,7 @@ func (bot *Bot) registerCommands() error {
 
 		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Help, "index", i, "object", beCmd)
 
-		btn := menu.Data(beCmd.Name, fmt.Sprintf("%s", beCmd.Name))
-		commands = append(commands, beCmd.Name)
+		btn := menu.Data(beCmd.Name, beCmd.Name)
 		rows = append(rows, menu.Row(btn))
 		if beCmd.HasSubCommand() {
 			subMenu := &tele.ReplyMarkup{ResizeKeyboard: true}
@@ -134,130 +129,166 @@ func (bot *Bot) registerCommands() error {
 				log.Info("adding command sub-command", "command", beCmd.Name,
 					"sub-command", sCmd.Name, "desc", sCmd.Help)
 
-				commands = append(commands, beCmd.Name)
-				subBtn := subMenu.Data(sCmd.Name, fmt.Sprintf("%s", sCmd.Name))
-				//bot.botInstance.Handle(&subBtn, func(c tele.Context) error {
-				//	return bot.commandHandler(c, c)
-				//})
-				subRows = append(subRows, subMenu.Row(subBtn))
+				subBtn := subMenu.Data(sCmd.Name, sCmd.Name)
 
-				//for _, arg := range sCmd.Args {
-				//	if arg.Desc == "" || arg.Name == "" {
-				//		continue
-				//	}
-				//
-				//	log.Info("adding sub command argument", "command", beCmd.Name,
-				//		"sub-command", sCmd.Name, "argument", arg.Name, "desc", arg.Desc)
-				//
-				//	commands = append(commands, &tele.Command{
-				//		Text:        sCmd.Name,
-				//		Description: arg.Desc,
-				//	})
-				//}
+				bot.botInstance.Handle(&subBtn, func(c tele.Context) error {
+					if len(sCmd.Args) > 0 {
+						return bot.handleArgCommand(c, []string{beCmd.Name, sCmd.Name}, sCmd.Args)
+					}
+
+					return bot.handleCommand(c, []string{beCmd.Name, sCmd.Name})
+				})
+				subRows = append(subRows, subMenu.Row(subBtn))
 			}
 
-			bot.botInstance.Handle(&btn, func(c tele.Context) error {
-				return bot.commandHandler(c, []string{beCmd.Name}, nil)
-			})
+			// add back to top menu button
+			// backButton := subMenu.Text("Back Main Menu")
+			// subRows = append(subRows, subMenu.Row(backButton))
+
 			subMenu.Inline(subRows...)
+			bot.botInstance.Handle(&btn, func(c tele.Context) error {
+				_ = bot.botInstance.Delete(c.Message())
+				return c.Send(beCmd.Name, subMenu)
+			})
+
+			bot.botInstance.Handle(fmt.Sprintf("/%s", beCmd.Name), func(c tele.Context) error {
+				_ = bot.botInstance.Delete(c.Message())
+				return c.Send(beCmd.Name, subMenu)
+			})
 		} else {
-			//for _, arg := range beCmd.Args {
-			//	if arg.Desc == "" || arg.Name == "" {
-			//		continue
-			//	}
-			//
-			//	log.Info("adding command argument", "command", beCmd.Name,
-			//		"argument", arg.Name, "desc", arg.Desc)
-			//
-			//	bot.botInstance.Handle(arg.Name, func(c tele.Context) error {
-			//		return c.Send("Hello!")
-			//	})
-			//
-			//	commands = append(commands, &tele.Command{
-			//		Text:        arg.Name,
-			//		Description: arg.Desc,
-			//	})
-			//}
+			bot.botInstance.Handle(&btn, func(c tele.Context) error {
+				if len(beCmd.Args) > 0 {
+					return bot.handleArgCommand(c, []string{beCmd.Name}, beCmd.Args)
+				}
+
+				return bot.handleCommand(c, []string{beCmd.Name})
+			})
 		}
 	}
+
+	// initiate menu button
+	// bot.botInstance.SetCommands(commands)
 
 	menu.Inline(rows...)
 	bot.botInstance.Handle("/start", func(c tele.Context) error {
-		return c.Send("select an option", menu)
+		_ = bot.botInstance.Delete(c.Message())
+		return c.Send("Pagu Main Menu", menu)
+	})
+
+	bot.botInstance.Handle(tele.OnText, func(c tele.Context) error {
+		if argsContext[c.Message().Chat.ID] == nil {
+			return c.Send("Pagu Main Menu", menu)
+		}
+
+		if argsValue[c.Message().Chat.ID] == nil {
+			argsValue[c.Message().Chat.ID] = make(map[string]string)
+		}
+
+		return bot.parsTestMessage(c)
 	})
 
 	return nil
-	//return bot.commandHandler(nil)
 }
 
-func (bot *Bot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
-	// Check if the message is from a private chat (DM)
-	if ctx.Update.Message.Chat.Type != "private" {
-		return nil // Ignore non-private messages.
+func (bot *Bot) parsTestMessage(c tele.Context) error {
+	chatID := c.Message().Chat.ID
+	cmd := findCommand(bot.engine.Commands(), argsContext[chatID].Commands[len(argsContext[chatID].Commands)-1])
+	if cmd == nil {
+		return c.Send("Invalid command")
 	}
 
-	// Handle the update.
-	if ctx.Update.Message != nil {
-		// Extract the entire message, including commands.
-		fullMessage := ctx.Update.Message.Text
+	currentArgsIndex := len(argsValue[chatID])
+	argsValue[chatID][cmd.Args[currentArgsIndex].Name] = c.Message().Text
 
-		// Remove the slash prefix.
-		fullMessage = strings.TrimPrefix(fullMessage, "/")
+	if len(argsValue[chatID]) == len(cmd.Args) {
+		return bot.handleCommand(c, argsContext[chatID].Commands)
+	}
 
-		// Split the message into an array.
-		messageParts := strings.Split(fullMessage, " ")
-		beInput := make(map[string]string)
+	return c.Send(fmt.Sprintf("Please Enter %s", cmd.Args[currentArgsIndex+1].Name))
+}
 
-		for _, t := range messageParts {
-			beInput[t] = t
+func (bot *Bot) handleArgCommand(c tele.Context, commands []string, args []command.Args) error {
+	msgCtx := &BotContext{Commands: commands}
+	argsContext[c.Chat().ID] = msgCtx
+	return c.Send(fmt.Sprintf("Please Enter %s", args[0].Name))
+}
+
+func (bot *Bot) handleCommand(c tele.Context, commands []string) error {
+	callerID := strconv.Itoa(int(c.Sender().ID))
+	res := bot.engine.Run(entity.AppIDTelegram, callerID, commands, argsValue[c.Message().Chat.ID])
+	_ = bot.botInstance.Delete(c.Message())
+
+	chatID := c.Message().Chat.ID
+	argsContext[chatID] = nil
+	argsValue[chatID] = nil
+	return c.Send(res.Message)
+}
+
+func findCommand(commands []*command.Command, c string) *command.Command {
+	for _, cmd := range commands {
+		if cmd.Name == c {
+			return cmd
 		}
 
-		// Pass the array to the bot engine.
-		callerID := strconv.FormatInt(ctx.EffectiveSender.User.Id, 10)
-		res := bot.engine.Run(entity.AppIDTelegram, callerID, []string{}, beInput)
-
-		// Check if the command execution resulted in an error.
-		if res.Error != "" {
-			log.Error("Failed to execute command:", res.Error)
-
-			_, err := b.SendMessage(ctx.EffectiveChat.Id, "An error occurred while processing your request.", nil)
-			if err != nil {
-				log.Error("Failed to send error response:", err)
+		for _, sc := range cmd.SubCommands {
+			if sc.Name == c {
+				return sc
 			}
-			return nil
+		}
+	}
+
+	return nil
+}
+
+/*
+	func (bot *Bot) handleUpdate(ctx tele.Context) error {
+		// Check if the message is from a private chat (DM)
+		if ctx.Update().Message.Chat.Type != "private" {
+			return nil // Ignore non-private messages.
 		}
 
-		// Send the response back to the user.
-		_, err := b.SendMessage(ctx.EffectiveChat.Id, res.Message, nil)
-		if err != nil {
-			log.Error("Failed to send response:", err)
+		// Handle the update.
+		if ctx.Update().Message != nil {
+			// Extract the entire message, including commands.
+			fullMessage := ctx.Update().Message.Text
+
+			// Remove the slash prefix.
+			fullMessage = strings.TrimPrefix(fullMessage, "/")
+
+			// Split the message into an array.
+			messageParts := strings.Split(fullMessage, " ")
+			beInput := make(map[string]string)
+
+			for _, t := range messageParts {
+				beInput[t] = t
+			}
+
+			// Pass the array to the bot engine.
+			// callerID := strconv.FormatInt(ctx.Message().Sender.ID, 10)
+			callerID := strconv.Itoa(int(ctx.Message().Sender.ID))
+			res := bot.engine.Run(entity.AppIDTelegram, callerID, []string{}, beInput)
+
+			// Check if the command execution resulted in an error.
+			if res.Error != "" {
+				log.Error("Failed to execute command:", res.Error)
+
+				_, err := bot.botInstance.Send(ctx.Message().Sender, "An error occurred while processing your request.", nil)
+				if err != nil {
+					log.Error("Failed to send error response:", err)
+				}
+				return nil
+			}
+
+			// Send the response back to the user.
+			_, err := bot.botInstance.Send(ctx.Message().Sender, res.Message, nil)
+			return err
+			//if err != nil {
+			//	log.Error("Failed to send response:", err)
+			//}
+			//
+			//return nil
 		}
 
 		return nil
 	}
-
-	return nil
-}
-
-func (bot *Bot) commandHandler(c tele.Context, commands []string, args map[string]string) error {
-
-	//args := make(map[string]string)
-	//
-	//cmd, err := bot.botInstance.Commands()
-	//if err != nil {
-	//	return err
-	//}
-	//for _, c := range cmd {
-	//	commands = append(commands, c.Text)
-	//}
-
-	callerID := strconv.Itoa(int(c.Sender().ID))
-	res := bot.engine.Run(entity.AppIDTelegram, callerID, commands, args)
-	return c.Send(res.Message)
-}
-
-func (bot *Bot) Stop() {
-	log.Info("Shutting down Telegram Bot")
-	bot.cancel()
-	bot.botInstance.Stop()
-}
+*/
