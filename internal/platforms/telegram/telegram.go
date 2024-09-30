@@ -2,30 +2,44 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 	"strconv"
-	"strings"
+	"time"
 
-	"github.com/PaulSonOfLars/gotgbot/v2"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/pactus-project/pactus/util"
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
+	tele "gopkg.in/telebot.v3"
 )
 
-type TelegramBot struct {
-	ctx             context.Context
-	cancel          context.CancelFunc
-	botEngine       *engine.BotEngine
-	chatID          int64
-	botInstance     *gotgbot.Bot
-	config          *config.Config
-	commandHandlers map[string]ext.Handler
-	updater         *ext.Updater
+type Bot struct {
+	ctx         context.Context
+	cancel      context.CancelFunc
+	engine      *engine.BotEngine
+	botInstance *tele.Bot
+	cfg         *config.Config
+	target      string
 }
 
-func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, cfg *config.Config) (*TelegramBot, error) {
-	bot, err := gotgbot.NewBot(token, nil)
+type BotContext struct {
+	Commands []string
+}
+
+var (
+	argsContext = make(map[int64]*BotContext)
+	argsValue   = make(map[int64]map[string]string)
+)
+
+func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Config) (*Bot, error) {
+	pref := tele.Settings{
+		Token:  token,
+		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+	}
+
+	tgb, err := tele.NewBot(pref)
 	if err != nil {
 		log.Error("Failed to create Telegram bot:", err)
 		return nil, err
@@ -33,118 +47,184 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, chatID int64, cfg
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	commandHandlers := make(map[string]ext.Handler)
-
-	return &TelegramBot{
-		botEngine:       botEngine,
-		chatID:          chatID,
-		botInstance:     bot,
-		config:          cfg,
-		commandHandlers: commandHandlers,
-		ctx:             ctx,
-		cancel:          cancel,
+	return &Bot{
+		engine:      botEngine,
+		botInstance: tgb,
+		cfg:         cfg,
+		ctx:         ctx,
+		cancel:      cancel,
+		target:      cfg.BotName,
 	}, nil
 }
 
-func (bot *TelegramBot) Start() error {
-	log.Info("Starting Telegram Bot...")
-
-	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
-		Error: func(_ *gotgbot.Bot, _ *ext.Context, err error) ext.DispatcherAction {
-			log.Error("Error handling update:", err)
-			bot.cancel()
-			return ext.DispatcherActionNoop
-		},
-		Panic: func(_ *gotgbot.Bot, _ *ext.Context, r any) {
-			log.Error("Panic occurred:", r)
-			bot.cancel()
-		},
-	})
-
-	dispatcher.AddHandler(bot)
-
-	updater := ext.NewUpdater(dispatcher, nil)
-
-	bot.updater = updater
+func (bot *Bot) Start() error {
+	if err := bot.registerCommands(); err != nil {
+		return err
+	}
 
 	go func() {
-		log.Info("Starting polling for updates...")
-		if err := updater.StartPolling(bot.botInstance, nil); err != nil {
-			log.Error("Failed to start polling:", err)
-			bot.cancel()
-		}
+		bot.botInstance.Start()
 	}()
 
-	log.Info("Telegram Bot started successfully")
-
+	log.Info("Starting Telegram Bot...")
 	return nil
 }
 
-func (bot *TelegramBot) HandleUpdate(b *gotgbot.Bot, ctx *ext.Context) error {
-	// Check if the message is from a private chat (DM)
-	if ctx.Update.Message.Chat.Type != "private" {
-		return nil // Ignore non-private messages.
-	}
-
-	// Handle the update.
-	if ctx.Update.Message != nil {
-		// Extract the entire message, including commands.
-		fullMessage := ctx.Update.Message.Text
-
-		// Remove the slash prefix.
-		fullMessage = strings.TrimPrefix(fullMessage, "/")
-
-		// Split the message into an array.
-		messageParts := strings.Split(fullMessage, " ")
-		beInput := make(map[string]string)
-
-		for _, t := range messageParts {
-			beInput[t] = t
-		}
-
-		// Pass the array to the bot engine.
-		callerID := strconv.FormatInt(ctx.EffectiveSender.User.Id, 10)
-		res := bot.botEngine.Run(entity.AppIDTelegram, callerID, []string{}, beInput)
-
-		// Check if the command execution resulted in an error.
-		if res.Error != "" {
-			log.Error("Failed to execute command:", res.Error)
-
-			_, err := b.SendMessage(ctx.EffectiveChat.Id, "An error occurred while processing your request.", nil)
-			if err != nil {
-				log.Error("Failed to send error response:", err)
-			}
-			return nil
-		}
-
-		// Send the response back to the user.
-		_, err := b.SendMessage(ctx.EffectiveChat.Id, res.Message, nil)
-		if err != nil {
-			log.Error("Failed to send response:", err)
-		}
-
-		return nil
-	}
-
-	return nil
-}
-
-func (bot *TelegramBot) RegisterCommandHandler(command string, handler CommandFunc) {
-	bot.commandHandlers[command] = NewCommandHandler(handler)
-}
-
-func (bot *TelegramBot) GetName() string {
-	return "TelegramBotHandler"
-}
-
-func (bot *TelegramBot) Stop() {
+func (bot *Bot) Stop() {
 	log.Info("Shutting down Telegram Bot")
 	bot.cancel()
+	bot.botInstance.Stop()
+}
 
-	if bot.updater != nil {
-		log.Info("Stopping polling for updates...")
-		if err := bot.updater.Stop(); err != nil {
-			log.Error("Failed to stop polling:", err)
+func (bot *Bot) registerCommands() error {
+	rows := make([]tele.Row, 0)
+	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
+
+	for i, beCmd := range bot.engine.Commands() {
+		if !beCmd.HasAppID(entity.AppIDTelegram) {
+			continue
+		}
+
+		switch bot.target {
+		case config.BotNamePaguMainnet:
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskMain) {
+				continue
+			}
+
+		case config.BotNamePaguTestnet:
+			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskTest) {
+				continue
+			}
+		}
+
+		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Help, "index", i, "object", beCmd)
+
+		btn := menu.Data(beCmd.Name, beCmd.Name)
+		rows = append(rows, menu.Row(btn))
+		if beCmd.HasSubCommand() {
+			subMenu := &tele.ReplyMarkup{ResizeKeyboard: true}
+			subRows := make([]tele.Row, 0)
+			for _, sCmd := range beCmd.SubCommands {
+				switch bot.target {
+				case config.BotNamePaguMainnet:
+					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskMain) {
+						continue
+					}
+
+				case config.BotNamePaguTestnet:
+					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskTest) {
+						continue
+					}
+
+				case config.BotNamePaguModerator:
+					if !util.IsFlagSet(sCmd.TargetFlag, command.TargetMaskModerator) {
+						continue
+					}
+				}
+
+				log.Info("adding command sub-command", "command", beCmd.Name,
+					"sub-command", sCmd.Name, "desc", sCmd.Help)
+
+				subBtn := subMenu.Data(sCmd.Name, sCmd.Name)
+
+				bot.botInstance.Handle(&subBtn, func(c tele.Context) error {
+					if len(sCmd.Args) > 0 {
+						return bot.handleArgCommand(c, []string{beCmd.Name, sCmd.Name}, sCmd.Args)
+					}
+
+					return bot.handleCommand(c, []string{beCmd.Name, sCmd.Name})
+				})
+				subRows = append(subRows, subMenu.Row(subBtn))
+			}
+
+			subMenu.Inline(subRows...)
+			bot.botInstance.Handle(&btn, func(c tele.Context) error {
+				_ = bot.botInstance.Delete(c.Message())
+				return c.Send(beCmd.Name, subMenu)
+			})
+
+			bot.botInstance.Handle(fmt.Sprintf("/%s", beCmd.Name), func(c tele.Context) error {
+				_ = bot.botInstance.Delete(c.Message())
+				return c.Send(beCmd.Name, subMenu)
+			})
+		} else {
+			bot.botInstance.Handle(&btn, func(c tele.Context) error {
+				if len(beCmd.Args) > 0 {
+					return bot.handleArgCommand(c, []string{beCmd.Name}, beCmd.Args)
+				}
+
+				return bot.handleCommand(c, []string{beCmd.Name})
+			})
 		}
 	}
+
+	menu.Inline(rows...)
+	bot.botInstance.Handle("/start", func(c tele.Context) error {
+		_ = bot.botInstance.Delete(c.Message())
+		return c.Send("Pagu Main Menu", menu)
+	})
+
+	bot.botInstance.Handle(tele.OnText, func(c tele.Context) error {
+		if argsContext[c.Message().Chat.ID] == nil {
+			return c.Send("Pagu Main Menu", menu)
+		}
+
+		if argsValue[c.Message().Chat.ID] == nil {
+			argsValue[c.Message().Chat.ID] = make(map[string]string)
+		}
+
+		return bot.parsTestMessage(c)
+	})
+
+	return nil
+}
+
+func (bot *Bot) parsTestMessage(c tele.Context) error {
+	chatID := c.Message().Chat.ID
+	cmd := findCommand(bot.engine.Commands(), argsContext[chatID].Commands[len(argsContext[chatID].Commands)-1])
+	if cmd == nil {
+		return c.Send("Invalid command")
+	}
+
+	currentArgsIndex := len(argsValue[chatID])
+	argsValue[chatID][cmd.Args[currentArgsIndex].Name] = c.Message().Text
+
+	if len(argsValue[chatID]) == len(cmd.Args) {
+		return bot.handleCommand(c, argsContext[chatID].Commands)
+	}
+
+	return c.Send(fmt.Sprintf("Please Enter %s", cmd.Args[currentArgsIndex+1].Name))
+}
+
+func (bot *Bot) handleArgCommand(c tele.Context, commands []string, args []command.Args) error {
+	msgCtx := &BotContext{Commands: commands}
+	argsContext[c.Chat().ID] = msgCtx
+	return c.Send(fmt.Sprintf("Please Enter %s", args[0].Name))
+}
+
+func (bot *Bot) handleCommand(c tele.Context, commands []string) error {
+	callerID := strconv.Itoa(int(c.Sender().ID))
+	res := bot.engine.Run(entity.AppIDTelegram, callerID, commands, argsValue[c.Message().Chat.ID])
+	_ = bot.botInstance.Delete(c.Message())
+
+	chatID := c.Message().Chat.ID
+	argsContext[chatID] = nil
+	argsValue[chatID] = nil
+	return c.Send(res.Message)
+}
+
+func findCommand(commands []*command.Command, c string) *command.Command {
+	for _, cmd := range commands {
+		if cmd.Name == c {
+			return cmd
+		}
+
+		for _, sc := range cmd.SubCommands {
+			if sc.Name == c {
+				return sc
+			}
+		}
+	}
+
+	return nil
 }

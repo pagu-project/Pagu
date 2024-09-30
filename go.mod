@@ -3,7 +3,6 @@ module github.com/pagu-project/Pagu
 go 1.22.2
 
 require (
-	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/go-mail/mail/v2 v2.3.0
 	github.com/h2non/gock v1.2.0
@@ -13,6 +12,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.64.0
+	gopkg.in/telebot.v3 v3.3.8
 	gorm.io/datatypes v1.2.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.10

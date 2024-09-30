@@ -16,20 +16,20 @@ import (
 	"github.com/pagu-project/Pagu/pkg/utils"
 )
 
-type DiscordBot struct {
+type Bot struct {
 	Session *discordgo.Session
 	engine  *engine.BotEngine
 	cfg     *config.DiscordBot
 	target  string
 }
 
-func NewDiscordBot(botEngine *engine.BotEngine, cfg *config.DiscordBot, target string) (*DiscordBot, error) {
+func NewDiscordBot(botEngine *engine.BotEngine, cfg *config.DiscordBot, target string) (*Bot, error) {
 	s, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		return nil, err
 	}
 
-	return &DiscordBot{
+	return &Bot{
 		Session: s,
 		engine:  botEngine,
 		cfg:     cfg,
@@ -37,7 +37,7 @@ func NewDiscordBot(botEngine *engine.BotEngine, cfg *config.DiscordBot, target s
 	}, nil
 }
 
-func (bot *DiscordBot) Start() error {
+func (bot *Bot) Start() error {
 	log.Info("starting Discord Bot...")
 
 	err := bot.Session.Open()
@@ -49,13 +49,13 @@ func (bot *DiscordBot) Start() error {
 	return bot.registerCommands()
 }
 
-func (bot *DiscordBot) Stop() error {
+func (bot *Bot) Stop() error {
 	log.Info("Stopping Discord Bot")
 
 	return bot.Session.Close()
 }
 
-func (bot *DiscordBot) deleteAllCommands() {
+func (bot *Bot) deleteAllCommands() {
 	cmdsServer, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, bot.cfg.GuildID)
 	cmdsGlobal, _ := bot.Session.ApplicationCommands(bot.Session.State.User.ID, "")
 	cmds := append(cmdsServer, cmdsGlobal...) //nolint
@@ -70,7 +70,7 @@ func (bot *DiscordBot) deleteAllCommands() {
 	}
 }
 
-func (bot *DiscordBot) registerCommands() error {
+func (bot *Bot) registerCommands() error {
 	bot.Session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		bot.commandHandler(s, i)
 	})
@@ -181,7 +181,7 @@ func (bot *DiscordBot) registerCommands() error {
 	return nil
 }
 
-func (bot *DiscordBot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *Bot) commandHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if i.GuildID != bot.cfg.GuildID {
 		bot.respondErrMsg("Please send messages on server chat", s, i)
 		return
@@ -233,7 +233,7 @@ func parseArgs(
 	return result
 }
 
-func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (bot *Bot) respondErrMsg(errStr string, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	errorEmbed := &discordgo.MessageEmbed{
 		Title:       "Error",
 		Description: errStr,
@@ -242,7 +242,7 @@ func (bot *DiscordBot) respondErrMsg(errStr string, s *discordgo.Session, i *dis
 	bot.respondEmbed(errorEmbed, s, i)
 }
 
-func (bot *DiscordBot) respondResultMsg(res command.CommandResult,
+func (bot *Bot) respondResultMsg(res command.CommandResult,
 	s *discordgo.Session, i *discordgo.InteractionCreate,
 ) {
 	var resEmbed *discordgo.MessageEmbed
@@ -263,7 +263,7 @@ func (bot *DiscordBot) respondResultMsg(res command.CommandResult,
 	bot.respondEmbed(resEmbed, s, i)
 }
 
-func (bot *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed,
+func (bot *Bot) respondEmbed(embed *discordgo.MessageEmbed,
 	s *discordgo.Session, i *discordgo.InteractionCreate,
 ) {
 	response := &discordgo.InteractionResponse{
@@ -279,7 +279,7 @@ func (bot *DiscordBot) respondEmbed(embed *discordgo.MessageEmbed,
 	}
 }
 
-func (bot *DiscordBot) UpdateStatusInfo() {
+func (bot *Bot) UpdateStatusInfo() {
 	log.Info("info status started")
 	for {
 		ns, err := bot.engine.NetworkStatus()
