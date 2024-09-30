@@ -62,8 +62,6 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/NathanBaulch/protoc-gen-cobra v1.2.1 h1:BOqX9glwicbqDJDGndMnhHhx8psGTSjGdZzRDY1a7A8=
 github.com/NathanBaulch/protoc-gen-cobra v1.2.1/go.mod h1:ZLPLEPQgV3jP3a7IEp+xxYPk8tF4lhY9ViV0hn6K3iA=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27 h1:rOlGzmYC3jPVPLVLWKMiiYuePQ6MV8Cyw5qJYBoMnkY=
-github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27/go.mod h1:kL1v4iIjlalwm3gCYGvF4NLa3hs+aKEfRkNJvj4aoDU=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=

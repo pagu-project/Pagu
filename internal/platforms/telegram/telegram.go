@@ -53,6 +53,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Confi
 		cfg:         cfg,
 		ctx:         ctx,
 		cancel:      cancel,
+		target:      cfg.BotName,
 	}, nil
 }
 
@@ -141,10 +142,6 @@ func (bot *Bot) registerCommands() error {
 				subRows = append(subRows, subMenu.Row(subBtn))
 			}
 
-			// add back to top menu button
-			// backButton := subMenu.Text("Back Main Menu")
-			// subRows = append(subRows, subMenu.Row(backButton))
-
 			subMenu.Inline(subRows...)
 			bot.botInstance.Handle(&btn, func(c tele.Context) error {
 				_ = bot.botInstance.Delete(c.Message())
@@ -165,9 +162,6 @@ func (bot *Bot) registerCommands() error {
 			})
 		}
 	}
-
-	// initiate menu button
-	// bot.botInstance.SetCommands(commands)
 
 	menu.Inline(rows...)
 	bot.botInstance.Handle("/start", func(c tele.Context) error {
@@ -239,56 +233,3 @@ func findCommand(commands []*command.Command, c string) *command.Command {
 
 	return nil
 }
-
-/*
-	func (bot *Bot) handleUpdate(ctx tele.Context) error {
-		// Check if the message is from a private chat (DM)
-		if ctx.Update().Message.Chat.Type != "private" {
-			return nil // Ignore non-private messages.
-		}
-
-		// Handle the update.
-		if ctx.Update().Message != nil {
-			// Extract the entire message, including commands.
-			fullMessage := ctx.Update().Message.Text
-
-			// Remove the slash prefix.
-			fullMessage = strings.TrimPrefix(fullMessage, "/")
-
-			// Split the message into an array.
-			messageParts := strings.Split(fullMessage, " ")
-			beInput := make(map[string]string)
-
-			for _, t := range messageParts {
-				beInput[t] = t
-			}
-
-			// Pass the array to the bot engine.
-			// callerID := strconv.FormatInt(ctx.Message().Sender.ID, 10)
-			callerID := strconv.Itoa(int(ctx.Message().Sender.ID))
-			res := bot.engine.Run(entity.AppIDTelegram, callerID, []string{}, beInput)
-
-			// Check if the command execution resulted in an error.
-			if res.Error != "" {
-				log.Error("Failed to execute command:", res.Error)
-
-				_, err := bot.botInstance.Send(ctx.Message().Sender, "An error occurred while processing your request.", nil)
-				if err != nil {
-					log.Error("Failed to send error response:", err)
-				}
-				return nil
-			}
-
-			// Send the response back to the user.
-			_, err := bot.botInstance.Send(ctx.Message().Sender, res.Message, nil)
-			return err
-			//if err != nil {
-			//	log.Error("Failed to send response:", err)
-			//}
-			//
-			//return nil
-		}
-
-		return nil
-	}
-*/

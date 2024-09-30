@@ -3,7 +3,6 @@ module github.com/pagu-project/Pagu
 go 1.22.2
 
 require (
-	github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.27
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/go-mail/mail/v2 v2.3.0
 	github.com/h2non/gock v1.2.0
