@@ -39,7 +39,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Confi
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
-	bot, err := tele.NewBot(pref)
+	tgb, err := tele.NewBot(pref)
 	if err != nil {
 		log.Error("Failed to create Telegram bot:", err)
 		return nil, err
@@ -49,7 +49,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Confi
 
 	return &Bot{
 		engine:      botEngine,
-		botInstance: bot,
+		botInstance: tgb,
 		cfg:         cfg,
 		ctx:         ctx,
 		cancel:      cancel,
@@ -93,11 +93,6 @@ func (bot *Bot) registerCommands() error {
 
 		case config.BotNamePaguTestnet:
 			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskTest) {
-				continue
-			}
-
-		case config.BotNamePaguModerator:
-			if !util.IsFlagSet(beCmd.TargetFlag, command.TargetMaskModerator) {
 				continue
 			}
 		}
