@@ -6,6 +6,8 @@ RUN mkdir /pagu
 WORKDIR /pagu
 COPY ../.. .
 
+RUN go mod tidy
+RUN go mod vendor
 RUN make build-telegram
 
 FROM alpine:3.14

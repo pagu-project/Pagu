@@ -85,6 +85,19 @@ services:
     volumes:
       - ../config/config.testnet.yml:/config/config.yml
       - ../config/wallets/testnet_wallet:/config/wallets/testnet_wallet
+  pagu-telegram:
+    build:
+      context: ../.
+      dockerfile: deployment/telegram/Dockerfile.Mainnet
+    hostname: pagu-telegram-mainnet
+    container_name: pagu-telegram
+    networks:
+      pagu-network:
+    depends_on:
+      - pagu-db
+    volumes:
+      - ../config/config.mainnet.yml:/config/config.yml
+      - ../config/wallets/main_wallet:/config/wallets/main_wallet
   pagu-node:
     hostname: pagu-node
     domainname: pagu-node
