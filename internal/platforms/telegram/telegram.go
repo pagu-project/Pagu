@@ -3,6 +3,8 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/pactus-project/pactus/util"
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine"
@@ -10,7 +12,6 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
 	tele "gopkg.in/telebot.v3"
-	"strconv"
 )
 
 type Bot struct {
@@ -55,6 +56,7 @@ func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Confi
 }
 
 func (bot *Bot) Start() error {
+	bot.deleteAllCommands()
 	if err := bot.registerCommands(); err != nil {
 		return err
 	}
@@ -71,9 +73,19 @@ func (bot *Bot) Stop() {
 	bot.botInstance.Stop()
 }
 
+func (bot *Bot) deleteAllCommands() {
+	for _, cmd := range bot.engine.Commands() {
+		err := bot.botInstance.DeleteCommands(tele.Command{Text: cmd.Name})
+		if err != nil {
+			log.Error("unable to delete command", "error", err, "cmd", cmd.Name)
+		}
+	}
+}
+
 func (bot *Bot) registerCommands() error {
 	rows := make([]tele.Row, 0)
 	menu := &tele.ReplyMarkup{ResizeKeyboard: true}
+	commands := make([]tele.Command, 0)
 
 	for i, beCmd := range bot.engine.Commands() {
 		if !beCmd.HasAppID(entity.AppIDTelegram) {
@@ -95,6 +107,7 @@ func (bot *Bot) registerCommands() error {
 		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Help, "index", i, "object", beCmd)
 
 		btn := menu.Data(beCmd.Name, beCmd.Name)
+		commands = append(commands, tele.Command{Text: beCmd.Name, Description: beCmd.Help})
 		rows = append(rows, menu.Row(btn))
 		if beCmd.HasSubCommand() {
 			subMenu := &tele.ReplyMarkup{ResizeKeyboard: true}
@@ -153,6 +166,8 @@ func (bot *Bot) registerCommands() error {
 		}
 	}
 
+	// initiate menu button
+	_ = bot.botInstance.SetCommands(commands)
 	menu.Inline(rows...)
 	bot.botInstance.Handle("/start", func(c tele.Context) error {
 		_ = bot.botInstance.Delete(c.Message())
