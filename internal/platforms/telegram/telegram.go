@@ -11,6 +11,8 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -106,7 +108,7 @@ func (bot *Bot) registerCommands() error {
 
 		log.Info("registering new command", "name", beCmd.Name, "desc", beCmd.Help, "index", i, "object", beCmd)
 
-		btn := menu.Data(beCmd.Name, beCmd.Name)
+		btn := menu.Data(cases.Title(language.English).String(beCmd.Name), beCmd.Name)
 		commands = append(commands, tele.Command{Text: beCmd.Name, Description: beCmd.Help})
 		rows = append(rows, menu.Row(btn))
 		if beCmd.HasSubCommand() {
@@ -133,7 +135,7 @@ func (bot *Bot) registerCommands() error {
 				log.Info("adding command sub-command", "command", beCmd.Name,
 					"sub-command", sCmd.Name, "desc", sCmd.Help)
 
-				subBtn := subMenu.Data(sCmd.Name, sCmd.Name)
+				subBtn := subMenu.Data(cases.Title(language.English).String(sCmd.Name), sCmd.Name)
 
 				bot.botInstance.Handle(&subBtn, func(c tele.Context) error {
 					if len(sCmd.Args) > 0 {
