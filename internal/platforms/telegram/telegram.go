@@ -3,9 +3,6 @@ package telegram
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"time"
-
 	"github.com/pactus-project/pactus/util"
 	"github.com/pagu-project/Pagu/config"
 	"github.com/pagu-project/Pagu/internal/engine"
@@ -13,6 +10,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/pkg/log"
 	tele "gopkg.in/telebot.v3"
+	"strconv"
 )
 
 type Bot struct {
@@ -35,8 +33,7 @@ var (
 
 func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Config) (*Bot, error) {
 	pref := tele.Settings{
-		Token:  token,
-		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+		Token: token,
 	}
 
 	tgb, err := tele.NewBot(pref)
@@ -62,11 +59,9 @@ func (bot *Bot) Start() error {
 		return err
 	}
 
-	go func() {
-		bot.botInstance.Start()
-	}()
-
+	go bot.botInstance.Start()
 	log.Info("Starting Telegram Bot...")
+
 	return nil
 }
 
