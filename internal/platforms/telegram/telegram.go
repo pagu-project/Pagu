@@ -177,32 +177,32 @@ func (bot *Bot) registerCommands() error {
 	})
 
 	bot.botInstance.Handle(tele.OnText, func(c tele.Context) error {
-		if argsContext[c.Message().Chat.ID] == nil {
-			return c.Send("Pagu Main Menu", menu)
+		if argsContext[c.Message().Sender.ID] == nil {
+			return nil
 		}
 
-		if argsValue[c.Message().Chat.ID] == nil {
-			argsValue[c.Message().Chat.ID] = make(map[string]string)
+		if argsValue[c.Message().Sender.ID] == nil {
+			argsValue[c.Message().Sender.ID] = make(map[string]string)
 		}
 
-		return bot.parsTestMessage(c)
+		return bot.parsTextMessage(c)
 	})
 
 	return nil
 }
 
-func (bot *Bot) parsTestMessage(c tele.Context) error {
-	chatID := c.Message().Chat.ID
-	cmd := findCommand(bot.engine.Commands(), argsContext[chatID].Commands[len(argsContext[chatID].Commands)-1])
+func (bot *Bot) parsTextMessage(c tele.Context) error {
+	senderID := c.Message().Sender.ID
+	cmd := findCommand(bot.engine.Commands(), argsContext[senderID].Commands[len(argsContext[senderID].Commands)-1])
 	if cmd == nil {
 		return c.Send("Invalid command")
 	}
 
-	currentArgsIndex := len(argsValue[chatID])
-	argsValue[chatID][cmd.Args[currentArgsIndex].Name] = c.Message().Text
+	currentArgsIndex := len(argsValue[senderID])
+	argsValue[senderID][cmd.Args[currentArgsIndex].Name] = c.Message().Text
 
-	if len(argsValue[chatID]) == len(cmd.Args) {
-		return bot.handleCommand(c, argsContext[chatID].Commands)
+	if len(argsValue[senderID]) == len(cmd.Args) {
+		return bot.handleCommand(c, argsContext[senderID].Commands)
 	}
 
 	return c.Send(fmt.Sprintf("Please Enter %s", cmd.Args[currentArgsIndex+1].Name))
@@ -210,18 +210,18 @@ func (bot *Bot) parsTestMessage(c tele.Context) error {
 
 func (bot *Bot) handleArgCommand(c tele.Context, commands []string, args []command.Args) error {
 	msgCtx := &BotContext{Commands: commands}
-	argsContext[c.Chat().ID] = msgCtx
+	argsContext[c.Sender().ID] = msgCtx
 	return c.Send(fmt.Sprintf("Please Enter %s", args[0].Name))
 }
 
 func (bot *Bot) handleCommand(c tele.Context, commands []string) error {
 	callerID := strconv.Itoa(int(c.Sender().ID))
-	res := bot.engine.Run(entity.AppIDTelegram, callerID, commands, argsValue[c.Message().Chat.ID])
+	res := bot.engine.Run(entity.AppIDTelegram, callerID, commands, argsValue[c.Message().Sender.ID])
 	_ = bot.botInstance.Delete(c.Message())
 
-	chatID := c.Message().Chat.ID
-	argsContext[chatID] = nil
-	argsValue[chatID] = nil
+	senderID := c.Message().Sender.ID
+	argsContext[senderID] = nil
+	argsValue[senderID] = nil
 	return c.Send(res.Message)
 }
 
