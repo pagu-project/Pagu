@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/pactus-project/pactus/util"
 	"github.com/pagu-project/Pagu/config"
@@ -36,7 +37,8 @@ var (
 
 func NewTelegramBot(botEngine *engine.BotEngine, token string, cfg *config.Config) (*Bot, error) {
 	pref := tele.Settings{
-		Token: token,
+		Token:  token,
+		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
 	tgb, err := tele.NewBot(pref)
@@ -222,7 +224,7 @@ func (bot *Bot) handleCommand(c tele.Context, commands []string) error {
 	senderID := c.Message().Sender.ID
 	argsContext[senderID] = nil
 	argsValue[senderID] = nil
-	return c.Send(res.Message)
+	return c.Send(res.Message, tele.NoPreview)
 }
 
 func findCommand(commands []*command.Command, c string) *command.Command {
