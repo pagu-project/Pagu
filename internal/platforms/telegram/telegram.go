@@ -165,6 +165,7 @@ func (bot *Bot) registerCommands() error {
 					return bot.handleArgCommand(c, []string{beCmd.Name}, beCmd.Args)
 				}
 
+				_ = bot.botInstance.Delete(c.Message())
 				return bot.handleCommand(c, []string{beCmd.Name})
 			})
 		}
@@ -195,7 +196,7 @@ func (bot *Bot) registerCommands() error {
 
 func (bot *Bot) parsTextMessage(c tele.Context) error {
 	senderID := c.Message().Sender.ID
-	cmd := findCommand(bot.engine.Commands(), argsContext[senderID].Commands[len(argsContext[senderID].Commands)-1])
+	cmd := findCommand(bot.engine.Commands(), senderID)
 	if cmd == nil {
 		return c.Send("Invalid command")
 	}
@@ -207,12 +208,15 @@ func (bot *Bot) parsTextMessage(c tele.Context) error {
 		return bot.handleCommand(c, argsContext[senderID].Commands)
 	}
 
+	_ = bot.botInstance.Delete(c.Message())
 	return c.Send(fmt.Sprintf("Please Enter %s", cmd.Args[currentArgsIndex+1].Name))
 }
 
 func (bot *Bot) handleArgCommand(c tele.Context, commands []string, args []command.Args) error {
 	msgCtx := &BotContext{Commands: commands}
 	argsContext[c.Sender().ID] = msgCtx
+	argsValue[c.Sender().ID] = nil
+	_ = bot.botInstance.Delete(c.Message())
 	return c.Send(fmt.Sprintf("Please Enter %s", args[0].Name))
 }
 
@@ -227,14 +231,17 @@ func (bot *Bot) handleCommand(c tele.Context, commands []string) error {
 	return c.Send(res.Message, tele.NoPreview)
 }
 
-func findCommand(commands []*command.Command, c string) *command.Command {
+func findCommand(commands []*command.Command, senderID int64) *command.Command {
+	lastEnteredCommandIndex := len(argsContext[senderID].Commands) - 1
+	enteredCommand := argsContext[senderID].Commands[lastEnteredCommandIndex]
+
 	for _, cmd := range commands {
-		if cmd.Name == c {
+		if cmd.Name == enteredCommand {
 			return cmd
 		}
 
 		for _, sc := range cmd.SubCommands {
-			if sc.Name == c {
+			if sc.Name == enteredCommand {
 				return sc
 			}
 		}
