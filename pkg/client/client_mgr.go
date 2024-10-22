@@ -62,6 +62,7 @@ func (cm *Mgr) updateValMap() {
 	for _, c := range cm.clients {
 		networkInfo, err := c.GetNetworkInfo(cm.ctx)
 		if err != nil {
+			logger.Warn("cannot connect to client", "err", err)
 			continue
 		}
 
@@ -70,7 +71,14 @@ func (cm *Mgr) updateValMap() {
 			continue
 		}
 
+		if len(networkInfo.GetConnectedPeers()) == 0 {
+			logger.Warn("no connected peers", "client", c.GetClientInfo())
+			continue
+		}
+
+		logger.Info("connected peers = ", "count", networkInfo.ConnectedPeersCount, "client", c.GetClientInfo())
 		for _, p := range networkInfo.ConnectedPeers {
+			logger.Info("sync peer", "peerId", p.PeerId)
 			for _, addr := range p.ConsensusAddresses {
 				current := freshValMap[addr]
 				if current != nil {
