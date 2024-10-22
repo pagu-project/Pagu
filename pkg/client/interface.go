@@ -16,6 +16,7 @@ type IClient interface {
 	GetTransactionData(context.Context, string) (*pactus.GetTransactionResponse, error)
 	GetBalance(context.Context, string) (int64, error)
 	GetFee(context.Context, int64) (int64, error)
+	GetClientInfo() string
 	Close() error
 }
 

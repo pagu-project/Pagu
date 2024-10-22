@@ -164,3 +164,7 @@ func (c *Client) GetFee(ctx context.Context, amt int64) (int64, error) {
 func (c *Client) Close() error {
 	return c.conn.Close()
 }
+
+func (c *Client) GetClientInfo() string {
+	return c.conn.Target()
+}
