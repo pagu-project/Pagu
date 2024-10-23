@@ -1,0 +1,19 @@
+{
+    "mainnet": [
+        "localhost:50051",
+        "bootstrap1.pactus.org:50051",
+        "bootstrap2.pactus.org:50051",
+        "bootstrap3.pactus.org:50051",
+        "bootstrap4.pactus.org:50051",
+        "rpc.javad.dev:50051",
+        "65.109.234.125:50051"
+    ],
+    "testnet": [
+        "localhost:50052",
+        "testnet1.pactus.org:50052",
+        "testnet2.pactus.org:50052",
+        "testnet3.pactus.org:50052",
+        "testnet4.pactus.org:50052",
+        "testnet-rpc.javad.dev:50052"
+    ]
+}

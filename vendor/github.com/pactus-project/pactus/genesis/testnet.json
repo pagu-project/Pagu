@@ -1,0 +1,54 @@
+{
+    "genesis_time": "2024-03-16T00:00:00Z",
+    "params": {
+        "block_version": 1,
+        "block_interval_in_second": 10,
+        "committee_size": 51,
+        "block_reward": 1000000000,
+        "transaction_to_live_interval": 8640,
+        "bond_interval": 360,
+        "unbond_interval": 181440,
+        "sortition_interval": 17,
+        "fee_fraction": 0.0001,
+        "minimum_fee": 1000,
+        "maximum_fee": 1000000,
+        "minimum_stake": 1000000000,
+        "maximum_stake": 1000000000000
+    },
+    "accounts": [
+        {
+            "address": "000000000000000000000000000000000000000000",
+            "balance": 21000000000000000
+        },
+        {
+            "address": "tpc1zeszhgvffmf2fx7arpp935n40ek09kx200evaga",
+            "balance": 8400000000000000
+        },
+        {
+            "address": "tpc1z76trjq323tp8cs2staa4vnhaegpxaqc8zm7uzk",
+            "balance": 6300000000000000
+        },
+        {
+            "address": "tpc1zty5pa3x0h879r5zdze6tat4exu97l4y2hyplkm",
+            "balance": 4200000000000000
+        },
+        {
+            "address": "tpc1zq6r4qjkgdn7qg7fdnusa9wsvepc94xeqd6rf6d",
+            "balance": 2100000000000000
+        }
+    ],
+    "validators": [
+        {
+            "public_key": "tpublic1ps5e3k3x9v3q0wdgw48sswx5za45w36fkeay8hkcwhgpl3q3w8zqs4uu7ewzhn537d5pnkmum3lf0yzqk9f2sld0qcl3700y372jxcjmt3kjzmfehru29z6ak7ehfmzh0965kgzdanptm7jnf89zvtkglzymnlq6q"
+        },
+        {
+            "public_key": "tpublic1p49mvzl9ray2rfhwg77ne7m457qlc5knpv897skqnkgfa3luluzq784hf7px30r68knhnhp5td5gayz8ss72dyfxgq8kk2qqm0y86tqsmzss8dvfn433z9j3g0saqhahzcw37f8wy48edrqh6qkf6h9yr4gg8093c"
+        },
+        {
+            "public_key": "tpublic1p3yyfsjdudntxlr6k5hdt249wxe6ajfnnkg6knklzt8lmj66s8z4j2duqk7qay8n8d47u0n6w97c8qrwwkljewqqw3t3ufy662llqflcq9nn6wsg35twdc3l5vn72j4ez50s982fxxh6per6hftn3e2v7fgm4gx35"
+        },
+        {
+            "public_key": "tpublic1pjy7z27zm6795xhj8rln65cve88dtqjkg7gca6scxzwwfxpncnmkhg35n2rw3fa9e04cqcc8c9fyqvpm7y39wj0x2e5qrl0he60ms6v79vga3le2uvgn566p7x9exjnyhh3klycqddstj7339afnm73k09v8k52uy"
+        }
+    ]
+}
