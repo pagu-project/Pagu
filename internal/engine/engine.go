@@ -13,6 +13,7 @@ import (
 	"github.com/pagu-project/Pagu/internal/engine/command/network"
 	phoenixtestnet "github.com/pagu-project/Pagu/internal/engine/command/phoenix"
 	"github.com/pagu-project/Pagu/internal/engine/command/voucher"
+	"github.com/pagu-project/Pagu/internal/engine/command/zealy"
 	"github.com/pagu-project/Pagu/internal/entity"
 	"github.com/pagu-project/Pagu/internal/job"
 	"github.com/pagu-project/Pagu/internal/repository"
@@ -39,6 +40,7 @@ type BotEngine struct {
 	phoenixCmd    *phoenixtestnet.Phoenix
 	voucherCmd    *voucher.Voucher
 	marketCmd     *market.Market
+	zealyCmd      *zealy.Zealy
 }
 
 func NewBotEngine(cfg *config.Config) (*BotEngine, error) {
@@ -117,6 +119,7 @@ func (be *BotEngine) RegisterAllCommands() {
 	be.rootCmd.AddSubCommand(be.networkCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.voucherCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.marketCmd.GetCommand())
+	be.rootCmd.AddSubCommand(be.zealyCmd.GetCommand())
 	be.rootCmd.AddSubCommand(be.phoenixCmd.GetCommand())
 
 	be.rootCmd.AddHelpSubCommand()
@@ -265,6 +268,7 @@ func newBotEngine(ctx context.Context,
 	phoenixCmd := phoenixtestnet.NewPhoenix(ctx, wlt, phoenixFaucetAmount, cm, db)
 	voucherCmd := voucher.NewVoucher(db, wlt, cm)
 	marketCmd := market.NewMarket(cm, priceCache)
+	zealyCmd := zealy.NewZealy(db, wlt)
 
 	return &BotEngine{
 		ctx:           ctx,
@@ -277,5 +281,6 @@ func newBotEngine(ctx context.Context,
 		phoenixCmd:    phoenixCmd,
 		voucherCmd:    voucherCmd,
 		marketCmd:     marketCmd,
+		zealyCmd:      zealyCmd,
 	}
 }

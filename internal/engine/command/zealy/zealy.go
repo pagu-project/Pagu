@@ -39,7 +39,7 @@ func (z *Zealy) GetCommand() *command.Command {
 			},
 		},
 		SubCommands: nil,
-		AppIDs:      entity.AllAppIDs(),
+		AppIDs:      []entity.AppID{entity.AppIDDiscord},
 		Handler:     z.claimHandler,
 		TargetFlag:  command.TargetMaskMain,
 	}
@@ -49,7 +49,7 @@ func (z *Zealy) GetCommand() *command.Command {
 		Help:        "Status of Zealy reward claims",
 		Args:        nil,
 		SubCommands: nil,
-		AppIDs:      entity.AllAppIDs(),
+		AppIDs:      []entity.AppID{entity.AppIDDiscord},
 		Handler:     z.statusHandler,
 		TargetFlag:  command.TargetMaskModerator,
 	}
@@ -58,7 +58,7 @@ func (z *Zealy) GetCommand() *command.Command {
 		Name:        CommandName,
 		Help:        "Zealy Commands",
 		Args:        nil,
-		AppIDs:      entity.AllAppIDs(),
+		AppIDs:      []entity.AppID{entity.AppIDDiscord},
 		SubCommands: make([]*command.Command, 0),
 		Handler:     nil,
 		TargetFlag:  command.TargetMaskMain | command.TargetMaskModerator,

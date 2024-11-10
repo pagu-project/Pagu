@@ -99,6 +99,20 @@ func (mr *MockIClientMockRecorder) GetBlockchainInfo(arg0 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlockchainInfo", reflect.TypeOf((*MockIClient)(nil).GetBlockchainInfo), arg0)
 }
 
+// GetClientInfo mocks base method.
+func (m *MockIClient) GetClientInfo() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetClientInfo")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetClientInfo indicates an expected call of GetClientInfo.
+func (mr *MockIClientMockRecorder) GetClientInfo() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientInfo", reflect.TypeOf((*MockIClient)(nil).GetClientInfo))
+}
+
 // GetFee mocks base method.
 func (m *MockIClient) GetFee(arg0 context.Context, arg1 int64) (int64, error) {
 	m.ctrl.T.Helper()
