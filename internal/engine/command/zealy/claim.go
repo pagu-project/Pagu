@@ -3,7 +3,6 @@ package zealy
 import (
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
-	"github.com/pagu-project/Pagu/pkg/amount"
 )
 
 func (z *Zealy) claimHandler(caller *entity.User, cmd *command.Command, args map[string]string) command.CommandResult {
@@ -18,8 +17,7 @@ func (z *Zealy) claimHandler(caller *entity.User, cmd *command.Command, args map
 	}
 
 	address := args["address"]
-	amt, _ := amount.NewAmount(float64(user.Amount))
-	txHash, err := z.wallet.TransferTransaction(address, "Pagu Zealy reward distribution", amt)
+	txHash, err := z.wallet.TransferTransaction(address, "Pagu Zealy reward distribution", user.Amount)
 	if err != nil {
 		return cmd.ErrorResult(err)
 	}
