@@ -1,6 +1,7 @@
 package zealy
 
 import (
+	"fmt"
 	"github.com/pagu-project/Pagu/internal/engine/command"
 	"github.com/pagu-project/Pagu/internal/entity"
 )
@@ -19,7 +20,9 @@ func (z *Zealy) claimHandler(caller *entity.User, cmd *command.Command, args map
 	address := args["address"]
 	txHash, err := z.wallet.TransferTransaction(address, "Pagu Zealy reward distribution", user.Amount)
 	if err != nil {
-		return cmd.ErrorResult(err)
+		fmt.Println(err.Error())
+		transferErr := fmt.Errorf("Failed to transfer zealy reward. Please make sure the address is valid")
+		return cmd.ErrorResult(transferErr)
 	}
 
 	if err = z.db.UpdateZealyUser(caller.CallerID, txHash); err != nil {
