@@ -48,7 +48,6 @@ func (p *price) start() {
 		wg     sync.WaitGroup
 		price  entity.Price
 		xeggex entity.XeggexPriceResponse
-		azbit  []entity.AzbitPriceResponse
 	)
 
 	ctx := context.Background()
@@ -62,21 +61,9 @@ func (p *price) start() {
 		}
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := p.getPrice(ctx, _defaultAzbitPriceEndpoint, &azbit); err != nil {
-			log.Error(err.Error())
-			return
-		}
-	}()
-
 	wg.Wait()
 
 	price.XeggexPacToUSDT = xeggex
-	if len(azbit) > 0 {
-		price.AzbitPacToUSDT = azbit[0]
-	}
 
 	ok := p.cache.Exists(config.PriceCacheKey)
 	if ok {
