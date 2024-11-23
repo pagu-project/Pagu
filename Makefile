@@ -36,7 +36,7 @@ fmt:
 	go mod tidy
 
 check:
-	golangci-lint run --timeout=20m0s
+	golangci-lint cache clean && golangci-lint run --timeout=20m0s
 
 ### building
 build: build-cli build-discord build-grpc build-telegram build-http

@@ -201,8 +201,8 @@ func (be *BotEngine) NetworkStatus() (*network.NetStatus, error) {
 	return &network.NetStatus{
 		ConnectedPeersCount: netInfo.ConnectedPeersCount,
 		ValidatorsCount:     chainInfo.TotalValidators,
-		TotalBytesSent:      netInfo.TotalSentBytes,
-		TotalBytesReceived:  netInfo.TotalReceivedBytes,
+		TotalBytesSent:      int64(netInfo.MetricInfo.TotalSent.Bytes),
+		TotalBytesReceived:  int64(netInfo.MetricInfo.TotalReceived.Bytes),
 		CurrentBlockHeight:  chainInfo.LastBlockHeight,
 		TotalNetworkPower:   chainInfo.TotalPower,
 		TotalCommitteePower: chainInfo.CommitteePower,
