@@ -5,7 +5,6 @@ todo
 *local*
 dist/
 .releaser.yml
-pactus-*
 cmd/data/*
 cmd/data/config.json
 cmd/data/validators.json

@@ -21,6 +21,7 @@ import (
 type MockIClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockIClientMockRecorder
+	isgomock struct{}
 }
 
 // MockIClientMockRecorder is the mock recorder for MockIClient.
@@ -207,6 +208,7 @@ func (mr *MockIClientMockRecorder) GetValidatorInfoByNumber(arg0, arg1 any) *gom
 type MockManager struct {
 	ctrl     *gomock.Controller
 	recorder *MockManagerMockRecorder
+	isgomock struct{}
 }
 
 // MockManagerMockRecorder is the mock recorder for MockManager.

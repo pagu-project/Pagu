@@ -20,6 +20,7 @@ import (
 type MockIWallet struct {
 	ctrl     *gomock.Controller
 	recorder *MockIWalletMockRecorder
+	isgomock struct{}
 }
 
 // MockIWalletMockRecorder is the mock recorder for MockIWallet.
