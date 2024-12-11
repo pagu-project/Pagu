@@ -23,9 +23,9 @@ func NewHTTPHandler(be *engine.BotEngine) HTTPHandler {
 func (hh *HTTPHandler) GetCommands(c echo.Context) error {
 	log.Info("New request received for GetCommands.")
 	commands := hh.engine.Commands()
-	var response []*CommandResponse
-	for _, cmd := range commands {
-		response = append(response, mapCommandToResponse(cmd))
+	response := make([]*CommandResponse, len(commands))
+	for i, cmd := range commands {
+		response[i] = mapCommandToResponse(cmd)
 	}
 	return c.JSON(http.StatusOK, GetCommandsResponse{
 		Data: response,
@@ -342,18 +342,18 @@ func mapCommandToResponse(cmd *command.Command) *CommandResponse {
 	if cmd == nil {
 		return nil
 	}
-	var argsResponses []CommandArgsResponse
-	for _, arg := range cmd.Args {
-		argsResponses = append(argsResponses, CommandArgsResponse{
+	argsResponses := make([]CommandArgsResponse, len(cmd.Args))
+	for i, arg := range cmd.Args {
+		argsResponses[i] = CommandArgsResponse{
 			Name:     arg.Name,
 			Desc:     arg.Desc,
 			InputBox: arg.InputBox,
 			Optional: arg.Optional,
-		})
+		}
 	}
-	var subCommandResponses []*CommandResponse
-	for _, subCmd := range cmd.SubCommands {
-		subCommandResponses = append(subCommandResponses, mapCommandToResponse(subCmd))
+	subCommandResponses := make([]*CommandResponse, len(cmd.SubCommands))
+	for i, subCmd := range cmd.SubCommands {
+		subCommandResponses[i] = mapCommandToResponse(subCmd)
 	}
 	return &CommandResponse{
 		Name:        cmd.Name,
