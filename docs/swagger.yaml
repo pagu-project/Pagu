@@ -1,0 +1,495 @@
+definitions:
+  command.InputBox:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - InputBoxText
+    - InputBoxNumber
+    - InputBoxFile
+    - InputBoxAmount
+    - InputBoxToggle
+  http.BasicResponse:
+    properties:
+      result:
+        $ref: '#/definitions/http.CommandResult'
+    type: object
+  http.CalculateFeeRequest:
+    properties:
+      amount:
+        type: string
+    type: object
+  http.CalculateRewardRequest:
+    properties:
+      days:
+        type: string
+      stake:
+        type: string
+    type: object
+  http.CommandArgsResponse:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      optional:
+        type: boolean
+      type:
+        $ref: '#/definitions/command.InputBox'
+    type: object
+  http.CommandResponse:
+    properties:
+      args:
+        items:
+          $ref: '#/definitions/http.CommandArgsResponse'
+        type: array
+      description:
+        type: string
+      name:
+        type: string
+      subCommands:
+        items:
+          $ref: '#/definitions/http.CommandResponse'
+        type: array
+    type: object
+  http.CommandResult:
+    properties:
+      color:
+        type: string
+      error:
+        type: string
+      message:
+        type: string
+      successful:
+        type: boolean
+      title:
+        type: string
+    type: object
+  http.GetCommandsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/http.CommandResponse'
+        type: array
+    type: object
+  http.NetworkNodeInfoRequest:
+    properties:
+      validatorAddress:
+        type: string
+    type: object
+  http.PhoenixFaucetRequest:
+    properties:
+      address:
+        type: string
+    type: object
+  http.VoucherClaimRequest:
+    properties:
+      address:
+        type: string
+      code:
+        type: string
+    type: object
+  http.VoucherCreateOneRequest:
+    properties:
+      amount:
+        type: string
+      description:
+        type: string
+      recipient:
+        type: string
+      validMonths:
+        type: string
+    type: object
+  http.VoucherStatusRequest:
+    properties:
+      code:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /calculate/fee:
+    post:
+      consumes:
+      - application/json
+      description: Calculate the fee based on the provided amount
+      parameters:
+      - description: Calculate Fee Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.CalculateFeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Calculation result
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Calculate fee
+      tags:
+      - Calculate
+  /calculate/help:
+    get:
+      consumes:
+      - application/json
+      description: Calculate help information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful calculation result
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Calculate help information
+      tags:
+      - Calculate
+  /calculate/reward:
+    post:
+      consumes:
+      - application/json
+      description: Calculate the reward based on the provided stake and number of
+        days
+      parameters:
+      - description: Calculate Reward Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.CalculateRewardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Calculation result
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Calculate reward
+      tags:
+      - Calculate
+  /commands:
+    get:
+      description: Retrieve a list of all available commands
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.GetCommandsResponse'
+      summary: Get available commands
+      tags:
+      - Commands
+  /help:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint runs the 'help' command and returns the result, including
+        color, title, error message, and success status.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Help command result
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BasicResponse'
+            - properties:
+                Result:
+                  $ref: '#/definitions/http.CommandResult'
+              type: object
+      summary: Executes a help command and returns the result.
+      tags:
+      - Help
+  /market/help:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint processes the "market help" command and returns relevant
+        details about the market command.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Command help details
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BasicResponse'
+            - properties:
+                Result:
+                  $ref: '#/definitions/http.CommandResult'
+              type: object
+      summary: Get help for the market command
+      tags:
+      - Market
+  /market/price:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the current market price information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the market price
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BasicResponse'
+            - properties:
+                result:
+                  $ref: '#/definitions/http.CommandResult'
+              type: object
+      summary: Get Market Price
+      tags:
+      - Market
+  /network/health:
+    get:
+      description: Retrieve the health status of the network
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Get network health
+      tags:
+      - Network
+  /network/help:
+    get:
+      consumes:
+      - application/json
+      description: Provides network help information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved network help
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BasicResponse'
+            - properties:
+                result:
+                  $ref: '#/definitions/http.CommandResult'
+              type: object
+      summary: Provides network help information
+      tags:
+      - Network
+  /network/node-info:
+    post:
+      consumes:
+      - application/json
+      description: Retrieves information about a network node based on the provided
+        validator address.
+      parameters:
+      - description: Validator Address
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.NetworkNodeInfoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The result of the command
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Get Network Node Information
+      tags:
+      - Network
+  /network/status:
+    post:
+      consumes:
+      - application/json
+      description: Retrieves the current status of the network node, including command
+        results such as color, title, error message, and success status.
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved network node status
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Get network node status
+      tags:
+      - Network
+  /phoenix/faucet:
+    post:
+      consumes:
+      - application/json
+      description: Initiates a faucet request for the Phoenix
+      parameters:
+      - description: Faucet request with address
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.PhoenixFaucetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response containing faucet status
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Initiates a faucet request for the Phoenix
+      tags:
+      - Phoenix
+  /phoenix/help:
+    get:
+      consumes:
+      - application/json
+      description: Executes Phoenix help command.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/http.BasicResponse'
+            - properties:
+                result:
+                  $ref: '#/definitions/http.CommandResult'
+              type: object
+      summary: Executes Phoenix help command
+      tags:
+      - Phoenix
+  /phoenix/status:
+    get:
+      consumes:
+      - application/json
+      description: Get Phoenix Status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status of the Phoenix application
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Get Phoenix Status
+      tags:
+      - Phoenix
+  /voucher/claim:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to claim a voucher by providing a valid
+        code and their address.
+      parameters:
+      - description: Voucher Claim Request
+        in: body
+        name: voucherClaimRequest
+        required: true
+        schema:
+          $ref: '#/definitions/http.VoucherClaimRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Voucher claim successful
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Claim a voucher using the provided code and address.
+      tags:
+      - Voucher
+  /voucher/create-one:
+    post:
+      consumes:
+      - application/json
+      description: Creates a voucher.
+      parameters:
+      - description: Voucher details
+        in: body
+        name: voucherCreateOneRequest
+        required: true
+        schema:
+          $ref: '#/definitions/http.VoucherCreateOneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Voucher creation successful
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Creates a new voucher
+      tags:
+      - Voucher
+  /voucher/help:
+    get:
+      consumes:
+      - application/json
+      description: Executes the 'voucher help' command and returns the result including
+        color, title, error, message, and success status.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response with command result
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Get help information for the voucher command
+      tags:
+      - Voucher
+  /voucher/status:
+    post:
+      consumes:
+      - application/json
+      description: Accepts a voucher code and returns the status of the voucher, including
+        title, message, error, color, and success information.
+      parameters:
+      - description: Voucher Status Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.VoucherStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Voucher status response
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Check the status of a voucher
+      tags:
+      - Voucher
+  /vouchers/create-bulk:
+    post:
+      consumes:
+      - application/json
+      description: This API allows you to create multiple vouchers.
+      parameters:
+      - description: File containing voucher data
+        in: formData
+        name: file
+        required: true
+        type: string
+      - description: Notification flag (optional)
+        in: formData
+        name: notify
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Command result containing the status of the bulk voucher creation
+          schema:
+            $ref: '#/definitions/http.BasicResponse'
+      summary: Create vouchers in bulk
+      tags:
+      - Voucher
+swagger: "2.0"
