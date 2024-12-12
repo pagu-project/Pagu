@@ -7,8 +7,8 @@ import (
 
 	pagucmd "github.com/pagu-project/Pagu/cmd"
 	"github.com/pagu-project/Pagu/config"
-	"github.com/pagu-project/Pagu/internal/delivery/http"
 	"github.com/pagu-project/Pagu/internal/engine"
+	"github.com/pagu-project/Pagu/internal/platforms/web/http"
 	"github.com/pagu-project/Pagu/pkg/log"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +23,7 @@ func runCommand(parentCmd *cobra.Command) {
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
 		// load configuration.
-		configs, err := config.Load("")
+		configs, err := config.Load(configPath)
 		pagucmd.ExitOnError(cmd, err)
 
 		// Initialize global logger.
