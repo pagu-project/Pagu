@@ -20,7 +20,7 @@ Pagu is designed to be flexible, allowing it to be used across different platfor
 You can access Pagu on the following platforms:
 
 - **Discord**: Join the [Pactus Discord server](https://discord.gg/H5vZkNnXCu) and interact with Pagu directly.
-- **Telegram**: Pagu will soon be available on Telegram—stay tuned for the release.
+- **Telegram**: Connect to [Pagu Telegram](https://t.me/pactus_pagu_bot), submit start button and use bot commands.
 
 ### Contributing
 
