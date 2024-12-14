@@ -72,11 +72,11 @@ func (cm *Mgr) updateValMap() {
 		}
 
 		if len(networkInfo.GetConnectedPeers()) == 0 {
-			logger.Warn("no connected peers", "client", c.GetClientInfo())
+			logger.Warn("no connected peers")
 			continue
 		}
 
-		logger.Info("connected peers = ", "count", networkInfo.ConnectedPeersCount, "client", c.GetClientInfo())
+		logger.Info("connected peers = ", "count", networkInfo.ConnectedPeersCount)
 		for _, p := range networkInfo.ConnectedPeers {
 			logger.Info("sync peer", "peerId", p.PeerId)
 			for _, addr := range p.ConsensusAddresses {
